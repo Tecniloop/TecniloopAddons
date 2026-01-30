@@ -1,0 +1,35 @@
+<odoo>
+
+    <!-- Form view for "model" -->
+    <record id="view_undo_allocation_wizard_form" model="ir.ui.view">
+        <field name="name">view.undo.allocation.wizard.form</field>
+        <field name="model">undo.allocation.wizard</field>
+        <field name="type">form</field>
+        <field name="mode">primary</field>
+        <field name="active" eval="True" />
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <div>
+                            <field name="employee_id" invisible="1"/>
+                            <field name="attendance_id" invisible="1"/>
+                            <label for="hr_leave_allocation_id"/>
+                            <field name="hr_leave_allocation_id" required="1"/>
+                        </div>
+                    </group>
+                </sheet>
+                <footer>
+                    <button 
+                        string="Deshacer asignación" 
+                        name="button_undo_allocation" 
+                        type="object" 
+                        class="btn btn-primary"
+                    />
+                    <button string="Cancelar" special="cancel" class="btn btn-light"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

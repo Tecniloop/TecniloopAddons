@@ -1,0 +1,14 @@
+<templates xml:space="preserve">
+    <!-- Heredamos de la plantilla original 'hr_holidays.TimeOffCard' que pinta la tarjeta del dashboard -->
+    <t t-inherit="hr_holidays.TimeOffCard" t-inherit-mode="extension">
+        <!-- Buscamos la variable 'parsed_duration' que contiene el texto de la duración (ej: "0.67") -->
+        <xpath expr="//t[@t-set='parsed_duration']" position="attributes">
+            <!-- 
+                Sobrescribimos el valor ('t-value').
+                Si existe data.virtual_remaining_display (nuestro campo formateado "0h 40m"), lo usamos.
+                Si no, usamos la función original formatNumber.
+            -->
+            <attribute name="t-value">data.virtual_remaining_display or formatNumber(this.lang, duration)</attribute>
+        </xpath>
+    </t>
+</templates>

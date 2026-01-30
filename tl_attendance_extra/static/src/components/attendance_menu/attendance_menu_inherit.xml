@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="tl_attendance_extra.attendance_menu" t-inherit="hr_attendance.attendance_menu" t-inherit-mode="extension" owl="1">
+       <xpath expr="//button[@t-if='this.isFirstAttendance']" position="replace">
+            <div class="d-flex gap-4">
+                <div class="d-flex flex-column gap-2">
+                    <button t-if="this.isFirstAttendance" t-on-click="() => this.signInOut()" t-attf-class="btn btn-{{ this.state.checkedIn ? 'warning' : 'success' }}" help="Registro de jornada laboral desde oficina.">
+                        <span t-if="!this.state.checkedIn">Check in</span>
+                        <span t-else="">Check out</span>
+                        <i t-attf-class="fa fa-sign-{{ this.state.checkedIn ? 'out' : 'in' }} ms-1"/>
+                    </button>
+                    <button t-if="!this.state.checkedIn" class="btn btn-warning" t-on-click="() => this.customCheckIn('office', true)" help="Registro de horas extra desde oficina">
+                        <span>Entrada horas extra Oficina</span>
+                        <i class="fa fa-clock-o ms-1"/>
+                    </button>
+                </div>
+                <div class="d-flex flex-column gap-2" >
+                    <button t-if="!this.state.checkedIn" class="btn btn-info" t-on-click="() => this.customCheckIn('home')" help="Registros de jornada laboral desde casa">
+                        <span>Registrar entrada Teletrabajo</span>
+                        <i class="fa fa-home ms-1"/>
+                    </button>
+                    <button t-if="!this.state.checkedIn" class="btn btn-dark" t-on-click="() => this.customCheckIn('home', true)" help="Registro de horas extra desde casa">
+                        <span>Entrada horas extra Teletrabajo</span>
+                        <i class="fa fa-hourglass-half ms-1"/>
+                    </button>
+                </div>
+            </div>
+            <div t-if="this.state.negative_hours_balance &amp;&amp; !this.state.checkedIn"
+                class="d-flex justify-content-center mt-3 pt-2 border-top"
+                t-attf-class="d-flex justify-content-center mt-3 pt-2 border-top 
+                    {{ 
+                        this.state.negative_hours_balance === '0h 00m' || this.state.negative_hours_balance === '00:00'
+                        ? 'text-primary font-weight-bold'
+                        : (this.state.negative_hours_balance.startsWith('-')
+                            ? 'text-danger font-weight-bold'
+                            : 'text-success font-weight-bold')
+                    }}">
+                    <small>
+                        Bolsa de horas:
+                        <b t-esc="this.state.negative_hours_balance"/>
+                    </small>
+            </div>
+        </xpath>
+    </t>
+</templates>

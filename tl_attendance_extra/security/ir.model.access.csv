@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_extra_hours_assign_wizard,access_extra_hours_assign_wizard,model_extra_hours_assign_wizard,,1,1,1,1
+access_undo_allocation_wizard,access_undo_allocation_wizard,model_undo_allocation_wizard,,1,1,1,1

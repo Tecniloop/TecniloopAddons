@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_employee_form_inherit_tl_attendance" model="ir.ui.view">
+        <field name="name">hr.employee</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr_attendance.view_employee_form_inherit_hr_attendance"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_open_last_month_attendances']" position="after">
+                <field name="hours_current_year" groups="hr_attendance.group_hr_attendance_officer" invisible="1"/>
+                <button name="action_open_last_year_attendances"
+                        class="oe_stat_button"
+                        icon="fa-clock-o"
+                        type="object"
+                        groups="hr_attendance.group_hr_attendance_officer"
+                        invisible="hours_current_year == 0"
+                        help="Horas trabajadas este año">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="hours_current_year_display" widget="float_time"/> Horas
+                        </span>
+                        <span class="o_stat_text">
+                            Este año
+                        </span>
+                    </div>
+                </button>
+                <field name="home_work_count" groups="hr_attendance.group_hr_attendance_officer" invisible="1"/>
+                <button name="action_show_home_work_attendances"
+                        class="oe_stat_button"
+                        icon="fa-laptop"
+                        type="object"
+                        groups="hr_attendance.group_hr_attendance_officer"
+                        invisible="home_work_count == 0"
+                        help="Asistencias de teletrabajo">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="home_work_count" readonly="1" /> Asistencias
+                        </span>
+                        <span class="o_stat_text">
+                            Contador Teletrabajo
+                        </span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+        
+</odoo>

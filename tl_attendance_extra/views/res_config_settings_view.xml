@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="res_config_settings_view_form_inherit" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.tl.attendance.extra</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="hr_attendance.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='overtime_settings']/setting[3]" position="after">
+                <setting company_dependent="1" string="Factor Horas Extra" help="Indicar el factor por el cual se multiplicarán las horas extra asignadas en días a disfrutar.">
+                    <field name="extra_hours_factor_attendance"/>     
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

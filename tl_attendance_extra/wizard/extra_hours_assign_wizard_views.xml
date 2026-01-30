@@ -1,0 +1,40 @@
+<odoo>
+
+    <!-- Form view for "model" -->
+    <record id="view_extra_hours_assign_wizard_form" model="ir.ui.view">
+        <field name="name">view.extra.hours.assign.wizard.form</field>
+        <field name="model">extra.hours.assign.wizard</field>
+        <field name="type">form</field>
+        <field name="mode">primary</field>
+        <field name="active" eval="True" />
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" style="display: flex; justify-content: center; gap: 32px; margin-top: 32px; margin-bottom: 32px;">
+                        <button 
+                            name="button_action_free_time" 
+                            string="Asignación de tiempo libre" 
+                            type="object" 
+                            class="btn btn-success btn-lg" 
+                            style="min-width: 180px; padding: 16px 24px; font-size: 18px;"
+                            help="Las horas extra seran puestan en la asignación del empleado para disfrutarlas." 
+                        />
+    
+                        <button 
+                            name="button_action_remuneration" 
+                            string="Compensación económica" 
+                            type="object" 
+                            class="btn btn-warning btn-lg" 
+                            style="min-width: 180px; padding: 16px 24px; font-size: 18px;"
+                            help="La asistencia quedara marcada para computar en la nómina, RRHH tiene que validar la asistencia." 
+                        />                        
+                    </div>
+                </sheet>
+                <footer>
+                    <button string="Cancelar" special="cancel" class="btn btn-light"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>
