@@ -1,0 +1,124 @@
+<odoo>
+    <data noupdate="1">
+    <!-- SCHEDULED ACTION IMPORTAR REP LOGS CONTACTOS-->
+    <record id="ir_cron_get_logs_contactos" model="ir.cron">
+        <field name="name">Importar RepLogs ContactosRelacion</field>
+        <field name="model_id" ref="tl_conn_a3erp.model_a3erp_contactos"/>
+        <field name="state">code</field>
+        <field name="code">model.get_rep_logs_contactos()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 08:00:00')" />
+        <field name="interval_type">hours</field>
+        <!--<field name="numbercall">-1</field>-->
+        <field name="priority">1</field>
+        <field name="active">False</field>
+    </record>
+
+    <!-- SERVER ACTION PARA IMPORTAR CONTACTOS -->
+    <record id="server_action_import_contactos" model="ir.actions.server">
+        <field name="name">a3ERP: Importar Contactos</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="tl_conn_a3erp.model_a3erp_contactos" />
+        <field name="state">code</field>
+        <field name="code">model.getall_contactos()</field>
+    </record>
+    </data>
+    <record id="a3erp_contacto_action" model="ir.actions.act_window">
+        <field name="name">Contactos</field>
+        <field name="res_model">a3erp.contactos</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_movimiento': 1}</field> 
+    </record>  
+
+    <record id="a3erp_contactos_form_view" model="ir.ui.view">
+        <field name="name">a3erp.contactos.form.view</field>
+        <field name="model">a3erp.contactos</field>
+        <field name="arch" type="xml">
+            <form string="Contactos" create="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="procesado" readonly="1"/>
+                            <field name="error" readonly="0"/>
+                            <field name="movimiento" readonly="1"/>
+                            <field name="fecha" readonly="1"/>
+
+                            <field name="obsoleto" readonly="1"/>
+                            <field name="idcontacto" readonly="1"/>
+                            <field name="idcontactorelacion" readonly="1"/>
+                            <field name="codcli" readonly="1"/>
+                            <field name="tipoentidad" readonly="1"/>
+                            <field name="idcargo" readonly="1"/>
+                            <field name="nombre" readonly="1"/>
+                            <field name="e_mail" readonly="1"/>
+                            <field name="enviar_email" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="dir1" readonly="1"/>
+                            <field name="dir2" readonly="1"/>
+                            <field name="codpais" readonly="1"/>
+                            <field name="codprovi" readonly="1"/>
+                            <field name="poblacion" readonly="1"/>
+                            <field name="telefono1" readonly="1"/>
+                            <field name="telefono2" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="company_id" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="a3erp_contactos_tree_view" model="ir.ui.view">
+        <field name="name">a3erp.contactos.view.tree</field>
+        <field name="model">a3erp.contactos</field>
+        <field name="arch" type="xml">
+            <list string="" create="false"
+                decoration-success="procesado == True"
+                decoration-danger="error == True"
+                decoration-warning="procesado == False and error == False">
+                <field name="error" optional="hide"/>
+                <field name="procesado" optional="hide"/>
+                <field name="movimiento" optional="show"/>
+                <field name="fecha" optional="show"/>
+                
+                <field name="idcontacto" optional="show"/>
+                <field name="idcontactorelacion" optional="show"/>
+                <field name="codcli" optional="show"/>
+                <field name="tipoentidad" optional="show"/>
+                <field name="idcargo" optional="show"/>
+                <field name="nombre" optional="show"/>
+                <field name="e_mail" optional="show"/>
+                <field name="dir1" optional="show"/>
+                <field name="dir2" optional="show"/>
+                <field name="telefono1" optional="show"/>
+                <field name="telefono2" optional="show"/>
+                <field name="company_id" optional="show"/>
+            </list>
+        </field>
+    </record>
+    
+    <record id="a3erp_contactos_search_view" model="ir.ui.view">
+        <field name="name">a3erp.contactos.search</field>
+        <field name="model">a3erp.contactos</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="idcontacto"/>
+                <field name="nombre"/>
+                <filter name="procesado" string="No Procesado" domain="[('procesado','=', False)]"/>
+                <group>
+                    <filter string="Contacto" name="idcontacto" context="{'group_by': 'idcontacto'}"/>
+                    <filter string="Movimiento" name="movimiento" context="{'group_by': 'movimiento'}"/>
+                </group>                
+            </search>
+        </field>
+    </record>  
+
+    <menuitem name="Contactos" id="a3erp_contactos" parent="a3erp_replogs" action="a3erp_contacto_action" sequence="7"/>
+    <!-- <menuitem name="Contactos" id="import_a3erp_contactos" parent="a3erp_importar"
+        action="server_action_import_contactos" sequence="35" /> -->
+</odoo>

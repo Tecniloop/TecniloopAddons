@@ -1,0 +1,26 @@
+<odoo>
+    <record id="view_create_date_wizard" model="ir.ui.view">
+        <field name="name">create.date.wizard.form</field>
+        <field name="model">create.date.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Seleccione la fecha de alta">
+                <group>
+                    <field name="create_date_a3erp" />
+                </group>
+                <footer>
+                    <button string="Confirmar" type="object" name="confirm_button" class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- <record id="commitment_date_wizard_action" model="ir.actions.act_window">
+        <field name="name">Nueva Fecha de entrega estimada</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">commitment.date.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_commitment_date_wizard"/>
+        <field name="target">new</field>
+    </record> -->
+    
+</odoo>

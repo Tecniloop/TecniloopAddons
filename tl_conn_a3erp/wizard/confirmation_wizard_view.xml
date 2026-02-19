@@ -1,0 +1,19 @@
+<odoo>
+    <data>
+        <record id="sale_confirmation_wizard" model="ir.ui.view">
+            <field name="name">Wizard de confirmacion</field>
+            <field name="model">sale.confirmation.wizard</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Mensaje">
+                    <h3>Hay productos que no estan creados en a3ERP, se van a procesar antes que el pedido:</h3>
+                    <field name="message" decoration-bf="1" colspan="4" nolabel="1" readonly="1" />                                                            
+                    <footer>
+                        <button name="confirm_button" type="object" string="Confirmar" class="oe_highlight"/>                             
+                        <button special="cancel" string="Cancelar"/>                    
+                    </footer>                                    
+                </form>
+            </field>
+    </record>
+    </data>
+</odoo>

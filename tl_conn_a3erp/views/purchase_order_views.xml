@@ -1,0 +1,76 @@
+<odoo>
+    <data noupdate="1">        
+        <!-- ACTION PARA PROCESAR PEDIDOS EN ESPERA-->
+        <record id="ir_cron_waiting_purchase" model="ir.cron">
+            <field name="name">Procesar pedidos Compra en ESPERA</field>
+            <field name="model_id" ref="purchase.model_purchase_order"/>
+            <field name="binding_model_id" ref="purchase.model_purchase_order" />
+            <field name="state">code</field>
+            <field name="code">
+if record:
+    if record.queue_state == 'ESPERA':
+        record.process_waiting_purchase()
+else:
+    purchase_orders = env['purchase.order'].search([('queue_state','=','ESPERA')])
+    purchase_orders.with_context(automatic=True).process_waiting_purchase()
+            </field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 08:10:00')" />
+            <field name="interval_type">minutes</field>
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        
+        <!--SERVER ACTION CONSULTAR ESTADO EN COLA-->
+        <record id="server_action_purchase_order_queue_state" model="ir.actions.server">
+            <field name="name">Consultar Estado Cola PENDIENTE</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="purchase.model_purchase_order" />
+            <field name="binding_model_id" ref="purchase.model_purchase_order" />
+            <field name="state">code</field>
+            <field name="code">records.get_cola_state()</field>
+        </record> 
+    </data>
+
+    <record id="purchase_order_form_a3erp_inherit" model="ir.ui.view">
+        <field name="name">view.purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form" />
+        <field name="arch" type="xml">
+            <!-- BOTON-->
+            <xpath expr="//header" position="inside">
+                <field name="a3erp_active_company" invisible="1"/>
+                <field name="allow_send" invisible="1"/>
+                <button name="send_a3erp_purchase_order" class="btn-primary" string="Tramitar documento en a3ERP" type="object" invisible="not a3erp_active_company or not allow_send or state != 'purchase' or ref_ofev_a3 or queue_state in ('ESPERA','PENDIENTE','FINALIZADO')" help="Dar de alta documento en a3ERP."/>
+            </xpath>
+
+            <field name="partner_ref" position="after">
+                <field name="ref_ofev_a3" readonly="1"/>            
+            </field>
+
+            <xpath expr="//page[@name='purchase_delivery_invoice']" position="after">
+                <page string="a3ERP" name="a3erp_information" invisible="not a3erp_active_company">
+                    <notebook>
+                        <page string="General" >
+                            <group>
+                                <field name="ref_ofev_a3" readonly="1"/>
+                                <field name="date_send" readonly="1"/>
+                                <field name="id_queue" invisible="1"/>
+                                <field name="queue_state" readonly="1"/>
+                                <field name="a3erp_error_simple" readonly="1" invisible="0"/>
+                            </group>
+                        </page>
+                        <page string="Tecnico" groups="base.group_no_one">
+                            <group>
+                                <field name="a3erp_error_extend" readonly="1"/>
+                                <field name="json_content_send" invisible="queue_state == False"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </page>
+            </xpath>
+        </field>
+    </record>   
+    
+</odoo>

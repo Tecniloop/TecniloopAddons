@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- ACTION PARA PROCESAR PEDIDOS EN ESPERA-->
+        <record id="ir_cron_waiting_sales" model="ir.cron">
+            <field name="name">Procesar pedidos en ESPERA</field>
+            <field name="model_id" ref="sale.model_sale_order"/>
+            <field name="binding_model_id" ref="sale.model_sale_order" />
+            <field name="state">code</field>
+            <field name="code">
+if record:
+    if record.queue_state == 'ESPERA':
+        record.process_waiting_sales()
+else:
+    sale_orders = env['sale.order'].search([('queue_state','=','ESPERA')])
+    sale_orders.with_context(automatic=True).process_waiting_sales()
+            </field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 08:10:00')" />
+            <field name="interval_type">minutes</field>
+            <!--<field name="numbercall">-1</field>-->
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+
+        <!--SERVER ACTION POR OFERTA-->
+        <record id="server_action_sale_order_queue_state" model="ir.actions.server">
+            <field name="name">Consultar Estado Cola PENDIENTE</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="sale.model_sale_order" />
+            <field name="binding_model_id" ref="sale.model_sale_order" />
+            <field name="state">code</field>
+            <field name="code">records.get_cola_state()</field>
+        </record> 
+    </data>
+    <record id="sale_order_form_view_inherit" model="ir.ui.view">
+        <field name="name">view.sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form" />
+        <field name="arch" type="xml">         
+            <!-- NO PERMITIR CREAR PRODUCTOS EN LAS LINEAS-->
+            <!-- <xpath expr="//field[@name='product_template_id']" position="attributes">
+                <attribute name="options">{'no_create':True}</attribute>                    
+            </xpath>
+            <xpath expr="//field[@name='product_id']" position="attributes">
+                <attribute name="options">{'no_create':True}</attribute>                    
+            </xpath>-->
+            
+            <!-- CAMPO DE PRODUCTO KIT-->
+            <xpath expr="//field[@name='sale_order_template_id']" position="after">
+                <field name="is_kit" widget="boolean_toggle" readonly="queue_state in ('PENDIENTE','FINALIZADO')" invisible="not a3erp_active_company"/>
+                <field name="kit_description" invisible="not is_kit" readonly="queue_state in ('PENDIENTE','FINALIZADO')"/>
+            </xpath>                       
+            
+            <!-- BOTON-->
+            <xpath expr="//header" position="inside">
+                <button name="action_a3erp_send" class="btn-primary" string="Tramitar documento en a3ERP" type="object" invisible="not a3erp_active_company or state != 'sale' or ref_ofev_a3 or queue_state in ('ESPERA','PENDIENTE','FINALIZADO')" help="Dar de alta documento en a3ERP."/>
+            </xpath>
+            
+            <!-- CAMPOS INFORMATIVOS -->
+            <group name="sale_header" position="before">
+                <group>
+                    <field name="show_update_partner" invisible="1"/>
+                    <button name="action_recompute_order_lines_price" type="object" string="Actualizar precios" class="btn-link mb-1 px-0" icon="fa-refresh" invisible="not show_update_partner or not a3erp_active_company" help="Al modificar el cliente se mantienen los precios y descuentos, con este boton se recalculan según el nuevo cliente."/>
+                </group>
+            </group>
+            
+            <!-- CAMPOS INFORMATIVOS-->
+            <field name="partner_shipping_id" position="after">
+                <field name="ref_ofev_a3" readonly="1" invisible="not a3erp_active_company"/>
+            </field>
+            
+            <xpath expr="//page[@name='other_information']" position="after">
+                <page string="a3ERP" name="a3erp_information" invisible="not a3erp_active_company">
+                    <notebook>
+                        <page string="General">
+                            <group>
+                                <field name="ref_ofev_a3" readonly="1"/>
+                                <field name="date_send" readonly="1"/>
+                                <field name="id_queue" invisible="1"/>
+                                <field name="queue_state" readonly="1"/>
+                                <field name="a3erp_error_simple" readonly="1" invisible="0"/>
+                            </group>
+                        </page>
+                        <page string="Tecnico" groups="base.group_no_one">
+                            <group>
+                                <field name="a3erp_error_extend" readonly="1"/>
+                                <field name="json_content_send" invisible="queue_state == False"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </page>
+            </xpath>
+            
+            <xpath expr="//page[@name='order_lines']//list" position="inside">
+                <field name="product_state" column_invisible="True"/>
+                <field name="codart_product" column_invisible="True"/>
+            </xpath>
+
+            <!--CONSULTA STOCK-->
+            <xpath expr="//list" position="inside">
+                <button type="object" name="get_product_stock" title="Consultar Stock" icon="fa-eye"/>
+            </xpath>
+
+            <!--RIESGO CLIENTE-->
+            <xpath expr="//field[@name='validity_date']" position="before">
+                <field name="credit_display"
+                    readonly="1"
+                    class="oe_inline"/>
+                <field name="credit_exceeded" invisible="1"/>
+                <field name="a3erp_credit" readonly="1" invisible="1" force_save="1"/>
+                <field name="a3erp_max_credit" readonly="1" invisible="1" force_save="1"/>
+            </xpath>
+            
+        </field>
+    </record>   
+
+    <record id="sale_order_tree_inherit" model="ir.ui.view">
+        <field name="name">sale.order.tree</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_tree" />
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="queue_state"  string="Estado traspaso a3ERP" optional="show" 
+                    decoration-success="queue_state == 'FINALIZADO'" 
+                    decoration-info="queue_state =='PENDIENTE'" 
+                    decoration-warning="queue_state =='ESPERA'" 
+                    decoration-danger="queue_state == 'ERROR'" 
+                    widget="badge"/>
+            </field>
+        </field>
+    </record>
+    
+    <record id="tl_sale_order_search_view_inherit" model="ir.ui.view">
+        <field name="name">sale.order.search</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='sales']" position="after">
+                <separator/>
+                <filter name="FINALIZADOS" string="a3ERP: Pedidos Finalizados" domain="[('queue_state','=','FINALIZADO')]"/>
+                <filter name="ESPERA" string="a3ERP: Pedidos en Espera" domain="[('queue_state','=','ESPERA')]"/>
+                <filter name="PENDIENTES" string="a3ERP: Pedidos Pendientes" domain="[('queue_state','=','PENDIENTE')]"/>
+                <filter name="ERROR" string="a3ERP: Pedidos con Incidencia" domain="[('queue_state','=','ERROR')]"/>   
+            </xpath>
+        </field>
+    </record> 
+
+</odoo>

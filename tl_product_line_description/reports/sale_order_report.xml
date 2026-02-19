@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="sale_order_report_inherit" inherit_id="sale.report_saleorder_document">
+
+        <!--AÑADIR DESCRIPCION PARA DISTINGUIR NOMBRE DE DESCRIPCION-->
+        <xpath expr="//td[@name='td_product_name']/span" position="replace">
+            <p style="font-weight: bold;" t-field="line.product_display"/>
+            <p style="white-space: pre-wrap;font-size:10px; font-style: italic; line-height: 1.5;" t-field="line.description_display"/>
+        </xpath>
+
+    </template>
+</odoo>

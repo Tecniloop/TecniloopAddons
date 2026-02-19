@@ -1,0 +1,153 @@
+<odoo>
+    <record id="view_a3erp_button_import_form" model="ir.ui.view">
+        <field name="name">a3erp.button.import.form</field>
+        <field name="model">a3erp.button.import</field>
+        <field name="arch" type="xml">
+            <form string="Botones" create="false" edit="false" class="form-inline">
+                <field name="company_id" readonly="1" invisible="1"/>
+                <group>
+                    <!-- CARACTERS -->
+                    <group string="CARACTERISTICAS" class="form-group mb-6">
+                        <button name="button_caracteristicas" type="object" string="Importar Caracteristicas" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_caracteristicas" type="object" string="RepLogs Caracteristicas" class="btn-primary" />
+                        <field name="last_caracteristicas_data" readonly="1"/>
+                    </group>
+                    <!-- DOCU PAGO -->
+                    <group string="DOCU.PAGO" class="form-group mb-6">
+                        <button name="button_docupago" type="object" string="Importar Documentos Pago" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_docupago" type="object" string="RepLogs Documentos Pago" class="btn-primary" />
+                        <field name="last_docupago_data" readonly="1"/>
+                    </group>
+                    <!-- FORM PAGO -->
+                    <group string="FORM.PAGO" class="form-group mb-6">
+                        <button name="button_formapago" type="object" string="Importar Formas Pago" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_formapago" type="object" string="RepLogs Formas Pago" class="btn-primary" />
+                        <field name="last_formapago_data" readonly="1"/>
+                    </group>
+                    <!-- CARGOS -->
+                    <group string="CARGOS" class="form-group mb-6">
+                        <button name="button_cargos" type="object" string="Importar Cargos" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_cargos" type="object" string="RepLogs Cargos" class="btn-primary" />
+                        <field name="last_cargos_data" readonly="1"/>
+                    </group>
+                    <!-- CENTROS C -->
+                    <group string="CENTROS C" class="form-group mb-6">
+                        <button name="button_centrosc_1" type="object" string="Importar Centros Coste Nvl. 1" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_centrosc_2" type="object" string="Importar Centros Coste Nvl. 2" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_centrosc_3" type="object" string="Importar Centros Coste Nvl. 3" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_centrosc_1" type="object" string="RepLogs Centros Coste" class="btn-primary" />
+                        <field name="last_centrosc_data" readonly="1"/>
+                    </group>
+                    <!-- FAMILIAS EST -->
+                    <group string="FAMILIAS" class="form-group mb-6">
+                        <button name="button_familias" type="object" string="Importar Familias" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_familias" type="object" string="RepLogs Familias" class="btn-primary" />
+                        <field name="last_familias_data" readonly="1"/>
+                    </group>
+                    <!-- PRODUCTOS -->
+                    <group string="PRODUCTOS" class="form-group mb-6">
+                        <button name="button_productos" type="object" string="Importar Productos" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_wizard_date" type="object" string="Importar Productos según Fecha" class="btn-primary" />
+                        <button name="button_productos" type="object" string="RepLogs Productos" class="btn-primary" />
+                        <field name="last_productos_data" readonly="1"/>
+                    </group>
+                     <!-- IDIOMA -->
+                     <group string="IDIOMA" class="form-group mb-6">
+                        <button name="button_idiomas" type="object" string="Importar Traducciones" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_idiomas" type="object" string="RepLogs Traducciones" class="btn-primary" />
+                        <field name="last_idioma_data" readonly="1"/>
+                    </group>                                   
+                    <!-- REFPRO -->
+                    <group string="REFPRO" class="form-group mb-6">
+                        <button name="button_refpro" type="object" string="RepLogs Referencias Proveed" class="btn-primary" />
+                        <field name="last_refpro_data" readonly="1"/>
+                    </group>                    
+                    <!-- TARIFAS 
+                    <group string="TARIFAS" class="form-group mb-6">
+                        <button name="button_tarifas" type="object" string="Importar Tarifas" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_tarifas" type="object" string="RepLogs Tarifas" class="btn-primary" />
+                        <field name="last_tarifas_data" readonly="1"/>
+                    </group>-->
+                    <!-- DESCUENTOS AF
+                    <group string="DESCUENTOS AF" class="form-group mb-6">
+                        <button name="button_descuent_af" type="object" string="Importar Descuentos AF" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_descuent_af" type="object" string="RepLogs Descuentos AF" class="btn-primary" />
+                        <field name="last_descaf_data" readonly="1"/>
+                    </group> -->
+                     <!-- CLIENTES -->
+                     <group string="CLIENTES" class="form-group mb-6">
+                        <button name="button_clientes" type="object" string="Importar Clientes" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_clientes" type="object" string="RepLogs Clientes" class="btn-primary"/>
+                        <field name="last_clientes_data" readonly="1"/>
+                    </group>
+                    <!-- DIRECCIONES -->
+                    <group string="DIRECCIONES" class="form-group mb-6">
+                        <button name="button_dirent" type="object" string="Importar Direcciones Entrega" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_dirent" type="object" string="RepLogs Direcciones Entrega" class="btn-primary" />
+                        <field name="last_dirent_data" readonly="1"/>
+                    </group>
+                    <!-- PROVEEDORES -->
+                    <group string="PROVEEDORES" class="form-group mb-6">
+                        <button name="button_proveed" type="object" string="Importar Proveedores" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_proveed" type="object" string="RepLogs Proveedores" class="btn-primary" />
+                        <field name="last_proveed_data" readonly="1"/>
+                    </group>
+                    <!-- CONTACTOS -->
+                    <group string="CONTACTOS" class="form-group mb-6">
+                        <button name="button_contactos" type="object" string="Importar Contactos" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_contactos" type="object" string="RepLogs Contactos" class="btn-primary" />
+                        <field name="last_contactos_data" readonly="1"/>
+                    </group>
+                    <!-- PRECIOS ESP
+                    <group string="PRECIOS ESP" class="form-group mb-6">
+                        <button name="button_precios_esp" type="object" string="Importar Precios Esp" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_precios_esp" type="object" string="RepLogs Precios Esp" class="btn-primary" />
+                        <field name="last_precesp_data" readonly="1"/>
+                    </group> -->
+                    <!-- DESCUENTOS AC 
+                    <group string="DESCUENTOS AC" class="form-group mb-6">
+                        <button name="button_descuent_ac" type="object" string="Importar Descuentos AC" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_descuent_ac" type="object" string="RepLogs Descuentos AC" class="btn-primary" />
+                        <field name="last_descac_data" readonly="1"/>
+                    </group> -->
+                    <!-- DESCUENTOS CF
+                    <group string="DESCUENTOS CF" class="form-group mb-6">
+                        <button name="button_descuent_cf" type="object" string="Importar Descuentos CF" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_descuent_cf" type="object" string="RepLogs Descuentos CF" class="btn-primary" />
+                        <field name="last_desccf_data" readonly="1"/>
+                    </group>-->
+                    <!-- DESCUENTOS FF 
+                    <group string="DESCUENTOS FF" class="form-group mb-6">
+                        <button name="button_descuent_ff" type="object" string="Importar Descuentos FF" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_descuent_ff" type="object" string="RepLogs Descuentos FF" class="btn-primary" />
+                        <field name="last_descff_data" readonly="1"/>
+                    </group> -->
+                     <!-- ALARMAS -->
+                     <group string="ALARMAS" class="form-group mb-6">
+                        <button name="button_alarmas" type="object" string="Importar Alarmas" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <button name="button_alarmas" type="object" string="RepLogs Alarmas" class="btn-primary" />
+                        <field name="last_alarmas_data" readonly="1"/>
+                    </group>  
+                    <!-- OPCIONALES -->
+                    <group string="OPCIONALES" class="form-group mb-6">
+                        <button name="button_opcionales" type="object" string="Importar Opcionales" class="btn-primary" context="{'button_name': 'importar'}"/>
+                        <field name="last_opcionales_data" readonly="1"/>
+                    </group> 
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_button_screen" model="ir.actions.act_window">
+        <field name="name">Pantalla de Botones</field>
+        <field name="res_model">a3erp.button.import</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="domain">[]</field>
+        <field name="context">{'search_default_1': 1}</field>
+        <field name="limit">1</field>
+    </record>
+    
+    <menuitem id="a3erp_botones_registros" name="Mantenimiento Datos" action="action_button_screen" parent="a3erp_base_menu"/>
+    
+</odoo>
