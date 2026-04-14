@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_electronic_signature_tree" model="ir.ui.view">
+        <field name="name">electronic.signature.tree</field>
+        <field name="model">electronic.signature</field>
+        <field name="arch" type="xml">
+            <tree create="0" edit="0" delete="0">
+                <field name="name"/>
+                <field name="certificate_id"/>
+                <field name="user_id"/>
+                <field name="report_ref" optional="hide"/>
+                <field name="res_model" optional="hide"/>
+                <field name="res_ids" optional="hide"/>
+                <field name="sign_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_electronic_signature_search" model="ir.ui.view">
+        <field name="name">electronic.signature.search</field>
+        <field name="model">electronic.signature</field>
+        <field name="arch" type="xml">
+            <search string="Signature Audit">
+                <field name="name"/>
+                <field name="certificate_id"/>
+                <field name="user_id"/>
+                <field name="report_ref"/>
+                <field name="res_model"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_certificate" string="Certificate" context="{'group_by': 'certificate_id'}"/>
+                    <filter name="group_user" string="User" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_report" string="Report" context="{'group_by': 'report_ref'}"/>
+                    <filter name="group_model" string="Model" context="{'group_by': 'res_model'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'sign_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_electronic_signature_pivot" model="ir.ui.view">
+        <field name="name">electronic.signature.pivot</field>
+        <field name="model">electronic.signature</field>
+        <field name="arch" type="xml">
+            <pivot string="Signature Audit">
+                <field name="certificate_id" type="row"/>
+                <field name="user_id" type="row"/>
+                <field name="sign_date" type="col" interval="month"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_electronic_signature_form" model="ir.ui.view">
+        <field name="name">electronic.signature.form</field>
+        <field name="model">electronic.signature</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0" delete="0">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="certificate_id" readonly="1"/>
+                        <field name="user_id" readonly="1"/>
+                        <field name="report_ref" readonly="1"/>
+                        <field name="res_model" readonly="1"/>
+                        <field name="res_ids" readonly="1"/>
+                        <field name="document_hash" readonly="1"/>
+                        <field name="document"/>
+                        <field name="sign_date"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_firma" model="ir.actions.act_window">
+        <field name="name">Signature Management</field>
+        <field name="res_model">electronic.signature</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_electronic_signature_search"/>
+        <field name="context">{'create': 0, 'edit': 0, 'delete': 0}</field>
+    </record>
+
+    <record id="action_firma_auditoria" model="ir.actions.act_window">
+        <field name="name">Signature Audit</field>
+        <field name="res_model">electronic.signature</field>
+        <field name="view_mode">tree,pivot,form</field>
+        <field name="search_view_id" ref="view_electronic_signature_search"/>
+        <field name="context">{'search_default_group_certificate': 1, 'create': 0, 'edit': 0, 'delete': 0}</field>
+    </record>
+
+    <menuitem id="menu_firma_auditoria"
+              name="Auditoría de Firma"
+              parent="menu_firma_electronica_root"
+              action="action_firma_auditoria"
+              sequence="20"/>
+</odoo>

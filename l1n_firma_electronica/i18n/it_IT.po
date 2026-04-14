@@ -1,0 +1,545 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: l10n_firma_electronica 17.0\n"
+"POT-Creation-Date: 2026-04-07 00:00+0000\n"
+"PO-Revision-Date: 2026-04-07 00:00+0000\n"
+"Language: it_IT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_usuario_certificado_form
+msgid "Acceso de Firma"
+msgstr "Accesso firma"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_users_form_inherit_firma
+msgid "Accesos de Firma por Usuario"
+msgstr "Accessi firma per utente"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_search
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_usuario_certificado_search
+msgid "Agrupar Por"
+msgstr "Raggruppa per"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__name
+msgid "Alias"
+msgstr "Alias"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_form
+msgid "Alias del certificado"
+msgstr "Alias del certificato"
+
+#. module: l10n_firma_electronica
+#: model:ir.actions.act_window,name:l10n_firma_electronica.action_firma_certificado
+#: model:ir.ui.menu,name:l10n_firma_electronica.menu_firma_certificados
+msgid "Almacen de Certificados"
+msgstr "Archivio certificati"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__archivo
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_tree
+msgid "Archivo"
+msgstr "File"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.actions.act_window,help:l10n_firma_electronica.action_firma_usuario_certificado
+msgid "Asigna certificados a usuarios"
+msgstr "Assegna certificati agli utenti"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_usuario_certificado_form
+msgid "Asignacion de Certificado"
+msgstr "Assegnazione certificato"
+
+#. module: l10n_firma_electronica
+#: model:ir.actions.act_window,name:l10n_firma_electronica.action_firma_usuario_certificado
+msgid "Asignacion de Certificados"
+msgstr "Assegnazione certificati"
+
+#. module: l10n_firma_electronica
+#: model:ir.model,name:l10n_firma_electronica.model_firma_usuario_certificado
+msgid "Asignación de Certificados"
+msgstr "Assegnazione certificati"
+
+#. module: l10n_firma_electronica
+#: model:ir.ui.menu,name:l10n_firma_electronica.menu_firma_asignaciones
+msgid "Asignar a Usuarios"
+msgstr "Assegna agli utenti"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_usuario_certificado_search
+msgid "Buscar Asignaciones"
+msgstr "Cerca assegnazioni"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_search
+msgid "Buscar Certificados"
+msgstr "Cerca certificati"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_search
+msgid "Caducados"
+msgstr "Scaduti"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_password_wizard_form
+msgid "Cancelar"
+msgstr "Annulla"
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/xml/signature_dialog.xml:0
+#, python-format
+msgid "Cerrar"
+msgstr "Chiudi"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado_password_wizard__certificado_id
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_usuario_certificado__certificado_id
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_usuario_certificado_search
+msgid "Certificado"
+msgstr "Certificato"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_form
+msgid "Certificado Digital"
+msgstr "Certificato digitale"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields.selection,name:l10n_firma_electronica.selection__firma_certificado__tipo__personal
+msgid "Certificado Personal"
+msgstr "Certificato personale"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields.selection,name:l10n_firma_electronica.selection__firma_certificado__tipo__empresa
+msgid "Certificado de Empresa"
+msgstr "Certificato aziendale"
+
+#. module: l10n_firma_electronica
+#: model:ir.ui.menu,name:l10n_firma_electronica.menu_firma_electronica_root
+msgid "Certificados"
+msgstr "Certificati"
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/xml/signature_dialog.xml:0
+#, python-format
+msgid "Certificados > Asignar a Usuarios"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#: model:ir.model,name:l10n_firma_electronica.model_firma_certificado
+msgid "Certificados Digitales"
+msgstr "Certificati digitali"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_res_users__firma_certificado_ids
+msgid "Certificados de Firma"
+msgstr "Certificati di firma"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_usuario_certificado_search
+msgid "Con PIN"
+msgstr "Con PIN"
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/xml/signature_dialog.xml:0
+#, python-format
+msgid "Consultando tus certificados..."
+msgstr "Caricamento dei tuoi certificati..."
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_form
+msgid "Contraseña"
+msgstr "Password"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__password_maestra
+msgid "Contraseña Maestra"
+msgstr "Password principale"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado_password_wizard__contrasena
+msgid "Contraseña del Certificado"
+msgstr "Password del certificato"
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "Contraseña incorrecta o certificado inválido."
+msgstr "Password errata o certificato non valido."
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.actions.act_window,help:l10n_firma_electronica.action_firma_certificado
+msgid "Crea tu primer certificado digital"
+msgstr "Crea il tuo primo certificato digitale"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__create_uid
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado_password_wizard__create_uid
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_electronica__create_uid
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_usuario_certificado__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__create_date
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado_password_wizard__create_date
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_electronica__create_date
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_usuario_certificado__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "Debes cargar un archivo .p12 o .pfx antes de validar."
+msgstr "Devi caricare un file .p12 o .pfx prima di convalidare."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "Debes introducir la contraseña antes de validar."
+msgstr "Devi inserire la password prima di convalidare."
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.actions.act_window,help:l10n_firma_electronica.action_firma_usuario_certificado
+msgid ""
+"Define que certificado puede usar cada usuario y el PIN asociado para "
+"autorizar la firma."
+msgstr ""
+"Definisci quale certificato può usare ogni utente e il PIN associato per "
+"autorizzare la firma."
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__display_name
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado_password_wizard__display_name
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_electronica__display_name
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_usuario_certificado__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_electronica__documento
+msgid "Documento"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "El certificado no tiene archivo adjunto."
+msgstr "Il certificato non ha alcun file allegato."
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_search
+msgid "Empresa"
+msgstr "Azienda"
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/report_signing_hook.py:0
+#, python-format
+msgid "Error al firmar el PDF: %s"
+msgstr "Errore durante la firma del PDF: %s"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__fecha_caducidad
+msgid "Fecha de Caducidad"
+msgstr "Data di scadenza"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_electronica__fecha_firma
+msgid "Fecha de Firma"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_users_form_inherit_firma
+msgid "Firma Electronica"
+msgstr "Firma elettronica"
+
+#. module: l10n_firma_electronica
+#: model:ir.model,name:l10n_firma_electronica.model_firma_electronica
+#: model:ir.ui.menu,name:l10n_firma_electronica.menu_firma_root
+msgid "Firma Electrónica"
+msgstr "Firma elettronica"
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/report_signing_hook.py:0
+#, python-format
+msgid "Firmado: %s"
+msgstr "Firmato: %s"
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/xml/signature_dialog.xml:0
+#, python-format
+msgid "Firmar e Imprimir"
+msgstr "Firma e stampa"
+
+#. module: l10n_firma_electronica
+#: model:ir.actions.act_window,name:l10n_firma_electronica.action_firma
+#: model:ir.ui.menu,name:l10n_firma_electronica.menu_firma
+msgid "Firmas"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#: model:ir.ui.menu,name:l10n_firma_electronica.menu_firma_gestion
+msgid "Gestion de Firmas"
+msgstr "Gestione firme"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.actions.act_window,help:l10n_firma_electronica.action_firma_certificado
+msgid ""
+"Gestiona certificados de empresa o personales para la firma electronica en "
+"reportes."
+msgstr ""
+"Gestisci certificati aziendali o personali per la firma elettronica nei "
+"report."
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__id
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado_password_wizard__id
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_electronica__id
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_usuario_certificado__id
+msgid "ID"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/xml/signature_dialog.xml:0
+#, python-format
+msgid "Imprimir sin Firmar"
+msgstr "Stampa senza firmare"
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/js/signature_dialog.js:0
+#, python-format
+msgid "Introduce el PIN de seguridad."
+msgstr "Inserisci il PIN di sicurezza."
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_password_wizard_form
+msgid "Introduce la contraseña del .p12/.pfx"
+msgstr "Inserisci la password del .p12/.pfx"
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/xml/signature_dialog.xml:0
+#, python-format
+msgid "Introduzca el PIN de"
+msgstr "Inserisci il PIN di"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__write_uid
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado_password_wizard__write_uid
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_electronica__write_uid
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_usuario_certificado__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__write_date
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado_password_wizard__write_date
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_electronica__write_date
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_usuario_certificado__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_users_form_inherit_firma
+msgid "Mantiene certificados y PIN para autorizar firma de reportes."
+msgstr "Mantiene certificati e PIN per autorizzare la firma dei report."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "No se encontró un certificado válido en el archivo cargado."
+msgstr "Nessun certificato valido trovato nel file caricato."
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/js/signature_dialog.js:0
+#, python-format
+msgid "No se pudieron cargar los certificados asignados."
+msgstr "Impossibile caricare i certificati assegnati."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid ""
+"No se puede leer el certificado porque falta la dependencia 'cryptography'."
+msgstr ""
+"Impossibile leggere il certificato perché manca la dipendenza "
+"'cryptography'."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/report_signing_hook.py:0
+#, python-format
+msgid "No tienes asignado este certificado."
+msgstr "Questo certificato non ti è assegnato."
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_electronica__name
+msgid "Nombre"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__nombre_archivo
+msgid "Nombre Interno de Archivo"
+msgstr "Nome interno del file"
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/xml/signature_dialog.xml:0
+#, python-format
+msgid "PIN de seguridad"
+msgstr "PIN di sicurezza"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_usuario_certificado_form
+msgid "PIN de seguridad para este usuario"
+msgstr "PIN di sicurezza per questo utente"
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "PIN incorrecto o acceso denegado."
+msgstr "PIN errato o accesso negato."
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_usuario_certificado__pin_asignado
+msgid "PIN para este Usuario"
+msgstr "PIN per questo utente"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_search
+msgid "Personal"
+msgstr "Personale"
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "Primero debes cargar el archivo del certificado."
+msgstr "Devi prima caricare il file del certificato."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate_password_wizard.py:0
+#, python-format
+msgid "Primero debes cargar un archivo .p12 o .pfx."
+msgstr "Devi prima caricare un file .p12 o .pfx."
+
+#. module: l10n_firma_electronica
+#: model:ir.model,name:l10n_firma_electronica.model_ir_actions_report
+msgid "Report Action"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_usuario_certificado_form
+msgid "Responsable"
+msgstr "Responsabile"
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/xml/signature_dialog.xml:0
+#, python-format
+msgid "Selecciona el certificado que deseas utilizar:"
+msgstr "Seleziona il certificato da utilizzare:"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_search
+msgid "Sin Archivo"
+msgstr "Senza file"
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/xml/signature_dialog.xml:0
+#, python-format
+msgid "Sin Certificados"
+msgstr "Nessun certificato"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_usuario_certificado_search
+msgid "Sin PIN"
+msgstr "Senza PIN"
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "Solo se permiten certificados con extensión .p12 o .pfx."
+msgstr "Sono consentiti solo certificati con estensione .p12 o .pfx."
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_certificado__tipo
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_search
+msgid "Tipo"
+msgstr "Tipo"
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/xml/signature_dialog.xml:0
+#, python-format
+msgid ""
+"Tu usuario de Odoo no tiene ningún certificado asignado. Por favor, ve al "
+"menú"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#: model:ir.model,name:l10n_firma_electronica.model_res_users
+msgid "User"
+msgstr ""
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_firma_usuario_certificado__user_id
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_usuario_certificado_search
+msgid "Usuario"
+msgstr "Utente"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_form
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_password_wizard_form
+msgid "Validar"
+msgstr "Convalida"
+
+#. module: l10n_firma_electronica
+#: model:ir.model,name:l10n_firma_electronica.model_firma_certificado_password_wizard
+msgid "Validar contraseña de certificado"
+msgstr "Convalida password certificato"
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_firma_certificado_password_wizard_form
+#, python-format
+msgid "Validar contraseña del certificado"
+msgstr "Convalida password del certificato"
+
+#. module: l10n_firma_electronica
+#. odoo-javascript
+#: code:addons/l10n_firma_electronica/static/src/xml/signature_dialog.xml:0
+#, python-format
+msgid "para configurar uno."
+msgstr ""

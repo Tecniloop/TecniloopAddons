@@ -1,0 +1,11 @@
+.modal-open .ui-widget.ui-autocomplete {
+    z-index: 1040 !important;
+}
+
+.modal-open .modal-backdrop {
+    z-index: 1050;
+}
+
+.modal-open .modal {
+    z-index: 1055;
+}

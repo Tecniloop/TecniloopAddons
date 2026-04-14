@@ -1,0 +1,566 @@
+# Spanish (Spain) translation for l10n_firma_electronica
+# Copyright (C) 2026
+# This file is distributed under the same license as the l10n_firma_electronica package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: l10n_firma_electronica 18.0\n"
+"POT-Creation-Date: 2026-04-14 00:00+0000\n"
+"PO-Revision-Date: 2026-04-14 00:00+0000\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# ── Modelos ────────────────────────────────────────────────────────────────
+
+#. module: l10n_firma_electronica
+#: model:ir.model,name:l10n_firma_electronica.model_digital_certificate
+msgid "Digital Certificates"
+msgstr "Certificados Digitales"
+
+#. module: l10n_firma_electronica
+#: model:ir.model,name:l10n_firma_electronica.model_certificate_password_wizard
+msgid "Validate Certificate Password"
+msgstr "Validar contraseña del certificado"
+
+#. module: l10n_firma_electronica
+#: model:ir.model,name:l10n_firma_electronica.model_electronic_signature
+msgid "Electronic Signature"
+msgstr "Firma Electrónica"
+
+#. module: l10n_firma_electronica
+#: model:ir.model,name:l10n_firma_electronica.model_user_certificate_assignment
+msgid "User Certificate Assignment"
+msgstr "Asignación de Certificado a Usuario"
+
+# ── Campos: digital.certificate ───────────────────────────────────────────
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_digital_certificate__name
+msgid "Alias"
+msgstr "Alias"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_digital_certificate__file
+msgid "File"
+msgstr "Fichero"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_digital_certificate__internal_filename
+msgid "Internal Filename"
+msgstr "Nombre interno del fichero"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_digital_certificate__master_password
+msgid "Master Password"
+msgstr "Contraseña maestra"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_digital_certificate__expiry_date
+msgid "Expiry Date"
+msgstr "Fecha de caducidad"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_digital_certificate__revoked
+msgid "Revoked"
+msgstr "Revocado"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_digital_certificate__revocation_check_date
+msgid "Last Revocation Check"
+msgstr "Última comprobación de revocación"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_digital_certificate__state
+msgid "State"
+msgstr "Estado"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_digital_certificate__type
+msgid "Type"
+msgstr "Tipo"
+
+# ── Campos: certificate.password.wizard ───────────────────────────────────
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_certificate_password_wizard__certificate_id
+msgid "Certificate"
+msgstr "Certificado"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_certificate_password_wizard__password
+msgid "Certificate Password"
+msgstr "Contraseña del certificado"
+
+# ── Campos: electronic.signature ──────────────────────────────────────────
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_electronic_signature__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_electronic_signature__certificate_id
+msgid "Certificate"
+msgstr "Certificado"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_electronic_signature__user_id
+msgid "Signed by"
+msgstr "Firmado por"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_electronic_signature__report_ref
+msgid "Report"
+msgstr "Informe"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_electronic_signature__res_model
+msgid "Source Model"
+msgstr "Modelo origen"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_electronic_signature__res_ids
+msgid "Signed Records"
+msgstr "Registros firmados"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_electronic_signature__document_hash
+msgid "SHA256 Hash"
+msgstr "Hash SHA256"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_electronic_signature__document
+msgid "Document"
+msgstr "Documento"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_electronic_signature__sign_date
+msgid "Sign Date"
+msgstr "Fecha de firma"
+
+# ── Campos: user.certificate.assignment ──────────────────────────────────
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_user_certificate_assignment__user_id
+msgid "User"
+msgstr "Usuario"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_user_certificate_assignment__certificate_id
+msgid "Certificate"
+msgstr "Certificado"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_user_certificate_assignment__assigned_date
+msgid "Assigned Date"
+msgstr "Fecha de asignación"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_user_certificate_assignment__pin
+msgid "PIN"
+msgstr "PIN"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_user_certificate_assignment__active
+msgid "Active"
+msgstr "Activo"
+
+# ── Campos: res.users (extensión) ─────────────────────────────────────────
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields,field_description:l10n_firma_electronica.field_res_users__user_certificate_assignment_ids
+msgid "Certificate Assignments"
+msgstr "Asignaciones de certificado"
+
+# ── Selecciones ───────────────────────────────────────────────────────────
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields.selection,name:l10n_firma_electronica.selection__digital_certificate__state__active
+msgid "Active"
+msgstr "Activo"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields.selection,name:l10n_firma_electronica.selection__digital_certificate__state__expired
+msgid "Expired"
+msgstr "Caducado"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields.selection,name:l10n_firma_electronica.selection__digital_certificate__state__revoked
+msgid "Revoked"
+msgstr "Revocado"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields.selection,name:l10n_firma_electronica.selection__digital_certificate__type__company
+msgid "Company Certificate"
+msgstr "Certificado de Empresa"
+
+#. module: l10n_firma_electronica
+#: model:ir.model.fields.selection,name:l10n_firma_electronica.selection__digital_certificate__type__personal
+msgid "Personal Certificate"
+msgstr "Certificado Personal"
+
+# ── Acciones y menús ──────────────────────────────────────────────────────
+
+#. module: l10n_firma_electronica
+#: model:ir.actions.act_window,name:l10n_firma_electronica.action_digital_certificate
+#: model:ir.ui.menu,name:l10n_firma_electronica.menu_firma_certificados
+msgid "Certificate Store"
+msgstr "Almacén de Certificados"
+
+#. module: l10n_firma_electronica
+#: model:ir.actions.act_window,name:l10n_firma_electronica.action_user_certificate_assignment
+msgid "Certificate Assignments"
+msgstr "Asignaciones de Certificado"
+
+#. module: l10n_firma_electronica
+#: model:ir.actions.act_window,name:l10n_firma_electronica.action_firma
+msgid "Signature Management"
+msgstr "Gestión de Firmas"
+
+#. module: l10n_firma_electronica
+#: model:ir.actions.act_window,name:l10n_firma_electronica.action_firma_auditoria
+msgid "Signature Audit"
+msgstr "Auditoría de Firmas"
+
+#. module: l10n_firma_electronica
+#: model:ir.ui.menu,name:l10n_firma_electronica.menu_firma_electronica_root
+msgid "Digital Signature"
+msgstr "Firma Digital"
+
+#. module: l10n_firma_electronica
+#: model:ir.ui.menu,name:l10n_firma_electronica.menu_firma_gestion
+msgid "Certificate Management"
+msgstr "Gestión de Certificados"
+
+#. module: l10n_firma_electronica
+#: model:ir.ui.menu,name:l10n_firma_electronica.menu_firma_asignaciones
+msgid "Assign to Users"
+msgstr "Asignar a Usuarios"
+
+#. module: l10n_firma_electronica
+#: model:ir.ui.menu,name:l10n_firma_electronica.menu_firma_auditoria
+msgid "Auditoría de Firma"
+msgstr "Auditoría de Firma"
+
+# ── Textos de ayuda (help) ────────────────────────────────────────────────
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.actions.act_window,help:l10n_firma_electronica.action_digital_certificate
+msgid "Create your first digital certificate"
+msgstr "Crea tu primer certificado digital"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.actions.act_window,help:l10n_firma_electronica.action_digital_certificate
+msgid "Manage company or personal certificates for electronic signature on reports."
+msgstr "Gestiona certificados de empresa o personales para la firma electrónica en informes."
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.actions.act_window,help:l10n_firma_electronica.action_user_certificate_assignment
+msgid "Assign certificates to users"
+msgstr "Asignar certificados a usuarios"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.actions.act_window,help:l10n_firma_electronica.action_user_certificate_assignment
+msgid "Define which certificate each user can use and the associated PIN to authorize the signature."
+msgstr "Define qué certificado puede usar cada usuario y el PIN asociado para autorizar la firma."
+
+# ── Vistas: certificate_views.xml ────────────────────────────────────────
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_form
+msgid "Digital Certificate"
+msgstr "Certificado Digital"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_form
+msgid "Certificate alias"
+msgstr "Alias del certificado"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_form
+msgid "Password"
+msgstr "Contraseña"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_form
+msgid "Validate"
+msgstr "Validar"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_form
+msgid "Check Revocation"
+msgstr "Comprobar revocación"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_search
+msgid "Search Certificates"
+msgstr "Buscar certificados"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_search
+msgid "Company"
+msgstr "Empresa"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_search
+msgid "Personal"
+msgstr "Personal"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_search
+msgid "No File"
+msgstr "Sin fichero"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_search
+msgid "Expired"
+msgstr "Caducado"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_search
+msgid "Active"
+msgstr "Activo"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_search
+msgid "Expired (State)"
+msgstr "Caducado (Estado)"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_search
+msgid "Revoked"
+msgstr "Revocado"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_search
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_user_certificate_assignment_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_search
+msgid "Type"
+msgstr "Tipo"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_digital_certificate_search
+msgid "State"
+msgstr "Estado"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_certificate_password_wizard_form
+msgid "Validate Certificate Password"
+msgstr "Validar contraseña del certificado"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_certificate_password_wizard_form
+msgid "Enter the .p12/.pfx password"
+msgstr "Introduce la contraseña del .p12/.pfx"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_certificate_password_wizard_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_user_certificate_assignment_form
+msgid "Certificate Assignment"
+msgstr "Asignación de Certificado"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_user_certificate_assignment_form
+msgid "User"
+msgstr "Usuario"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_user_certificate_assignment_form
+msgid "Signature Access"
+msgstr "Acceso de Firma"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_user_certificate_assignment_form
+msgid "Security PIN for this user"
+msgstr "PIN de seguridad para este usuario"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_user_certificate_assignment_search
+msgid "Search Assignments"
+msgstr "Buscar asignaciones"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_user_certificate_assignment_search
+msgid "With PIN"
+msgstr "Con PIN"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_user_certificate_assignment_search
+msgid "Without PIN"
+msgstr "Sin PIN"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_user_certificate_assignment_search
+msgid "Certificate"
+msgstr "Certificado"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_users_form_inherit_firma
+msgid "Electronic Signature"
+msgstr "Firma Electrónica"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_users_form_inherit_firma
+msgid "Signature Access by User"
+msgstr "Acceso de firma por usuario"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_users_form_inherit_firma
+msgid "Manage certificates and PIN to authorize report signatures."
+msgstr "Gestiona certificados y PIN para autorizar la firma de informes."
+
+# ── Vistas: signature_views.xml ──────────────────────────────────────────
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_electronic_signature_search
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_electronic_signature_pivot
+msgid "Signature Audit"
+msgstr "Auditoría de Firmas"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_electronic_signature_search
+msgid "Group By"
+msgstr "Agrupar por"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_electronic_signature_search
+msgid "Certificate"
+msgstr "Certificado"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_electronic_signature_search
+msgid "User"
+msgstr "Usuario"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_electronic_signature_search
+msgid "Report"
+msgstr "Informe"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_electronic_signature_search
+msgid "Model"
+msgstr "Modelo"
+
+#. module: l10n_firma_electronica
+#: model_terms:ir.ui.view,arch_db:l10n_firma_electronica.view_electronic_signature_search
+msgid "Date"
+msgstr "Fecha"
+
+# ── Textos Python (_()) ───────────────────────────────────────────────────
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "You must upload a .p12 or .pfx file before validating."
+msgstr "Debe subir un fichero .p12 o .pfx antes de validar."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "Cannot read the certificate because the 'cryptography' dependency is missing."
+msgstr "No se puede leer el certificado porque la dependencia 'cryptography' no está instalada."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "Incorrect password or invalid certificate."
+msgstr "Contraseña incorrecta o certificado no válido."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "No valid certificate found in the uploaded file."
+msgstr "No se encontró ningún certificado válido en el fichero subido."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "You must first upload the certificate file."
+msgstr "Debe subir primero el fichero de certificado."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "Validate certificate password"
+msgstr "Validar contraseña del certificado"
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "You must enter the password before validating."
+msgstr "Debe introducir la contraseña antes de validar."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "You must have a file and validated password to check revocation."
+msgstr "Debe tener un fichero y contraseña validada para comprobar la revocación."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "Only certificates with .p12 or .pfx extension are allowed."
+msgstr "Solo se permiten certificados con extensión .p12 o .pfx."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate.py:0
+#, python-format
+msgid "The certificate has no attached file."
+msgstr "El certificado no tiene ningún fichero adjunto."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/certificate_password_wizard.py:0
+#, python-format
+msgid "You must first upload a .p12 or .pfx file."
+msgstr "Debe subir primero un fichero .p12 o .pfx."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/user_certificate_assignment.py:0
+#, python-format
+msgid "PIN is required."
+msgstr "El PIN es obligatorio."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/report_signing_hook.py:0
+#, python-format
+msgid "You do not have this certificate assigned."
+msgstr "No tiene asignado este certificado."
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/report_signing_hook.py:0
+#, python-format
+msgid "Error signing the PDF: %s"
+msgstr "Error al firmar el PDF: %s"
+
+#. module: l10n_firma_electronica
+#. odoo-python
+#: code:addons/l10n_firma_electronica/models/report_signing_hook.py:0
+#, python-format
+msgid "Signed: %s"
+msgstr "Firmado: %s"

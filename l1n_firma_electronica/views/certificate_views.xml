@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_digital_certificate_tree" model="ir.ui.view">
+        <field name="name">digital.certificate.tree</field>
+        <field name="model">digital.certificate</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="type == 'company'" decoration-muted="not file" decoration-success="state == 'active'" decoration-warning="state == 'expired'" decoration-danger="state == 'revoked'">
+                <field name="file" invisible="1"/>
+                <field name="name"/>
+                <field name="state" decoration-danger="state == 'revoked'" decoration-success="state == 'active'" decoration-warning="state == 'expired'" widget="badge"/>
+                <field name="type" widget="badge"/>
+                <field name="expiry_date"/>
+                <field name="revocation_check_date" optional="hide"/>
+                <field name="internal_filename" string="File"/>
+                <field name="master_password" password="True" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_digital_certificate_form" model="ir.ui.view">
+        <field name="name">digital.certificate.form</field>
+        <field name="model">digital.certificate</field>
+        <field name="arch" type="xml">
+            <form string="Digital Certificate">
+                <sheet>
+                    <group>
+                        <field name="name" placeholder="Certificate alias"/>
+                        <field name="state" widget="badge" readonly="1"/>
+                        <field name="type" widget="radio" options="{'horizontal': true}"/>
+                        <field name="file" filename="internal_filename" widget="binary" options="{'accepted_file_extensions': '.p12,.pfx'}"/>
+                        <label for="master_password" string="Password"/>
+                        <div class="o_row">
+                            <field name="master_password" password="True"/>
+                            <button name="action_validate_password"
+                                    type="object"
+                                    string="Validate"
+                                    class="oe_highlight"
+                                    invisible="not file"/>
+                            <button name="action_check_revocation_status"
+                                    type="object"
+                                    string="Check Revocation"
+                                    class="btn-secondary"
+                                    invisible="not file or not master_password"/>
+                        </div>
+                        <field name="expiry_date" readonly="1"/>
+                        <field name="revocation_check_date" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_digital_certificate_search" model="ir.ui.view">
+        <field name="name">digital.certificate.search</field>
+        <field name="model">digital.certificate</field>
+        <field name="arch" type="xml">
+            <search string="Search Certificates">
+                <field name="name"/>
+                <field name="internal_filename"/>
+                <field name="type"/>
+                <field name="state"/>
+                <field name="expiry_date"/>
+                <filter name="filter_company" string="Company" domain="[('type', '=', 'company')]"/>
+                <filter name="filter_personal" string="Personal" domain="[('type', '=', 'personal')]"/>
+                <filter name="filter_no_file" string="No File" domain="[('file', '=', False)]"/>
+                <filter name="filter_expired" string="Expired" domain="[('expiry_date', '&lt;', context_today())]"/>
+                <filter name="filter_active" string="Active" domain="[('state', '=', 'active')]"/>
+                <filter name="filter_expired_state" string="Expired (State)" domain="[('state', '=', 'expired')]"/>
+                <filter name="filter_revoked" string="Revoked" domain="[('state', '=', 'revoked')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_type" string="Type" context="{'group_by': 'type'}"/>
+                    <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_certificate_password_wizard_form" model="ir.ui.view">
+        <field name="name">certificate.password.wizard.form</field>
+        <field name="model">certificate.password.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Validate Certificate Password">
+                <group>
+                    <field name="certificate_id" readonly="1"/>
+                    <field name="password" password="True" placeholder="Enter the .p12/.pfx password"/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Validate" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_digital_certificate" model="ir.actions.act_window">
+        <field name="name">Certificate Store</field>
+        <field name="res_model">digital.certificate</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_digital_certificate_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first digital certificate</p>
+            <p>Manage company or personal certificates for electronic signature on reports.</p>
+        </field>
+    </record>
+
+    <record id="view_user_certificate_assignment_tree" model="ir.ui.view">
+        <field name="name">user.certificate.assignment.tree</field>
+        <field name="model">user.certificate.assignment</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="user_id" widget="many2one_avatar_user"/>
+                <field name="certificate_id"/>
+                <field name="pin" password="True"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_user_certificate_assignment_form" model="ir.ui.view">
+        <field name="name">user.certificate.assignment.form</field>
+        <field name="model">user.certificate.assignment</field>
+        <field name="arch" type="xml">
+            <form string="Certificate Assignment">
+                <sheet>
+                    <group>
+                        <group string="User">
+                            <field name="user_id" widget="many2one_avatar_user" options="{'no_create': false}"/>
+                        </group>
+                        <group string="Signature Access">
+                            <field name="certificate_id"/>
+                            <field name="pin" password="True" placeholder="Security PIN for this user"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_user_certificate_assignment_search" model="ir.ui.view">
+        <field name="name">user.certificate.assignment.search</field>
+        <field name="model">user.certificate.assignment</field>
+        <field name="arch" type="xml">
+            <search string="Search Assignments">
+                <field name="user_id"/>
+                <field name="certificate_id"/>
+                <filter name="filter_with_pin" string="With PIN" domain="[('pin', '!=', False)]"/>
+                <filter name="filter_without_pin" string="Without PIN" domain="[('pin', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_user" string="User" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_certificate" string="Certificate" context="{'group_by': 'certificate_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_user_certificate_assignment" model="ir.actions.act_window">
+        <field name="name">Certificate Assignments</field>
+        <field name="res_model">user.certificate.assignment</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_user_certificate_assignment_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Assign certificates to users</p>
+            <p>Define which certificate each user can use and the associated PIN to authorize the signature.</p>
+        </field>
+    </record>
+
+    <record id="view_users_form_inherit_firma" model="ir.ui.view">
+        <field name="name">res.users.form.inherit.firma</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Electronic Signature" name="electronic_signature">
+                    <group>
+                        <group string="Signature Access by User">
+                            <div class="text-muted">Manage certificates and PIN to authorize report signatures.</div>
+                            <field name="user_certificate_assignment_ids" nolabel="1" context="{'default_user_id': active_id}">
+                                <tree editable="bottom">
+                                    <field name="certificate_id"/>
+                                    <field name="pin" password="True"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <menuitem id="menu_firma_electronica_root"
+              name="Digital Signature"
+              web_icon="base,static/description/icon.png"
+              sequence="10"/>
+
+    <menuitem id="menu_firma_gestion"
+              name="Certificate Management"
+              parent="menu_firma_electronica_root"
+              sequence="10"/>
+
+    <menuitem id="menu_firma_certificados"
+              name="Certificate Store"
+              parent="menu_firma_gestion"
+              action="action_digital_certificate"
+              sequence="10"/>
+
+    <menuitem id="menu_firma_asignaciones"
+              name="Assign to Users"
+              parent="menu_firma_gestion"
+              action="action_user_certificate_assignment"
+              sequence="20"/>
+
+</odoo>

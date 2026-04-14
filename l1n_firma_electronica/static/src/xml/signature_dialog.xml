@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="l10n_firma_electronica.SignatureDialog" owl="1">
+        <Dialog title="'¿Desea firmar el documento?'" size="'md'">
+            <div class="o_firma_container p-2">
+
+                <t t-if="state.isLoading">
+                    <div class="text-center p-5">
+                        <i class="fa fa-spinner fa-spin fa-3x text-primary"></i>
+                        <p class="mt-2">Consultando tus certificados...</p>
+                    </div>
+                </t>
+
+                <t t-else="">
+                    <t t-if="!state.certificates or state.certificates.length === 0">
+                        <div class="alert alert-warning border-0 shadow-sm">
+                            <h5 class="fw-bold"><i class="fa fa-exclamation-triangle me-2"></i>Sin Certificados</h5>
+                            <p class="mb-0">Tu usuario de Odoo no tiene ningún certificado asignado. Por favor, ve al menú <strong>Certificados > Asignar a Usuarios</strong> para configurar uno.</p>
+                        </div>
+                    </t>
+
+                    <t t-else="">
+                        <p class="text-muted mb-4">Selecciona el certificado que deseas utilizar:</p>
+
+                        <div class="row g-3 mb-4">
+                            <t t-foreach="state.certificates" t-as="cert" t-key="cert.id">
+                                <div class="col-6">
+                                    <div t-attf-class="card h-100 cursor-pointer border-2 shadow-sm #{state.selectedCertificate and state.selectedCertificate.id === cert.id ? 'border-primary bg-light' : 'border-200'}"
+                                         t-on-click="() => this.selectCertificate(cert)">
+                                        <div class="card-body text-center p-3">
+                                            <div t-attf-class="rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center #{state.selectedCertificate and state.selectedCertificate.id === cert.id ? 'bg-primary text-white' : 'bg-200 text-600'}"
+                                                 style="width: 44px; height: 44px;">
+                                                <i t-attf-class="fa #{cert.type === 'company' ? 'fa-building' : 'fa-user'} fa-lg"></i>
+                                            </div>
+                                            <div class="fw-bold text-truncate" t-esc="cert.name"/>
+                                            <div class="small text-muted text-uppercase" style="font-size: 0.7rem;" t-esc="cert.type_label || cert.type"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+
+                        <t t-if="state.selectedCertificate">
+                            <div class="form-group border-top pt-3">
+                                <label class="form-label fw-bold">
+                                    Introduzca el PIN de <span class="text-primary" t-esc="state.selectedCertificate.name"/>
+                                </label>
+                                <div class="input-group shadow-sm">
+                                    <span class="input-group-text bg-white"><i class="fa fa-lock text-muted"></i></span>
+                                    <input type="password"
+                                           class="form-control"
+                                           t-model="state.enteredPin"
+                                           placeholder="PIN de seguridad"/>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </t>
+            </div>
+
+            <t t-set-slot="footer">
+                <button t-if="!state.isLoading and state.certificates and state.certificates.length > 0"
+                        class="btn btn-lg btn-primary px-4 shadow-sm"
+                        t-on-click="confirm">
+                    <i class="fa fa-check me-2"></i>Firmar e Imprimir
+                </button>
+                <button class="btn btn-lg btn-secondary px-4 shadow-sm" t-on-click="printWithoutSigning">
+                    <i class="fa fa-print me-2"></i>Imprimir sin Firmar
+                </button>
+                <button class="btn btn-lg btn-link text-muted" t-on-click="cancel">
+                    Cerrar
+                </button>
+            </t>
+        </Dialog>
+    </t>
+</templates>
