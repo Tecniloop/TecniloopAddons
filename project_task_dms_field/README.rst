@@ -9,7 +9,7 @@ This module adds a Documents tab to project tasks using ``dms.field.mixin``.
 * Adds ``dms_directory_ids`` support to ``project.task``.
 * Shows a Documents tab in the task form.
 * Allows configuring an Embedded DMS template for project tasks.
-* Demo data includes a sample template using task assignees.
+* Demo data includes a sample template for project tasks.
 
 Configuration
 =============
@@ -17,8 +17,8 @@ Configuration
 1. Go to Documents > Configuration > Embedded DMS templates.
 2. Create a template for model ``project.task``.
 3. Choose storage and access groups.
-4. Optionally set the task assignees field as user field if your DMS setup supports it.
-4. Define the folder hierarchy to be created per task.
+4. Do not use `user_ids` as the DMS `user field` unless you also customize `dms_field` for multi-user support.
+5. Define the folder hierarchy to be created per task.
 
 Usage
 =====
