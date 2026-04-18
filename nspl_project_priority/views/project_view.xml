@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_project_form_priority" model="ir.ui.view">
+        <field name="name">project.project.form.priority</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="priority" widget="priority"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_project_kanban_inherit_priority" model="ir.ui.view">
+        <field name="name">project.project.kanban.priority</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//t[@t-name='card']//field[@name='display_name']" position="after">
+                <div>
+                    <field name="priority" widget="priority"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="nspl_project_priority_list_inherit" model="ir.ui.view">
+        <field name="name">project.project.list.priority</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="priority" widget="priority"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="nspl_project_search_priority" model="ir.ui.view">
+        <field name="name">project.project.search.inherit.priority</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='own_projects']" position="before">
+                <filter name="priority_low" string="Priority: Low" domain="[('priority', '=', '0')]"/>
+                <filter name="priority_medium" string="Priority: Medium" domain="[('priority', '=', '1')]"/>
+                <filter name="priority_high" string="Priority: High" domain="[('priority', '=', '2')]"/>
+                <filter name="priority_very_high" string="Priority: Very High" domain="[('priority', '=', '3')]"/>
+                <separator/>
+            </xpath>
+            <xpath expr="//group" position="inside">
+                <filter string="Priority" name="group_by_priority" context="{'group_by': 'priority'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
