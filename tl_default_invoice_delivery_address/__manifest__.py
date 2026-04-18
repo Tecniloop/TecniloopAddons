@@ -10,7 +10,7 @@
     'description': """
         Este modulo filtra automaticamente las direcciones de facturación y envío en los pedidos de venta, según el cliente seleccionado
     """,
-    'version': '19.0.1.0.1',
+    'version': '18.0.1.0.1',
     'depends': ['sale_management'],
     'data': ["views/sale_order_views.xml"],
     'installable': True,
