@@ -5,7 +5,7 @@
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.edit_project"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="after">
+            <xpath expr="//field[@name='user_id']" position="after">
                 <field name="priority" widget="priority"/>
             </xpath>
         </field>
@@ -16,8 +16,8 @@
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.view_project_kanban"/>
         <field name="arch" type="xml">
-            <xpath expr="//t[@t-name='card']//field[@name='display_name']" position="after">
-                <div>
+            <xpath expr="//t[@t-name='card']//span[@name='partner_name']" position="before">
+                <div class="text-muted mb-1">
                     <field name="priority" widget="priority"/>
                 </div>
             </xpath>
@@ -29,8 +29,8 @@
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.view_project"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="before">
-                <field name="priority" widget="priority"/>
+            <xpath expr="//field[@name='display_name']" position="before">
+                <field name="priority" widget="priority" optional="show"/>
             </xpath>
         </field>
     </record>
@@ -47,7 +47,7 @@
                 <filter name="priority_very_high" string="Priority: Very High" domain="[('priority', '=', '3')]"/>
                 <separator/>
             </xpath>
-            <xpath expr="//group" position="inside">
+            <xpath expr="//group[@string='Group By']" position="inside">
                 <filter string="Priority" name="group_by_priority" context="{'group_by': 'priority'}"/>
             </xpath>
         </field>

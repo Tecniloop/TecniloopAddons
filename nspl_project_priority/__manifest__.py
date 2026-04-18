@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Project And Task Priority',
-    'version': '19.0.1',
-    'summary': """Add Priority to Projects and Tasks with Filters and Kanban Rating""",
+    'version': '18.0.1.0.0',
+    'summary': 'Add project priority and task priority filters for Odoo 18',
     'description': """
-This module enhances Odoo's project management features by adding priority fields to both projects and tasks, helping teams stay focused and organized.
+This module enhances Odoo 18 Project by:
 
-✔ Set priority on both projects and tasks  
-✔ View priority visually in Kanban using ratings  
-✔ Filter and group by priority for better task planning  
-✔ Improves project tracking and team coordination  
-✔ Seamless integration with Odoo Project app  
-
-Ideal for teams that want to manage workloads and deadlines more effectively.
+- adding a priority field to projects,
+- showing project priority in form, list and kanban views,
+- adding filters and group by options for project priority,
+- adding filters and group by options for task priority.
     """,
     'category': 'Project',
     'sequence': 5,
@@ -23,12 +20,11 @@ Ideal for teams that want to manage workloads and deadlines more effectively.
     'support': 'support@namahsoftech.com',
     'depends': ['project'],
     'data': [
-        'security/ir.model.access.csv',
         'views/project_view.xml',
         'views/task_view.xml',
     ],
     'images': ['static/description/img/banner.png'],
     'installable': True,
-    'auto_install': False,
     'application': True,
+    'auto_install': False,
 }

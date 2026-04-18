@@ -1,37 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <record id="view_task_form_inherit_priority" model="ir.ui.view">
-        <field name="name">project.task.form.priority</field>
-        <field name="model">project.task</field>
-        <field name="inherit_id" ref="project.view_task_form2"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="after">
-                <!--                <field name="priority" widget="priority"/>-->
-            </xpath>
-        </field>
-    </record>
-
-    <record id="nspl_task_priority_list_inherit" model="ir.ui.view">
-        <field name="name">project.task.list.priority</field>
-        <field name="model">project.task</field>
-        <field name="inherit_id" ref="project.open_view_my_tasks_list_view"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='name']" position="before">
-                <field name="priority" widget="priority"/>
-            </xpath>
-        </field>
-    </record>
-
-<!--    <record id="view_task_kanban_inherit_priority" model="ir.ui.view">-->
-<!--        <field name="name">project.task.kanban.priority</field>-->
-<!--        <field name="model">project.task</field>-->
-<!--        <field name="inherit_id" ref="project.view_task_kanban"/>-->
-<!--        <field name="arch" type="xml">-->
-<!--            <xpath expr="//div[contains(@class, 'oe_kanban_content')]" position="inside">-->
-<!--                <field name="priority" widget="priority"/>-->
-<!--            </xpath>-->
-<!--        </field>-->
-<!--    </record>-->
-
     <record id="nspl_task_priority_filter" model="ir.ui.view">
         <field name="name">project.task.search.priority</field>
         <field name="model">project.task</field>
@@ -44,7 +12,7 @@
                 <filter name="priority_very_high" string="Very High Priority" domain="[('priority', '=', '3')]"/>
                 <separator/>
             </xpath>
-            <xpath expr="//group" position="inside">
+            <xpath expr="//group[@string='Group By']" position="inside">
                 <filter name="group_by_priority" string="Priority" context="{'group_by': 'priority'}"/>
             </xpath>
         </field>
