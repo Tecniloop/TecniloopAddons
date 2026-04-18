@@ -47,7 +47,7 @@
                 <filter name="priority_very_high" string="Priority: Very High" domain="[('priority', '=', '3')]"/>
                 <separator/>
             </xpath>
-            <xpath expr="//group[@string='Group By']" position="inside">
+            <xpath expr="//search/group" position="inside">
                 <filter string="Priority" name="group_by_priority" context="{'group_by': 'priority'}"/>
             </xpath>
         </field>
