@@ -85,9 +85,9 @@
                         <field name="catastro_error" readonly="1" nolabel="1"/>
                     </group>
 
-                    <group string="Depuración Catastro" groups="base.group_no_one">
+                    <group string="Depuración Catastro" groups="base.group_no_one" invisible="not context.get('debug')">
                         <separator string="Todos los campos devueltos por Catastro"/>
-                        <field name="catastro_line_ids" nolabel="1" readonly="1">
+                        <field name="catastro_line_ids" nolabel="1" readonly="1" invisible="not context.get('debug')">
                             <list create="0" delete="0" edit="0" open_form_view="0">
                                 <field name="sequence" optional="hide"/>
                                 <field name="section"/>
@@ -98,7 +98,7 @@
                         </field>
 
                         <separator string="Payload bruto"/>
-                        <field name="catastro_raw_payload" widget="text" readonly="1" nolabel="1"/>
+                        <field name="catastro_raw_payload" widget="text" readonly="1" nolabel="1" invisible="not context.get('debug')"/>
                     </group>
                 </page>
             </xpath>

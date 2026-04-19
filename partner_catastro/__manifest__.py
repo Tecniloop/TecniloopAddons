@@ -1,6 +1,6 @@
 {
     'name': 'Partner Catastro',
-    'version': '18.0.1.0.6',
+    'version': '18.0.1.0.7',
     'summary': 'Consulta datos del Catastro desde res.partner',
     'description': '''
 Partner Catastro
@@ -15,7 +15,7 @@ Características:
 - Almacenamiento de resumen, payload bruto y todos los campos/valores devueltos.
 - Dirección adaptada a la estructura del Catastro (cv, tv, nv, pnp, plp, snp, slp, km, td, bq, es, pt, pu, dp, dm, ldt).
 - URLs y timeout configurables desde Ajustes.
-- El payload bruto y el detalle completo solo se muestran en modo desarrollador.
+- El payload bruto y el detalle completo solo se muestran en modo desarrollador y quedan ocultos fuera de debug aunque el usuario tenga permisos técnicos.
 - Recuperación del campo URL devuelto por Catastro, priorizando finca/infgraf/igraf.
 ''',
     'author': 'OpenAI',
