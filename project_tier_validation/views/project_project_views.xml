@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="project_project_view_form_tier_validation" model="ir.ui.view">
+        <field name="name">project.project.form.tier.validation</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project" />
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='stage_id']" position="after">
+                <field name="validation_status" invisible="1" />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_project_project_filter_tier_validation" model="ir.ui.view">
+        <field name="name">project.project.search.tier.validation</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter" />
+        <field name="arch" type="xml">
+            <filter name="my_projects" position="after">
+                <filter
+                    name="needs_review"
+                    string="Needs my Review"
+                    domain="[('reviewer_ids', 'in', uid), ('stage_id.fold', '=', False)]"
+                    help="Projects pending my review"
+                />
+                <filter
+                    name="tier_validated"
+                    string="Validated"
+                    domain="[('validated', '=', True)]"
+                    help="Projects validated and ready to be closed"
+                />
+            </filter>
+        </field>
+    </record>
+</odoo>

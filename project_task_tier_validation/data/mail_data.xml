@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <record id="project_task_tier_validation_requested" model="mail.message.subtype" forcecreate="1">
+        <field name="name">Tier Validation Requested</field>
+        <field name="res_model">project.task</field>
+        <field name="internal">True</field>
+    </record>
+    <record id="project_task_tier_validation_accepted" model="mail.message.subtype" forcecreate="1">
+        <field name="name">Tier Validation Accepted Notification</field>
+        <field name="res_model">project.task</field>
+        <field name="internal">True</field>
+    </record>
+    <record id="project_task_tier_validation_rejected" model="mail.message.subtype" forcecreate="1">
+        <field name="name">Tier Validation Rejected Notification</field>
+        <field name="res_model">project.task</field>
+        <field name="internal">True</field>
+    </record>
+
+    <record id="project_project_task_tier_validation_requested" model="mail.message.subtype" forcecreate="1">
+        <field name="name">Tier Validation Requested</field>
+        <field name="res_model">project.project</field>
+        <field name="default" eval="True" />
+        <field name="internal">True</field>
+        <field name="parent_id" ref="project_task_tier_validation.project_task_tier_validation_requested" />
+        <field name="relation_field">project_id</field>
+    </record>
+    <record id="project_project_task_tier_validation_accepted" model="mail.message.subtype" forcecreate="1">
+        <field name="name">Tier Validation Accepted Notification</field>
+        <field name="res_model">project.project</field>
+        <field name="default" eval="True" />
+        <field name="internal">True</field>
+        <field name="parent_id" ref="project_task_tier_validation.project_task_tier_validation_accepted" />
+        <field name="relation_field">project_id</field>
+    </record>
+    <record id="project_project_task_tier_validation_rejected" model="mail.message.subtype" forcecreate="1">
+        <field name="name">Tier Validation Rejected Notification</field>
+        <field name="res_model">project.project</field>
+        <field name="default" eval="True" />
+        <field name="internal">True</field>
+        <field name="parent_id" ref="project_task_tier_validation.project_task_tier_validation_rejected" />
+        <field name="relation_field">project_id</field>
+    </record>
+</odoo>
