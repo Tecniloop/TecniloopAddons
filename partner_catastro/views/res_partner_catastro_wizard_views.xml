@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_partner_catastro_fetch_form" model="ir.ui.view">
+        <field name="name">res.partner.catastro.fetch.form</field>
+        <field name="model">res.partner.catastro.fetch</field>
+        <field name="arch" type="xml">
+            <form string="Importar Catastro">
+                <group>
+                    <field name="partner_id" invisible="1"/>
+                    <field name="refcat"/>
+                    <field name="province"/>
+                    <field name="municipality"/>
+                    <field name="fetch_coordinates"/>
+                    <field name="srs" invisible="not fetch_coordinates"/>
+                </group>
+                <footer>
+                    <button name="action_fetch" type="object" string="Importar" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

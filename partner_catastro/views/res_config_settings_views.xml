@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_partner_catastro" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.partner.catastro</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Catastro" name="partner_catastro" groups="base.group_system">
+                    <block title="Catastro" name="partner_catastro_settings_block">
+                        <setting id="partner_catastro_base_url_callejero" string="Servicio de Callejero">
+                            <field name="catastro_base_url_callejero"/>
+                        </setting>
+                        <setting id="partner_catastro_base_url_coord" string="Servicio de Coordenadas">
+                            <field name="catastro_base_url_coord"/>
+                        </setting>
+                        <setting id="partner_catastro_http_timeout" string="Timeout HTTP">
+                            <field name="catastro_http_timeout"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>
