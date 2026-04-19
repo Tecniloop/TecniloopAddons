@@ -43,3 +43,9 @@ Puedes configurar:
 - Si la referencia es de 14 posiciones, Catastro puede devolver una lista de inmuebles vinculados a la finca.
 - `Consulta_CPMRC` trabaja con la finca de 14 posiciones.
 - El módulo guarda el payload completo para no perder información aunque la respuesta cambie de estructura.
+
+
+## Cambios en 18.0.1.0.1
+
+- Corregida la extracción de los campos de resumen de Catastro para respuestas JSON con estructuras variables o listas.
+- Corregida la detección de errores del servicio de coordenadas para no tratar `cuerr=0` como error.

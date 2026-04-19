@@ -1,6 +1,6 @@
 {
     'name': 'Partner Catastro',
-    'version': '18.0.1.0.0',
+    'version': '18.0.1.0.1',
     'summary': 'Consulta datos del Catastro desde res.partner',
     'description': '''
 Partner Catastro
