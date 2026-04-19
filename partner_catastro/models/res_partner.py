@@ -13,10 +13,15 @@ class ResPartner(models.Model):
     ], string='Estado Catastro', default='empty', copy=False, readonly=True)
     catastro_error = fields.Text(string='Error Catastro', copy=False, readonly=True)
     catastro_raw_payload = fields.Text(string='Payload Catastro', copy=False, readonly=True)
+    catastro_url = fields.Char(string='URL Catastro', copy=False, readonly=True)
 
     catastro_bi_type = fields.Char(string='Tipo de bien', copy=False, readonly=True)
     catastro_province = fields.Char(string='Provincia Catastro', copy=False, readonly=True)
     catastro_municipality = fields.Char(string='Municipio Catastro', copy=False, readonly=True)
+    catastro_zip = fields.Char(string='Código postal', copy=False, readonly=True)
+    catastro_district = fields.Char(string='Distrito municipal', copy=False, readonly=True)
+
+    # Dirección Catastro simplificada
     catastro_street_type = fields.Char(string='Tipo vía', copy=False, readonly=True)
     catastro_street_name = fields.Char(string='Nombre vía', copy=False, readonly=True)
     catastro_street_number = fields.Char(string='Número', copy=False, readonly=True)
@@ -24,7 +29,18 @@ class ResPartner(models.Model):
     catastro_stair = fields.Char(string='Escalera', copy=False, readonly=True)
     catastro_floor = fields.Char(string='Planta', copy=False, readonly=True)
     catastro_door = fields.Char(string='Puerta', copy=False, readonly=True)
-    catastro_zip = fields.Char(string='Código postal', copy=False, readonly=True)
+
+    # Dirección Catastro estructurada
+    catastro_street_code = fields.Char(string='Código de vía', copy=False, readonly=True)
+    catastro_number_first = fields.Char(string='Primer número', copy=False, readonly=True)
+    catastro_number_first_letter = fields.Char(string='Letra primer número', copy=False, readonly=True)
+    catastro_number_second = fields.Char(string='Segundo número', copy=False, readonly=True)
+    catastro_number_second_letter = fields.Char(string='Letra segundo número', copy=False, readonly=True)
+    catastro_km = fields.Char(string='Kilómetro', copy=False, readonly=True)
+    catastro_unstructured_address = fields.Char(string='Dirección no estructurada', copy=False, readonly=True)
+    catastro_literal_address = fields.Char(string='Domicilio tributario literal', copy=False, readonly=True)
+    catastro_finca_literal_address = fields.Char(string='Domicilio de finca', copy=False, readonly=True)
+
     catastro_use = fields.Char(string='Uso', copy=False, readonly=True)
     catastro_surface = fields.Char(string='Superficie', copy=False, readonly=True)
     catastro_coefficient = fields.Char(string='Coef. participación', copy=False, readonly=True)
@@ -75,9 +91,12 @@ class ResPartner(models.Model):
                 'payload': payload,
                 'coords': coords or {},
             }),
+            'catastro_url': summary.get('catastro_url'),
             'catastro_bi_type': summary.get('catastro_bi_type'),
             'catastro_province': summary.get('catastro_province'),
             'catastro_municipality': summary.get('catastro_municipality'),
+            'catastro_zip': summary.get('catastro_zip'),
+            'catastro_district': summary.get('catastro_district'),
             'catastro_street_type': summary.get('catastro_street_type'),
             'catastro_street_name': summary.get('catastro_street_name'),
             'catastro_street_number': summary.get('catastro_street_number'),
@@ -85,7 +104,15 @@ class ResPartner(models.Model):
             'catastro_stair': summary.get('catastro_stair'),
             'catastro_floor': summary.get('catastro_floor'),
             'catastro_door': summary.get('catastro_door'),
-            'catastro_zip': summary.get('catastro_zip'),
+            'catastro_street_code': summary.get('catastro_street_code'),
+            'catastro_number_first': summary.get('catastro_number_first'),
+            'catastro_number_first_letter': summary.get('catastro_number_first_letter'),
+            'catastro_number_second': summary.get('catastro_number_second'),
+            'catastro_number_second_letter': summary.get('catastro_number_second_letter'),
+            'catastro_km': summary.get('catastro_km'),
+            'catastro_unstructured_address': summary.get('catastro_unstructured_address'),
+            'catastro_literal_address': summary.get('catastro_literal_address'),
+            'catastro_finca_literal_address': summary.get('catastro_finca_literal_address'),
             'catastro_use': summary.get('catastro_use'),
             'catastro_surface': summary.get('catastro_surface'),
             'catastro_coefficient': summary.get('catastro_coefficient'),

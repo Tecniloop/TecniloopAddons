@@ -33,20 +33,43 @@
                             <field name="catastro_province" readonly="1"/>
                             <field name="catastro_municipality" readonly="1"/>
                             <field name="catastro_zip" readonly="1"/>
+                            <field name="catastro_district" readonly="1"/>
+                            <field name="catastro_url" readonly="1" widget="url"/>
                         </group>
                     </group>
 
-                    <group string="Dirección Catastro">
+                    <group string="Dirección Catastro estructurada">
                         <group>
+                            <field name="catastro_street_code" readonly="1"/>
                             <field name="catastro_street_type" readonly="1"/>
                             <field name="catastro_street_name" readonly="1"/>
-                            <field name="catastro_street_number" readonly="1"/>
+                            <field name="catastro_km" readonly="1"/>
                         </group>
+                        <group>
+                            <field name="catastro_number_first" readonly="1"/>
+                            <field name="catastro_number_first_letter" readonly="1"/>
+                            <field name="catastro_number_second" readonly="1"/>
+                            <field name="catastro_number_second_letter" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Localización interna">
                         <group>
                             <field name="catastro_block" readonly="1"/>
                             <field name="catastro_stair" readonly="1"/>
+                        </group>
+                        <group>
                             <field name="catastro_floor" readonly="1"/>
                             <field name="catastro_door" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <group string="Dirección Catastro textual">
+                        <group>
+                            <field name="catastro_street_number" readonly="1"/>
+                            <field name="catastro_unstructured_address" readonly="1"/>
+                            <field name="catastro_literal_address" readonly="1"/>
+                            <field name="catastro_finca_literal_address" readonly="1"/>
                         </group>
                     </group>
 
@@ -62,19 +85,21 @@
                         <field name="catastro_error" readonly="1" nolabel="1"/>
                     </group>
 
-                    <separator string="Todos los campos devueltos por Catastro"/>
-                    <field name="catastro_line_ids" nolabel="1" readonly="1">
-                        <list create="0" delete="0" edit="0" open_form_view="0">
-                            <field name="sequence" optional="hide"/>
-                            <field name="section"/>
-                            <field name="label"/>
-                            <field name="value"/>
-                            <field name="path" optional="hide"/>
-                        </list>
-                    </field>
+                    <group string="Depuración Catastro" groups="base.group_no_one">
+                        <separator string="Todos los campos devueltos por Catastro"/>
+                        <field name="catastro_line_ids" nolabel="1" readonly="1">
+                            <list create="0" delete="0" edit="0" open_form_view="0">
+                                <field name="sequence" optional="hide"/>
+                                <field name="section"/>
+                                <field name="label"/>
+                                <field name="value"/>
+                                <field name="path" optional="hide"/>
+                            </list>
+                        </field>
 
-                    <separator string="Payload bruto"/>
-                    <field name="catastro_raw_payload" widget="text" readonly="1" nolabel="1"/>
+                        <separator string="Payload bruto"/>
+                        <field name="catastro_raw_payload" widget="text" readonly="1" nolabel="1"/>
+                    </group>
                 </page>
             </xpath>
         </field>

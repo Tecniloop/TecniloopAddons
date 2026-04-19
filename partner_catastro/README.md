@@ -55,3 +55,9 @@ Puedes configurar:
 
 - Soporte para la envoltura JSON real del Catastro (`consulta_dnprcResult` / `Consulta_CPMRCResult`).
 - Extracción de resumen y dirección tanto para detalle completo (18/20 posiciones) como para listas por finca (14 posiciones).
+
+
+## Cambios en 18.0.1.0.4
+
+- Se añade el campo **URL Catastro** al resumen e intento de extracción robusta desde la respuesta del servicio.
+- **Payload bruto** y **Todos los campos devueltos por Catastro** quedan ocultos para usuarios normales y solo visibles en modo desarrollador.
