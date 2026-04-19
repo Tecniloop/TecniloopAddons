@@ -61,3 +61,9 @@ Puedes configurar:
 
 - Se añade el campo **URL Catastro** al resumen e intento de extracción robusta desde la respuesta del servicio.
 - **Payload bruto** y **Todos los campos devueltos por Catastro** quedan ocultos para usuarios normales y solo visibles en modo desarrollador.
+
+
+## Notas de compatibilidad
+
+- Desde la versión 18.0.1.0.6, `catastro_url` es un campo calculado no almacenado a partir del payload Catastro.
+- Se incluye un script de migración `migrations/18.0.1.0.6/pre-10-legacy-catastro-url.py` para crear la columna legacy si falta y evitar errores durante despliegues intermedios.

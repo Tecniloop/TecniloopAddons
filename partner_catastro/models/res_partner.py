@@ -1,4 +1,6 @@
-from odoo import fields, models
+import json
+
+from odoo import api, fields, models
 
 
 class ResPartner(models.Model):
@@ -13,7 +15,12 @@ class ResPartner(models.Model):
     ], string='Estado Catastro', default='empty', copy=False, readonly=True)
     catastro_error = fields.Text(string='Error Catastro', copy=False, readonly=True)
     catastro_raw_payload = fields.Text(string='Payload Catastro', copy=False, readonly=True)
-    catastro_url = fields.Char(string='URL Catastro', copy=False, readonly=True)
+    catastro_url = fields.Char(
+        string='URL Catastro',
+        compute='_compute_catastro_url',
+        readonly=True,
+        store=False,
+    )
 
     catastro_bi_type = fields.Char(string='Tipo de bien', copy=False, readonly=True)
     catastro_province = fields.Char(string='Provincia Catastro', copy=False, readonly=True)
@@ -57,6 +64,27 @@ class ResPartner(models.Model):
         copy=False,
     )
 
+    @api.depends('catastro_raw_payload')
+    def _compute_catastro_url(self):
+        service = self.env['partner.catastro.service']
+        for partner in self:
+            partner.catastro_url = False
+            raw_payload = partner.catastro_raw_payload
+            if not raw_payload:
+                continue
+            try:
+                data = json.loads(raw_payload)
+            except Exception:
+                continue
+
+            payload = data.get('payload') if isinstance(data, dict) else data
+            coords = data.get('coords') if isinstance(data, dict) else None
+            try:
+                summary = service.extract_summary(payload or {}, coords=coords or {})
+            except Exception:
+                summary = {}
+            partner.catastro_url = summary.get('catastro_url') or False
+
     def action_open_catastro_wizard(self):
         self.ensure_one()
         return {
@@ -91,7 +119,6 @@ class ResPartner(models.Model):
                 'payload': payload,
                 'coords': coords or {},
             }),
-            'catastro_url': summary.get('catastro_url'),
             'catastro_bi_type': summary.get('catastro_bi_type'),
             'catastro_province': summary.get('catastro_province'),
             'catastro_municipality': summary.get('catastro_municipality'),
