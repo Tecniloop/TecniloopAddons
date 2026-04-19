@@ -49,3 +49,9 @@ Puedes configurar:
 
 - Corregida la extracción de los campos de resumen de Catastro para respuestas JSON con estructuras variables o listas.
 - Corregida la detección de errores del servicio de coordenadas para no tratar `cuerr=0` como error.
+
+
+## Corrección 18.0.1.0.2
+
+- Soporte para la envoltura JSON real del Catastro (`consulta_dnprcResult` / `Consulta_CPMRCResult`).
+- Extracción de resumen y dirección tanto para detalle completo (18/20 posiciones) como para listas por finca (14 posiciones).

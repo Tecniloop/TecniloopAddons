@@ -171,6 +171,17 @@ class PartnerCatastroService(models.AbstractModel):
             'value': '' if value is None else str(value),
         })
 
+    def _unwrap_result_payload(self, data):
+        current = data
+        while isinstance(current, dict) and len(current) == 1:
+            key, value = next(iter(current.items()))
+            key_lower = str(key).lower()
+            if key_lower.endswith('result') and isinstance(value, dict):
+                current = value
+                continue
+            break
+        return current
+
     def _dig(self, data, *path, default=None):
         cur = data
         for key in path:
@@ -212,28 +223,67 @@ class PartnerCatastroService(models.AbstractModel):
                     return found
         return {}
 
+    def _find_first_list_item_dict(self, value, list_key):
+        if isinstance(value, dict):
+            candidate = value.get(list_key)
+            if isinstance(candidate, list) and candidate:
+                first = candidate[0]
+                if isinstance(first, dict):
+                    return first
+            if isinstance(candidate, dict):
+                return candidate
+            for child in value.values():
+                found = self._find_first_list_item_dict(child, list_key)
+                if found:
+                    return found
+        elif isinstance(value, list):
+            for item in value:
+                found = self._find_first_list_item_dict(item, list_key)
+                if found:
+                    return found
+        return {}
+
     def _extract_bi(self, payload):
-        return self._dig(payload, 'consulta_dnp', 'bico', 'bi', default={}) or {}
+        payload = self._unwrap_result_payload(payload)
+        bi = self._dig(payload, 'bico', 'bi', default=None)
+        if isinstance(bi, dict):
+            return bi
+        return self._find_first_dict_with_any_keys(payload, {'idbi', 'dt', 'debi', 'ldt'}) or {}
 
-    def _extract_address_dict(self, payload):
+    def _extract_rcdnp(self, payload):
+        payload = self._unwrap_result_payload(payload)
+        rcdnp = self._dig(payload, 'lrcdnp', 'rcdnp', default=None)
+        if isinstance(rcdnp, dict):
+            return rcdnp
+        return self._find_first_list_item_dict(payload, 'rcdnp') or {}
+
+    def _extract_main_record(self, payload):
         bi = self._extract_bi(payload)
+        if bi:
+            return {'record_type': 'bi', 'record': bi}
+        rcdnp = self._extract_rcdnp(payload)
+        if rcdnp:
+            return {'record_type': 'rcdnp', 'record': rcdnp}
+        payload = self._unwrap_result_payload(payload)
+        return {'record_type': 'payload', 'record': payload if isinstance(payload, dict) else {}}
 
+    def _extract_address_dict_from_record(self, record):
         for path in (
             ('dt', 'locs', 'lous', 'lourb'),
             ('dt', 'locs', 'lors', 'lourb'),
             ('dt', 'lourb'),
         ):
-            value = self._dig(bi, *path, default=None)
+            value = self._dig(record, *path, default=None)
             if isinstance(value, dict):
                 return value
             if isinstance(value, list) and value and isinstance(value[0], dict):
                 return value[0]
 
-        return self._find_first_dict_with_any_keys(bi, {'tv', 'nv', 'pnp', 'dp', 'bq', 'es', 'pt', 'pu'}) or {}
+        return self._find_first_dict_with_any_keys(record, {'tv', 'nv', 'pnp', 'dp', 'bq', 'es', 'pt', 'pu'}) or {}
 
     def _extract_geo_dict(self, coords):
+        coords = self._unwrap_result_payload(coords)
         for path in (
-            ('consulta_coordenadas', 'coordenadas', 'coord', 'geo'),
             ('coordenadas', 'coord', 'geo'),
             ('coord', 'geo'),
             ('geo',),
@@ -247,73 +297,127 @@ class PartnerCatastroService(models.AbstractModel):
         return self._find_first_dict_with_any_keys(coords, {'xcen', 'ycen', 'srs'}) or {}
 
     def extract_summary(self, payload, coords=None):
-        bi = self._extract_bi(payload)
-        address = self._extract_address_dict(payload)
+        payload = self._unwrap_result_payload(payload)
+        main = self._extract_main_record(payload)
+        record_type = main['record_type']
+        record = main['record'] or {}
+        address = self._extract_address_dict_from_record(record)
         geo = self._extract_geo_dict(coords or {}) if coords else {}
 
-        summary = {
-            'catastro_bi_type': self._first_value(bi, [
-                ('idbi', 'cn'),
-                ('cn',),
-            ]),
-            'catastro_province': self._first_value(bi, [
-                ('dt', 'np'),
-                ('np',),
-            ]),
-            'catastro_municipality': self._first_value(bi, [
-                ('dt', 'nm'),
-                ('nm',),
-            ]),
-            'catastro_street_type': self._first_value(address, [
-                ('dir', 'tv'),
-                ('tv',),
-            ]),
-            'catastro_street_name': self._first_value(address, [
-                ('dir', 'nv'),
-                ('nv',),
-                ('ldt',),
-            ]),
-            'catastro_street_number': self._first_value(address, [
-                ('dir', 'pnp'),
-                ('pnp',),
-            ]),
-            'catastro_block': self._first_value(address, [
-                ('loint', 'bq'),
-                ('bq',),
-            ]),
-            'catastro_stair': self._first_value(address, [
-                ('loint', 'es'),
-                ('es',),
-            ]),
-            'catastro_floor': self._first_value(address, [
-                ('loint', 'pt'),
-                ('pt',),
-            ]),
-            'catastro_door': self._first_value(address, [
-                ('loint', 'pu'),
-                ('pu',),
-            ]),
-            'catastro_zip': self._first_value(address, [
-                ('dp',),
-            ]),
-            'catastro_use': self._first_value(bi, [
-                ('debi', 'luso'),
-                ('luso',),
-            ]),
-            'catastro_surface': self._first_value(bi, [
-                ('debi', 'sfc'),
-                ('sfc',),
-                ('lcons', 'cons', 'dfcons', 'stl'),
-            ]),
-            'catastro_coefficient': self._first_value(bi, [
-                ('debi', 'cpt'),
-                ('cpt',),
-            ]),
-            'catastro_antiquity': self._first_value(bi, [
-                ('debi', 'ant'),
-                ('ant',),
-            ]),
-        }
+        if record_type == 'bi':
+            summary = {
+                'catastro_bi_type': self._first_value(record, [
+                    ('idbi', 'cn'),
+                    ('cn',),
+                ]),
+                'catastro_province': self._first_value(record, [
+                    ('dt', 'np'),
+                    ('np',),
+                ]),
+                'catastro_municipality': self._first_value(record, [
+                    ('dt', 'nm'),
+                    ('nm',),
+                ]),
+                'catastro_street_type': self._first_value(address, [
+                    ('dir', 'tv'),
+                    ('tv',),
+                ]),
+                'catastro_street_name': self._first_value(address, [
+                    ('dir', 'nv'),
+                    ('nv',),
+                    ('td',),
+                    ('ldt',),
+                ]),
+                'catastro_street_number': self._first_value(address, [
+                    ('dir', 'pnp'),
+                    ('pnp',),
+                ]),
+                'catastro_block': self._first_value(address, [
+                    ('loint', 'bq'),
+                    ('bq',),
+                ]),
+                'catastro_stair': self._first_value(address, [
+                    ('loint', 'es'),
+                    ('es',),
+                ]),
+                'catastro_floor': self._first_value(address, [
+                    ('loint', 'pt'),
+                    ('pt',),
+                ]),
+                'catastro_door': self._first_value(address, [
+                    ('loint', 'pu'),
+                    ('pu',),
+                ]),
+                'catastro_zip': self._first_value(address, [
+                    ('dp',),
+                ]),
+                'catastro_use': self._first_value(record, [
+                    ('debi', 'luso'),
+                    ('luso',),
+                ]),
+                'catastro_surface': self._first_value(record, [
+                    ('debi', 'sfc'),
+                    ('sfc',),
+                    ('lcons', 'cons', 'dfcons', 'stl'),
+                ]),
+                'catastro_coefficient': self._first_value(record, [
+                    ('debi', 'cpt'),
+                    ('cpt',),
+                ]),
+                'catastro_antiquity': self._first_value(record, [
+                    ('debi', 'ant'),
+                    ('ant',),
+                ]),
+            }
+        else:
+            summary = {
+                'catastro_bi_type': None,
+                'catastro_province': self._first_value(record, [
+                    ('dt', 'np'),
+                    ('np',),
+                ]),
+                'catastro_municipality': self._first_value(record, [
+                    ('dt', 'nm'),
+                    ('nm',),
+                ]),
+                'catastro_street_type': self._first_value(address, [
+                    ('dir', 'tv'),
+                    ('tv',),
+                ]),
+                'catastro_street_name': self._first_value(address, [
+                    ('dir', 'nv'),
+                    ('nv',),
+                    ('td',),
+                    ('ldt',),
+                ]),
+                'catastro_street_number': self._first_value(address, [
+                    ('dir', 'pnp'),
+                    ('pnp',),
+                ]),
+                'catastro_block': self._first_value(address, [
+                    ('loint', 'bq'),
+                    ('bq',),
+                ]),
+                'catastro_stair': self._first_value(address, [
+                    ('loint', 'es'),
+                    ('es',),
+                ]),
+                'catastro_floor': self._first_value(address, [
+                    ('loint', 'pt'),
+                    ('pt',),
+                ]),
+                'catastro_door': self._first_value(address, [
+                    ('loint', 'pu'),
+                    ('pu',),
+                ]),
+                'catastro_zip': self._first_value(address, [
+                    ('dp',),
+                ]),
+                'catastro_use': None,
+                'catastro_surface': None,
+                'catastro_coefficient': None,
+                'catastro_antiquity': None,
+            }
 
         if geo:
             summary.update({
