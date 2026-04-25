@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="prt_mail_messages.MessageReview">
+        <table
+            class="message"
+            t-att-style="table_class"
+            t-att-title="title"
+            t-ref="root"
+        >
+            <tbody>
+                <tr>
+                    <td class="message__avatar_block">
+                        <img
+                            class="rounded-circle message__avatar_size"
+                            t-att-src="avatar"
+                            alt="Avatar"
+                            t-att-title="state.record.author_display"
+                        />
+                    </td>
+                    <td class="message__content_block">
+                        <table class="message__content_block__table">
+                            <tbody>
+                                <tr>
+                                    <td id="author">
+                                        <strong
+                                            t-esc="state.record.author_display"
+                                            class="o_author_margin"
+                                        />
+                                        <span
+                                            id="subject"
+                                            t-esc="state.record.subject"
+                                        />
+                                    </td>
+                                    <td
+                                        id="date-container"
+                                        class="message__content_block__table_date"
+                                    >
+                                        <span
+                                            t-att-title="state.record.message_date"
+                                            id="date-text"
+                                            t-esc="state.record.message_date_display"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p
+                                            id="related-record"
+                                            class="message__content_block__table_ref"
+                                            t-if="state.record.record_ref"
+                                        >
+                                            <strong t-esc="state.record.model_name" /> -
+                                            <a
+                                            href="#"
+                                            t-on-click="openRecordReference"
+                                            t-esc="state.record.record_ref.displayName"
+                                        />
+                                        </p>
+                                    </td>
+                                    <td
+                                        id="notifications"
+                                        class="message__content_block__notification"
+                                    >
+                                        <i
+                                            class="fa fa-envelope notification_icon"
+                                            title="New message"
+                                            t-if="state.record.needaction"
+                                        />
+                                        <i
+                                            class="fa fa-star notification_icon"
+                                            title="Starred"
+                                            t-if="state.record.starred"
+                                        />
+                                        <i
+                                            class="fa fa-exclamation notification_icon"
+                                            title="Sending Error"
+                                            t-if="state.record.has_error"
+                                        />
+                                        <i
+                                            class="fa fa-edit notification_icon"
+                                            style="color:#1D8348;"
+                                            t-att-title="state.record.cx_edit_uid"
+                                            t-if="state.record.cx_edit_uid"
+                                        />
+                                        <i
+                                            class="fa fa-paperclip notification_icon"
+                                            title="Has attachments"
+                                            t-if="state.has_attachments"
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <b
+                            id='daleted-days'
+                            class='text-danger'
+                            t-esc="delete_alert"
+                            t-if="state.record.delete_date"
+                        />
+                        <p
+                            id="text-preview"
+                            style="color: #808080;"
+                            t-esc="state.record.preview"
+                        />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </t>
+
+</templates>

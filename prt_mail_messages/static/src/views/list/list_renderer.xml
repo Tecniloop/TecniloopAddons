@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t
+        t-name="prt_mail_messages.ListRenderer"
+        t-inherit="web.ListRenderer"
+        t-inherit-mode="primary"
+    >
+        <xpath expr="//t[@t-foreach='columns']" position="replace">
+            <th
+                t-att-class="'cursor-default opacity-trigger-hover w-print-auto w-100 o_list_message_header'"
+                data-tooltip-delay="1000"
+                tabindex="-1"
+            >Message</th>
+        </xpath>
+        <xpath expr="//tfoot/tr/t[@t-foreach='columns']" position="replace">
+            <td />
+        </xpath>
+    </t>
+
+    <t
+        t-name="prt_mail_messages.Message.ListRenderer.RecordRow"
+        t-inherit="web.ListRenderer.RecordRow"
+        t-inherit-mode="primary"
+    >
+        <xpath expr="//t[@t-foreach='getColumns(record)']" position="replace">
+            <td
+                class="o_data_cell cursor-pointer"
+                data-tooltip-delay="1000"
+                t-on-click="(ev) => this.props.openRecord(record)"
+                tabindex="-1"
+            >
+                <MessageReview record="record" note_color="note_color" />
+            </td>
+        </xpath>
+    </t>
+
+    <t
+        t-name="prt_mail_messages.Conversation.ListRenderer.RecordRow"
+        t-inherit="web.ListRenderer.RecordRow"
+        t-inherit-mode="primary"
+    >
+        <xpath expr="//t[@t-foreach='getColumns(record)']" position="replace">
+            <td
+                class="o_data_cell cursor-pointer"
+                data-tooltip-delay="1000"
+                t-on-click="(ev) => this.props.openRecord(record)"
+                tabindex="-1"
+            >
+                <ConversationReview record="record" />
+            </td>
+        </xpath>
+    </t>
+
+</templates>

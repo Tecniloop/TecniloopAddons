@@ -1,0 +1,1673 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* prt_mail_messages
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: prt_mail_messages
+#: model:res.groups,comment:prt_mail_messages.group_delete_any
+msgid ""
+"\n"
+"            Delete any message (must have DELETE access to record!)\n"
+"        "
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,comment:prt_mail_messages.group_delete
+msgid ""
+"\n"
+"            Delete own messages (must have DELETE access to record!)\n"
+"        "
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,comment:prt_mail_messages.group_move
+msgid ""
+"\n"
+"            Move any message (must have WRITE access to records!)\n"
+"        "
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/tools.py:0
+msgid "%(day)s %(month)s"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/conversation_review.esm.js:0
+msgid "%s (%s new)"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/conversation_review.esm.js:0
+msgid "%s message"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/conversation_review.esm.js:0
+msgid "%s messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.report,print_report_name:prt_mail_messages.action_report_mail_message_all
+msgid ""
+"'%s' % (object.subject or 'Report messages all fields')\n"
+"        "
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.report,print_report_name:prt_mail_messages.action_report_mail_message_only_body
+msgid ""
+"'%s' % (object.subject or 'Report messages body only')\n"
+"        "
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "<span>:</span>"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.report_mailmessage_template
+msgid "<strong>From:</strong>"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.report_mailmessage_template
+msgid "<strong>Partners:</strong>"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cx_message_assign_partner
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_message_move_form
+msgid "<strong>Pro Version</strong>"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_needaction
+msgid "Action Needed"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__active
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__active
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__active
+msgid "Active"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__activity_ids
+msgid "Activities"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__activity_state
+msgid "Activity State"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__activity_type_icon
+msgid "Activity Type Icon"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.report,name:prt_mail_messages.action_report_mail_message_all
+msgid "All fields"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_res_config_settings__allow_direct_messages_to_catchall
+msgid "Allow Direct Messages To Catchall"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "Apr"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Archive"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Archive message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Archive selected messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.act_window,name:prt_mail_messages.action_prt_mail_messages_archived
+#: model:ir.ui.menu,name:prt_mail_messages.prt_messages_archived
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_search
+msgid "Archived"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Are you sure you want to delete the selected messages?"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid ""
+"Are you sure you want to remove the selected messages completely from the "
+"system?"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Are you sure you want to restore the selected messages?"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Are you sure?"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cx_message_assign_partner
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Assign Author"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model,name:prt_mail_messages.model_cx_message_partner_assign_wiz
+msgid "Assign Partner to Messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_partner_assign_wiz__partner_id
+msgid "Assign To"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_compose_message__forward_ref
+msgid "Attach to record"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_attachment_count
+msgid "Attachment Count"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Attachments"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__attachment_count
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__attachment_count
+msgid "Attachments count"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "Aug"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__author_id
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_search
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_search
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_res_partner_view_form
+msgid "Author"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__author_allowed_id
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__author_allowed_id
+msgid "Author Allowed"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_search
+msgid "Author not detected"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/conversation_review.xml:0
+#: code:addons/prt_mail_messages/static/src/components/message_review.xml:0
+msgid "Avatar"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Background color for internal notes"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_res_config_settings__messages_easy_color_note
+msgid "Background color for internal notes in HTML format (e.g. #fbd78b)"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model,name:prt_mail_messages.model_base
+msgid "Base"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__mail_compose_message__signature_location__b
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__res_config_settings__message_signature_location__b
+msgid "Before quote"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_edit_wiz__body
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Body"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.report,name:prt_mail_messages.action_report_mail_message_only_body
+msgid "Body only"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_edit_wiz__can_edit
+msgid "Can Edit"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cx_message_assign_partner
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cx_message_edit_wiz_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_message_move_form
+msgid "Cancel"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Cetmix Mail Messages Easy"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.actions.act_window,help:prt_mail_messages.action_prt_mail_messages_contacts
+msgid "Click to add a contact in your address book."
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__mail_compose_message__wizard_mode__compose
+msgid "Compose New Message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model,name:prt_mail_messages.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Configure action"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_compose_message_view_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_message_move_form
+msgid "Configure referable"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:cx.model.reference,custom_name:prt_mail_messages.cx_model_reference_res_partner
+#: model:ir.model,name:prt_mail_messages.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Contact image"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.act_window,name:prt_mail_messages.action_prt_mail_messages_contacts
+#: model:ir.ui.menu,name:prt_mail_messages.prt_messages_contacts
+msgid "Contacts"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/conversation_review.xml:0
+#: model:cx.model.reference,custom_name:prt_mail_messages.cx_model_reference_cetmix_conversation
+#: model:ir.model,name:prt_mail_messages.model_cetmix_conversation
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__is_conversation
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_search
+msgid "Conversation"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Conversation will be deleted after messages are moved! Are you sure?"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.act_window,name:prt_mail_messages.action_conversations
+#: model:ir.ui.menu,name:prt_mail_messages.menu_conversations
+#: model:res.partner.category,name:prt_mail_messages.cetmix_conversations_partner_cat
+msgid "Conversations"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid ""
+"Copy message to other record. Original message text will be quoted and kept."
+" Followers of the other record will be notified!"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Count days"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__create_uid
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_edit_wiz__create_uid
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_partner_assign_wiz__create_uid
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_model_reference__create_uid
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__create_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_edit_wiz__create_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_partner_assign_wiz__create_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_model_reference__create_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_search
+msgid "Date"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "Dec"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Default Message Signature Location"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_res_config_settings__message_signature_location
+msgid "Default Signature Location"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Delete"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__lead_delete
+msgid "Delete Empty Leads"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__opp_delete
+msgid "Delete Empty Opportunities"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.module.category,name:prt_mail_messages.module_messages_easy_category_delete
+msgid "Delete Messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,name:prt_mail_messages.group_delete_any
+msgid "Delete any message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Delete completely"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Delete completely message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Delete message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,name:prt_mail_messages.group_delete
+msgid "Delete own messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Delete selected messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/message_review.esm.js:0
+msgid "Deleted ${this.state.record.deleted_days} days ago"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__deleted_days
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__deleted_days
+msgid "Deleted Days"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__delete_uid
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__delete_uid
+msgid "Deleted by"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/message_review.esm.js:0
+msgid "Deleted less than one day ago"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__delete_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__delete_date
+msgid "Deleted on"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__display_name
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_edit_wiz__display_name
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_partner_assign_wiz__display_name
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_model_reference__display_name
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Do not bounce messages sent directly to the 'catchall' address"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__prt_message_move_wiz__notify__0
+msgid "Do not notify"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_res_config_settings__mail_incoming_smart_notify
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid ""
+"Do not notify followers if they are already notified in the incoming email"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cx_message_edit_wiz_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Edit"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model,name:prt_mail_messages.model_cx_message_edit_wiz
+msgid "Edit Message or Note"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.module.category,name:prt_mail_messages.module_messages_easy_category_edit_msg
+msgid "Edit Messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.module.category,name:prt_mail_messages.module_messages_easy_category_edit_note
+msgid "Edit Notes"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,comment:prt_mail_messages.group_messages_edit_all
+#: model:res.groups,name:prt_mail_messages.group_messages_edit_all
+msgid "Edit any message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,comment:prt_mail_messages.group_notes_edit_all
+#: model:res.groups,name:prt_mail_messages.group_notes_edit_all
+msgid "Edit any note"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.act_window,name:prt_mail_messages.action_configure_cron
+msgid "Edit cron"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Edit message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,comment:prt_mail_messages.group_messages_edit_own
+#: model:res.groups,name:prt_mail_messages.group_messages_edit_own
+msgid "Edit own messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,comment:prt_mail_messages.group_notes_edit_own
+#: model:res.groups,name:prt_mail_messages.group_notes_edit_own
+msgid "Edit own notes"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__cx_edit_uid
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__cx_edit_uid
+msgid "Edited by"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+msgid "Edited by %(name)s %(date)s"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__cx_edit_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__cx_edit_date
+msgid "Edited on"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_partner_assign_wiz__email
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Email"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model,name:prt_mail_messages.model_mail_thread
+msgid "Email Thread"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model,name:prt_mail_messages.model_mail_compose_message
+msgid "Email composition wizard"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Empty Trash"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_res_config_settings__messages_easy_empty_trash
+msgid "Empty trash in (days)"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid ""
+"Error while sending message. Please check error log under \"Email\n"
+"                        Messages\" tab"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "Feb"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_follower_ids
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__ref_partner_ids
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__ref_partner_ids
+msgid "Followers"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_partner_ids
+msgid "Followers (Partners)"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_cetmix_conversation__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Forward"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__mail_compose_message__wizard_mode__forward
+msgid "Forward Message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_res_partner_view_search
+msgid "From Conversations"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/wizard/mail_compose_message.py:0
+msgid "Fwd:"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.act_window,name:prt_mail_messages.action_messages_config_settings
+#: model:ir.ui.menu,name:prt_mail_messages.menu_messages_general_settings
+msgid "General Settings"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_search
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_search
+msgid "Group By"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/message_review.xml:0
+msgid "Has attachments"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__is_participant
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_search
+msgid "I participate"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__id
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_edit_wiz__id
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_partner_assign_wiz__id
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_model_reference__id
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__id
+msgid "ID"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__activity_exception_icon
+msgid "Icon"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_cetmix_conversation__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_prt_message_move_wiz__lead_delete
+msgid ""
+"If all messages are moved from lead and there are no other messages left "
+"except for notifications lead will be deleted"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_prt_message_move_wiz__opp_delete
+msgid ""
+"If all messages are moved from opportunity and there are no other messages "
+"left except for notifications opportunity will be deleted"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid ""
+"If all messages are moved or deleted from Conversation it will be deleted"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_cetmix_conversation__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_cetmix_conversation__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/message_review.esm.js:0
+msgid "Internal Note"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_search
+msgid "Internal Notes"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__is_note
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__is_note
+msgid "Is Note"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "Jan"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Join"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "Jul"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "Jun"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_model_reference__custom_name
+msgid "Label"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__last_message_post
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_search
+msgid "Last Message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__last_message_by
+msgid "Last Message By"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__write_uid
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_edit_wiz__write_uid
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_partner_assign_wiz__write_uid
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_model_reference__write_uid
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__write_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_edit_wiz__write_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_partner_assign_wiz__write_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_model_reference__write_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__is_lead
+msgid "Lead"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Leave"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Leave Participant"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__prt_message_move_wiz__notify__1
+msgid "Log internal note"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+msgid "Lost Message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.module.category,name:prt_mail_messages.module_messages_easy_category_conversations
+msgid "Mail Conversations"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.module.category,description:prt_mail_messages.module_messages_easy_category
+#: model:ir.module.category,description:prt_mail_messages.module_messages_easy_category_delete
+#: model:ir.module.category,description:prt_mail_messages.module_messages_easy_category_edit_msg
+#: model:ir.module.category,description:prt_mail_messages.module_messages_easy_category_edit_note
+msgid "Manage Odoo Messages Easy"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "Mar"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Mark as Read"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Mark read"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Mark selected messages as read"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_partner_assign_wiz__same_email
+msgid "Match Email"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "May"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/message_review.esm.js:0
+#: code:addons/prt_mail_messages/static/src/views/list/list_renderer.xml:0
+#: model:ir.model,name:prt_mail_messages.model_mail_message
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_edit_wiz__message_id
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__author_display
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__author_display
+msgid "Message Author"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_count
+msgid "Message Count"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__message_date
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__message_date
+msgid "Message Date"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_date_display
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__message_date_display
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__message_date_display
+msgid "Message Date Display"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_has_error
+msgid "Message Delivery error"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_needaction_count
+msgid "Message Needaction Count"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_res_config_settings__message_quote_number
+msgid "Message Quote Number"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__record_ref
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__record_ref
+msgid "Message Record"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Message body preview length for List View, characters"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__mail_compose_message__signature_location__a
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__res_config_settings__message_signature_location__a
+msgid "Message bottom"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+msgid "Message has multiple recipients"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/res_config_settings.py:0
+msgid "Message quote number must be greater or equal than 0!"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+msgid "Message recipients undefined"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+#: model:ir.actions.act_window,name:prt_mail_messages.action_prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_ids
+#: model:ir.ui.menu,name:prt_mail_messages.prt_messages_messages
+#: model:ir.ui.menu,name:prt_mail_messages.prt_messages_root
+msgid "Messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.module.category,name:prt_mail_messages.module_messages_easy_category
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Messages Easy"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.server,name:prt_mail_messages.ir_cron_ptr_mail_messages_action_unlink_ir_actions_server
+msgid "Messages Easy: empty trash"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_res_partner__messages_from_count
+#: model:ir.model.fields,field_description:prt_mail_messages.field_res_users__messages_from_count
+msgid "Messages From"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_search
+msgid "Messages Only"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_res_partner__messages_to_count
+#: model:ir.model.fields,field_description:prt_mail_messages.field_res_users__messages_to_count
+msgid "Messages To"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__thread_messages_count
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__thread_messages_count
+msgid "Messages in thread"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid ""
+"Messages in trash will be deleted after this amount of days."
+"                                 If 0 messages will not be deleted "
+"automatically"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Mobile:"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_model_reference__ir_model_id
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__model_name
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__model_name
+msgid "Model"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.constraint,message:prt_mail_messages.constraint_cx_model_reference_model_unique
+msgid "Model name must be unique!"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Models to which messages can be moved"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__cx_edit_message
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__cx_edit_message
+msgid "Modified by"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.act_window,name:prt_mail_messages.conversation_move_multi
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_message_move_form
+msgid "Move"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Move Messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model,name:prt_mail_messages.model_prt_message_move_wiz
+msgid "Move Messages To Other Thread"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,name:prt_mail_messages.group_move
+msgid "Move any message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Move message from current to other record"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_message_move_form
+msgid "Move messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Move selected messages to another record"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__model_to
+msgid "Move to"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Move to models"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_message_partner_assign_wiz__name
+msgid "Name"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.act_window,name:prt_mail_messages.partner_send_email
+msgid "New Message"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+#: code:addons/prt_mail_messages/static/src/components/message_review.xml:0
+msgid "New message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__activity_summary
+msgid "Next Activity Summary"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__activity_type_id
+msgid "Next Activity Type"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/conversation_review.esm.js:0
+msgid "No messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__mail_compose_message__signature_location__n
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__res_config_settings__message_signature_location__n
+msgid "No signature"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cx_message_edit_wiz_form
+msgid "Not enough access rights to edit this message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_res_config_settings__messages_easy_color_note
+msgid "Note Background"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_prt_message_move_wiz__notify
+msgid "Notify"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_prt_message_move_wiz__notify
+msgid "Notify followers of destination record"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "Nov"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__message_has_error_counter
+msgid "Number of errors"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_cetmix_conversation__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_cetmix_conversation__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "Oct"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.actions.act_window,help:prt_mail_messages.action_prt_mail_messages_contacts
+msgid ""
+"Odoo helps you easily track all activities related to\n"
+"            a customer: discussions, history of business opportunities,\n"
+"            documents, etc."
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Open Thread"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__partner_ids
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Participants"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Phone:"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cx_message_assign_partner
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_message_move_form
+msgid "Please purchase"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid ""
+"Post new message to record. Original message text will be quoted. Record "
+"followers will be notified!"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Post new message to record. Record followers will be notified!"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Posted messages will be sent to all participants"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Preview length"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_search
+msgid "Private Inbox"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Quote"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__mail_compose_message__wizard_mode__quote
+msgid "Quote Message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model,name:prt_mail_messages.model_ir_qweb
+msgid "Qweb"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/wizard/mail_compose_message.py:0
+msgid "Re:"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_res_partner_view_form
+msgid "Recipient"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__partner_count
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__partner_count
+msgid "Recipients count"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__ref_partner_count
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__ref_partner_count
+msgid "Ref Partner Count"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model,name:prt_mail_messages.model_cx_model_reference
+msgid "Referable Models"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid "Referable models"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.act_window,name:prt_mail_messages.cx_model_reference_action
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cx_model_reference_form_view
+msgid "Referencable models"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.actions.act_window,help:prt_mail_messages.cx_model_reference_action
+msgid "Reference models for moving messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Remove selected messages completely from the system"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Reply"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__activity_user_id
+msgid "Responsible User"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Restore"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Restore message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Restore selected messages from trash"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cx_message_edit_wiz_form
+msgid "Save"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields.selection,name:prt_mail_messages.selection__prt_message_move_wiz__notify__2
+msgid "Send message"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/message_review.xml:0
+msgid "Sending Error"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_search
+msgid "Sent by Me"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/common.py:0
+msgid "Sep"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_model_reference__sequence
+msgid "Sequence"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_res_config_settings__message_signature_location
+msgid "Set default signature location"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.ui.menu,name:prt_mail_messages.prt_messages_settings
+msgid "Settings"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_mail__shared_inbox
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_message__shared_inbox
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_search
+msgid "Shared Inbox"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_cx_message_partner_assign_wiz__same_email
+msgid "Show Partners with same email address only"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,comment:prt_mail_messages.group_technical
+msgid "Show technical fields in mail messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_compose_message__signature_location
+msgid "Signature Location"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_res_config_settings__mail_incoming_smart_notify
+msgid "Smart Notification"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Star"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Star selected messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Star/Unstar"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-javascript
+#: code:addons/prt_mail_messages/static/src/components/message_review.xml:0
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_search
+msgid "Starred"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Started by"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_cetmix_conversation__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cetmix_conversation__name
+msgid "Subject"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+msgid "Subject..."
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Technical"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_cx_model_reference__model
+msgid "Technical Name"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/res_config_settings.py:0
+msgid "Test Preview length must be greater than 10!"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/tests/test_user_access_message.py:0
+msgid "Test message #1 for Conversation 1"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/tests/test_user_access_message.py:0
+msgid "Test message #1 for Conversation 2"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_res_config_settings__messages_easy_text_preview
+msgid "Text preview length"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_mail_mail__thread_messages_count
+#: model:ir.model.fields,help:prt_mail_messages.field_mail_message__thread_messages_count
+msgid "Total number of messages in thread"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.actions.act_window,name:prt_mail_messages.action_prt_mail_messages_trash
+#: model:ir.ui.menu,name:prt_mail_messages.prt_messages_trash
+msgid "Trash"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_cetmix_conversation__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Unarchive"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Unarchive message"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_list
+msgid "Unarchive selected messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_search
+msgid "Unread"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cetmix_conversation_search
+msgid "Unread Messages"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_mail_message_form
+msgid "Unstar"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.module.category,description:prt_mail_messages.module_messages_easy_category_conversations
+msgid "Use Conversations"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_mail_mail__shared_inbox
+#: model:ir.model.fields,help:prt_mail_messages.field_mail_message__shared_inbox
+msgid "Used for Shared Inbox filter only"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,comment:prt_mail_messages.group_conversation_own
+msgid "View Conversation participating in"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,name:prt_mail_messages.group_conversation_all
+msgid "View all Conversations"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,comment:prt_mail_messages.group_conversation_all
+msgid "View any Conversation"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,name:prt_mail_messages.group_conversation_own
+msgid "View own Conversation"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:res.groups,name:prt_mail_messages.group_technical
+msgid "View technical fields"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.res_config_settings_view_form
+msgid ""
+"When quoting a message that contains another quotes"
+"                                 trim message body and leave only this "
+"number of quotes.                                  Set '0' or leave blank to"
+" keep such messages untrimmed"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,help:prt_mail_messages.field_mail_compose_message__signature_location
+msgid "Whether to put signature before or after the quoted text."
+msgstr ""
+
+#. module: prt_mail_messages
+#: model:ir.model.fields,field_description:prt_mail_messages.field_mail_compose_message__wizard_mode
+msgid "Wizard Mode"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/tools.py:0
+msgid "Yesterday %s"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+msgid "You are not the message author"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+msgid "You are not the message recipient"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+msgid "You cannot delete messages!"
+msgstr ""
+
+#. module: prt_mail_messages
+#. odoo-python
+#: code:addons/prt_mail_messages/models/mail_message.py:0
+msgid ""
+"You cannot delete the following message\n"
+" Subject: %(subject)s \n"
+"\n"
+" Reason: %(reason)s"
+msgstr ""
+
+#. module: prt_mail_messages
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.cx_message_assign_partner
+#: model_terms:ir.ui.view,arch_db:prt_mail_messages.prt_message_move_form
+msgid "to use this feature"
+msgstr ""

@@ -1,0 +1,41 @@
+.message {
+    width: 100%;
+    border: none;
+}
+
+.message__avatar_block {
+    width: 1%;
+}
+
+.message__content_block {
+    width: 100%;
+    padding-right: 15px;
+}
+
+.message__content_block__table {
+    width: 100%;
+    border: none;
+}
+
+.message__content_block__table_date {
+    text-align: right;
+}
+
+.message__content_block__table_ref {
+    font-size: small;
+}
+
+.message__content_block__notification {
+    text-align: right;
+    width: 100%;
+}
+
+.notification_icon {
+    padding-right: 10px;
+}
+
+.message__avatar_size {
+    width: 64px;
+    padding: 10px;
+    border: none;
+}

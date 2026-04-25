@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-name="prt_mail_messages.ConversationReview">
+        <table class="o_conversation_table" title="Conversation">
+            <tbody>
+                <tr>
+                    <td class="o_conversation_avatar_cell">
+                        <img
+                            class="rounded-circle o_conversation_avatar"
+                            t-att-src="avatar"
+                            alt="Avatar"
+                            t-att-title="title"
+                            width="100"
+                            border="0"
+                        />
+                    </td>
+                    <td class="o_conversation_content_cell">
+                        <table class="o_conversation_table">
+                            <tbody>
+                                <tr>
+                                    <td id="author">
+                                        <strong
+                                            t-esc="author"
+                                            class="o_author_margin"
+                                        />
+                                        <span id="subject" t-esc="state.record.name" />
+                                    </td>
+                                    <td
+                                        t-if="state.record.last_message_post"
+                                        id="date"
+                                        style="text-align: right;"
+                                        t-att-title="state.record.message_date"
+                                        t-esc="state.record.message_date_display"
+                                    />
+                                    <td />
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p
+                                            id="notifications"
+                                            style="font-size: x-small;"
+                                        >
+                                            <strong t-esc="messageCount" />
+                                        </p>
+                                    </td>
+                                    <td id="participants" style="text-align: right;">
+                                        <t
+                                            t-foreach="state.participants"
+                                            t-as="partner"
+                                            t-key="partner.id"
+                                        >
+                                            <img
+                                                class="rounded-circle"
+                                                style="width:24px;max-height:24px;margin:2px;"
+                                                t-att-title="partner.name"
+                                                t-attf-src="/web/image/res.partner/#{partner.id}/image_128"
+                                            />
+                                        </t>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <img
+                            t-if="state.conversation_message"
+                            class="rounded-circle"
+                            style="width:16px;max-height:16px;margin:2px;"
+                            t-att-title="messageAuthor"
+                            t-att-src="messageAvatar"
+                        />
+                        <span
+                            id="text-preview"
+                            t-if="state.conversation_message"
+                            style="color:#808080;vertical-align:middle;"
+                            t-esc="state.conversation_message.preview"
+                        />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </t>
+</templates>

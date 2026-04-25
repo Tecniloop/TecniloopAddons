@@ -1,0 +1,24 @@
+.message_header_container {
+    display: flex;
+}
+
+.message_header__avatar {
+    height: 40px !important;
+    margin-right: 10px !important;
+}
+
+.message_header_info {
+    flex: auto;
+}
+
+.message_header__info_partners {
+    margin: 0;
+}
+
+.message_header__date {
+    align-self: end;
+}
+
+.message_header__separator {
+    margin-top: 0;
+}
