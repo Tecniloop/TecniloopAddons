@@ -1,5 +1,6 @@
 # Copyright 2021 Tecnativa - Jairo Llopis
-# Copyright 2025 Tecnativa - Víctor Martínez
+# Copyright 2025 Tecnativa - Victor Martinez
+# Copyright 2026 Tecnativa - Jaume Roiges Merlo
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 from datetime import datetime
 
@@ -28,10 +29,8 @@ class SurveyInvitationCase(BaseCommon):
 
     @freeze_time("2021-02-26 09:00:00", tick=True)
     def test_new_booking_survey_invitation(self):
-        """New booking gets invited to survey."""
-        # Clear mail queue to avoid pollution
+        """Manual action sends the booking-specific survey invitation."""
         self.env["mail.mail"].search([]).unlink()
-        # Make sure RB gets surveyed as expected
         booking_f = Form(self.env["resource.booking"])
         booking_f.type_id = self.rbt
         booking_f.partner_ids.add(self.partner)
@@ -40,23 +39,32 @@ class SurveyInvitationCase(BaseCommon):
         self.assertEqual(booking.state, "scheduled")
         self.assertFalse(booking.survey_user_input_id)
         self.assertEqual(len(self.env["mail.mail"].search([])), 1)
-        # Nope
+
         with self.assertRaises(UserError):
             booking.action_invite_survey()
         self.assertEqual(booking.state, "scheduled")
         self.assertFalse(booking.survey_user_input_id)
         self.assertEqual(len(self.env["mail.mail"].search([])), 1)
-        # After confirming, also nope: partner without email
+
         booking.action_confirm()
         with self.assertRaises(UserError):
             booking.action_invite_survey()
-        # Bad mail? Nope
+
         self.partner.email = "I'm tricking you"
         with self.assertRaises(UserError):
             booking.action_invite_survey()
-        # After setting good mail, yep
+
         self.partner.email = "donkey@banana.kong"
         booking.action_invite_survey()
         self.assertEqual(booking.state, "confirmed")
         self.assertTrue(booking.survey_user_input_id)
-        self.assertTrue(len(self.env["mail.mail"].search([])), 2)
+        mails = self.env["mail.mail"].search([], order="id")
+        self.assertEqual(len(mails), 2)
+        survey_mail = mails[-1]
+        self.assertIn(booking.survey_user_input_id.access_token, survey_mail.body_html)
+        self.assertEqual(
+            booking.survey_user_input_id.get_start_url(),
+            "/survey/start/%s?answer_token=%s"
+            % (self.survey.access_token, booking.survey_user_input_id.access_token),
+        )
+        self.assertIn(booking.survey_user_input_id.access_token, booking.message_ids[0].body)
