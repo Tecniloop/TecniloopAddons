@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+    Copyright (C) 2020 Cetmix OÜ
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU LESSER GENERAL PUBLIC LICENSE as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU LESSER GENERAL PUBLIC LICENSE for more details.
+
+    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<odoo>
+    <template id="report_mail_message_body_document">
+        <t t-set="o" t-value="o.with_context(lang=lang)" />
+        <div class="page">
+            <div id="oe_structure_before_container" class="oe_structure" />
+            <div class="container mt-1">
+                <i t-field="o.date" style="float: right;" />
+                <br />
+                <hr />
+                <p t-field="o.body" />
+                <hr />
+            </div>
+            <div id="oe_structure_after_container" class="oe_structure" />
+        </div>
+    </template>
+
+    <template id="report_mailmessage_body">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t
+                    t-set="lang"
+                    t-value="user.partner_id.lang or o.company_id.partner_id.lang"
+                />
+                <t
+                    t-call="prt_mail_messages.report_mail_message_body_document"
+                    t-lang="lang"
+                />
+            </t>
+        </t>
+    </template>
+
+    <template id="report_mailmessage_template">
+        <t t-set="o" t-value="o.with_context(lang=lang)" />
+        <div class="page">
+            <div id="oe_structure_start_page" class="oe_structure" />
+            <div class="container">
+                <h2 t-esc="o.subject" />
+                <div class="message_header_container">
+                    <div t-if="o.author_avatar">
+                        <img
+                            t-att-src="'data:image/*;base64,'+ o.author_avatar.decode()"
+                            class="oe_avatar message_header__avatar"
+                        />
+                    </div>
+                    <div class="message_header_info">
+                        <strong>From:</strong>
+                        <span class="m-0" t-field="o.author_id.name" />
+                        <div t-if="o.ref_partner_ids">
+                            <strong>Partners:</strong>
+                            <span
+                                class="message_header__info_partners"
+                                t-foreach="o.ref_partner_ids"
+                                t-as="partner"
+                            >
+                                <t t-esc="partner.email_formatted" />
+                                <t t-if="not partner_last">,</t>
+                            </span>
+                        </div>
+                    </div>
+                    <i t-field="o.date" class="message_header__date" />
+                </div>
+
+                <hr class="message_header__separator" />
+                <p t-field="o.body" />
+            </div>
+            <div id="oe_structure_end_page" class="oe_structure" />
+        </div>
+    </template>
+
+    <template id="report_mailmessage">
+        <t t-call="web.html_container">
+            <style />
+            <t t-foreach="docs" t-as="o">
+                <t
+                    t-set="lang"
+                    t-value="user.partner_id.lang or o.company_id.partner_id.lang"
+                />
+                <t
+                    t-call="prt_mail_messages.report_mailmessage_template"
+                    t-lang="lang"
+                />
+            </t>
+        </t>
+    </template>
+
+    <!--Reports -->
+    <record id="action_report_mail_message_all" model="ir.actions.report">
+        <field name="name">All fields</field>
+        <field name="model">mail.message</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">prt_mail_messages.report_mailmessage</field>
+        <field name="report_file">prt_mail_messages.report_mailmessage</field>
+        <field
+            name="print_report_name"
+        >'%s' % (object.subject or 'Report messages all fields')
+        </field>
+        <field name="binding_model_id" ref="model_mail_message" />
+        <field name="binding_type">report</field>
+        <field
+            name="paperformat_id"
+            ref="prt_mail_messages.paperformat_a4_mail_message_tn_portrait"
+        />
+    </record>
+    <record id="action_report_mail_message_only_body" model="ir.actions.report">
+        <field name="name">Body only</field>
+        <field name="model">mail.message</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">prt_mail_messages.report_mailmessage_body</field>
+        <field name="report_file">prt_mail_messages.report_mailmessage_body</field>
+        <field
+            name="print_report_name"
+        >'%s' % (object.subject or 'Report messages body only')
+        </field>
+        <field name="binding_model_id" ref="model_mail_message" />
+        <field name="binding_type">report</field>
+        <field
+            name="paperformat_id"
+            ref="prt_mail_messages.paperformat_a4_mail_message_tn_portrait"
+        />
+    </record>
+</odoo>

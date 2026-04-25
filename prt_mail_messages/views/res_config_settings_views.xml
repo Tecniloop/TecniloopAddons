@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+    Copyright (C) 2020 Cetmix OÜ
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU LESSER GENERAL PUBLIC LICENSE as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU LESSER GENERAL PUBLIC LICENSE for more details.
+
+    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<odoo>
+    <record id="action_configure_cron" model="ir.actions.act_window">
+        <field name="name">Edit cron</field>
+        <field name="res_model">ir.cron</field>
+        <field
+            name="res_id"
+            ref="prt_mail_messages.ir_cron_ptr_mail_messages_action_unlink"
+        />
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <form position="inside">
+                <app
+                    data-string="Messages Easy"
+                    string="Messages Easy"
+                    name="prt_mail_messages"
+                >
+                    <div id="prt_mail_messages">
+                        <block
+                            title="Cetmix Mail Messages Easy"
+                            name="prt_mail_messages"
+                        >
+                            <setting
+                                id="messages_easy_text_preview"
+                                help="Message body preview length for List View, characters"
+                            >
+                                <field
+                                    name="messages_easy_text_preview"
+                                    min="0"
+                                    placeholder="Preview length"
+                                />
+                            </setting>
+                            <setting
+                                id="messages_easy_color_note"
+                                help="Background color for internal notes"
+                            >
+                                <field name="messages_easy_color_note" widget="color" />
+                            </setting>
+                            <setting
+                                id="message_signature_location"
+                                help="Default Message Signature Location"
+                            >
+                                <field name="message_signature_location" />
+                            </setting>
+                            <setting
+                                id="messages_easy_empty_trash"
+                                help="
+                                Messages in trash will be deleted after this amount of days.
+                                If 0 messages will not be deleted automatically"
+                            >
+                                <field
+                                    name="messages_easy_empty_trash"
+                                    min="0"
+                                    placeholder="Count days"
+                                />
+                                <div class="mt8">
+                                    <button
+                                        name="%(action_configure_cron)d"
+                                        type="action"
+                                        string="Configure action"
+                                        class="oe_link"
+                                        icon="fa-arrow-right"
+                                    />
+                                </div>
+                            </setting>
+                            <setting
+                                id="mail_incoming_smart_notify"
+                                help="Do not notify followers if they are already notified in the incoming email"
+                            >
+                                <field name="mail_incoming_smart_notify" />
+                            </setting>
+                            <setting
+                                id="messages_easy_move_ir_model_ids"
+                                help="Models to which messages can be moved"
+                                string="Move to models"
+                            >
+                                <div class="mt8">
+                                    <button
+                                        name="%(prt_mail_messages.cx_model_reference_action)d"
+                                        type="action"
+                                        string="Referable models"
+                                        class="oe_link"
+                                        icon="fa-arrow-right"
+                                    />
+                                </div>
+                            </setting>
+                            <setting
+                                id="message_quote_number"
+                                help="
+                                When quoting a message that contains another quotes
+                                trim message body and leave only this number of quotes.
+
+                                Set '0' or leave blank to keep such messages untrimmed
+                                "
+                            >
+                                <field name="message_quote_number" />
+                            </setting>
+                            <setting
+                                id="allow_direct_messages_to_catchall"
+                                help="Do not bounce messages sent directly to the 'catchall' address"
+                            >
+                                <field name="allow_direct_messages_to_catchall" />
+                            </setting>
+                        </block>
+                    </div>
+                </app>
+            </form>
+        </field>
+    </record>
+
+    <!-- ## Action ## -->
+    <record id="action_messages_config_settings" model="ir.actions.act_window">
+        <field name="name">General Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="res_config_settings_view_form" />
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'prt_mail_messages'}</field>
+    </record>
+
+    <!-- ## Menu -->
+    <menuitem
+        id="menu_messages_general_settings"
+        name="General Settings"
+        parent="prt_messages_settings"
+        sequence="0"
+        action="action_messages_config_settings"
+        groups="base.group_system"
+    />
+</odoo>
