@@ -3,29 +3,50 @@
     <record id="res_config_settings_view_form" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.website.sale.search.brand.attribute</field>
         <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="website.res_config_settings_view_form"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//block[@id='website_info']" position="after">
-                <block title="Product Search" id="website_sale_search_brand_attribute">
-                    <setting string="Extra product search fields" help="Choose additional fields that website and shop search should match.">
-                        <div class="content-group">
-                            <field name="website_search_brand_name"/> Brand name<br/>
-                            <field name="website_search_brand_description"/> Brand description<br/>
-                            <field name="website_search_attribute_values"/> Attribute values<br/>
-                            <field name="website_search_attribute_names"/> Attribute names<br/>
-                            <field name="website_search_variant_attribute_values"/> Variant-level attribute values<br/>
-                            <field name="website_search_product_tags"/> Product tags<br/>
-                            <field name="website_search_website_categories"/> Website categories<br/>
-                            <field name="website_search_parent_website_categories"/> Parent website categories<br/>
-                        </div>
-                    </setting>
-                    <setting string="Only visible attributes" help="Ignore attributes hidden from the website when searching attributes.">
-                        <field name="website_search_visible_attributes_only"/>
-                    </setting>
-                    <setting string="Prioritize extra matches" help="Move products matching brand, attributes, tags or categories higher in shop result pages.">
-                        <field name="website_search_prioritize_extra_matches"/>
-                    </setting>
-                </block>
+            <!--
+                Keep this inheritance deliberately generic.
+                Some Odoo 18 SaaS/CloudPepper builds do not expose website.res_config_settings_view_form
+                with the same block ids as stock Odoo, so anchoring on //form avoids upgrade failures.
+            -->
+            <xpath expr="//form" position="inside">
+                <app string="Website Product Search" name="website_sale_search_brand_attribute">
+                    <block title="Extra product search fields" id="website_sale_search_brand_attribute_block">
+                        <setting string="Brand name" help="Match products by their brand name when searching the shop or website.">
+                            <field name="website_search_brand_name"/>
+                        </setting>
+                        <setting string="Brand description" help="Match products by brand description fields when available.">
+                            <field name="website_search_brand_description"/>
+                        </setting>
+                        <setting string="Attribute values" help="Match products by template attribute values, such as Red or XL.">
+                            <field name="website_search_attribute_values"/>
+                        </setting>
+                        <setting string="Attribute names" help="Match products by attribute names, such as Color or Size.">
+                            <field name="website_search_attribute_names"/>
+                        </setting>
+                        <setting string="Variant attribute values" help="Match products by variant-level attribute values when available.">
+                            <field name="website_search_variant_attribute_values"/>
+                        </setting>
+                        <setting string="Product tags" help="Match products by website product tags when the field exists.">
+                            <field name="website_search_product_tags"/>
+                        </setting>
+                        <setting string="Website categories" help="Match products by eCommerce website category names.">
+                            <field name="website_search_website_categories"/>
+                        </setting>
+                        <setting string="Parent website categories" help="Match products by parent eCommerce category names and child categories.">
+                            <field name="website_search_parent_website_categories"/>
+                        </setting>
+                    </block>
+                    <block title="Search behavior" id="website_sale_search_brand_attribute_behavior_block">
+                        <setting string="Only visible attributes" help="Ignore attributes hidden from the website when searching attributes, when the visibility field exists.">
+                            <field name="website_search_visible_attributes_only"/>
+                        </setting>
+                        <setting string="Prioritize extra matches" help="Move products matching brand, attributes, tags or categories higher in shop result pages.">
+                            <field name="website_search_prioritize_extra_matches"/>
+                        </setting>
+                    </block>
+                </app>
             </xpath>
         </field>
     </record>
