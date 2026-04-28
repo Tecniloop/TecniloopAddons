@@ -40,7 +40,7 @@ class WebsiteSale(WebsiteSaleController):
         if not website and len(args) >= 5:
             website = args[4]
 
-        if website and search and getattr(website, "search_prioritize_extra_matches", False):
+        if website and search and website._search_option_enabled("search_prioritize_extra_matches"):
             products = products.sorted(
                 key=lambda product: website._product_extra_search_score(product, search),
                 reverse=True,

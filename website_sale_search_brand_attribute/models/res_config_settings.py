@@ -8,32 +8,52 @@ class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
     website_search_brand_name = fields.Boolean(
-        related="website_id.search_brand_name", readonly=False
+        string="Search brand name",
+        default=True,
+        config_parameter="website_sale_search_brand_attribute.search_brand_name",
     )
     website_search_brand_description = fields.Boolean(
-        related="website_id.search_brand_description", readonly=False
+        string="Search brand description",
+        default=True,
+        config_parameter="website_sale_search_brand_attribute.search_brand_description",
     )
     website_search_attribute_values = fields.Boolean(
-        related="website_id.search_attribute_values", readonly=False
+        string="Search attribute values",
+        default=True,
+        config_parameter="website_sale_search_brand_attribute.search_attribute_values",
     )
     website_search_attribute_names = fields.Boolean(
-        related="website_id.search_attribute_names", readonly=False
+        string="Search attribute names",
+        default=True,
+        config_parameter="website_sale_search_brand_attribute.search_attribute_names",
     )
     website_search_variant_attribute_values = fields.Boolean(
-        related="website_id.search_variant_attribute_values", readonly=False
+        string="Search variant-level attribute values",
+        default=True,
+        config_parameter="website_sale_search_brand_attribute.search_variant_attribute_values",
     )
     website_search_product_tags = fields.Boolean(
-        related="website_id.search_product_tags", readonly=False
+        string="Search product tags",
+        default=True,
+        config_parameter="website_sale_search_brand_attribute.search_product_tags",
     )
     website_search_website_categories = fields.Boolean(
-        related="website_id.search_website_categories", readonly=False
+        string="Search website categories",
+        default=True,
+        config_parameter="website_sale_search_brand_attribute.search_website_categories",
     )
     website_search_parent_website_categories = fields.Boolean(
-        related="website_id.search_parent_website_categories", readonly=False
+        string="Search parent website categories",
+        default=True,
+        config_parameter="website_sale_search_brand_attribute.search_parent_website_categories",
     )
     website_search_visible_attributes_only = fields.Boolean(
-        related="website_id.search_visible_attributes_only", readonly=False
+        string="Only search visible attributes",
+        default=True,
+        config_parameter="website_sale_search_brand_attribute.search_visible_attributes_only",
     )
     website_search_prioritize_extra_matches = fields.Boolean(
-        related="website_id.search_prioritize_extra_matches", readonly=False
+        string="Prioritize extra matches",
+        default=True,
+        config_parameter="website_sale_search_brand_attribute.search_prioritize_extra_matches",
     )

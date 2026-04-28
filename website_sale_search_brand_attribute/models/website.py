@@ -1,7 +1,7 @@
 # Copyright 2026 APEN Solutions
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0.en.html).
 
-from odoo import fields, models
+from odoo import models
 from odoo.osv import expression
 from odoo.tools import escape_psql
 
@@ -9,24 +9,18 @@ from odoo.tools import escape_psql
 class Website(models.Model):
     _inherit = "website"
 
-    search_brand_name = fields.Boolean(default=True)
-    search_brand_description = fields.Boolean(default=True)
-    search_attribute_values = fields.Boolean(default=True)
-    search_attribute_names = fields.Boolean(default=True)
-    search_variant_attribute_values = fields.Boolean(default=True)
-    search_product_tags = fields.Boolean(default=True)
-    search_website_categories = fields.Boolean(default=True)
-    search_parent_website_categories = fields.Boolean(default=True)
-    search_visible_attributes_only = fields.Boolean(default=True)
-    search_prioritize_extra_matches = fields.Boolean(default=True)
+    _SEARCH_PARAM_PREFIX = "website_sale_search_brand_attribute."
+
+    def _search_option_enabled(self, key, default=True):
+        """Read addon search options without adding columns to website."""
+        value = self.env["ir.config_parameter"].sudo().get_param(
+            f"{self._SEARCH_PARAM_PREFIX}{key}",
+            "1" if default else "0",
+        )
+        return value not in (False, "0", "False", "false", "no", "None", "")
 
     def _search_has_path(self, model_name, path):
-        """Return whether a dotted ORM path exists from ``model_name``.
-
-        Domains are built dynamically because brand addons in the wild use
-        different models/field names. Checking paths before injecting them keeps
-        the module safe across forks of ``website_product_brands``.
-        """
+        """Return whether a dotted ORM path exists from ``model_name``."""
         if model_name not in self.env.registry:
             return False
         current_model = self.env[model_name]
@@ -53,9 +47,9 @@ class Website(models.Model):
             if field.comodel_name not in self.env.registry:
                 continue
             Brand = self.env[field.comodel_name]
-            if self.search_brand_name:
+            if self._search_option_enabled("search_brand_name"):
                 result += [f"{brand_field}.{fname}" for fname in name_fields if fname in Brand._fields]
-            if self.search_brand_description:
+            if self._search_option_enabled("search_brand_description"):
                 result += [
                     f"{brand_field}.{fname}"
                     for fname in description_fields
@@ -64,7 +58,7 @@ class Website(models.Model):
         return result
 
     def _search_attribute_visibility_domain(self, attr_path):
-        if not self.search_visible_attributes_only:
+        if not self._search_option_enabled("search_visible_attributes_only"):
             return []
         hidden_path = f"{attr_path}.visibility"
         if self._search_has_path("product.template", hidden_path):
@@ -72,12 +66,7 @@ class Website(models.Model):
         return []
 
     def _product_extra_search_subdomains(self, search_term):
-        """Return a list of valid extra-search subdomains for one token.
-
-        WebsiteSale._add_search_subdomains_hook must return a list of
-        independent domains. Core Odoo appends that list to the normal product
-        name/default-code/description search before OR-ing the items.
-        """
+        """Return a list of valid extra-search subdomains for one token."""
         self.ensure_one()
         word = escape_psql(search_term or "").strip()
         if not word:
@@ -89,7 +78,7 @@ class Website(models.Model):
             if self._search_has_path("product.template", field_path):
                 subdomains.append([(field_path, "ilike", word)])
 
-        if self.search_attribute_values and self._search_has_path(
+        if self._search_option_enabled("search_attribute_values") and self._search_has_path(
             "product.template", "attribute_line_ids.value_ids.name"
         ):
             subdomains.append(expression.AND([
@@ -97,7 +86,7 @@ class Website(models.Model):
                 [("attribute_line_ids.value_ids.name", "ilike", word)],
             ]))
 
-        if self.search_attribute_names and self._search_has_path(
+        if self._search_option_enabled("search_attribute_names") and self._search_has_path(
             "product.template", "attribute_line_ids.attribute_id.name"
         ):
             subdomains.append(expression.AND([
@@ -105,7 +94,7 @@ class Website(models.Model):
                 [("attribute_line_ids.attribute_id.name", "ilike", word)],
             ]))
 
-        if self.search_variant_attribute_values and self._search_has_path(
+        if self._search_option_enabled("search_variant_attribute_values") and self._search_has_path(
             "product.template",
             "product_variant_ids.product_template_attribute_value_ids.product_attribute_value_id.name",
         ):
@@ -116,7 +105,7 @@ class Website(models.Model):
                     word,
                 )
             ])
-            if self.search_attribute_names and self._search_has_path(
+            if self._search_option_enabled("search_attribute_names") and self._search_has_path(
                 "product.template",
                 "product_variant_ids.product_template_attribute_value_ids.attribute_id.name",
             ):
@@ -128,20 +117,20 @@ class Website(models.Model):
                     )
                 ])
 
-        if self.search_product_tags and self._search_has_path("product.template", "website_tag_ids.name"):
+        if self._search_option_enabled("search_product_tags") and self._search_has_path("product.template", "website_tag_ids.name"):
             subdomains.append([("website_tag_ids.name", "ilike", word)])
 
-        if self.search_website_categories and self._search_has_path(
+        if self._search_option_enabled("search_website_categories") and self._search_has_path(
             "product.template", "public_categ_ids.name"
         ):
             subdomains.append([("public_categ_ids.name", "ilike", word)])
 
-        if self.search_parent_website_categories and self._search_has_path(
+        if self._search_option_enabled("search_parent_website_categories") and self._search_has_path(
             "product.template", "public_categ_ids.parent_id.name"
         ):
             subdomains.append([("public_categ_ids.parent_id.name", "ilike", word)])
 
-        if self.search_parent_website_categories and "product.public.category" in self.env.registry:
+        if self._search_option_enabled("search_parent_website_categories") and "product.public.category" in self.env.registry:
             Category = self.env["product.public.category"]
             categories = Category.search([("name", "ilike", word)])
             if categories:
@@ -168,13 +157,9 @@ class Website(models.Model):
         return expression.AND(domains_by_word) if domains_by_word else []
 
     def _product_extra_search_score(self, product, search_term):
-        """Small Python-side rank used to prioritize configured extra matches.
-
-        This is intentionally conservative: it reorders only the product recordset
-        returned by Odoo, and does not alter access rules or the base shop domain.
-        """
+        """Small Python-side rank used to prioritize configured extra matches."""
         term = (search_term or "").lower().strip()
-        if not term or not self.search_prioritize_extra_matches:
+        if not term or not self._search_option_enabled("search_prioritize_extra_matches"):
             return 0
         words = [term] + [w for w in term.split() if w != term]
 
@@ -187,19 +172,19 @@ class Website(models.Model):
                     break
             if value:
                 chunks.append(" ".join(value.mapped("display_name")) if hasattr(value, "mapped") else str(value))
-        if self.search_attribute_values:
+        if self._search_option_enabled("search_attribute_values"):
             chunks += product.attribute_line_ids.mapped("value_ids.name")
-        if self.search_attribute_names:
+        if self._search_option_enabled("search_attribute_names"):
             chunks += product.attribute_line_ids.mapped("attribute_id.name")
-        if self.search_variant_attribute_values:
+        if self._search_option_enabled("search_variant_attribute_values"):
             chunks += product.product_variant_ids.mapped(
                 "product_template_attribute_value_ids.product_attribute_value_id.name"
             )
-        if self.search_product_tags and "website_tag_ids" in product._fields:
+        if self._search_option_enabled("search_product_tags") and "website_tag_ids" in product._fields:
             chunks += product.mapped("website_tag_ids.name")
-        if self.search_website_categories and "public_categ_ids" in product._fields:
+        if self._search_option_enabled("search_website_categories") and "public_categ_ids" in product._fields:
             chunks += product.mapped("public_categ_ids.name")
-        if self.search_parent_website_categories and "public_categ_ids" in product._fields:
+        if self._search_option_enabled("search_parent_website_categories") and "public_categ_ids" in product._fields:
             chunks += product.mapped("public_categ_ids.parent_id.name")
 
         haystack = " ".join(chunks).lower()
