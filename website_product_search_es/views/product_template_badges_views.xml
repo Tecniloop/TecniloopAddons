@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="es_product_template_tree_badges" model="ir.ui.view">
+        <field name="name">product.template.tree.es.badges</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="product_tag_ids" position="after">
+                <field name="es_is_bestseller" optional="show"/>
+                <field name="es_is_trending" optional="show"/>
+                <field name="es_is_new_arrival" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="es_product_template_search_badges" model="ir.ui.view">
+        <field name="name">product.template.search.es.badges</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <filter name="favorites" position="before">
+                <separator/>
+                <filter string="Bestseller" name="es_bestseller" domain="[('es_is_bestseller', '=', True)]"/>
+                <filter string="Trending" name="es_trending" domain="[('es_is_trending', '=', True)]"/>
+                <filter string="New Arrival" name="es_new_arrival" domain="[('es_is_new_arrival', '=', True)]"/>
+            </filter>
+        </field>
+    </record>
+
+    <record id="es_product_template_kanban_badges" model="ir.ui.view">
+        <field name="name">product.template.kanban.es.badges</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_kanban_view"/>
+        <field name="arch" type="xml">
+            <field name="activity_state" position="after">
+                <field name="es_badges_enabled"/>
+                <field name="es_is_bestseller"/>
+                <field name="es_is_trending"/>
+                <field name="es_is_new_arrival"/>
+            </field>
+            <xpath expr="//field[@name='product_properties']" position="before">
+                <div class="mt-1" t-if="record.es_badges_enabled.raw_value and (record.es_is_bestseller.raw_value or record.es_is_trending.raw_value or record.es_is_new_arrival.raw_value)">
+                    <span class="badge text-bg-warning me-1" t-if="record.es_is_bestseller.raw_value">Bestseller</span>
+                    <span class="badge text-bg-info me-1" t-if="record.es_is_trending.raw_value">Trending</span>
+                    <span class="badge text-bg-success me-1" t-if="record.es_is_new_arrival.raw_value &amp;&amp; !(record.es_is_bestseller.raw_value &amp;&amp; record.es_is_trending.raw_value)">New</span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

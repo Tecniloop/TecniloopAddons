@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_es_index_log,access_es_index_log,model_es_index_log,base.group_system,1,1,1,1
+access_es_search_log,access_es_search_log,model_es_search_log,base.group_system,1,1,1,1
+access_es_search_click,access_es_search_click,model_es_search_click,base.group_system,1,1,1,1
+access_es_index_config,access_es_index_config,model_es_index_config,base.group_system,1,1,1,1
+access_es_index_config_line,access_es_index_config_line,model_es_index_config_line,base.group_system,1,1,1,1

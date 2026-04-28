@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_es_search" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.es.search</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="Elasticsearch Search" name="website_product_search_es" groups="base.group_system">
+                    <block title="Elasticsearch Search" name="es_search_block">
+                        <setting id="es_search_enabled_setting" string="Enable Elasticsearch Search" help="Enable Elasticsearch search for website products.">
+                            <field name="es_search_enabled"/>
+                        </setting>
+
+                        <setting id="es_search_url_setting" string="Elasticsearch URL" help="Example: http://localhost:9200">
+                            <field name="es_search_url" placeholder="http://localhost:9200"/>
+                        </setting>
+
+                        <setting id="es_search_index_setting" string="Elasticsearch Index">
+                            <field name="es_search_index" placeholder="odoo_products"/>
+                            <div class="mt8">
+                                <button
+                                    type="object"
+                                    name="action_test_es_connection"
+                                    class="btn btn-secondary"
+                                    string="Test Elasticsearch Connection"
+                                />
+                            </div>
+                        </setting>
+
+                        <setting id="es_hide_oos_setting" string="Hide Out Of Stock">
+                            <field name="es_hide_out_of_stock"/>
+                        </setting>
+
+                        <setting id="es_autocomplete_setting" string="Enable Autocomplete">
+                            <field name="es_enable_autocomplete"/>
+                        </setting>
+
+                        <setting id="es_trending_setting" string="Enable Trending Searches">
+                            <field name="es_enable_trending"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

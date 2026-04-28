@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="es_badges_on_shop_cards" inherit_id="website_sale.products_item" name="ES Badges on Shop Product Card">
+        <xpath expr="//*[hasclass('o_wsale_products_item_title')]" position="after">
+            <div class="es-store-badges" t-if="product.es_badges_enabled and (product.es_is_bestseller or product.es_is_trending or product.es_is_new_arrival)">
+                <span class="es-badge-chip es-badge-bestseller" t-if="product.es_is_bestseller">Bestseller</span>
+                <span class="es-badge-chip es-badge-trending" t-if="product.es_is_trending">Trending</span>
+                <span class="es-badge-chip es-badge-new" t-if="product.es_is_new_arrival and not (product.es_is_bestseller and product.es_is_trending)">New Arrival</span>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="es_badges_on_product_page" inherit_id="website_sale.product" name="ES Badges on Product Page">
+        <xpath expr="//h1[@itemprop='name']" position="after">
+            <div class="es-store-badges mt-2" t-if="product.es_badges_enabled and (product.es_is_bestseller or product.es_is_trending or product.es_is_new_arrival)">
+                <span class="es-badge-chip es-badge-bestseller" t-if="product.es_is_bestseller">Bestseller</span>
+                <span class="es-badge-chip es-badge-trending" t-if="product.es_is_trending">Trending</span>
+                <span class="es-badge-chip es-badge-new" t-if="product.es_is_new_arrival and not (product.es_is_bestseller and product.es_is_trending)">New Arrival</span>
+            </div>
+        </xpath>
+    </template>
+</odoo>
