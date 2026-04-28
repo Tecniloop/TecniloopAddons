@@ -3,8 +3,8 @@
 
 {
     "name": "Website Sale - Search by brand and attribute values",
-    "summary": "Extends /shop search to match product brand and variant attribute values",
-    "version": "18.0.1.0.1",
+    "summary": "Extends website product search across brands, attributes, tags and categories",
+    "version": "18.0.2.0.0",
     "category": "Website/Website",
     "author": "APEN Solutions, OCA",
     "website": "",
@@ -14,7 +14,9 @@
         "product",
         "website_product_brands",
     ],
-    "data": [],
+    "data": [
+        "views/res_config_settings_views.xml",
+    ],
     "installable": True,
     "application": False,
     "maintainers": ["jaume"],

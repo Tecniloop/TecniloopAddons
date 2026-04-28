@@ -13,7 +13,7 @@ class TestProductTemplateSearchFields(SavepointCase):
         super().setUpClass()
         cls.website = cls.env.ref("website.default_website")
 
-    def test_search_get_detail_uses_search_extra_for_brand_and_attribute_values(self):
+    def test_search_get_detail_uses_search_extra_for_extra_fields(self):
         options = {
             "displayImage": False,
             "displayDescription": False,
@@ -30,13 +30,18 @@ class TestProductTemplateSearchFields(SavepointCase):
         )
 
         # Avoid Many2one dot-path in search_fields to stay compatible with trigram fuzzy enumeration
-        # (pg_trgm path doesn't join Many2one tables).
+        # (pg_trgm path does not join arbitrary Many2one tables reliably).
         self.assertNotIn("product_brand_id.name", detail.get("search_fields", []))
 
         search_extra = detail.get("search_extra")
         self.assertTrue(callable(search_extra))
 
-        domain = search_extra(self.env, "Acme")
-        # Domain is an expression list; ensure our criteria are present.
-        self.assertIn(("product_brand_id.name", "ilike", "Acme"), domain)
+        domain = search_extra(self.env, "Acme Red")
         self.assertIn(("attribute_line_ids.value_ids.name", "ilike", "Acme"), domain)
+        self.assertIn(("attribute_line_ids.attribute_id.name", "ilike", "Red"), domain)
+        self.assertIn(("product_brand_id.name", "ilike", "Acme"), domain)
+
+    def test_settings_can_disable_extra_field(self):
+        self.website.search_attribute_values = False
+        domain = self.website._product_extra_search_domain("Red")
+        self.assertNotIn(("attribute_line_ids.value_ids.name", "ilike", "Red"), domain)
