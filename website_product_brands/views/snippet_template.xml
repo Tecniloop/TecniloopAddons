@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <data>
+        <template id="website_product_brands_carousal">
+            <div class="oe_structure oe_empty">
+                <div class="container" t-if="brands">
+                    <div class="product_brand_span">
+                        <h4>Shop by Brand</h4>
+                    </div>
+                    <div class="owl-carousel owl-theme">
+                        <t t-foreach="brands" t-as="brand">
+                            <t t-set="is_active" t-value="brand_id == brand.id" />
+                            <div class="carousel-item active" t-if="brand.website_published">
+                                <a t-attf-href="/shop/brand/#{ slug(brand) }">
+                                    <div t-attf-class="p-container #{'active' if is_active else ''}">
+                                        <div class="brand-img">
+                                            <span class="product_brand_span w-100 h-100" alt="brand"
+                                                t-field="brand.image"
+                                                t-options="{'widget': 'image', 'class': 'd-block w-100' }" />
+                                        </div>
+                                        <div class="brand_name">
+                                            <p t-esc="brand.name" />
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="product_carousel_snippets_template" name="Website Product Brand Carousal">
+            <section class="mb-2 mt-2 website_product_brands_carousal"></section>
+        </template>
+
+        <template id="brand_snippets" inherit_id="website.snippets" name="Website Product Brand">
+            <xpath expr="//snippets[@id='snippet_groups']" position="inside">
+                <t snippet-group="products" string="Product Brands Carousal"
+                    t-snippet="website_product_brands.product_carousel_snippets_template"
+                    t-thumbnail="/website/static/src/img/snippets_thumbs/s_dynamic_products.svg" />
+            </xpath>
+        </template>
+    </data>
+</odoo>

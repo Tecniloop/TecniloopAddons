@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<odoo>
+    <data>
+<!-- 
+        <template id="inherited_website_sale_cart_website_product_brands_wk"
+            name="website product brand" inherit_id="website_sale.product" active="True">
+            <xpath expr="//div[hasclass('js_main_product')]" position="after">
+                <t t-if="product.product_brand_id">
+                    <hr />
+                    <b>Brand :<span t-field="product.product_brand_id" class="text-muted ms-2" /></b>
+                </t>
+            </xpath>
+        </template> -->
+
+        <template id="inherit_website_sale_o_wsale_offcanvas"
+            inherit_id="website_sale.o_wsale_offcanvas">
+            <xpath expr="//form[@t-if='opt_wsale_attributes or opt_wsale_attributes_top']/t"
+                position="after">
+                <div class="accordion-item">
+                    <h2 id="o_wsale_offcanvas_orderby_header" class="accordion-header mb-0">
+                        <button
+                            class="o_wsale_offcanvas_title accordion-button border-top rounded-0 collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#o_wsale_offcanvas_brands"
+                            aria-expanded="false"
+                            aria-controls="o_wsale_offcanvas_brands">
+                            <b>Brands</b>
+                        </button>
+                    </h2>
+                    <div id="o_wsale_offcanvas_brands"
+                        class="accordion-collapse collapse"
+                        aria-labelledby="o_wsale_offcanvas_orderby_header">
+                        <div class="accordion-body pt-0">
+                            <div class="list-group list-group-flush">
+                                <a t-foreach="brand_rec" t-as="b" role="menuitem">
+                                    <label>
+                                        <input type="checkbox" name="attrib_brand"
+                                            class="form-check-input"
+                                            t-att-id="'%s-%s' % (b.id,b.id)"
+                                            t-att-value="'%s-%s' % (b.id,b.id)"
+                                            t-att-checked="'checked' if b.id in brand_set else None" />
+                                        <span style="font-weight: normal" t-field="b.name" />
+                                    </label>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="wk_horizontal_brands" name="Brand list" inherit_id="website_sale.products"
+            active="True">
+            <xpath expr="//div[hasclass('products_pager')]" position="after">
+                <div class="horizontal_category">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <center>
+                                <ul class="list-inline nav nav-pills justify-content-center">
+                                    <t t-set="wk_brands"
+                                        t-value="brand_set and website.get_wk_brands(brand_set)" />
+                                    <li class="horizontal_category_unlink_list">
+                                        <ul class="list-inline nav nav-pills justify-content-center"
+                                            t-if='wk_brands'>
+                                            <t t-foreach="wk_brands" t-as="b">
+                                                <li
+                                                    t-att-class="'active mr8 mb8' if b.id == int(brand or 0) else ' mr8 mb8'">
+                                                    <a href="/shop" class="btn btn-primary wk_brand"
+                                                        t-att-data-wk_brand='b.id'>
+                                                        <t t-esc="b.name" />
+                                                        <i class="fa fa-trash"></i>
+                                                    </a>
+                                                </li>
+                                            </t>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="products_attributes" inherit_id="website_sale.products_attributes"
+            name="Product Brand's Filters" active="True" customize_show="True">
+            <xpath expr="//form//input[@name='search']" position="after">
+                <div class="mb-3" t-if="brand_rec">
+                        <h6 class="mb-3">
+                            <button
+                                class="accordion-button px-0 bg-transparent shadow-none"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                t-attf-data-bs-target="#o_wsale_brands"
+                                t-attf-aria-controls="o_wsale_brands"
+                                aria-expanded="true">
+                                <b>Marcas</b>
+                            </button>
+                        </h6>
+                        <select id="attrib_brand" name="attrib_brand" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todas</option>
+                        <t t-foreach="brand_rec" t-as="b">
+                            <option t-att-value="b.id" t-att-selected="'selected' if b.id in brand_set else None">
+                                <t t-esc="b.name"/>
+                            </option>
+                        </t>
+                        </select>
+                </div>
+            </xpath>
+        </template>
+
+        <!-- <template id="inherited_products_description_website_product_brands"
+            inherit_id="website_sale.products_description" active="True">
+            <xpath expr="//div[hasclass('oe_subdescription')]" position="inside">
+                <b t-if='product.product_brand_id'>Brand:<span t-field="product.product_brand_id"
+                        class="text-muted ms-1" /></b>
+            </xpath>
+        </template> -->
+
+        <template id="wk_brands_page" name="Brands Page">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Product Brands</t>
+                <div id="wrap" class="js_sale">
+                    <div class="oe_structure" id="oe_structure_website_sale_products_1" />
+                    <div class="container oe_website_sale">
+                        <div
+                            class="products_pager form-inline flex-md-nowrap justify-content-between justify-content-md-center">
+                            <div class="mt-2 ml-md-2" style="padding:0px">
+                                <form t-att-action="keep('/shop/brands', search=0)" method="get"
+                                    t-att-class="search_class">
+                                    <t t-call="website.website_search_box" />
+                                </form>
+                            </div>
+                        </div>
+                        <div class="row o_wsale_products_main_row">
+                            <div id="products_grid" t-attf-class="col">
+                                <div t-if="bins" class="o_wsale_products_grid_table_wrapper">
+                                    <div class="row">
+                                        <t t-foreach="bins" t-as="tr_brands">
+                                            <t t-foreach="tr_brands" t-as="td_brands">
+                                                <t t-if="td_brands">
+                                                    <t t-set="wk_brand"
+                                                        t-value="td_brands['product']" />
+                                                    <div
+                                                        t-att-colspan="td_brands['x'] != 1 and td_brands['x']"
+                                                        t-att-rowspan="td_brands['y'] != 1 and td_brands['y']"
+                                                        t-attf-class="oe_product col-lg-3 col-md-6 col-sm-12">
+                                                        <div
+                                                            t-attf-class="o_wsale_product_grid_wrapper o_wsale_product_grid_wrapper_#{td_brands['x']}_#{td_brands['y']}">
+                                                            <t
+                                                                t-call="website_product_brands.wk_brands_item">
+                                                                <t t-set="product_image_big"
+                                                                    t-value="td_brands['x'] + td_brands['y'] &gt; 2" />
+                                                            </t>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </div>
+                                <t t-else="">
+                                    <div class="text-center text-muted">
+                                        <t t-if="not search">
+                                            <h3 class="mt8">No Brand defined</h3>
+                                            <p t-if="category">No Brand defined in category "<strong
+                                                    t-esc="category.display_name" />".</p>
+                                        </t>
+                                        <t t-else="">
+                                            <h3 class="mt8">No results</h3>
+                                            <p>No results for "<strong t-esc='search' />".</p>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="products_pager form-inline justify-content-center mt-3">
+                            <t t-call="website.pager">
+                                <t t-set="_classes">mt-2 ms-md-2 justify-content-center</t>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="oe_structure mb32" id="oe_structure_website_sale_products_2" />
+                </div>
+            </t>
+        </template>
+
+        <template id="wk_brands_item" name="brands  card">
+            <form class="card oe_product_cart">
+                <div class="card-body p-1 oe_product_image">
+                    <a class="oe_product_image_link d-block position-relative"
+                        t-att-href="keep('/product/brand/%s' % wk_brand.id, page=(pager['page']['num'] if pager['page']['num']&gt;1 else None))">
+                        <span
+                            class="oe_product_image_img_wrapper d-flex h-100 justify-content-center align-items-center">
+                            <img t-attf-src="/web/image/wk.product.brand/#{wk_brand.id}/image"
+                                class="img h-100 w-100" />
+                        </span>
+                    </a>
+                </div>
+                <div class="card-body p-0 text-center o_wsale_product_information">
+                    <div class="p-2 o_wsale_product_information_text">
+                        <h6 class="o_wsale_products_item_title">
+                            <a
+                                t-att-href="keep('/product/brand/%s' % wk_brand.id, page=(pager['page']['num'] if pager['page']['num']&gt;1 else None), search=None)"
+                                t-att-content="wk_brand.name" t-field="wk_brand.name" />
+                        </h6>
+                        <div class="product_price" itemprop="offers" itemscope="itemscope"
+                            itemtype="http://schema.org/Offer">
+                            <span t-esc="wk_brand.total_products" /> Products </div>
+                        <p>Country of Origin: <t t-out="wk_brand.country_of_origin" /></p>
+                        <div class="brand_description" itemprop="offers" itemscope="itemscope"
+                            itemtype="http://schema.org/Offer" />
+                    </div>
+                    <div class="o_wsale_product_btn" />
+                </div>
+            </form>
+        </template>
+
+
+        <template id="wk_product_brand_page" name="Product brand Page">
+            <t t-call="website.layout">
+                <t t-set="additional_title">
+                    <t t-esc="wk_brand.name" />
+                </t>
+                <div id="wrap" class="js_sale">
+                    <div class="oe_structure" id="oe_structure_website_sale_products_1" />
+                    <div style="height: 200px;">
+                        <div class="carousel-inner">
+                            <t t-set="brand_banner" t-value="wk_brand.sudo().brand_banner" />
+                            <t t-if="brand_banner">
+                                <div class="item oe_img_bg oe_custom_bg active"
+                                    t-attf-style="width: 100%;height: -webkit-fill-available;background-size:cover; height:320px;">
+                                    <div class="carousel-item oe_img_bg oe_custom_bg active"
+                                        t-attf-style="background-image: url('/web/image/wk.product.brand/#{wk_brand.id}/brand_banner');width: 100%;height: 320px;background-size:100% 320px;"></div>
+                                </div>
+                            </t>
+                            <t t-if="not brand_banner">
+                                <div class="item oe_img_bg oe_custom_bg active mt-md-0 mt-5"
+                                    t-attf-style="background-image: url('/website_product_brands/static/description/dummy-banner.png');width: 100%;height: 320px;background-size:100% 320px;background-position: center top; background-repeat: no-repeat;"></div>
+                            </t>
+                        </div>
+                    </div>
+                    <div style="display: inline-block;float: right;margin: 15px; position:relative;">
+                        <button class="btn btn-secondary" data-bs-toggle="modal"
+                            data-bs-target=".bd-example-modal-lg">More Information</button>
+                    </div>
+                    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+                        aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg container">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 style="color:#8B8B8B;">Brand Information</h1>
+                                </div>
+                                <div class="description col-md-12 mx-3">
+                                    <span t-if="wk_brand.description" t-out="wk_brand.description" />
+                                    <br />
+                                    <br />
+                                    <span>Total <t t-esc="wk_brand.total_products" /> Products are
+                                        available. </span>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Ok</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='container'>
+                        <div class="col-md-12 mp_seller_desc" id=""
+                            style="padding-top:15px;padding-bottom:15px;">
+                            <div class="row">
+                                <div class="col-sm-3 hidden-xs hidden-sm mp_seller_desc_profile">
+                                    <div class="item oe_img_bg oe_custom_bg wk-brand-image border"
+                                        t-attf-style="background-image: url('/web/image/wk.product.brand/#{wk_brand.id}/image');background-size:contain;background-color:white;background-position:center;top: 270px;left:80px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container oe_website_sale">
+                        <div class="">
+                            <div class="container"
+                                style="margin-top:12%; padding-top:2%; padding-bottom:2%;">
+                                <span>
+                                    <h1 class="wk_product_name">
+                                        <t t-out="wk_brand.name" />
+                                    </h1>
+                                </span>
+                                <br />
+                                <div class="row">
+                                    <div class="wk_product_count col-lg-3 col-sm-6" style="">
+                                        <p>All Products</p>
+                                        <div class="border p-2 wk_product_count_1"
+                                            t-if="wk_brand.total_products">
+                                            <t t-esc="wk_brand.total_products" /> Products</div>
+                                        <br />
+                                        <p>Country of Origin: <br /><t t-out="country_origin" /></p>
+
+                                    </div>
+                                    <div
+                                        class="products_pager col-lg-8 d-flex align-items-center flex-md-nowrap justify-content-start mb-4"
+                                        style="">
+                                        <div class="mt-2 me-2" style="padding:0px">
+                                            <form
+                                                t-att-action="keep('/product/brand/%s' % wk_brand.id, search=0)"
+                                                method="get" t-att-class="search_class">
+                                                <t t-call="website.website_search_box" />
+                                            </form>
+                                        </div>
+                                        <t t-call="website_sale.pricelist_list">
+                                            <t t-set="_classes">mt-2 me-2</t>
+                                        </t>
+                                    </div>
+                                </div>
+
+                                <div class="row o_wsale_products_main_row">
+                                    <div t-if="hasLeftColumn" id="products_grid_before"
+                                        class="col-lg-3 pb-2" style="" />
+                                    <div id="products_grid"
+                                        t-attf-class="col #{'o_wsale_layout_list' if layout_mode == 'list' else ''}">
+                                        <t t-if="brand_product">
+                                            <t t-if="category">
+                                                <t t-set='editor_msg'>Drag building blocks here to
+                                                    customize the header for "<t
+                                                        t-esc='category.name' />" category.</t>
+                                                <div class="mb16" id="category_header"
+                                                    t-att-data-editor-message="editor_msg"
+                                                    t-field="category.website_description" />
+                                            </t>
+                                            <div t-if="bins"
+                                                class="o_wsale_products_grid_table_wrapper row">
+                                                <t t-foreach="bins" t-as="tr_product">
+                                                    <t t-foreach="tr_product" t-as="td_product">
+                                                        <t t-if="td_product">
+                                                            <div
+                                                                class="oe_product col-lg-3 col-md-6 col-sm-12">
+                                                                <div
+                                                                    t-attf-class="o_wsale_product_grid_wrapper o_wsale_product_grid_wrapper_#{td_product['x']}_#{td_product['y']}">
+                                                                    <t
+                                                                        t-call="website_sale.products_item">
+                                                                        <t t-set="products"
+                                                                            t-value="td_product['product'].product_brand_id.products" />
+                                                                        <t
+                                                                            t-set="product_template_id"
+                                                                            t-value="td_product['product'].id" />
+                                                                        <t t-set="product"
+                                                                            t-value="td_product['product']" />
+                                                                    </t>
+                                                                </div>
+                                                            </div>
+                                                        </t>
+                                                        <td t-else="" />
+                                                    </t>
+                                                </t>
+                                            </div>
+                                        </t>
+                                        <t t-else="">
+                                            <div class="text-center text-muted">
+                                                <t t-if="not search">
+                                                    <h3 class="mt8">No product defined</h3>
+                                                    <p t-if="category">No product defined in
+                                                        category "<strong
+                                                            t-esc="category.display_name" />".</p>
+                                                </t>
+                                                <t t-else="">
+                                                    <h3 class="mt8">No results</h3>
+                                                    <p>No results for "<strong t-esc='search' />"<t
+                                                            t-if="category"> in category "<strong
+                                                                t-esc="category.display_name" />"</t>
+                                                        .</p>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div class="products_pager form-inline justify-content-center mt-3">
+                                    <t t-call="website.pager">
+                                        <t t-set="_classes">mt-2 ms-md-2 justify-content-center</t>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="oe_structure mb32" id="oe_structure_website_sale_products_2" />
+                </div>
+            </t>
+        </template>
+
+        <template id="products_categories" inherit_id="website_product_brands.wk_product_brand_page"
+            active="False" customize_show="True" name="eCommerce Categories">
+            <xpath expr="//div[@id='products_grid_before']" position="before">
+                <t t-set="hasLeftColumn" t-value="True" />
+            </xpath>
+            <xpath expr="//div[@id='products_grid_before']" position="inside">
+                <button type="button" class="btn btn-link d-lg-none"
+                    data-target="#wsale_products_categories_collapse" data-toggle="collapse">
+                    Show categories
+                </button>
+                <div class="collapse d-lg-block" id="wsale_products_categories_collapse">
+                    <ul class="nav nav-pills flex-column mb-2">
+                        <li class="nav-item">
+                            <a t-att-href="keep('/product/brand/%s' % wk_brand.id, category=0)"
+                                t-attf-class="nav-link #{'' if category else 'active'} o_not_editable">All
+                                Products</a>
+                        </li>
+                        <t t-foreach="categories" t-as="c">
+                            <t t-call="website_sale.categories_recursive" />
+                        </t>
+                    </ul>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="brand_shop_now" inherit_id="website_product_brands.wk_brands_item"
+            active="False" customize_show="True" name="Shop Now Button">
+            <xpath expr="//div[hasclass('o_wsale_product_btn')]" position="after">
+                <a t-att-href="keep('/product/brand/%s' % wk_brand.id)" class="btn btn-success mb-2"
+                    title="View Brand Products">
+                    <span>Shop Now</span>
+                </a>
+            </xpath>
+        </template>
+
+        <template id="brand_description" inherit_id="website_product_brands.wk_brands_item"
+            active="False" customize_show="True" name="Brand Description">
+            <xpath expr="//div[hasclass('brand_description')]" position="after">
+                <t t-if="wk_brand.description">
+                    <span t-esc="wk_brand.description[:20]" />
+                    <a t-if="len(wk_brand.description) > 20" type="button" class="text-info"
+                        data-bs-toggle="modal" data-bs-target=".bd-example-modal-lg">.... Read more</a>
+
+                    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog"
+                        aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg container">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <span class="display-4" style="color:#8B8B8B;">Brand Information</span>
+                                </div>
+                                <div class="description col-md-12">
+                                    <span t-if="wk_brand.description" t-esc="wk_brand.description" />
+                                    <br />
+                                    <br />
+                                    <span>Total <t t-esc="wk_brand.total_products" /> Products are
+                                        available. </span>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-dismiss="modal">Ok</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </xpath>
+        </template>
+
+        <template id="add_grid_or_list_option"
+            inherit_id="website_product_brands.wk_product_brand_page" active="True"
+            customize_show="True" name="Grid or List button">
+            <xpath expr="//div[hasclass('products_pager')]/t[@t-call][last()]" position="after">
+                <t t-set="_activeClasses">border-primary</t>
+                <div t-attf-class="o_wsale_apply_layout btn-group ms-3 {{_classes}}"
+                    t-att-data-active-classes="_activeClasses">
+                    <input type="radio" class="btn-check" name="wsale_products_layout"
+                        id="o_wsale_apply_grid"
+                        t-att-checked="'checked' if layout_mode != 'list' else None" value="grid" />
+                    <label
+                        t-attf-class="btn btn-{{navClass}} #{_activeClasses if layout_mode != 'list' else None} o_wsale_apply_grid"
+                        title="Grid" for="o_wsale_apply_grid">
+                        <i class="fa fa-th-large" />
+                    </label>
+                    <input type="radio" class="btn-check" name="wsale_products_layout"
+                        id="o_wsale_apply_list"
+                        t-att-checked="'checked' if layout_mode == 'list' else None" value="list" />
+                    <label
+                        t-attf-class="btn btn-{{navClass}} #{_activeClasses if layout_mode == 'list' else None} o_wsale_apply_list"
+                        title="List" for="o_wsale_apply_list">
+                        <i class="oi oi-view-list" />
+                    </label>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="sort" inherit_id="website_product_brands.wk_product_brand_page"
+            customize_show="True" name="Show Sort by">
+            <xpath expr="//div[hasclass('products_pager')]/t[@t-call][last()]" position="after">
+                <t t-set="list_price_desc_label">Catalog price: High to Low</t>
+                <t t-set="list_price_asc_label">Catalog price: Low to High</t>
+                <t t-set="name_asc_label">Name: A to Z</t>
+                <t t-set="name_desc_label">Name: Z to A</t>
+                <t t-set="website_sale_sortable"
+                    t-value="[
+                    (list_price_desc_label, 'list_price desc'),
+                    (list_price_asc_label, 'list_price asc'),
+                    (name_asc_label, 'name asc'),
+                    (name_desc_label, 'name desc')
+                ]" />
+                <t t-set="isSortingBy"
+                    t-value="[sort for sort in website_sale_sortable if sort[1]==request.params.get('order', '')]" />
+                <div
+                    t-attf-class="o_sortby_dropdown dropdown dropdown_sorty_by ms-lg-3 {{_classes}}">
+                    <small class="d-none d-lg-inline text-muted">Sort By:</small>
+                    <a role="button" href="#" t-attf-class="dropdown-toggle btn btn-{{navClass}}"
+                        data-bs-toggle="dropdown">
+                        <span class="d-none d-lg-inline">
+                            <t t-if="isSortingBy" t-out="isSortingBy[0][0]" />
+                            <span t-else="1" t-field="website.shop_default_sort" />
+                        </span>
+                        <i class="fa fa-sort-amount-asc d-lg-none" />
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end" role="menu">
+                        <t t-foreach="website_sale_sortable" t-as="sortby">
+                            <a role="menuitem" rel="noindex,nofollow"
+                                t-att-href="keep('/product/brand/%s' % wk_brand.id, order=sortby[1])"
+                                class="dropdown-item">
+                                <span t-out="sortby[0]" />
+                            </a>
+                        </t>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="products_attribute" inherit_id="website_product_brands.wk_product_brand_page"
+            customize_show="True" name="Product Attribute's Filters">
+            <xpath expr="//div[@id='products_grid_before']" position="before">
+                <t t-set="hasLeftColumn" t-value="True" />
+            </xpath>
+            <xpath expr="//div[@id='products_grid_before']" position="inside">
+                <button type="button" class="btn btn-link btn-light d-lg-none w-100 p-0"
+                    data-bs-target="#wsale_products_attributes_collapse" data-bs-toggle="collapse">
+                    Show options
+                </button>
+                <div class="collapse d-lg-block" id="wsale_products_attributes_collapse">
+                    <form class="js_attributes mb-2" method="get">
+                        <input t-if="category" type="hidden" name="category"
+                            t-att-value="category.id" />
+                        <input type="hidden" name="search" t-att-value="search" />
+                        <ul class="nav nav-pills flex-column">
+                            <t t-foreach="attributes" t-as="a">
+                                <li t-if="a.value_ids and len(a.value_ids) &gt; 1" class="nav-item">
+                                    <div>
+                                        <strong t-field="a.name" />
+                                    </div>
+                                    <t t-if="a.display_type == 'select'">
+                                        <select class="form-control" name="attrib">
+                                            <option value="" />
+                                            <t t-foreach="a.value_ids" t-as="v">
+                                                <option t-att-value="'%s-%s' % (a.id,v.id)"
+                                                    t-esc="v.name"
+                                                    t-att-selected="v.id in attrib_set" />
+                                            </t>
+                                        </select>
+                                    </t>
+                                    <t t-if="a.display_type == 'radio'">
+                                        <ul class="nav nav-pills flex-column">
+                                            <t t-foreach="a.value_ids" t-as="v">
+                                                <li class="nav-item">
+                                                    <label style=""
+                                                        t-attf-class="nav-link#{' active' if v.id in attrib_set else ''}">
+                                                        <input type="checkbox" name="attrib"
+                                                            t-att-value="'%s-%s' % (a.id,v.id)"
+                                                            t-att-checked="'checked' if v.id in attrib_set else None" />
+                                                        <span style="font-weight: normal"
+                                                            t-field="v.name" />
+                                                    </label>
+                                                </li>
+                                            </t>
+                                        </ul>
+                                    </t>
+                                    <t t-if="a.display_type == 'color'">
+                                        <t t-foreach="a.value_ids" t-as="v">
+                                            <label
+                                                t-attf-style="background-color:#{v.html_color or v.name}"
+                                                t-attf-class="css_attribute_color #{'active' if v.id in attrib_set else ''}">
+                                                <input type="checkbox" name="attrib"
+                                                    t-att-value="'%s-%s' % (a.id,v.id)"
+                                                    t-att-checked="'checked' if v.id in attrib_set else None"
+                                                    t-att-title="v.name" />
+                                            </label>
+                                        </t>
+                                    </t>
+                                </li>
+                            </t>
+                        </ul>
+                    </form>
+                </div>
+            </xpath>
+        </template>
+
+        <!-- Brand collapsable -->
+        <template id="products_attributes_brand_filter" inherit_id="website_sale.products_attributes">
+            <xpath expr="//div[@id='wsale_products_attributes_collapse']" position="attributes">
+                <attribute name="t-if">attributes or all_tags or brand_rec</attribute>
+            </xpath>
+            <xpath expr="//div[@t-if='attrib_values or tags']/a" position="attributes">
+                <attribute name="t-att-href">keep('/shop' + ('/category/' + slug(category)) if category else None, attribute_value=0, tags=0, attrib_brand=0, wk_brand=0)</attribute>
+            </xpath>
+            <xpath expr="//div[@t-if='attrib_values or tags']" position="attributes">
+                <attribute name="t-if">attrib_values or tags or brand_set</attribute>
+            </xpath>
+        </template>
+
+    </data>
+</odoo>

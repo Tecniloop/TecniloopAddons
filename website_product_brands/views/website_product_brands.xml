@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) -->
+<!-- See LICENSE file for full copyright and licensing details. -->
+<odoo>
+
+    <record id="wk_inherited_product_template_website_product_brand" model="ir.ui.view">
+        <field name="name">Product Brands </field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='list_price_uom']" position="after">
+                <label for="product_brand_id" class="mt-1" />
+                <div name="brands">
+                    <field name="product_brand_id" class="oe_inline" />
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_brand_search_view" model="ir.ui.view">
+        <field name="name">Product Brand Search</field>
+        <field name="model">wk.product.brand</field>
+        <field name="arch" type="xml">
+            <search string="Search Report">
+                <filter string="Published" name="published"
+                    domain="[('website_published', '=', True)]" />
+            </search>
+        </field>
+    </record>
+
+    <record id="product_brand_kanban_view" model="ir.ui.view">
+        <field name="name">wk.product.brand.kanban</field>
+        <field name="model">wk.product.brand</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="id" />
+                <field name="image" />
+                <field name="name" />
+                <field name="total_products" />
+                <field name="sequence" widget="handle"/>
+                <templates>
+                    <t t-name="card" class="flex-row">
+                        <aside>
+                            <field
+                                name="image"
+                                widget="image"
+                                alt="Brand"
+                                options="{'img_class': 'w-100 object-fit-contain'}" />
+                        </aside>
+                        <a type="delete"
+                            style="position: absolute; right: 15px; padding: 4px; display: inline-block">
+                            <i title='Delete' class="fa fa-close" style="font-size:20px"></i>
+                        </a>
+                        <main class="ps-2 justify-content-center">
+                            <div class="mb-1">
+                                <div class="d-flex mb-0 h5">
+                                    <field name="name"/>
+                                </div>
+                                <span>
+                                    Products: <field name="total_products"></field>
+                                </span>
+                            </div>
+                        </main>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="product_public_category_form_view" model="ir.ui.view">
+        <field name="name">wk.product.brand.form</field>
+        <field name="model">wk.product.brand</field>
+        <field name="arch" type="xml">
+            <form string="Product Brands">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="website_publish_button" type="object"
+                            icon="fa-globe">
+                            <field name="website_published" widget="website_button" />
+                        </button>
+                    </div>
+                    <field name="image" widget='image' class="oe_avatar" />
+                    <div class="oe_title">
+                        <label class="oe_edit_only" for="name" string="Brand Name" />
+                        <h1>
+                            <field name="name" placeholder="Brand Name" />
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="website_id" />
+                            <field name="sequence" />
+                        </group>
+                        <group>
+                            <field name="country_of_origin" />
+                            <field name="total_products" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Products">
+                            <separator string="Add/Remove Products of this Brand" />
+                            <group col="4">
+                                <field name="products" domain="[('product_brand_id','=',False)]"
+                                    widget="many2many_tags" options="{'not_delete': True}"
+                                    colspan="4" nolabel="1">
+                                </field>
+                            </group>
+                        </page>
+                        <page string="Description">
+                            <separator string="Description" />
+                            <group col="2">
+                                <field name="description" />
+                            </group>
+                            <separator string="Banner" />
+                            <group>
+                                <div>
+                                    <field name="brand_banner" class="mp_shop_image" widget="image"
+                                        options='{"size": [825, 250]}' />
+                                </div>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="product_public_category_tree_view" model="ir.ui.view">
+        <field name="name">wk.product.brand.tree</field>
+        <field name="model">wk.product.brand</field>
+        <field name="arch" type="xml">
+            <list string="Product  Brands">
+                <field name="sequence" widget="handle" />
+                <field name="name" />
+            </list>
+        </field>
+    </record>
+
+    <record id="wk_website_product_brand_action" model="ir.actions.act_window">
+        <field name="name">Product Brands Configuration</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">wk.product.brand</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="view_id" eval="False" />
+        <field name="context">{'search_default_published': 1}</field>
+        <field name="search_view_id" ref="product_brand_search_view" />
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to define a new Brands.
+            </p>
+        </field>
+    </record>
+
+    <record id="inherit_product_template_search_view" model="ir.ui.view">
+        <field name="name">product.template.search</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view" />
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="product_brand_id" filter_domain="[('product_brand_id', '=', self)]" />
+                <field name="product_brand_id" string="Product Brands" />
+                <group string="Group BY">
+                    <filter string="Brands" name="group_product_brand_filter"
+                        icon="terp-accessories-archiver-minus"
+                        context="{'group_by':'product_brand_id'}" />
+                </group>
+            </field>
+        </field>
+    </record>
+
+    <record id="product_product_brand_action_tree" model="ir.actions.act_window">
+        <field name="name">Product Variants</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">list,form,kanban</field>
+        <field name="context">
+            {'product_brand_id':active_id,'search_default_product_brand_id':active_id}</field>
+    </record>
+
+    <menuitem id="menu_product_brand_root_menu"
+        parent="website.menu_website_configuration"
+        sequence="13"
+        name="Product Brands" />
+
+    <menuitem id="menu_product_brand_config"
+        parent="menu_product_brand_root_menu"
+        sequence="2"
+        name="All Brands"
+        action="wk_website_product_brand_action" />
+
+</odoo>
