@@ -1,0 +1,22 @@
+.web_matrix {
+//     display: block;
+    overflow-x: auto;
+    margin-left: auto;
+    margin-right: auto;
+
+    tbody {
+        display: revert !important;
+        width: none !important;
+    }
+
+    tr {
+        display: revert !important;
+        width: none !important;
+        flex-wrap: revert !important;
+    }
+
+    td {
+        display: revert !important;
+        width: auto !important;
+    }
+}

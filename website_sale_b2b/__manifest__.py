@@ -1,0 +1,35 @@
+{
+    'name': 'eCommerce Business B2B - Variant Grid Entry',
+    'category': 'Website/Website',
+    'sequence': 50,
+    "author": "SoftMuch",
+    'summary': 'Give your ecommerce the possibility of making B2B (business to business) sales in a much more agile way.',
+    'version': '18.0',
+    'description': "Give your ecommerce the possibility of making B2B (business to business) sales in a much more agile way.",
+    'images': ['static/description/main_picture.png'],
+    'depends': ['base', 'website_sale', 'sale_product_matrix'],
+    'data': [
+        'views/product_pricelist.xml',
+        'views/web_matrix_template.xml',
+        'views/web_templates.xml',
+    ],
+    'assets': {
+        'web.assets_frontend': [
+            'website_sale_b2b/static/**/*',
+        ],
+    },
+    'tags': [
+        'Website',
+        'eCommerce',
+        'Variants',
+        'B2B',
+        'Business',
+        'Grid',
+        'Grid view',
+    ],
+    'installable': True,
+    'application': True,
+    'price': 145,
+    'currency': 'EUR',
+    'license': 'OPL-1',
+}

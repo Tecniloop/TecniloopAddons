@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="matrix">
+        <t t-set="grid" t-value="order.get_web_matrix(product)"/>
+        <t t-set="attribute_exclusions" t-value="product._get_attribute_exclusions(parent_combination, parent_name)"/>
+        <div style="max-width:60rem; max-height:100%; overflow:auto;" class="container_web_matrix">
+            <table class="web_matrix table table-striped oe_cart">
+                <thead>
+                    <tr>
+                        <th t-foreach="grid['header']" t-as="column_header" class="o_grid_title_header text-center">
+                            <span t-esc="column_header['name']"/>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="grid['matrix']" t-as="row">
+                        <t t-foreach="row" t-as="cell">
+                            <td t-if="cell.get('name', False)" class="text-left">
+                                <strong t-esc="cell['name']"/>
+                            </td>
+                            <td t-else="" class="text-center">
+                                <div t-if="cell['is_possible_combination']" class="js_product js_main_product">
+                                    <div>
+                                        <span class="oe_price badge text-bg-secondary" t-esc="cell['price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+                                    </div>
+                                    <div id="o_wsale_cta_wrapper" t-if="not cell['free_qty'] or cell['free_qty'] > 0" class="js_matrix_inputs input-group mt-2">
+                                        <!-- Values required for the base JS -->
+                                        <ul class="d-none" t-att-data-attribute_exclusions="json.dumps(attribute_exclusions)"/>
+                                        <input type="hidden" class="d-none product_template_id" t-att-value="product.id"/>
+                                        <input type="hidden" class="d-none product_id" t-att-value="cell['variant_id']"/>
+                                        <input type="hidden" name="add_qty" class="d-none" t-attf-value="{{cell['qty']}}"/>
+
+                                        <div class="o_attribute_inputs">
+                                            <t t-foreach="cell['ptav_ids']" t-as="ptav_id">
+                                                <input type="radio" class="js_variant_change d-none" t-att-value="ptav_id"/>
+                                            </t>
+                                        </div>
+                                        <input type="number"
+                                               class="js_matrix_input js_quantity w-100"
+                                               t-attf-value="{{int(cell['qty'])}}"
+                                               min="0"
+                                               t-att-max="cell['free_qty'] if cell['free_qty'] else ''"
+                                               t-att-data-product-tmpl-id="cell['product_id']"
+                                               t-att-data-product-id="cell['variant_id']"
+                                               t-att-data-ptav-ids="cell['ptav_ids']"
+                                               t-att-data-is_custom="cell['is_custom']"
+                                               t-att-data-value_id="cell['value_id']"
+                                               t-att-data-value_name="cell['value_name']"
+                                        />
+                                    </div>
+                                    <div t-else="">
+                                        <br/>
+                                        <span class="px-3 py-2 badge badge-pill badge-warning js_matrix_input o_matrix_cell o_matrix_text_muted o_matrix_nocontent_container">
+                                              Out of stock
+                                        </span>
+                                    </div>
+                                </div>
+                                <t t-else="">
+                                    <br/>
+                                    <span class="px-3 py-2 badge badge-pill badge-warning o_matrix_cell o_matrix_text_muted o_matrix_nocontent_container">Not available</span>
+                                </t>
+                            </td>
+                        </t>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <div class="row">
+            <div class="col_custom_input col-8"/>
+            <div class="col_custom_button col-4 mt-1"/>
+        </div>
+    </template>
+
+    <template id="matrix_modal" name="Optional Products">
+        <t t-call="website_sale_b2b.matrix" />
+    </template>
+</odoo>
