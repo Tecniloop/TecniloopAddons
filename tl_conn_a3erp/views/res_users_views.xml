@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Form view for "model" -->
+        <record id="view_users_simple_form_inherit" model="ir.ui.view">
+            <field name="name">res.users.simplified.form</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_simple_form" />
+            <field name="arch" type="xml">                
+                <field name="mobile" position="after">
+                        <field name="cod_rep_a3" help="Codigo del representante en a3ERP. Campo que se informa manual por el Administrador."/>
+                        <field name="cod_persona_a3" help="Codigo de la Persona en a3ERP. Campo que se informa manual por el Administrador."/>                    
+                </field>                
+            </field>
+        </record>
+        
+        <!-- Form view for "model" -->
+        <record id="view_users_form_inherit" model="ir.ui.view">
+            <field name="name">res.users.form</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form" />
+            <field name="arch" type="xml">                
+                <field name="login" position="after">
+                    <label for="cod_rep_a3" string="Codigo Representante a3ERP"/>
+                    <field name="cod_rep_a3" help="Codigo del representante en a3ERP. Campo que se informa manual por el Administrador."/>
+                    <label for="cod_persona_a3" string="Codigo Persona a3ERP"/>
+                    <field name="cod_persona_a3" help="Codigo de la Persona en a3ERP. Campo que se informa manual por el Administrador."/>
+                </field>                
+            </field>
+        </record>        
+        
+    </data>
+</odoo>

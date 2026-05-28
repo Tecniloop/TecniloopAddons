@@ -1,0 +1,84 @@
+<odoo>
+    <data noupdate="1">
+        <!-- SCHEDULED ACTION PARA PROCESAR LOGS DE CARACTERISTICAS-->
+        <record id="ir_cron_proces_logs_caracteristicas" model="ir.cron">
+            <field name="name">Procesar RepLogs Caracteristicas</field>
+            <field name="model_id" ref="tl_conn_a3erp.model_res_caracteristicas" />
+            <field name="state">code</field>
+            <field name="code">
+values = env['a3erp.caracteristicas'].search([('procesado','=', False)])
+if values:
+    model.process_replogs_caractaristicas(values)
+            </field>
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">1</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 23:30:00')" />
+            <field name="interval_type">days</field>
+            <!-- <field name="numbercall">-1</field> -->
+            <field name="priority">1</field>
+            <field name="active">True</field>
+        </record>
+    </data>
+    <record id="res_caracteristicas_action" model="ir.actions.act_window">
+        <field name="name">Caracteristicas</field>
+        <field name="res_model">res.caracteristicas</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_tip_carac': 1, 'search_default_num_carac': 1}</field>
+    </record>  
+
+    <record id="res_caracteristicas_form_view" model="ir.ui.view">
+        <field name="name">res.caracteristicas.form.view</field>
+        <field name="model">res.caracteristicas</field>
+        <field name="arch" type="xml">
+            <form string="Caracteristicas" create="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="cod_carac" readonly="1"/>
+                            <field name="desc_carac" readonly="1"/>
+                            <field name="num_carac" readonly="1"/>
+                            <field name="tip_carac" readonly="1"/>
+                            <field name="product_ids" invisible="num_carac != 2 or tip_carac != 'A'" readonly="1" widget="many2many_tags"/>
+                        </group>
+                        <group>
+                            <field name="last_date_update" readonly="1"/>
+                            <field name="company_id" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="res_caracteristicas_tree_view" model="ir.ui.view">
+        <field name="name">res.caracteristicas.view.tree</field>
+        <field name="model">res.caracteristicas</field>
+        <field name="arch" type="xml">
+            <list string="" create="False">
+                <field name="cod_carac" />
+                <field name="desc_carac" />
+                <field name="num_carac" />
+                <field name="tip_carac" />
+                <field name="company_id" />
+            </list>
+        </field>
+    </record>
+    
+    <record id="res_caracteristicas_search_view" model="ir.ui.view">
+        <field name="name">res.caracteristicas.search</field>
+        <field name="model">res.caracteristicas</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="cod_carac"/>
+                <field name="desc_carac"/>
+                <group>
+                    <filter string="Tipo" name="tip_carac" context="{'group_by': 'tip_carac'}"/>
+                    <filter string="Número Carac." name="num_carac" context="{'group_by': 'num_carac'}"/>
+                </group>                
+            </search>
+        </field>
+    </record>  
+
+    
+    <menuitem name="Caractertisticas" id="res_caracteristicas" parent="a3erp_auxiliar" action="res_caracteristicas_action" sequence="1"/>
+</odoo>

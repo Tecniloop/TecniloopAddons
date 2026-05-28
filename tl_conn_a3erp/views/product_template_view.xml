@@ -1,0 +1,302 @@
+<odoo>
+    <data noupdate="1">
+    <!--SERVER ACTION POR PRODUCTO -->
+    <record id="server_action_product_template_queue_state" model="ir.actions.server">
+        <field name="name">Producto: Consultar Estado Cola</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="product.model_product_template" />
+        <field name="binding_model_id" ref="product.model_product_template" />
+        <field name="state">code</field>
+        <field name="code">records.get_cola_state()</field>
+    </record>
+    <!--SERVER ACTION PARA ACTUALIZAR/CREAR PRODUCTOS MASIVAMENTE-->
+    <record id="server_action_product_template_create_update" model="ir.actions.server">
+        <field name="name">Crear/Actualizar Productos en a3ERP</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="product.model_product_template" />
+        <field name="binding_model_id" ref="product.model_product_template" />
+        <field name="state">code</field>
+        <field name="code">
+for record in records:
+    if record.cod_articulo_a3:
+        record.action_update_a3erp()
+    else:
+        record.action_send_a3erp()
+        </field>
+    </record>
+    
+    <!--PLANIFICADA PARA EJECUTAR LA ACTUALIZACION/CREACION DE PRODUCTOS-->
+    <record id="ir_cron_product_template_sync_a3erp" model="ir.cron">
+        <field name="name">Sincronizar productos a3ERP (18:00)</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_sync_a3erp_products()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+        <field name="priority">2</field>
+        <field name="nextcall" eval="(datetime.now().replace(hour=17, minute=0, second=0))"/>
+    </record>
+
+    <!-- SCHEDULED ACTION PARA PROCESAR OPCIONALES-->
+    <record id="ir_cron_proces_logs_opcionales" model="ir.cron">
+        <field name="name">Procesar RepLogs Opcionales</field>
+        <field name="model_id" ref="product.model_product_template" />
+        <field name="state">code</field>
+        <field name="code">
+values = env['a3erp.opcionales'].search([('procesado','=', False)])
+if values:
+    model.process_opcionales(values)
+        </field>
+        <field name="user_id" ref="base.user_root" />
+        <field name="interval_number">3</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 05:00:00')" />
+        <field name="interval_type">days</field>
+        <!-- <field name="numbercall">-1</field> -->
+        <field name="priority">1</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- IMPORTACION MASIVA DEL STOCK DE PRODUCTOS -->
+    <record id="ir_cron_import_product_stock" model="ir.cron">
+        <field name="name">Importar Stock Productos</field>
+        <field name="model_id" ref="product.model_product_template" />
+        <field name="state">code</field>
+        <field name="code">
+model.get_all_product_stock()
+        </field>
+        <field name="user_id" ref="base.user_root" />
+        <field name="interval_number">10</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 05:00:00')" />
+        <field name="interval_type">minutes</field>
+        <!-- <field name="numbercall">-1</field> -->
+        <field name="priority">1</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- SCHEDULED ACTION PARA PROCESAR LOGS DE PRODUCTOS-->
+    <record id="ir_cron_proces_logs_productos" model="ir.cron">
+        <field name="name">Procesar RepLogs Productos</field>
+        <field name="model_id" ref="product.model_product_template" />
+        <field name="state">code</field>
+        <field name="code">
+values = env['a3erp.productos'].search([('procesado','=', False)])
+if values:
+    model.process_replogs_productos(values)
+    env['account.analytic.distribution.model'].process_replogs_analitica(values)
+
+values = env['a3erp.idioma'].search([('procesado','=', False)])
+if values:
+    model.process_replogs_idioma(repLogs=values)
+        </field>
+        <field name="user_id" ref="base.user_root" />
+        <field name="interval_number">1</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 08:10:00')" />
+        <field name="interval_type">hours</field>
+        <!-- <field name="numbercall">-1</field> -->
+        <field name="priority">1</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- SCHEDULED ACTION PARA PROCESAR LOGS DE ALARMAS-->
+    <record id="ir_cron_proces_logs_alarmas" model="ir.cron">
+        <field name="name">Procesar RepLogs Alarmas Productos</field>
+        <field name="model_id" ref="product.model_product_template" />
+        <field name="state">code</field>
+        <field name="code">
+values = env['a3erp.alarmas'].search([('procesado','=', False)])
+if values:
+    model.process_replogs_alarmas(values)
+        </field>
+        <field name="user_id" ref="base.user_root" />
+        <field name="interval_number">2</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 01:00:00')" />
+        <field name="interval_type">days</field>
+        <!-- <field name="numbercall">-1</field> -->
+        <field name="priority">1</field>
+        <field name="active">True</field>
+    </record>
+    </data>
+    
+    <record id="product_template_form_view_inherit" model="ir.ui.view">
+        <field name="name">product.template.form</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view" />
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_send_a3erp" class="btn-primary" string="Crear Producto en a3ERP" type="object" invisible="not (company_id == 1 and (not queue_state or queue_state == 'ERROR'))" help="Dar de alta producto en a3ERP."/>
+                    <button name="get_a3erp_product_data" string="Forzar valores de a3ERP" class="oe_highlight" type="object" invisible="not (company_id == 1 and cod_articulo_a3 and queue_state == 'FINALIZADO')" help="Con este boton actualizamos el registro en ODOO a partir de los datos de a3ERP."/>
+                    <button string="Actualizar a3ERP" type="object" name="action_update_a3erp" class="oe_highlight" icon="fa-refresh" invisible="
+                        not a3erp_active_company
+                        or not cod_articulo_a3                             
+                        or last_date_update > write_date       
+                        or not last_date_update                      
+                        or queue_state == 'PENDIENTE'"/>
+            </xpath>
+            
+            <xpath expr="//notebook" position="inside">
+                <page string="Información a3ERP" id="a3erp_extra" invisible="not a3erp_active_company">
+                    <notebook>
+                        <page string="General">
+                            <group>
+                                <field name="a3erp_active_company" invisible="1"/>
+                                <field name="cod_articulo_a3" readonly="queue_state in ('PENDIENTE','FINALIZADO')" string="Cod.Producto a3ERP"/>
+                                <field name="last_date_update" readonly="1"/>
+                                <field name="queue_state" readonly="1"/>
+                                <field name="id_queue" invisible="1"/>
+                                <field name="a3erp_error_simple" readonly="1" invisible="queue_state != 'ERROR'"/>
+                                <field name="a3erp_product_stock" readonly="1"/>
+                                <field name="a3erp_product_margin" readonly="queue_state in ('PENDIENTE','FINALIZADO')" />
+                            </group>
+                        </page>
+                        <page string="Tecnico" groups="base.group_no_one">
+                            <group>
+                                <field name="a3erp_error_extend" readonly="1"/>
+                                <field name="json_content_send" invisible="queue_state == False"/>
+                            </group>
+                        </page>
+                    </notebook>
+
+                    <notebook>
+                        <page string="Caracteristicas" name="page_caracteristicas" >
+                            <group string="Caracteristicas" priority="1">
+                                <field name="carac1_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                <field name="carac2_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                <field name="carac3_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                <field name="carac4_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                <field name="carac5_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                <field name="carac6_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                <field name="carac7_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                <field name="carac8_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                <field name="carac9_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                <field name="carac10_id" options="{'no_create': True, 'no_create_edit':True}"/>
+                            </group>
+                        </page>
+                        <page string="Parametrizables" name="page_parametrizables" >
+
+                        </page>
+                    </notebook>
+                    
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_template_tree_view_inherit" model="ir.ui.view">
+        <field name="name">product.template.tree</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="name" position="before">
+                <field name="cod_articulo_a3"/>
+                <field name="queue_state"  string="Estado traspaso a3ERP" optional="show" 
+                    decoration-success="queue_state == 'FINALIZADO'" 
+                    decoration-info="queue_state =='PENDIENTE'" 
+                    decoration-warning="queue_state =='ESPERA'" 
+                    decoration-danger="queue_state == 'ERROR'" 
+                    widget="badge"/>
+            </field>
+            <field name="standard_price" position="after">
+                <field name="a3erp_product_stock"/>
+                <button type="object" name="get_product_detail_stock" title="Consultar Stock Real" icon="fa-eye"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="product_template_kanban_view_inherit" model="ir.ui.view">
+        <field name="name">product.template.kanban</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//main[@class='pe-2']" position="inside">
+                <div name="a3erp_stock" >
+                    Stock: <field name="a3erp_product_stock" />
+                    <button type="object" name="get_product_detail_stock" title="Consultar Stock Real" icon="fa-eye" />
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_view_kanban_catalog_inherit" model="ir.ui.view">
+        <field name="name">product.view.kanban.catalog</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_view_kanban_catalog"/>
+        <field name="arch" type="xml">
+            <field name="product_template_attribute_value_ids" position="after">
+                <div name="a3erp_stock">
+                    Stock: <field name="a3erp_product_stock"/>
+                    <button type="object" name="get_product_detail_stock" title="Consultar Stock Real" icon="fa-eye"/>
+                </div>
+            </field>
+        </field>
+    </record>
+
+    <record id="tl_product_template_search_view_inherit" model="ir.ui.view">
+        <field name="name">product.template.search</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='categ_id']" position="after">
+                <field name="cod_articulo_a3"/>
+                <separator/>
+                    <filter name="PENDIENTES" string="a3ERP: Estado Pendientes" domain="[('queue_state','=','PENDIENTE')]"/>
+                    <filter name="ERROR" string="a3ERP: Estado Incidencia" domain="[('queue_state','=','ERROR')]"/>           
+                    <filter name="FINALIZADO" string="a3ERP: Estado Finalizado" domain="[('queue_state','=','FINALIZADO')]"/>           
+            </xpath>
+        </field>
+    </record> 
+
+    <!-- VISTA LISTA NUEVA -->
+    <record id="view_product_template_tree_last_12h_a3erp" model="ir.ui.view">
+        <field name="name">product.template.list.last.12h.</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <list string="Productos a3ERP (últimas 12h)" 
+                decoration-success="queue_state == 'FINALIZADO'" 
+                decoration-info="queue_state =='PENDIENTE'" 
+                decoration-warning="queue_state =='ESPERA'" 
+                decoration-danger="queue_state == 'ERROR'" >
+                <field name="write_date" optional="show" string="Odoo: Última actualización" />
+                <field name="last_date_update" optional="show" string="a3ERP: Última actualización" />
+                <field name="cod_articulo_a3" optional="show" />
+                <field name="default_code" optional="show" />
+                <field name="name" />
+                <field name="queue_state" string="Estado traspaso a3ERP" optional="show" 
+                    decoration-success="queue_state == 'FINALIZADO'" 
+                    decoration-info="queue_state =='PENDIENTE'" 
+                    decoration-warning="queue_state =='ESPERA'" 
+                    decoration-danger="queue_state == 'ERROR'" 
+                    widget="badge"/>
+                <field name="categ_id" optional="show" />
+                <field name="carac1_id" optional="show" />
+                <field name="carac2_id" optional="show" />
+                <field name="carac3_id" optional="show" />
+                <field name="list_price" optional="show" />
+                <field name="standard_price" optional="show" />
+            </list>
+        </field>
+    </record>
+
+    <record id="action_product_template_last_12h" model="ir.actions.act_window">
+        <field name="name">Productos modificados/creados últimas 12h</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form</field>
+        <field name="views" eval="[('view_product_template_tree_last_12h_a3erp', 'list'),(False, 'form')]"/>
+        <field name="view_id" ref="view_product_template_tree_last_12h_a3erp"/>
+        <field name="domain" eval="['&amp;',
+                '|',
+                    ('write_date', '>=', (datetime.now() - relativedelta(hours=12))),
+                    ('create_date', '>=', (datetime.now() - relativedelta(hours=12))),
+                ('pending_a3erp', '=', True)]"/>
+    </record>
+
+
+    <menuitem
+        id="menu_product_template_last_12h"
+        name="Productos últimas 12h"
+        parent="sale.product_menu_catalog"
+        action="action_product_template_last_12h"
+    />
+
+</odoo>

@@ -1,0 +1,24 @@
+<odoo>
+    
+    <record id="view_res_company_form_inherit" model="ir.ui.view">
+        <field name="name">view.res.company.form</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="a3ERP">
+                    <group>
+                        <field name="a3erp_active_company" />
+                        <field name="a3erp_sale_order_type" required="a3erp_active_company" invisible="not a3erp_active_company" />
+                        <field name="a3erp_purchase_order_type" required="a3erp_active_company" invisible="not a3erp_active_company" />
+                        <field name="a3erp_contact_required" invisible="not a3erp_active_company or a3erp_sale_order_type != 'orders'" />
+                        <field name="a3erp_codart_type" invisible="not a3erp_active_company" />
+                        <field name="a3erp_canon_company" invisible="not a3erp_active_company" />
+                        <field name="a3erp_price_policy" invisible="not a3erp_active_company" />
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>    
+    
+</odoo>

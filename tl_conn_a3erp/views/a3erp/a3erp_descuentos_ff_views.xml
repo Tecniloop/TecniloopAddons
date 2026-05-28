@@ -1,0 +1,106 @@
+<odoo>
+    <data noupdate="1">
+    <!-- VISTA DESCUENTOS FF -->
+    <!-- SCHEDULED ACTION PARA IMPORTAR REP LOGS DESCUENTOS FF
+    <record id="ir_cron_get_logs_descuentos_ff" model="ir.cron">
+        <field name="name">Importar RepLogs Descuentos FF</field>
+        <field name="model_id" ref="tl_conn_a3erp.model_a3erp_descuentos_ff"/>
+        <field name="state">code</field>
+        <field name="code">model.get_rep_logs_descuentos_ff()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">2</field>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 21:15:00')" />
+        <field name="interval_type">days</field>
+        
+        <field name="priority">2</field>
+        <field name="active">True</field>
+    </record> -->
+
+    <!-- SERVER ACTION PARA IMPORTAR DESCUENTOS FAMILIA CLIENTE - FAMILIA ARTICULO -->
+    <record id="server_action_import_descuentos_ff" model="ir.actions.server">
+        <field name="name">a3ERP: Importar Descuentos FF</field>
+        <field name="type">ir.actions.server</field>
+        <field name="model_id" ref="tl_conn_a3erp.model_a3erp_descuentos_ff" />
+        <field name="state">code</field>
+        <field name="code">model.getall_descuentosff()</field>
+    </record>
+    </data> 
+    <record id="a3erp_descuentos_ff_action" model="ir.actions.act_window">
+        <field name="name">Descuentos FF</field>
+        <field name="res_model">a3erp.descuentos.ff</field>
+        <field name="view_mode">list,form</field>
+    </record>  
+
+    <record id="a3erp_descuentos_ff_form_view" model="ir.ui.view">
+        <field name="name">a3erp.descuentos.ff.form.view</field>
+        <field name="model">a3erp.descuentos.ff</field>
+        <field name="arch" type="xml">
+            <form string="Descuentos FF" create="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="procesado" readonly="1"/>
+                            <field name="error" readonly="0"/>
+                            <field name="movimiento" readonly="1"/>
+                            <field name="fecha" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="famart" readonly="1"/>
+                            <field name="famcli" readonly="1"/>
+                            <field name="descfam" readonly="1"/>
+                            <field name="desc1" readonly="1"/>
+                            <field name="desc2" readonly="1"/>
+                            <field name="unidades" readonly="1"/>
+                            <field name="tipreg" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="a3erp_descuentos_ff_tree_view" model="ir.ui.view">
+        <field name="name">a3erp.descuentos.ff.view.tree</field>
+        <field name="model">a3erp.descuentos.ff</field>
+        <field name="arch" type="xml">
+            <list string="" create="False" 
+                decoration-success="procesado == True"
+                decoration-danger="error == True"
+                decoration-warning="procesado == False and error == False">
+                <field name="error" optional="hide"/>
+                <field name="procesado" optional="hide"/>
+                <field name="movimiento" optional="show"/>
+                <field name="fecha" optional="show"/>
+                <field name="famart" optional="show"/>
+                <field name="famcli" optional="show"/>
+                <field name="descfam" optional="show"/>
+                <field name="desc1" optional="show"/>
+                <field name="desc2" optional="show"/>
+                <field name="unidades" optional="show"/>
+                <field name="tipreg" optional="show"/>
+            </list>
+        </field>
+    </record>
+    
+    <record id="a3erp_descuentos_ff_search_view" model="ir.ui.view">
+        <field name="name">a3erp.descuentos.ff.search</field>
+        <field name="model">a3erp.descuentos.ff</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter name="procesado" string="No Procesado" domain="[('procesado','=', False)]"/>
+                <group>
+                    <filter string="Fam. Cliente" name="famcli" context="{'group_by': 'famcli'}"/>
+                    <filter string="Movimiento" name="movimiento" context="{'group_by': 'movimiento'}"/>
+                </group>                
+            </search>
+        </field>
+    </record>  
+
+    <!-- <menuitem name="Descuentos FF" id="a3erp_descuentos_ff" parent="a3erp_base_tarifas" action="a3erp_descuentos_ff_action" sequence="25"/> -->
+    <!-- <menuitem name="Descuentos FF" id="import_a3erp_descuentosff" parent="a3erp_importar"
+        action="server_action_import_descuentos_ff" sequence="31" /> -->
+</odoo>

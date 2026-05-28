@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">    
+        <!--SERVER ACTION POR CLIENTE -->
+        <record id="server_action_res_partner_queue_state" model="ir.actions.server">
+            <field name="name">Contacto/Cliente: Consultar Estado Cola</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="base.model_res_partner" />
+            <field name="binding_model_id" ref="base.model_res_partner" />
+            <field name="state">code</field>
+            <field name="code">records.get_cola_state()</field>
+        </record>
+        
+        <!-- SCHEDULED ACTION PARA CREAR CONTACTO/CONTACTOS EN a3ERP-->
+        <record id="scheduled_action_send_contacts" model="ir.cron">
+            <field name="name">a3ERP: Crear/Actualizar Contacto/s</field>
+            <field name="model_id" ref="base.model_res_partner" />
+            <field name="state">code</field>
+            <field name="code">model.get_contacts_to_syncro()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 18:00:00')" />
+            <field name="interval_type">days</field>
+            <!--<field name="numbercall">-1</field>-->
+            <field name="priority">3</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- SCHEDULED ACTION PARA PROCESAR LOGS DE CLIENTES/CONTACTOS/Direcciones-->
+        <record id="ir_cron_proces_logs_clientes" model="ir.cron">
+            <field name="name">Procesar RepLogs Clientes/Contactos/Direcciones Entrega/Proveedores</field>
+            <field name="model_id" ref="base.model_res_partner"/>
+            <field name="state">code</field>
+            <field name="code">
+values = env['a3erp.clientes'].search([('procesado','=', False)])
+if values:
+    model.process_replogs_partner(values)
+
+values = env['a3erp.dirent'].search([('procesado','=', False)])
+if values:
+    model.process_replogs_dirent(values)
+
+values = env['a3erp.contactos'].search([('procesado','=', False)])
+if values:
+    model.process_replogs_partner(values)
+
+values = env['a3erp.proveed'].search([('procesado','=', False)])
+if values:
+    model.process_replogs_partner(values)
+            </field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">2</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 07:10:00')" />
+            <field name="interval_type">hours</field>
+            <!--<field name="numbercall">-1</field>-->
+            <field name="priority">2</field>
+            <field name="active">True</field>
+        </record>
+        
+        <!-- SCHEDULED ACTION PARA PROCESAR ALARMAS DE CLIENTES-->
+        <record id="scheduled_action_process_alarmas" model="ir.cron">
+            <field name="name">Procesar Rep Logs Alarmas Clientes</field>
+            <field name="model_id" ref="base.model_res_partner" />
+            <field name="state">code</field>
+            <field name="code">
+values = env['a3erp.alarmas'].search([('procesado','=', False)])
+if values:
+    model.process_replogs_alarmas(values)
+            </field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">2</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 23:50:00')" />
+            <field name="interval_type">days</field>
+            <!--<field name="numbercall">-1</field>-->
+            <field name="priority">4</field>
+            <field name="active">True</field>
+        </record>
+    </data> 
+        <!-- SERVER ACTION PARA CREAR CONTACTO EN a3ERP
+        <record id="server_action_send_contacts" model="ir.actions.server">
+            <field name="name">a3ERP: Crear/Actualizar Contacto</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="base.model_res_partner" />
+            <field name="binding_model_id" ref="base.model_res_partner" />
+            <field name="state">code</field>
+            <field name="code">records.get_contacts_to_syncro()</field>
+        </record> -->
+        
+        <record id="view_partner_tree_inherit" model="ir.ui.view">
+            <field name="name">view.res.partner.tree</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_tree" />
+            <field name="arch" type="xml">
+                <xpath expr="//list/field[@name='phone']" position="before">
+                    <field name="comercial" />
+                    <field name="cargo_id" />
+                </xpath>             
+            </field>
+        </record>
+
+        <record id="res_partner_form_view_inherit" model="ir.ui.view">
+            <field name="name">view.res.partner.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form" />
+            <field name="arch" type="xml">
+                <!--BOTONES A3ERP-->
+                <div class="oe_button_box" position="before">
+                    <button string="Crear a3ERP" class="oe_highlight" type="object" name="action_a3erp_syncro" invisible="not a3erp_active_company or cod_cliente_a3 or parent_id or queue_state == 'PENDIENTE' or company_type == 'person' or cod_proveed_a3" icon="fa-arrow-down" groups="sales_team.group_sale_salesman" help="Con este boton se crea el registro en a3ERP."/>
+                    <button string="Sincronizar a3ERP" class="oe_highlight" type="object" name="get_contacts_to_syncro" invisible="not a3erp_active_company or write_date &lt; last_date_update or type not in ('contact','other') or not parent_id or queue_state == 'PENDIENTE'" icon="fa-exchange" groups="sales_team.group_sale_salesman" help="Con este boton se Crea/Actualiza el Contacto en a3ERP."/>
+                    <button string="Forzar valores de a3ERP" class="oe_highlight" type="object" name="get_a3erp_contact_data" invisible="not a3erp_active_company or not cod_cliente_a3 and not cod_proveed_a3 and not cod_contacto_a3 and not cod_dirent_a3 or queue_state == 'PENDIENTE'" icon="fa-refresh" groups="sales_team.group_sale_salesman" help="Con este boton actualizamos el registro en ODOO a partir de los datos de a3ERP."/>
+                    <button string="Crear Dirección Entrega en a3ERP"
+                        class="oe_highlight"
+                        type="object"
+                        name="action_a3erp_send_delivery_address"
+                        icon="fa-truck"
+                        groups="sales_team.group_sale_salesman"
+                        invisible="
+                            not a3erp_active_company
+                            or not parent_id
+                            or type != 'delivery'
+                            or queue_state in ('PENDIENTE','FINALIZADO')
+                        "
+                        help="Enviar dirección de envío a a3ERP."/>
+                </div>
+                
+                <field name="function" position="before">
+                    <field name="write_date" invisible="1"/>
+                    <field name="send_email" widget="boolean_toggle" invisible="company_type == 'company'"/>
+                    <field name="cargo_id" options="{'no_create': True, 'no_create_edit':True}" required="type == 'contact'" invisible="company_type == 'company'"/>
+                </field>
+                
+                <xpath expr="//page[@name='contact_addresses']//form/sheet/group[1]/group[2]/field[@name='email']" position="before">
+                    <field name="cargo_id" options="{'no_create': True, 'no_create_edit':True}" required="type == 'contact'" />                    
+                </xpath>                
+
+                <!--PAGINA NUEVA PARA VALORES DE A3ERP-->
+                <page name="internal_notes" position="after">
+                    <page name="a3erp_extra_info" string="Información a3ERP" invisible="not a3erp_active_company">
+                        <notebook>
+                            <page string="General">
+                                <group invisible="type != 'delivery'">
+                                    <field name="cod_dirent_a3" readonly="1" />
+                                </group>
+                                <group invisible="company_type == 'company' or type not in ('contact','other')">
+                                    <field name="cod_contacto_a3" string="Cod.Contacto a3ERP" readonly="1" />
+                                    <field name="tipo_entidad_contacto" readonly="1" />
+                                    <field name="id_contacto_relacion" readonly="1" />
+                                </group>
+                                <group>
+                                    <field name="last_date_update" readonly="1"/>
+                                    <field name="queue_state" readonly="1"/>
+                                    <field name="id_queue" invisible="1"/>
+                                    <field name="a3erp_error_simple" readonly="1" invisible="queue_state != 'ERROR'"/>
+                                </group>
+                                <group invisible="company_type == 'person'">
+                                    <field name="cod_tarifa_a3" readonly="1" />
+                                </group>
+                                <group invisible="company_type == 'person'">
+                                    <group string="Ventas">
+                                        <field name="cod_cliente_a3" readonly="1" />
+                                    </group>
+                                    <group string="Compras">
+                                        <field name="cod_proveed_a3" readonly="1" />
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Tecnico" groups="base.group_no_one">
+                                <group>
+                                    <field name="a3erp_error_extend" readonly="1"/>
+                                    <field name="json_content_send" invisible="queue_state == False" />
+                                </group>
+                            </page>
+                        </notebook>
+                        <notebook invisible="company_type == 'person'">
+                            <page string="Caracteristicas" name="page_caracteristicas" >
+                                <group>
+                                    <group string="Caracteristicas Cliente" priority="1">
+                                        <field name="carac1_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac2_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac3_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac4_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac5_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac6_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac7_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac8_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac9_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac10_id" options="{'no_create': True, 'no_create_edit':True}"/>
+                                    </group>
+                                    <group string="Caracteristicas Organización" priority="1">
+                                        <field name="carac1_org_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac2_org_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac3_org_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac4_org_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac5_org_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac6_org_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac7_org_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac8_org_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac9_org_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                        <field name="carac10_org_id" options="{'no_create': True, 'no_create_edit':True}" />
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Parametrizables" name="page_parametrizables">
+                                
+                            </page>
+                        </notebook>
+                    </page>
+                </page>    
+                            
+            </field>
+        </record>
+
+        <record id="tl_res_partner_search_view_inherit" model="ir.ui.view">
+            <field name="name">res.partner.search</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_res_partner_filter"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="comercial" string="Alias" filter_domain="[('comercial','ilike', self)]" />
+                </field>
+                <xpath expr="//filter[@name='type_company']" position="after">
+                    <field name="cod_cliente_a3"/>
+                    <field name="cod_proveed_a3"/>
+                    <field name="cod_contacto_a3"/>
+                    <field name="cod_dirent_a3"/>
+                    <separator/>
+                    <filter name="PENDIENTES" string="a3ERP: Estado Pendientes" domain="[('queue_state','=','PENDIENTE')]"/>
+                    <filter name="ERROR" string="a3ERP: Estado Incidencia" domain="[('queue_state','=','ERROR')]"/>
+                </xpath>
+            </field>
+        </record> 
+</odoo>

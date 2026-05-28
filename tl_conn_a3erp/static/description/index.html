@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #2C3E50; }
+        h2 { color: #2980B9; }
+        p { color: #34495E; line-height: 1.6; }
+        ul { margin: 10px 0; padding-left: 20px; }
+        .image { text-align: center; margin: 20px 0; width: 100px;}
+    </style>
+</head>
+<body>
+    <h2>Aplicacion Pagina Principal</h2>
+    <div class="image">
+        <img src="app_page.png" alt="App Page">
+    </div><br/>
+    <h2>Inicio Sesión</h2>
+    <p>Para empezar, debemos configurar los campos necesarios, como la URL del Web Service, usuario, contraseña e ID de la empresa de a3ERP. Una vez configurados, podremos iniciar sesión, obteniendo un token temporal de 2 horas.</p>
+    <div class="image">
+        <img src="settings.png" alt="Inicio Sesion">
+    </div>
+    <h2>Primer Vistazo</h2>
+    <p>En la pantalla principal encontraremos el icono de a3ERP para acceder a las funciones básicas de la API. Las opciones disponibles incluyen:</p>
+    <ul>
+        <li>a3ERP RepLogs: Modelos donde se guardan los datos provenientes de a3ERP.</li>
+        <li>Mapeo de Campos: Interpreta los campos entre Odoo y a3ERP.</li>
+        <li>Auxiliar: Vistas de los modelos Auxiliares creados: Cargos y Caracteristicas.</li>
+        <li>Importación: Opciones de importacion de Datos.</li>
+        <li>Logs: Registro de errores/información durante los procesos.</li>
+        <li>Configuración: Acceso directo para configurar los parámetros principales.</li>
+    </ul>
+    <div class="image">
+        <img src="options.png" alt="Opcions">
+    </div>
+    <br/>
+    <h3>Creación de Clientes</h3>
+    <p>Al crear un cliente en Odoo, es posible enviarlo a a3ERP si no tiene un código asociado. Un botón nos permite agregar el cliente a la cola de creación de a3ERP. El estado de la petición se guarda en el campo "Estado Cola".</p>
+    <div class="image">
+        <img src="cliente.png" alt="Opcions">
+    </div>
+    
+    <h3>Creación de Contactos</h3>
+    <p>Los contactos en Odoo pueden transferirse a a3ERP si pertenecen a una empresa. Hay tres maneras de hacerlo:</p>
+    <ul>
+        <li><b>Automática 1:</b> Cuando se recibe un nuevo código de cliente en a3ERP.</li>
+        <li><b>Automática 2:</b> Un cron procesa los contactos modificados en los últimos 2 días.</li>
+        <li><b>Manual:</b> Un botón en la ficha del contacto permite crearlo manualmente. Solo se pueden enviar contactos, nada mas.</li>
+    </ul>
+    <div class="image">
+        <img src="contacto.png" alt="Opcions">
+    </div>
+    <br/>
+    <h3>Pedidos de Venta</h3>
+    <p>Los pedidos confirmados y sin un número de OFEV pueden enviarse a a3ERP. Si el cliente no existe en a3ERP, se debe crear primero. Una vez que se genera el pedido, devuelve un número de documento.</p>
+    <div class="image">
+        <img src="sale_order.png" alt="Opcions">
+    </div>
+    <br/>
+    <h3>Mapeo de Campos</h3>
+    <p>El mapeo de campos entre Odoo y a3ERP permite una traducción entre ambos sistemas. Algunos campos importantes:</p>
+    <ul>
+        <li><b>Nombre Odoo:</b> Nombre del campo en Odoo.</li>
+        <li><b>Nombre Odoo:</b> Nombre del campo en la tabla auxiliar.</li>
+        <li><b>Nombre a3ERP:</b> Nombre del campo en a3ERP.</li>
+        <li><b>Valor por Defecto:</b> Se utiliza si un campo es obligatorio en un sentido.</li>
+    </ul>    
+    <div class="image">
+        <img src="mapper.png" alt="Ejemplo de mapeo de campos">
+    </div>
+    <br/>
+    <h2>a3ERP RepLogs</h2>
+    <p>Esta sección almacena los registros modificados, creados o borrados en a3ERP. Los registros se clasifican en colores para indicar el estado de procesamiento:</p>
+    <ul>
+        <li>Verde: Procesado</li>
+        <li>Marrón: Pendiente</li>
+        <li>Rojo: Error</li>
+    </ul>
+    <div class="image">
+        <img src="replogs.png" alt="Ejemplo de registros en RepLogs">
+    </div>
+
+</body>
+</html>
