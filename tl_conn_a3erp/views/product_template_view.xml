@@ -128,12 +128,13 @@ if values:
                 <header>
                     <button name="action_send_a3erp" class="btn-primary" string="Crear Producto en a3ERP" type="object" invisible="not a3erp_active_company or last_date_update             or not (not queue_state or queue_state == 'ERROR')         " help="Dar de alta producto en a3ERP."/>
                     <button name="get_a3erp_product_data" string="Forzar valores de a3ERP" class="oe_highlight" type="object" invisible="not (company_id == 1 and cod_articulo_a3 and queue_state == 'FINALIZADO')" help="Con este boton actualizamos el registro en ODOO a partir de los datos de a3ERP."/>
-                    <button string="Actualizar a3ERP" type="object" name="action_update_a3erp" class="oe_highlight" icon="fa-refresh" invisible="
-                        not a3erp_active_company
+                    <button string="Actualizar a3ERP" type="object" name="action_update_a3erp" class="oe_highlight" icon="fa-refresh" 
+                        invisible=" not a3erp_active_company
                         or not cod_articulo_a3                             
                         or last_date_update > write_date       
                         or not last_date_update                      
-                        or queue_state == 'PENDIENTE'"/>
+                        or queue_state == 'PENDIENTE'"
+                        help="Con este boton actualizamos el registro en a3ERP a partir de los datos de ODOO." />
                 </header>
             </xpath>
             

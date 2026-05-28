@@ -1,0 +1,13 @@
+<odoo>
+    <!--CRON PARA RECUPERAR EL IMPORTE FACTURADO DE LAS COMPRAS -->
+    <record id="ir_cron_sync_a3_purchase_invoiced" model="ir.cron">
+        <field name="name">a3ERP - Compras Facturadas</field>
+        <field name="model_id" ref="purchase.model_purchase_order"/>
+        <field name="state">code</field>
+        <field name="code">model.action_sync_a3_invoiced()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active">True</field>
+        <field name="nextcall" eval="(DateTime.now() + relativedelta(days=1)).replace(hour=0, minute=0, second=0)"/>
+    </record>
+</odoo>

@@ -55,7 +55,12 @@ else:
             
             <!-- BOTON-->
             <xpath expr="//header" position="inside">
-                <button name="action_a3erp_send" class="btn-primary" string="Tramitar documento en a3ERP" type="object" invisible="not a3erp_active_company or state != 'sale' or ref_ofev_a3 or queue_state in ('ESPERA','PENDIENTE','FINALIZADO')" help="Dar de alta documento en a3ERP."/>
+                <!-- <button name="action_a3erp_send" class="btn-primary" string="Tramitar documento en a3ERP" type="object" invisible="not a3erp_active_company or state != 'sale' or ref_ofev_a3 or queue_state in ('ESPERA','PENDIENTE','FINALIZADO')" help="Dar de alta documento en a3ERP."/> -->
+                <button name="action_a3erp_send_confirm"
+                    class="btn-primary"
+                    string="Tramitar documento en a3ERP"
+                    type="object"
+                    invisible="not a3erp_active_company or state != 'sale' or ref_ofev_a3 or queue_state in ('ESPERA','PENDIENTE','FINALIZADO')"/>
             </xpath>
             
             <!-- CAMPOS INFORMATIVOS -->
@@ -146,5 +151,4 @@ else:
             </xpath>
         </field>
     </record> 
-
 </odoo>

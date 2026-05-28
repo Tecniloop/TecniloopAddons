@@ -268,6 +268,7 @@ class A3erpRepLogs(models.Model):
             
             new_record = {}    
             if modelo == 'a3erp.centrosc':
+                campoClave2 = 'nivelcentro'
                 new_record['nivelcentro'] = kwargs['nivel']
             
             for field in required_fields: # AÑADIR CAMPOS DINAMICAMENTE SEGÚN LOS OBLIGATORIOS

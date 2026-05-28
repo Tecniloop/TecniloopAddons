@@ -6,6 +6,7 @@ from . import create_log
 import requests,json,logging, re
 from datetime import datetime, timedelta
 import inspect
+from odoo.osv import expression
 
 _logger = logging.getLogger(__name__)
 
@@ -96,13 +97,12 @@ class ResPartner(models.Model):
                 super(ResPartner, record)._compute_display_name()
     
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        args = args or []
-        if not name:
-            return super().name_search(name, args, operator, limit)
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
+        domain = domain or []
+        args = []
 
         if name:
-            domain = ["|","|","|","|","|","|",
+            args = ["|","|","|","|","|","|",
                 ("complete_name", operator,name),
                 ("name", operator, name),
                 ("comercial", operator, name),
@@ -111,10 +111,12 @@ class ResPartner(models.Model):
                 ("phone", operator, name),
                 ("cod_cliente_a3", "=", name)]
             
-            if args:
-                domain = ['&'] + args + domain
-            records = self.search_fetch(domain, ['display_name'], limit=limit)
-            return [(record.id, record.display_name) for record in records.sudo()]
+            final_domain = domain + args
+            partners = self.search(final_domain, limit=limit)
+        else:
+            partners = self.search(domain, limit=limit)
+            
+        return [(partner.id, partner.display_name) for partner in partners]
     
     def check_contacts(self):
         """Comprueba si el cliente tiene al menos un Contacto creado."""

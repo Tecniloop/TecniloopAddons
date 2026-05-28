@@ -41,4 +41,9 @@ Versions | Maintainers | Description
 19.0.3.0.3 | [![enrjuli](https://github.com/enrjuli.png?size=30px)](https://github.com/enrjuli) | Modificar el decimal en los precios de articulos, se creaba en a3ERP como un punto y el precio era erronio.
 19.0.3.0.4 | [![enrjuli](https://github.com/enrjuli.png?size=30px)](https://github.com/enrjuli) | Modificar la busqueda y como añadir los centros de coste al enviar el pedido de venta/compra. Control de CODART desde el pedido de compra al momento de enviar a a3ERP, si no se envian. 
 19.0.3.0.5 | [![enrjuli](https://github.com/enrjuli.png?size=30px)](https://github.com/enrjuli) | Consultar y mostrar el riesgo del cliente en el pedido de Venta, se hace una consulta a tiempo real en a3ERP. 
+19.0.3.0.6 | [![enrjuli](https://github.com/enrjuli.png?size=30px)](https://github.com/enrjuli) | Arreglar problema con product_id y product_template al buscar el producto y enviar a a3ERP desde Pedido de Compra. 
+19.0.3.0.7 | [![enrjuli](https://github.com/enrjuli.png?size=30px)](https://github.com/enrjuli) | Poder enviar a nivel de cabecera los CENTROCOSTE informados en las Linias a nivel de pedido de Compra.
+19.0.3.0.8 | [![enrjuli](https://github.com/enrjuli.png?size=30px)](https://github.com/enrjuli) | Importar replogs de centros de coste de nivel 2 y 3, controlar que no esta ya creado la combinacion de nviel y codigo, mediante el campoClave2. 
+19.0.3.0.9 | [![enrjuli](https://github.com/enrjuli.png?size=30px)](https://github.com/enrjuli) | Poder enviar los CENTROCOSTE a nivel de cabecera en los pedidos de Venta.
+19.0.4.1.1 | [![enrjuli](https://github.com/enrjuli.png?size=30px)](https://github.com/enrjuli) | Añadir validación de envío a a3ERP, previamente a todos los otros pasos, asi se evita errores de envío.
 ----------------

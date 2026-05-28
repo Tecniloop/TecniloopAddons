@@ -33,7 +33,7 @@ mandatory_field,table_name,odoo_field_name,mapped_name,a3erp_field_name,default_
 ,DOCUPAGO,note,obs,OBS,,A3ERP->ODOO,,,5
 ,CARACTERISTICAS,desc_carac,desccar,DESCCAR,,A3ERP->ODOO,,,5
 ,CARACTERISTICAS,cod_carac,codcar,CODCAR,,A3ERP->ODOO,,,5
-,DIRENT,name,noment,NOMENT,,A3ERP->ODOO,,,5
+,DIRENT,name,noment,CONTACTO,,A3ERP->ODOO,,,5
 ,DIRENT,country_id,codpais,CODPAIS,,A3ERP->ODOO,res.country,code,5
 ,DOCUPAGO,a3erp_payment_mode_code,docpag,DOCPAG,,A3ERP->ODOO,,,5
 True,REFPRO,product_code,,REFERENCIA,,ODOO->A3ERP,,,5
@@ -46,7 +46,9 @@ True,REFPRO,product_code,,REFERENCIA,,ODOO->A3ERP,,,5
 ,LINEOFER,id_producto_padre,,APEN_IDLINPEXT,,ODOO->A3ERP,,,5,sale
 ,CABEPEDV,client_order_ref,,REFERENCIA,,ODOO->A3ERP,,,5
 ,CONTACTOS,send_email,enviar_email,__CONTACTOSRELACION.ENVIAREMAIL,False|BOOLEAN,,,,5
-True,CABEPEDV,commitment_date,,FECENTREGA,,ODOO->A3ERP,,,5
+,CABEPEDV,analytic_distribution,,CENTROCOSTE,,ODOO->A3ERP,,,5
+,CABEPEDV,analytic_distribution,,CENTROCOSTE2,,ODOO->A3ERP,,,5
+,CABEPEDV,analytic_distribution,,CENTROCOSTE3,,ODOO->A3ERP,,,5
 ,PRODUCTOS,account_prefix,analitica_2,CENTROCOSTEC2,,A3ERP->ODOO,,,5
 ,PRODUCTOS,account_prefix,analitica_1,CENTROCOSTEC,,A3ERP->ODOO,,,5
 ,PRODUCTOS,cod_articulo_a3,codart,CODART,,A3ERP->ODOO,,,5
@@ -143,6 +145,10 @@ True,CLIENTES,country_id,codpais,CODPAIS,,,res.country,code,24
 ,LINEOFER,analytic_distribution,centrocoste,CENTROCOSTE,,ODOO->A3ERP,,,73
 ,LINEOFER,analytic_distribution,centrocoste2,CENTROCOSTE2,,ODOO->A3ERP,,,74
 ,LINEOFER,analytic_distribution,centrocoste3,CENTROCOSTE3,,ODOO->A3ERP,,,77
+,CABEPEDC,partner_ref,,REFERENCIA,,ODOO->A3ERP,,,105
 ,CABEPEDC,date_order,,FECHA,,ODOO->A3ERP,,,105
+,CABEPEDC,analytic_distribution,,CENTROCOSTE,,ODOO->A3ERP,,,105
+,CABEPEDC,analytic_distribution,,CENTROCOSTE2,,ODOO->A3ERP,,,105
+,CABEPEDC,analytic_distribution,,CENTROCOSTE3,,ODOO->A3ERP,,,105
 ,FAMILIAS,name,nombre,DESCFAM,,A3ERP->ODOO,,,5
 ,FAMILIAS,a3erp_category_code,codigo,CODFAM,,A3ERP->ODOO,,,5

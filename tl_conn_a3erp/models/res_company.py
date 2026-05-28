@@ -132,7 +132,7 @@ class ResCompany(models.Model):
                                 record.ref_ofev_a3 = record.get_doc_values(dict_values.get('IDDOC'))
                             
                             elif record._name == 'purchase.order':
-                                record.id_document = record.get_doc_values(dict_values.get('IDDOC')) # Guardamos el ID documento.
+                                record.id_document = dict_values.get('IDDOC') # Guardamos el ID documento.
                                 record.ref_ofev_a3 = record.get_doc_values(dict_values.get('IDDOC'))
                             
                             elif record._name == 'product.template':

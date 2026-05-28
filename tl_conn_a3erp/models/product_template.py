@@ -26,18 +26,25 @@ class ProductProduct(models.Model):
     _inherit = ['product.product']       
         
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
         """Añadir CODART de a3ERP para buscar productos en las lineas."""
-        args = args or []
-        if not name:
-            return super().name_search(name, args, operator, limit)
-
+        domain = domain or []
+        args = []
+        
         if name:
-            domain = ['|', '|' , '|' , ('name', operator, name), ('default_code', operator, name), ('barcode', operator, name), ('cod_articulo_a3', operator, name)]
-            if args:
-                domain = ['&'] + args + domain
-            records = self.search_fetch(domain, ['display_name'], limit=limit)
-            return [(record.id, record.display_name) for record in records.sudo()]
+            args = ['|', '|' , '|' , 
+                ('name', operator, name), 
+                ('default_code', operator, name), 
+                ('barcode', operator, name), 
+                ('cod_articulo_a3', operator, name)
+            ]
+            
+            final_domain = domain + args
+            products = self.search(final_domain, limit=limit)
+        else:
+            products = self.search(domain, limit=limit)           
+            
+        return [(record.id, record.display_name) for record in products.sudo()]
         
     def get_product_detail_stock(self):
         return self.product_tmpl_id.get_product_detail_stock()
@@ -1109,18 +1116,25 @@ class ProductTemplate(models.Model):
         return self.search([('cod_articulo_a3','=',cod_articulo),('company_id','=', company)], limit=1)
 
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
         """Añadir CODART de a3ERP para buscar productos en las lineas."""
-        args = args or []
-        if not name:
-            return super().name_search(name, args, operator, limit)
-
+        domain = domain or []
+        args = []
+        
         if name:
-            domain = ['|', '|' , '|' , ('name', operator, name), ('default_code', operator, name), ('barcode', operator, name), ('cod_articulo_a3', operator, name)]
-            if args:
-                domain = ['&'] + args + domain
-            records = self.search_fetch(domain, ['display_name'], limit=limit)
-            return [(record.id, record.display_name) for record in records.sudo()]
+            args = ['|', '|' , '|' , 
+                ('name', operator, name), 
+                ('default_code', operator, name), 
+                ('barcode', operator, name), 
+                ('cod_articulo_a3', operator, name)
+            ]
+            
+            final_domain = domain + args
+            products = self.search(final_domain, limit=limit)
+        else:
+            products = self.search(domain, limit=limit)           
+            
+        return [(record.id, record.display_name) for record in products.sudo()]
 
     def get_caracteristica(self, table_code, modelo, a3_field, valor, company_id):
         """Buscar y devolver la caracteristica correspondientes.
@@ -1160,7 +1174,7 @@ class ProductTemplate(models.Model):
             ):
                 return result
 
-            if record.queue_state in ("PENDIENTE"):
+            if record.queue_state == "PENDIENTE":
                 raise ValidationError("No se puede modificar el Producto. Esta en cola de creción.")
             else:
                 return result

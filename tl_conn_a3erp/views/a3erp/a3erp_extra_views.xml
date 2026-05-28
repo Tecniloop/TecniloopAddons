@@ -403,11 +403,15 @@
     <data noupdate="1">
         <!-- CENTROS DE COSTE-->
         <!-- SCHEDULED ACTION IMPORTAR REP LOGS CENTROS COSTE 1-->
-        <record id="ir_cron_get_logs_centrosc_1" model="ir.cron">
-            <field name="name">Importar RepLogs Centros de Coste Nivel 1</field>
+        <record id="ir_cron_get_logs_centrosc" model="ir.cron">
+            <field name="name">Importar RepLogs Centros de Coste Nivel 1, 2, 3</field>
             <field name="model_id" ref="tl_conn_a3erp.model_a3erp_centrosc" />
             <field name="state">code</field>
-            <field name="code">model.get_rep_logs_centrosc(1)</field>
+            <field name="code">
+model.get_rep_logs_centrosc(1)
+model.get_rep_logs_centrosc(2)
+model.get_rep_logs_centrosc(3)
+            </field>
             <field name="user_id" ref="base.user_root" />
             <field name="interval_number">2</field>
             <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 03:00:00')" />

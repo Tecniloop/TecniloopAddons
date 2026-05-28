@@ -72,6 +72,21 @@ class SaleOrder(models.Model):
         store=True
     ) 
     
+    def action_a3erp_send_confirm(self):
+        self.ensure_one()
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Confirmar envío',
+            'res_model': 'a3erp.send.confirm.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'active_id': self.id,
+                'active_model': self._name,
+            }
+        }
+    
     def process_waiting_sales(self):
         """Recibimos todos los pedidos en estado por de ESPERA, si sus articulos ya se han creado en a3, se envia a la cola."""
         for sale in self:
@@ -106,7 +121,7 @@ class SaleOrder(models.Model):
             'res_model': 'sale.confirmation.wizard',
             'view_mode': 'form',
             'target': 'new',
-            'context': {'productos_sin_codart': productos_sin_codart.ids, 'active_id': record.id},
+            'context': {'productos_sin_codart': productos_sin_codart.ids, 'model_name': record._name, 'sale_order_id': record.id},
             'res_id': value.id
         }
 
@@ -213,6 +228,11 @@ class SaleOrder(models.Model):
                 return self._open_confirmation_wizard(productos_sin_codart, record)
 
             headers = {'Authorization': f'Bearer {record.company_id.a3erp_token}','Content-Type': 'application/json'}
+            PLAN_FIELD_MAP = {
+                self.env.ref('tl_conn_a3erp.analytic_plan_1').id: 'CENTROCOSTE',
+                self.env.ref('tl_conn_a3erp.analytic_plan_2').id: 'CENTROCOSTE2',
+                self.env.ref('tl_conn_a3erp.analytic_plan_3').id: 'CENTROCOSTE3',
+            }
             cabecera_documento, lineas_documento = [],[]
             empty_mandatory_fields = [] # GUARDAR LOS CAMPOS DE ODOO QUE SON OBLIGATORIOS PASAR Y ESTAN VACIOS
             response = False
@@ -320,6 +340,9 @@ class SaleOrder(models.Model):
                     for field in required_cabepedv:
                         # SI NO TIENE CAMPO DE ODOO, TIENE VALOR POR DEFECTO
                         if field.odoo_field_name:
+                            if field.a3erp_field_name in ('CENTROCOSTE','CENTROCOSTE2','CENTROCOSTE3'):
+                                cuenta_analitica = True
+                                continue
                             if record[field.odoo_field_name]:
                                 if field.relational_table:
                                     if record[field.odoo_field_name][field.table_code]:
@@ -328,8 +351,13 @@ class SaleOrder(models.Model):
                                     continue
 
                                 campo_a3 = MAPPER.traducir_campo(record._fields[field.odoo_field_name].type) # MAPPEAR EL TIPO DEL CAMPO
+                                if field.a3erp_field_name == 'NUMDOC':
+                                    solo_digitos = ''.join(filter(str.isdigit, str(record[field.odoo_field_name])))
+                                    cabecera_documento.append(
+                                        Parametro(field.a3erp_field_name,solo_digitos,campo_a3)
+                                    )
                                 # CONVERTIR FECHA
-                                if "date" in record._fields[field.odoo_field_name].type:
+                                elif "date" in record._fields[field.odoo_field_name].type:
                                     fecha = convertir_fecha(record[field.odoo_field_name])
                                     cabecera_documento.append(Parametro(field.a3erp_field_name, fecha, campo_a3))
                                 
@@ -372,12 +400,12 @@ class SaleOrder(models.Model):
                 if self.env.context.get('check_required_fields'):
                     return True
 
-                # /!\ CAMPOS LINEA
+                # NOTE: CAMPOS LINEA
                 empty_mandatory_fields = []
                 for line in sorted(record.order_line, key=lambda x: x.sequence, reverse=False):
                     linea = []
                     empty_codart = False # SABER SI SALIR DE LA ITERACION ACTUAL EN CASO DE CODART VACÍO
-                    if line.display_type == 'line_section': # SECCION
+                    if line.display_type in ('line_section', 'line_subsection'): # SECCION
                         product = self._get_a3erp_section_product(line, record.company_id)
                         linea.append(Parametro("CODART", cuadrar(product.cod_articulo_a3), "STRING"))
                         linea.append(Parametro("DESCLIN", line.name, "STRING"))
@@ -446,11 +474,6 @@ class SaleOrder(models.Model):
                                     linea.append(Parametro(field.a3erp_field_name, line[field.odoo_field_name], campo_a3))
 
                             if cuenta_analitica: # SI LA CUENTA ANALITICA ES REQUERIDA
-                                PLAN_FIELD_MAP = {
-                                    self.env.ref('tl_conn_a3erp.analytic_plan_1').id: 'CENTROCOSTE',
-                                    self.env.ref('tl_conn_a3erp.analytic_plan_2').id: 'CENTROCOSTE2',
-                                    self.env.ref('tl_conn_a3erp.analytic_plan_3').id: 'CENTROCOSTE3',
-                                }
                                 analytic_data = line.analytic_distribution 
                                 if isinstance(analytic_data, dict) and analytic_data:
                                     AnalyticAccount = record.env['account.analytic.account']
@@ -501,13 +524,63 @@ class SaleOrder(models.Model):
 
                     lineas_documento.append(linea)
 
+                #NOTE: CENTRO DE COSTE A NIVEL DE CABECERA
+                if cuenta_analitica:
+                    AnalyticAccount = record.env['account.analytic.account']
+
+                    plan_values = {}
+
+                    for line in record.order_line:
+                        analytic_data = line.analytic_distribution
+
+                        if not isinstance(analytic_data, dict) or not analytic_data:
+                            continue
+
+                        for key in analytic_data.keys():
+                            for id_str in key.split(','):
+                                if not id_str.strip().isdigit():
+                                    continue
+
+                                analytic_account = AnalyticAccount.browse(int(id_str)).exists()
+
+                                if not analytic_account or not analytic_account.code:
+                                    continue
+
+                                plan_id = analytic_account.plan_id.id
+
+                                if plan_id not in PLAN_FIELD_MAP:
+                                    continue
+
+                                plan_values.setdefault(plan_id, set()).add(analytic_account.code)
+
+                    # Decidir qué enviar
+                    for plan_id, codes in plan_values.items():
+                        # Solo si hay UN único centro de coste
+                        if len(codes) == 1:
+                            code = next(iter(codes))
+                            a3_field_name = PLAN_FIELD_MAP[plan_id]
+
+                            field = required_cabepedv.filtered(
+                                lambda f: f.a3erp_field_name == a3_field_name
+                            )[:1]
+
+                            if field:
+                                cabecera_documento.append(
+                                    Parametro(
+                                        a3_field_name,
+                                        code,
+                                        "STRING"
+                                    )
+                                )                            
+                         
                 if empty_codart or break_record:
                     if break_record:
                         fields = ', '.join(empty_mandatory_fields)
                         msg = f"Los siguientes campos de LINEOFEV son requeridos y estan vacíos: '{fields}'"
                         self._log_and_continue(record, msg)
                         raise ValidationError(_(msg))
-                        
+                    raise ValidationError(_("Hay un Articulo que no tiene nu CODART."))
+                         
                 else:
                     document_json = ''
                     if not codcli_missing:
@@ -731,7 +804,7 @@ class SaleOrder(models.Model):
         """
         for order in self:
             if order.ref_ofev_a3:
-                raise UserError('No se puede borrar esta Oferta de Venta. Ya ha estado vinculada con un Documento de A3ERP.')
+                raise UserError('No se puede borrar esta Documento de Venta. Ya ha estado vinculada con un Documento de A3ERP.')
         return super(SaleOrder, self).unlink()
 
     def action_recompute_order_lines_price(self):
@@ -761,13 +834,18 @@ class SaleOrderLine(models.Model):
         for line in self:
             if not line.product_id:
                 continue
-            # SIEMPRE EJECUTAR SI SE MODIFICA EL producct_id AUNQUE a3erp_price_policy NO ESTE ACTIVADO
+            # SIEMPRE EJECUTAR SI SE MODIFICA EL product_id AUNQUE a3erp_price_policy NO ESTE ACTIVADO
             if self._origin and self._origin.product_id != line.product_id:
                 values = line._get_product_price_discount()
                 if not values:
                     continue
-                elif "ConnectTimeoutError" in values:
-                    raise ValidationError(_("Error de conexión con a3ERP. Compruebe la conexión y vuelva a intentarlo."))
+                elif 'tag' in values:
+                    return {
+                        'warning': {
+                            'title': 'Warning',
+                            'message': values.get('params', {}).get('message', 'Error desconocido'),
+                        }
+                    }
                 elif values:
                     price = values.get('PRECIO', 0.0)
                     discount = values.get('DESC1', 0.0)
@@ -786,8 +864,13 @@ class SaleOrderLine(models.Model):
                 values = line._get_product_price_discount()
                 if not values:
                     continue
-                elif "ConnectTimeoutError" in values:
-                    raise ValidationError(_("Error de conexión con a3ERP. Compruebe la conexión y vuelva a intentarlo."))
+                elif 'tag' in values:
+                    return {
+                        'warning': {
+                            'title': 'Warning',
+                            'message': values.get('params', {}).get('message', 'Error desconocido'),
+                        }
+                    }
                 elif values:
                     price = values.get('PRECIO', 0.0)
                     discount = values.get('DESC1', 0.0)
@@ -808,11 +891,11 @@ class SaleOrderLine(models.Model):
         
         cod_articulo = self.product_id.cod_articulo_a3
         cod_cliente = partner_id.cod_cliente_a3
+        pricelist_code = partner_id.cod_tarifa_a3
 
-        if not cod_articulo or not cod_cliente:
+        if not cod_articulo or not cod_cliente or not pricelist_code:
             return False
 
-        pricelist_code = partner_id.cod_tarifa_a3
 
         headers = {'Authorization': f'Bearer {self.company_id.a3erp_token}','Content-Type': 'application/json'}
         list_parametros = []
@@ -853,6 +936,16 @@ class SaleOrderLine(models.Model):
         except Exception as e:
             _logger.error(format(e))
             #self.order_id.message_post(message_type='comment', body=format(e))
+            return { 
+                'type' : 'ir.actions.client' , 
+                'tag' : 'display_notification' , 
+                'params' : { 
+                    'title' : 'Warning' , 
+                    'message' : f'Error Obteniendo el precio: {format(e)}' , 
+                    'type' : 'warning' , 
+                    'sticky' : True , 
+                } , 
+            }
             return "ConnectTimeoutError"
             #raise UserError(_("Error al obtener el precio de venta del producto: %s") % format(e))
 

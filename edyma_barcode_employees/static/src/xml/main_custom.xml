@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="CustomMainMenu" t-inherit="stock_barcode.MainMenu" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[@class='d-flex align-items-center justify-content-between my-3']" position="after">
+            <div class="text-center">
+                <span> <b> Esta con el Usuario <p t-esc="this._getStoredEmployeeName()"/></b></span>
+            </div>
+        </xpath>
+    </t>
+</templates>
+

@@ -13,6 +13,7 @@ NAX_ALBARANES = "{}/albaranc/nax"
 ESTADO_COLA = "{}/cola/getEstadoCola"
 CONSULTA_PEDIDOC = "{}/pedidoc/getbycode"
 CONSULTA_ALBARANC = "{}/albaranc/getbycode"
+CONSULTA_FACTURASC = "{}/Facturac/getlineasbyidpedc"
 CAMPOS_CABECERA = ["CABECERA.TIPOCONT","CABECERA.NUMDOC", "CABECERA.SERIE"]
 MAPPER = TypeMapper()
 
@@ -76,12 +77,17 @@ class PurchaseOrder(models.Model):
                 'Authorization': f'Bearer {record.company_id.a3erp_token}',
                 'Content-Type': 'application/json'
             }
-
+            PLAN_FIELD_MAP = {
+                self.env.ref('tl_conn_a3erp.analytic_plan_1').id: 'CENTROCOSTE',
+                self.env.ref('tl_conn_a3erp.analytic_plan_2').id: 'CENTROCOSTE2',
+                self.env.ref('tl_conn_a3erp.analytic_plan_3').id: 'CENTROCOSTE3',
+            }
             cabecera_documento = []
             lineas_documento = []
             empty_mandatory_fields = []
             response = False
-
+            cuenta_analitica = False
+            
             record.a3erp_error_simple = ""
             record.a3erp_error_extend = ""
 
@@ -102,6 +108,9 @@ class PurchaseOrder(models.Model):
             # Procesar CABEPEDC (cabecera)
             for field in required_cabepedc:
                 if field.odoo_field_name:
+                    if field.a3erp_field_name in ('CENTROCOSTE','CENTROCOSTE2','CENTROCOSTE3'):
+                        cuenta_analitica = True
+                        continue
                     valor = record[field.odoo_field_name]
                     if valor:
                         if field.relational_table:
@@ -156,11 +165,6 @@ class PurchaseOrder(models.Model):
                         linea.append(Parametro(field.a3erp_field_name, default, campo_a3))
                     
                 if cuenta_analitica: # SI LA CUENTA ANALITICA ES REQUERIDA
-                    PLAN_FIELD_MAP = {
-                        self.env.ref('tl_conn_a3erp.analytic_plan_1').id: 'CENTROCOSTE',
-                        self.env.ref('tl_conn_a3erp.analytic_plan_2').id: 'CENTROCOSTE2',
-                        self.env.ref('tl_conn_a3erp.analytic_plan_3').id: 'CENTROCOSTE3',
-                    }
                     analytic_data = line.analytic_distribution 
                     if isinstance(analytic_data, dict) and analytic_data:
                         AnalyticAccount = record.env['account.analytic.account']
@@ -198,6 +202,55 @@ class PurchaseOrder(models.Model):
 
                 lineas_documento.append(linea)
 
+            #NOTE: CENTRO DE COSTE A NIVEL DE CABECERA
+            if cuenta_analitica:
+                AnalyticAccount = record.env['account.analytic.account']
+
+                plan_values = {}
+
+                for line in record.order_line:
+                    analytic_data = line.analytic_distribution
+
+                    if not isinstance(analytic_data, dict) or not analytic_data:
+                        continue
+
+                    for key in analytic_data.keys():
+                        for id_str in key.split(','):
+                            if not id_str.strip().isdigit():
+                                continue
+
+                            analytic_account = AnalyticAccount.browse(int(id_str)).exists()
+
+                            if not analytic_account or not analytic_account.code:
+                                continue
+
+                            plan_id = analytic_account.plan_id.id
+
+                            if plan_id not in PLAN_FIELD_MAP:
+                                continue
+
+                            plan_values.setdefault(plan_id, set()).add(analytic_account.code)
+
+                # Decidir qué enviar
+                for plan_id, codes in plan_values.items():
+                    # Solo si hay UN único centro de coste
+                    if len(codes) == 1:
+                        code = next(iter(codes))
+                        a3_field_name = PLAN_FIELD_MAP[plan_id]
+
+                        field = required_cabepedc.filtered(
+                            lambda f: f.a3erp_field_name == a3_field_name
+                        )[:1]
+
+                        if field:
+                            cabecera_documento.append(
+                                Parametro(
+                                    a3_field_name,
+                                    code,
+                                    "STRING"
+                                )
+                            )
+                            
             if empty_mandatory_fields:
                 fields = ', '.join(empty_mandatory_fields)
                 raise ValidationError(_(f"Los siguientes campos de LINEOFER son requeridos y están vacíos: '{fields}'"))
@@ -260,6 +313,7 @@ class PurchaseOrder(models.Model):
                         'sticky': True,
                     }
                 }
+
     
     def check_products_without_codart(self):
         """Busca los productos que no tienen un CODART, osea, se han creado en Odoo
@@ -272,7 +326,8 @@ class PurchaseOrder(models.Model):
     
     def _open_confirmation_wizard(self, productos_sin_codart, record):
         """Abre el asistente de confirmación cuando faltan códigos de artículo en productos."""
-        lista = '\n'.join(f"- {x.name}" for x in productos_sin_codart)
+        templates = productos_sin_codart.mapped('product_tmpl_id')
+        lista = '\n'.join(f"- {x.name}" for x in templates)
         value = self.env['sale.confirmation.wizard'].sudo().create({'message': f'{lista}'})
         return {
             'type': 'ir.actions.act_window',
@@ -280,7 +335,7 @@ class PurchaseOrder(models.Model):
             'res_model': 'sale.confirmation.wizard',
             'view_mode': 'form',
             'target': 'new',
-            'context': {'productos_sin_codart': productos_sin_codart.ids, 'active_id': record.id},
+            'context': {'productos_sin_codart': templates.ids, 'model_name': record._name,'purchase_order_id': record.id},
             'res_id': value.id
         }
     
@@ -350,4 +405,108 @@ class PurchaseOrder(models.Model):
         except Exception as e:
             _logger.error(format(e))
             create_log.create_log(self, "ERROR", "GET", self._name, self.id, self.name, format(e), self.company_id.id)
+            return False
+    
+    def get_invoice_lines_summary(self, id_pedc, fields=["*"]):
+        """
+        Consulta las líneas de factura asociadas a un IDPEDC y devuelve un sumatorio
+        de los campos: PRCMONEDA, UNIDADES, TIPIVA y BASEMONEDA.
+        """
+
+        self.ensure_one()
+
+        headers = {
+            'Authorization': f'Bearer {self.company_id.a3erp_token}',
+            'Content-Type': 'application/json'
+        }
+
+        url = CONSULTA_FACTURASC.format(self.company_id.a3erp_url)
+        payload = MensajeSolicitudGet(self.company_id.a3erp_company_id, fields, str(id_pedc))
+
+        try:
+            response = requests.get(
+                url,
+                json=payload.to_json(),
+                verify=False,
+                headers=headers,
+                timeout=5
+            )
+
+            if response.status_code == 200:
+                data = json.loads(response.text)
+
+                if data.get("message") != "Sin Errores":
+                    create_log.create_log(
+                        self, "ERROR", "GET",
+                        self._name, self.id, self.name,
+                        data.get("result"), self.company_id.id
+                    )
+                    return False
+
+                result_lines = data.get("result", [])
+
+                total_precio = 0.0
+                total_unidades = 0.0
+                total_base = 0.0
+                total_calculado = 0.0
+                iva_breakdown = {}
+
+                for line in result_lines:
+                    precio = float(line.get("PRCMONEDA") or 0.0)
+                    unidades = float(line.get("UNIDADES") or 0.0)
+                    base = float(line.get("BASEMONEDA") or 0.0)
+                    tipiva = line.get("TIPIVA") or "SIN_IVA"
+
+                    total_precio += precio
+                    total_unidades += unidades
+                    total_base += base
+                    total_calculado += precio * unidades
+
+                    if tipiva not in iva_breakdown:
+                        iva_breakdown[tipiva] = {
+                            "base": 0.0,
+                            "unidades": 0.0,
+                            "total": 0.0,
+                        }
+
+                    iva_breakdown[tipiva]["base"] += base
+                    iva_breakdown[tipiva]["unidades"] += unidades
+                    iva_breakdown[tipiva]["total"] += precio * unidades
+
+                return {
+                    "total_precio": total_precio,
+                    "total_unidades": total_unidades,
+                    "total_base": total_base,
+                    "total_calculado": total_calculado,
+                    "iva_breakdown": iva_breakdown,
+                }
+
+            elif response.status_code == 401:
+                create_log.create_log(
+                    self, "ERROR", "GET",
+                    self._name, self.id, self.name,
+                    "Unauthorized: Token expirado o incorrecto.",
+                    self.company_id.id
+                )
+                return False
+
+            elif response.status_code == 400:
+                error_data = json.loads(response.text)
+                create_log.create_log(
+                    self, "ERROR", "GET",
+                    self._name, self.id, self.name,
+                    json.dumps(error_data, indent=4),
+                    self.company_id.id
+                )
+                return False
+
+            return False
+
+        except Exception as e:
+            _logger.exception("Error consultando líneas de factura por IDPEDC: %s", e)
+            create_log.create_log(
+                self, "ERROR", "GET",
+                self._name, self.id, self.name,
+                str(e), self.company_id.id
+            )
             return False

@@ -9,7 +9,7 @@ class CreateDateWizard(models.TransientModel):
     create_date_a3erp = fields.Datetime(string='Fecha de Alta', required=True)
 
     def confirm_button(self):
-        objct = self.env['a3erp.button.import'].browse(self._context.get('active_id'))
+        objct = self.env['a3erp.button.import'].browse(self.env.context.get('active_id'))
 
         objct.with_context(
             button_name='importar_date', 

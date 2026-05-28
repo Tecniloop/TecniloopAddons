@@ -10,13 +10,12 @@
     'website': "https://www.tecniloop.es",
     "maintainers": ["enrjuli"],
     "category": "Extra Tools",
-    'version': '19.0.3.0.5', 
+    'version': '19.0.4.1.1', 
     'depends': [ 
         'base','base_automation','purchase',
         'crm','sale_management',
         'sale_crm','contacts',
         'account_payment_mode',
-        'account_payment_partner',    
         'tl_products_obligatorios',
         'partner_contact_address_default',
         'l10n_es_partner',
@@ -58,6 +57,7 @@
         'wizard/confirmation_wizard_view.xml',   
         'wizard/product_stock_wizard_views.xml',
         'wizard/create_date_wizard_views.xml',
+        'wizard/send_confirmation_wizard.xml',
     ],        
     
     'post_init_hook': 'post_init_insert_a3erp_required_fields',

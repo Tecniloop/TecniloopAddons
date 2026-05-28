@@ -8,12 +8,12 @@ class SaleConfirmationWizard(models.TransientModel):
     message = fields.Text()
     
     def confirm_button(self):
-        productos_sin_codart = self.env['product.template'].browse(self._context.get('productos_sin_codart', []))
+        productos_sin_codart = self.env['product.template'].browse(self.env.context.get('productos_sin_codart', []))
         
-        if self._context.get('active_model') == 'sale.order':
-            record = self.env['sale.order'].browse(self._context.get('active_id'))
-        elif self._context.get('active_model') == 'purchase.order':
-            record = self.env['purchase.order'].browse(self._context.get('active_id'))
+        if self.env.context.get('model_name') == 'sale.order':
+            record = self.env['sale.order'].browse(self.env.context.get('sale_order_id'))
+        elif self.env.context.get('model_name') == 'purchase.order':
+            record = self.env['purchase.order'].browse(self.env.context.get('purchase_order_id'))
             
         check_products = [] #Productos que requieren de campos obligatorios
         for product in productos_sin_codart:

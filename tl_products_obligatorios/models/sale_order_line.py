@@ -37,7 +37,8 @@ class SaleOrderLine(models.Model):
         records = super(SaleOrderLine, self).create(vals)
         # Mirar si tiene productos opcionales
         for record in records:
-            if record.display_type == False and (record.order_id.partner_id.opcional_obligatorio or record.order_id.partner_id.parent_id.opcional_obligatorio):
+            partner_id = record.order_id.partner_id.parent_id or record.order_id.partner_id
+            if record.display_type == False and (partner_id.opcional_obligatorio or partner_id.opcional_obligatorio):
                 if 'a3erp_canon_company' in record.company_id._fields and record.company_id.a3erp_canon_company and 'carac2_id' in record.product_id._fields:
                     self.create_by_carac(record)
                 elif record.product_id.productos_obligatorios:

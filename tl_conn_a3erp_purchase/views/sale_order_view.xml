@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<odoo>
+    <!--VISTA TREE PERSONALZIADA-->
+    <record id="view_sale_order_cost_analysis_list" model="ir.ui.view">
+        <field name="name">sale.order.cost.analysis.list</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <list string="Análisis Costes Venta">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="account_analytic_account_line" />
+                <field name="amount_untaxed"/>
+                <field name="purchase_total_amount" sum="Total Compras"/>
+                <field name="purchase_total_invoiced" sum="Total Facturado"/>
+                <field name="labour_total_cost" sum="Total mano de Obra"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sale_order_cost_analysis" model="ir.actions.act_window">
+        <field name="name">Análisis Costes Ventas</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="view_id" ref="view_sale_order_cost_analysis_list"/>
+        <field name="domain">[('queue_state','=',False)]</field>
+    </record>
+
+    <menuitem
+        id="menu_sale_order_cost_analysis"
+        name="Análisis Costes"
+        parent="sale.sale_order_menu"
+        action="action_sale_order_cost_analysis"
+        sequence="60"/>
+</odoo>
