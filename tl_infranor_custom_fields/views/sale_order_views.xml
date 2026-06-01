@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_inherit_client_delivery_date" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.client.delivery.date</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Fecha Entrega Cliente en la cabecera del pedido -->
+            <xpath expr="//field[@name='date_order']" position="after">
+                <field name="client_delivery_date"/>
+            </xpath>
+            
+            <!-- Plazo entrega en semanas -->
+            <xpath expr="//field[@name='date_order']" position="after">
+                <field name="week_commitment_date"/>
+            </xpath>
+
+            <!-- Fecha Confirmación Fábrica -->
+            <xpath expr="//field[@name='client_delivery_date']" position="after">
+                <field name="production_confirmation_date"/>
+            </xpath>
+
+            <!-- Fecha de Confirmación -->
+            <xpath expr="//field[@name='production_confirmation_date']" position="after">
+                <field name="confirmation_date"/>
+            </xpath>
+
+            <!-- Bloquear Precio -->
+            <xpath expr="//field[@name='confirmation_date']" position="after">
+                <field name="lock_price"/>
+            </xpath>
+
+        </field>
+    </record>
+    <record id="view_order_form_inherit_global_discount_label" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.global.discount.label</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_global_discount.view_order_form"/>
+        <field name="arch" type="xml">
+            <field name="amount_global_discount" position="attributes">
+                <attribute name="string">Coste envío</attribute>
+            </field>
+        </field>
+    </record>
+
+</odoo>

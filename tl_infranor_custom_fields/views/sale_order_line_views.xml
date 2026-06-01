@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_inherit_undelivered_qty" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.undelivered.qty</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='order_line']/tree/field[@name='qty_delivered']" position="after">
+                <field name="undelivered_qty" readonly="1" optional="show"/>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/tree/field[@name='undelivered_qty']" position="after">
+                <field name="undelivered_subtotal" readonly="1" optional="show"/>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/tree/field[@name='undelivered_subtotal']" position="after">
+                <field name="lines_production_confirmation_date" optional="show"/>
+                <field name="product_responsible_id" optional="show"/>
+                <field name="fecha_confirmacion" optional="show"/>
+                <field name="fecha_entrega_final" optional="show"/>
+            </xpath>
+            
+        </field>
+    </record>
+
+    <!-- Bloquear purchase_price en lista cuando lock_price está activo -->
+    <record id="view_order_form_inherit_lock_purchase_price" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.lock.purchase.price</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_margin.sale_margin_sale_order_line_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/tree//field[@name='purchase_price']" position="attributes">
+                <attribute name="readonly">parent.lock_price</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Bloquear price_unit (precio unitario) en lista y formulario cuando lock_price está activo -->
+    <record id="view_order_form_inherit_lock_price_unit" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.lock.price.unit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/tree//field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">parent.lock_price</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="attributes">
+                <attribute name="readonly">parent.lock_price</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
