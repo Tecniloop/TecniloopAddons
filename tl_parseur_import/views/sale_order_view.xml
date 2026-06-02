@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+        <!-- FORM VIEW  -->
+        <record id="sale_order_view" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <!--CONTADOR DE PARSEUR-->
+                <xpath expr="//list/field[@name='product_uom_qty']" position="after">
+                    <field name="parseur_qty_count" readonly="1" invisible="1"/>                    
+                </xpath>
+                
+                <!--LINIA DE COLOR SI ES EXTRA -->
+                <xpath expr="//field[@name='order_line']/list" position="attributes">
+                    <attribute name="decoration-danger">
+                        is_extra_parseur
+                    </attribute>
+                    <attribute name="decoration-bf">
+                        is_extra_parseur
+                    </attribute>
+                    <attribute name="decoration-warning">
+                        not is_extra_parseur and ((state in ['draft', 'sent'] and is_product_archived) or sale_line_warn_msg)
+                    </attribute>
+                </xpath>
+        
+            </field>
+        </record>
+    </data>
+</odoo>

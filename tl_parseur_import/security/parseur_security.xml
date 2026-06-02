@@ -1,0 +1,27 @@
+<odoo>
+    <data noupdate="0">
+
+        <!-- <record id="group_parseur_order_manager" model="res.groups">
+            <field name="name">Administrador Parseur</field>
+        </record> -->
+        
+        <record model="res.groups.privilege" id="res_groups_privilege_parseur">
+            <field name="name">Parseur</field>
+            <field name="sequence">15</field>
+            <field name="category_id" ref="base.module_category_supply_chain"/>
+        </record>
+
+        <record id="group_parseur_user" model="res.groups">
+            <field name="name">Usuario</field>
+            <field name="privilege_id" ref="res_groups_privilege_parseur"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="group_parseur_order_manager" model="res.groups">
+            <field name="name">Administrador</field>
+            <field name="privilege_id" ref="res_groups_privilege_parseur"/>
+            <field name="implied_ids" eval="[(4, ref('group_parseur_user'))]"/>
+        </record>
+
+    </data>
+</odoo>

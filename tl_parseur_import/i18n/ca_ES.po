@@ -1,0 +1,527 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* tl_parseur_import
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-05 09:43+0000\n"
+"PO-Revision-Date: 2026-02-05 10:52+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ca_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.4\n"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__message_needaction
+msgid "Action Needed"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.actions.act_window,name:tl_parseur_import.action_parseur_order
+#: model:ir.ui.menu,name:tl_parseur_import.parseur_orders_menu
+msgid "Albaranes"
+msgstr "Albarans"
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_assign_partner_wizard_form
+msgid "Assignar lineas a pedido existente"
+msgstr "Assignar línies a comanda existent"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__message_attachment_count
+msgid "Attachment Count"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_assign_partner_wizard_form
+msgid "Añadir Lineas"
+msgstr "Afegir Línies"
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_assign_partner_wizard_form
+msgid "Añadir el pedido a uno existente."
+msgstr "Afegir la comanda a una existent."
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__parseur_order
+msgid "Cabecera"
+msgstr "Capçalera"
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_assign_partner_wizard_form
+msgid "Cancelar"
+msgstr "Cancel·lar"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__product_uom_qty
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__product_uom_qty
+msgid "Cantidad"
+msgstr "Quantitat"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_sale_order_line__parseur_qty_count
+msgid "Cantidad de Parseur"
+msgstr "Quantitat de Parseur"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,help:tl_parseur_import.field_sale_order_line__parseur_qty_count
+msgid ""
+"Cantidad real que se ha importado desde el parseur, cuando se pasa de la "
+"qty ofertada, ya no entra como linia normal."
+msgstr ""
+"Quantitat real que s'ha importat des del parseur, quan es passa de la qty "
+"ofertada, ja no entra com a línia normal."
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard__sale_partner_id
+msgid "Cliente Pedido de Venta"
+msgstr "Client Comanda de Venda"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,help:tl_parseur_import.field_assign_partner_wizard__sale_partner_id
+msgid "Cliente al que se hará el pedido de Venta"
+msgstr "Client a qui es farà la comanda de Venda"
+
+#. module: tl_parseur_import
+#: model:ir.model,name:tl_parseur_import.model_res_config_settings
+msgid "Config Settings"
+msgstr "Paràmetres de configuració"
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_assign_partner_wizard_form
+msgid "Crear Pedido"
+msgstr "Crear Comanda"
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_parseur_order_form
+msgid "Crear Pedidos Asociados"
+msgstr "Crear Comandes Associades"
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_parseur_order_form
+msgid "Documento Procesado"
+msgstr "Document processat"
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_assign_partner_wizard_form
+msgid "Crear nuevo pedido"
+msgstr "Crear nova comanda"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard__create_uid
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__create_uid
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__create_uid
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard__create_date
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__create_date
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__create_date
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model,name:tl_parseur_import.model_parseur_order_line
+msgid "Datos de Lineas"
+msgstr "Dades de Línies"
+
+#. module: tl_parseur_import
+#. odoo-python
+#: code:addons/tl_parseur_import/wizards/assign_partner_wizard.py:0
+msgid "Debe seleccionar un cliente."
+msgstr "Heu de seleccionar un client."
+
+#. module: tl_parseur_import
+#. odoo-python
+#: code:addons/tl_parseur_import/wizards/assign_partner_wizard.py:0
+msgid "Debe seleccionar un pedido de venta al que añadir las líneas."
+msgstr "Heu de seleccionar una comanda de venda on afegir les línies."
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__name
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__name
+msgid "Descripción"
+msgstr "Descripció"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__discount
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__discount
+msgid "Descuento %"
+msgstr "Descompte %"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard__display_name
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__display_name
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__display_name
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__display_name
+#: model:ir.model.fields,field_description:tl_parseur_import.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:tl_parseur_import.field_sale_order_line__display_name
+msgid "Display Name"
+msgstr "Nom mostrat"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__original_link
+msgid "Documento Original"
+msgstr "Document Original"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__origin
+msgid "Doc. Origen"
+msgstr "Doc. Origen"
+
+#. module: tl_parseur_import
+#: model:ir.model,name:tl_parseur_import.model_parseur_order
+msgid "Documento Parseur"
+msgstr "Document Parseur"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__purchase_id
+msgid "Documento de Compra Asociado"
+msgstr "Document de Compra Associat"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__order_id
+msgid "Documento de Venta Asociado"
+msgstr "Document de Venda Associat"
+
+#. module: tl_parseur_import
+#: model:ir.ui.menu,name:tl_parseur_import.parseur_menu_root
+msgid "Documentos Parseur"
+msgstr "Documents Parseur"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__error_log
+msgid "Errores de procesamiento"
+msgstr "Error al processar"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__date_order
+msgid "Fecha"
+msgstr "Data"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__message_follower_ids
+msgid "Followers"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__message_partner_ids
+msgid "Followers (Partners)"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard__id
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__id
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__id
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__id
+#: model:ir.model.fields,field_description:tl_parseur_import.field_res_config_settings__id
+#: model:ir.model.fields,field_description:tl_parseur_import.field_sale_order_line__id
+msgid "ID"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,help:tl_parseur_import.field_parseur_order__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,help:tl_parseur_import.field_parseur_order__message_has_error
+#: model:ir.model.fields,help:tl_parseur_import.field_parseur_order__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__tax_id
+msgid "Impuestos"
+msgstr "Impostos"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__message_is_follower
+msgid "Is Follower"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__json
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_parseur_order_form
+msgid "JSON Recibido"
+msgstr "JSON Rebut"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard__write_uid
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__write_uid
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__write_uid
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard__write_date
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__write_date
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__write_date
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__order_lines
+msgid "Lineas"
+msgstr "Línies"
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_assign_partner_wizard_form
+msgid "Lineas a Procesar"
+msgstr "Línies a Processar"
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_parseur_order_form
+msgid "Logs de Errores"
+msgstr "Logs d'Errors"
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_parseur_order_form
+msgid "Líneas"
+msgstr "Línies"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard__wizard_lines
+msgid "Líneas del Pedido"
+msgstr "Línies de la Comanda"
+
+#. module: tl_parseur_import
+#: model:ir.model,name:tl_parseur_import.model_assign_partner_wizard_line
+msgid "Líneas del Wizard de creación"
+msgstr "Línies del Wizard de creació"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__margin
+msgid "Margen %"
+msgstr "Marge %"
+
+#. module: tl_parseur_import
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.res_config_settings_view_form_inherit
+msgid "Margen % Global"
+msgstr "Marge % Global"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_res_config_settings__sale_global_margin
+msgid "Margen % Global de Ventas"
+msgstr "Marge % Global de Vendes"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,help:tl_parseur_import.field_res_config_settings__sale_global_margin
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.res_config_settings_view_form_inherit
+msgid ""
+"Margen que se aplicara al precio de compra para calcular el precio de Venta "
+"al crear el Pedido de Venta."
+msgstr ""
+"Marge que s'aplica al preu de compra per calcular el preu de Venda en crear "
+"la Comanda de Venda."
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__message_has_error
+msgid "Message Delivery error"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__message_ids
+msgid "Messages"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__partner_vat
+msgid "NIF"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__temperaturas
+msgid "Temperaturas"
+msgstr "Temperatures"
+
+#. module: tl_parseur_import
+#. odoo-python
+#: code:addons/tl_parseur_import/wizards/assign_partner_wizard.py:0
+msgid "No hay líneas para procesar."
+msgstr "No hi ha línies per processar."
+
+#. module: tl_parseur_import
+#. odoo-python
+#: code:addons/tl_parseur_import/wizards/assign_partner_wizard.py:0
+msgid "No hay un proveedor informado."
+msgstr "No hi ha cap proveïdor informat."
+
+#. module: tl_parseur_import
+#. odoo-python
+#: code:addons/tl_parseur_import/wizards/assign_partner_wizard.py:0
+msgid "No se encontró el registro de Parseur."
+msgstr "No s'ha trobat el registre de Parseur."
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__notes
+msgid "Notas"
+msgstr "Notes"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__message_needaction_counter
+msgid "Number of Actions"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__message_has_error_counter
+msgid "Number of errors"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,help:tl_parseur_import.field_parseur_order__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,help:tl_parseur_import.field_parseur_order__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard__sale_order
+msgid "Pedido"
+msgstr "Comanda"
+
+#. module: tl_parseur_import
+#. odoo-python
+#: code:addons/tl_parseur_import/wizards/assign_partner_wizard.py:0
+msgid "Pedido de Compra"
+msgstr "Comanda de Compra"
+
+#. module: tl_parseur_import
+#. odoo-python
+#: code:addons/tl_parseur_import/wizards/assign_partner_wizard.py:0
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_parseur_order_search
+msgid "Pedido de Venta"
+msgstr "Comanda de Venda"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__portes
+msgid "Portes"
+msgstr "Ports"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__sale_unit_price
+msgid "Precio de Venta"
+msgstr "Preu de Venta"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__price_unit_cost
+msgid "Precio de compra"
+msgstr "Preu de Compra"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__price_unit
+msgid "Precio unitario"
+msgstr "Preu unitari"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__product_code
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__product_code
+msgid "Producto"
+msgstr "Producte"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__partner_name
+#: model_terms:ir.ui.view,arch_db:tl_parseur_import.view_parseur_order_search
+msgid "Proveedor"
+msgstr "Proveïdor"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard__purchase_partner_id
+msgid "Proveedor Pedido de Compra"
+msgstr "Proveïdor Comanda de Compra"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,help:tl_parseur_import.field_assign_partner_wizard__purchase_partner_id
+msgid "Proveedor al que se hará el pedido de compra"
+msgstr "Proveïdor a què es farà la comanda de compra"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__rating_ids
+msgid "Ratings"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__client_order_ref
+msgid "Referencia"
+msgstr "Referència"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model,name:tl_parseur_import.model_sale_order_line
+msgid "Sales Order Line"
+msgstr "Línia comanda de venda"
+
+#. module: tl_parseur_import
+#. odoo-python
+#: code:addons/tl_parseur_import/models/parseur_order.py:0
+msgid "Seleccionar Cliente/Proveedor"
+msgstr "Seleccionar Client/Proveïdor"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__sale_line_subtotal
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order_line__price_subtotal
+msgid "Subtotal"
+msgstr "Subtotal"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__price_subtotal
+msgid "Subtotal Compra"
+msgstr "Subtotal Compra"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__amount_total
+msgid "Total"
+msgstr "Total"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__amount_tax
+msgid "Total Impuestos"
+msgstr "Total Impostos"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__amount_untaxed
+msgid "Total sin impuestos"
+msgstr "Total sense impostos"
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_parseur_order__website_message_ids
+msgid "Website Messages"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,help:tl_parseur_import.field_parseur_order__website_message_ids
+msgid "Website communication history"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model.fields,field_description:tl_parseur_import.field_assign_partner_wizard_line__wizard_id
+msgid "Wizard"
+msgstr ""
+
+#. module: tl_parseur_import
+#: model:ir.model,name:tl_parseur_import.model_assign_partner_wizard
+msgid "Wizard seleccionar el cliente y pedido del registro"
+msgstr ""

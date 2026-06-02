@@ -1,0 +1,82 @@
+<odoo>
+
+    <record id="view_assign_partner_wizard_form" model="ir.ui.view">
+        <field name="name">assign.partner.wizard.view</field>
+        <field name="model">assign.partner.wizard</field>        
+        <field name="active" eval="True" />
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group string="Crear nuevo pedido">
+                        <field name="skip_sale_order" invisible="1"/>
+                        <field name="sale_partner_id"
+                            required="skip_sale_order == False" invisible="skip_sale_order == True"
+                            domain="[('is_company','=',True)]"
+                            options="{'no_create': True}"
+                            help="Cliente del Pedido de Venta."
+                        />
+                        <field name="purchase_partner_id" 
+                            required="1"
+                            domain="[('is_company','=',True),('supplier_rank', '>', 0)]"
+                            options="{'no_create': True}"                  
+                            help="Proveedor del pedido de compra"          
+                        />
+                        <field name="manual_skip_sale_order"/>
+                        <field name="analytic_account1_id" 
+                            options="{'no_create': True}"        
+                            required="1"        
+                            help="El CECO de nivel 1 informado se replicara a las linias creadas de los Pedidos."            
+                        />
+                        <field name="analytic_account2_id" required="require_analytic_23 == True" invisible="0" options="{'no_create': True}" help="El CECO de nivel 2 informado se replicara a las linias creadas de los Pedidos."/>
+                        <field name="analytic_account3_id" required="require_analytic_23 == True" invisible="0" options="{'no_create': True}" help="El CECO de nivel 3 informado se replicara a las linias creadas de los Pedidos."/>
+                    </group>
+                    <group string="Assignar lineas a pedido existente" invisible="skip_sale_order">
+                        <field 
+                            name="sale_order" 
+                            domain="[('partner_id', '=', sale_partner_id),('state','=', 'sale')]"
+                            invisible="skip_sale_order == True"
+                            help="Añadir las línias a un pedido existente." 
+                            options="{'no_create': True}"
+                        />
+                        <field name="sale_mode" required="sale_order" widget="radio" options="{'horizontal': true}"/>
+                    </group>
+                    <div string="Lineas a Procesar">
+                        <field name="wizard_lines" nolabel="1">
+                            <list editable="bottom"
+                                decoration-success="product_id"
+                                decoration-danger="not product_id">
+                                <field name="product_id" options="{'no_create': True}" optional="show"/>
+                                <field name="product_code" optional="show"/>
+                                <field name="name" optional="show"/>
+                                <field name="product_uom_qty" optional="show"/>
+                                <field name="price_unit_cost" optional="show"/>
+                                <field name="discount" optional="show"/>
+                                <field name="price_subtotal" optional="show"/>
+                                <field name="margin" widget="percentage" optional="show"/>
+                                <field name="sale_unit_price" optional="show"/>
+                                <field name="sale_line_subtotal" readonly="1" optional="show"/>
+                            </list>
+                        </field>
+                    </div>
+                </sheet>
+                <footer>
+                    <button 
+                        name="action_create_sale_order"
+                        string="Crear Pedido" 
+                        type="object"
+                        class="btn-primary"
+                        invisible="sale_order"
+                    />
+                    <button 
+                        name="action_add_lines"
+                        string="Añadir Lineas" 
+                        type="object"
+                        class="btn-primary"
+                        invisible="not sale_order"
+                    />
+                    <button string="Cancelar" special="cancel" class="btn btn-light"/>
+                </footer>
+            </form>
+        </field>
+    </record>    
+</odoo>
