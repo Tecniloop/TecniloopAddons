@@ -33,17 +33,17 @@ class AssignPartnerWizard(models.TransientModel):
     analytic_account1_id = fields.Many2one(
         comodel_name='account.analytic.account',
         string='Centro de Coste 1',
-        domain=lambda self: self._domain_analytic_account1()
+        #domain=lambda self: self._domain_analytic_account1()
     )
     analytic_account2_id = fields.Many2one(
         comodel_name='account.analytic.account',
         string='Centro de Coste 2',
-        domain=lambda self: self._domain_analytic_account2()
+        #domain=lambda self: self._domain_analytic_account2()
     )
     analytic_account3_id = fields.Many2one(
         comodel_name='account.analytic.account',
         string='Centro de Coste 3',
-        domain=lambda self: self._domain_analytic_account3()
+        #domain=lambda self: self._domain_analytic_account3()
     )
     
     def _domain_analytic_account1(self):
