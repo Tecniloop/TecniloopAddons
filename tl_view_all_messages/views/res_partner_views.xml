@@ -1,0 +1,19 @@
+<odoo>
+  <record id="view_partner_form_inherit_all_messages" model="ir.ui.view">
+    <field name="name">res.partner.form.all.messages</field>
+    <field name="model">res.partner</field>
+    <field name="inherit_id" ref="base.view_partner_form"/>
+    <field name="arch" type="xml">
+
+    <xpath expr="//button[@name='schedule_meeting']" position="before">
+        <button type="object"
+                name="action_view_all_messages"
+                class="oe_stat_button"
+                icon="fa-comments">
+            <field name="message_count_all" widget="statinfo" string="Mensajes"/>
+        </button>
+    </xpath>
+
+    </field>
+  </record>
+</odoo>

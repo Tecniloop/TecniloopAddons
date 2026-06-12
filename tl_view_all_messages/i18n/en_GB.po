@@ -1,0 +1,85 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* tl_view_all_messages
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-05 08:04+0000\n"
+"PO-Revision-Date: 2026-03-05 09:11+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_GB\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.4\n"
+
+#. module: tl_view_all_messages
+#: model_terms:ir.ui.view,arch_db:tl_view_all_messages.view_partner_form_inherit_all_messages
+msgid "<span class=\"o_stat_text\">Ver Mensajes</span>"
+msgstr "<span class=\"o_stat_text\">View Messages</span>"
+
+#. module: tl_view_all_messages
+#: model_terms:ir.ui.view,arch_db:tl_view_all_messages.view_mail_message_search_tl_partner
+msgid "Agrupar por"
+msgstr "Group by"
+
+#. module: tl_view_all_messages
+#: model_terms:ir.ui.view,arch_db:tl_view_all_messages.view_mail_message_search_tl_partner
+msgid "Autor"
+msgstr "Author"
+
+#. module: tl_view_all_messages
+#: model_terms:ir.ui.view,arch_db:tl_view_all_messages.view_mail_message_search_tl_partner
+msgid "Buscar mensajes"
+msgstr "Search messages"
+
+#. module: tl_view_all_messages
+#: model_terms:ir.ui.view,arch_db:tl_view_all_messages.view_mail_message_search_tl_partner
+msgid "Comentarios"
+msgstr "Comments"
+
+#. module: tl_view_all_messages
+#: model:ir.model,name:tl_view_all_messages.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: tl_view_all_messages
+#: model_terms:ir.ui.view,arch_db:tl_view_all_messages.view_mail_message_search_tl_partner
+msgid "Documento (modelo)"
+msgstr "Document (model)"
+
+#. module: tl_view_all_messages
+#: model_terms:ir.ui.view,arch_db:tl_view_all_messages.view_mail_message_search_tl_partner
+msgid "Día"
+msgstr "Day"
+
+#. module: tl_view_all_messages
+#: model_terms:ir.ui.view,arch_db:tl_view_all_messages.view_mail_message_search_tl_partner
+msgid "Email"
+msgstr "Email"
+
+#. module: tl_view_all_messages
+#: model:ir.actions.act_window,name:tl_view_all_messages.action_tl_partner_messages
+#: model_terms:ir.ui.view,arch_db:tl_view_all_messages.view_mail_message_list_tl_partner
+msgid "Mensajes del cliente"
+msgstr "Customer messages"
+
+#. module: tl_view_all_messages
+#: model:ir.model,name:tl_view_all_messages.model_mail_message
+msgid "Message"
+msgstr "Message"
+
+#. module: tl_view_all_messages
+#: model_terms:ir.ui.view,arch_db:tl_view_all_messages.view_mail_message_search_tl_partner
+msgid "Notas internas"
+msgstr "Internal notes"
+
+#. module: tl_view_all_messages
+#: model:ir.model.fields,field_description:tl_view_all_messages.field_mail_mail__model_name
+#: model:ir.model.fields,field_description:tl_view_all_messages.field_mail_message__model_name
+msgid "Tipo de documento"
+msgstr "Document type"
