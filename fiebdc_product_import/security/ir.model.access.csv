@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_fiebdc_import_batch_user,fiebdc.import.batch.user,model_fiebdc_import_batch,base.group_user,1,0,0,0
+access_fiebdc_import_batch_system,fiebdc.import.batch.system,model_fiebdc_import_batch,base.group_system,1,1,1,1
+access_fiebdc_import_log_user,fiebdc.import.log.user,model_fiebdc_import_log,base.group_user,1,0,0,0
+access_fiebdc_import_log_system,fiebdc.import.log.system,model_fiebdc_import_log,base.group_system,1,1,1,1
