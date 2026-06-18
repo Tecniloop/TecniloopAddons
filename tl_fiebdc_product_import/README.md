@@ -81,3 +81,7 @@ La version 19.0.1.0.7 incluye tres puntos de entrada para evitar problemas de me
 3. Productos: desde lista/formulario, menu **Accion > Importar productos BC3 / FIEBDC**.
 
 Si no aparece ninguno, Odoo no esta cargando esta carpeta del modulo o no se ha ejecutado la actualizacion `-u tl_fiebdc_product_import` sobre la base correcta.
+
+## 19.0.1.0.10
+
+Safe install build: removes the product form header button and server action bindings. The wizard is opened only from the top menu `BC3 / FIEBDC -> Importar productos BC3` to avoid stale XML action references during installation.
