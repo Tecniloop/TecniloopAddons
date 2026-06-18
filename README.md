@@ -1,38 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Top-level menu. The action is also attached to the root entry so it is visible/searchable in the Odoo app menu. -->
-    <menuitem id="menu_fiebdc_root"
-              name="BC3 / FIEBDC"
-              sequence="70"
-              action="action_fiebdc_import_wizard"/>
-
-    <menuitem id="menu_fiebdc_import"
-              name="Importar productos BC3"
-              parent="menu_fiebdc_root"
-              action="action_fiebdc_import_wizard"
-              sequence="10"/>
-
-    <menuitem id="menu_fiebdc_import_history"
-              name="Historial de importaciones"
-              parent="menu_fiebdc_root"
-              action="action_fiebdc_import_batch"
-              sequence="20"/>
-
-    <!-- Additional entry under Inventory, so users can launch the wizard from the Inventory app too. -->
-    <menuitem id="menu_stock_fiebdc_root"
-              name="BC3 / FIEBDC"
-              parent="stock.menu_stock_root"
-              sequence="95"/>
-
-    <menuitem id="menu_stock_fiebdc_import"
-              name="Importar productos BC3"
-              parent="menu_stock_fiebdc_root"
-              action="action_fiebdc_import_wizard"
-              sequence="10"/>
-
-    <menuitem id="menu_stock_fiebdc_import_history"
-              name="Historial de importaciones BC3"
-              parent="menu_stock_fiebdc_root"
-              action="action_fiebdc_import_batch"
-              sequence="20"/>
+    <record id="view_product_template_form_fiebdc" model="ir.ui.view">
+        <field name="name">product.template.form.fiebdc</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/header" position="inside">
+                <button name="action_open_fiebdc_import_wizard" type="object" string="Importar BC3" class="btn-primary"/>
+            </xpath>
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="FIEBDC / BC3">
+                    <group>
+                        <group>
+                            <field name="bc3_code"/>
+                            <field name="bc3_alias_codes"/>
+                            <field name="bc3_type"/>
+                            <field name="bc3_unit_code"/>
+                            <field name="bc3_price_date"/>
+                            <field name="bc3_source_file"/>
+                        </group>
+                    </group>
+                    <group string="BC3 Description">
+                        <field name="bc3_long_description" nolabel="1"/>
+                    </group>
+                    <group string="Raw BC3 Values">
+                        <field name="bc3_raw_prices_json" nolabel="1"/>
+                        <field name="bc3_technical_json" nolabel="1"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
 </odoo>

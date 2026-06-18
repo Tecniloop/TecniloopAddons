@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_fiebdc_root" name="BC3 / FIEBDC" sequence="25"/>
+    <menuitem id="menu_fiebdc_import" name="Importar productos BC3" parent="menu_fiebdc_root" action="action_fiebdc_import_wizard" sequence="10"/>
+    <menuitem id="menu_fiebdc_import_history" name="Historial de importaciones" parent="menu_fiebdc_root" action="action_fiebdc_import_batch" sequence="20"/>
+</odoo>

@@ -14,3 +14,14 @@ class ProductTemplate(models.Model):
     bc3_raw_prices_json = fields.Text(string='BC3 Raw Prices', copy=False)
     bc3_technical_json = fields.Text(string='BC3 Technical Data', copy=False)
     bc3_long_description = fields.Html(string='BC3 Long Description', copy=False)
+
+
+    def action_open_fiebdc_import_wizard(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Importar productos BC3 / FIEBDC',
+            'res_model': 'fiebdc.import.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {},
+        }
