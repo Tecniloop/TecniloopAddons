@@ -10,13 +10,12 @@
                         <div class="alert alert-info" role="alert" colspan="2">
                             Select a .zip file containing one .bc3 file and its related images/PDFs.
                         </div>
-                        <field name="zip_file"
-                               widget="binary"
-                               filename="zip_filename"
+                        <field name="zip_attachment_ids"
+                               widget="many2many_binary"
                                required="1"
-                               class="oe_inline"
                                options="{'accepted_file_extensions': '.zip'}"/>
-                        <field name="zip_filename" readonly="1" force_save="1"/>
+                        <field name="zip_file" invisible="1"/>
+                        <field name="zip_filename" invisible="1" force_save="1"/>
                         <field name="bc3_filename" placeholder="Optional: path/to/file.bc3"/>
                     </group>
                     <group string="Import Options" col="4">

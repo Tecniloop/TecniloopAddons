@@ -22,7 +22,17 @@ class FiebdcImportWizard(models.TransientModel):
     _name = 'fiebdc.import.wizard'
     _description = 'Import FIEBDC BC3 Products'
 
-    zip_file = fields.Binary(string='ZIP File', required=True, attachment=False)
+    zip_attachment_ids = fields.Many2many(
+        'ir.attachment',
+        'fiebdc_import_wizard_ir_attachment_rel',
+        'wizard_id',
+        'attachment_id',
+        string='ZIP File',
+        help='Upload one ZIP file containing the BC3 and related images/PDFs.',
+    )
+    # Legacy binary fallback. Kept for compatibility with older installed views; the visible upload
+    # field in Odoo 19 uses zip_attachment_ids with widget="many2many_binary".
+    zip_file = fields.Binary(string='ZIP File (legacy)', attachment=False)
     zip_filename = fields.Char(string='ZIP Filename')
     bc3_filename = fields.Char(string='BC3 Filename', help='Optional. Leave empty to use the first .bc3 file found in the ZIP.')
 
@@ -124,11 +134,33 @@ class FiebdcImportWizard(models.TransientModel):
         batch.write({'state': state, **counters})
         return self._open_batch(batch)
 
+    def _get_uploaded_zip(self):
+        self.ensure_one()
+        attachments = self.zip_attachment_ids
+        if attachments:
+            if len(attachments) != 1:
+                raise UserError(_('Please upload exactly one ZIP file.'))
+            attachment = attachments[0].sudo()
+            filename = attachment.name or self.zip_filename or 'import.zip'
+            if not filename.lower().endswith('.zip'):
+                raise UserError(_('The uploaded file must be a .zip file.'))
+            if not attachment.datas:
+                raise UserError(_('The uploaded ZIP file is empty.'))
+            return base64.b64decode(attachment.datas), filename
+
+        if self.zip_file:
+            filename = self.zip_filename or 'import.zip'
+            if filename and not filename.lower().endswith('.zip'):
+                raise UserError(_('The uploaded file must be a .zip file.'))
+            return base64.b64decode(self.zip_file), filename
+
+        raise UserError(_('Please upload a ZIP file.'))
+
     def _parse_zip(self):
-        if not self.zip_file:
-            raise UserError(_('Please upload a ZIP file.'))
         try:
-            zip_bytes = base64.b64decode(self.zip_file)
+            zip_bytes, filename = self._get_uploaded_zip()
+            if filename and not self.zip_filename:
+                self.zip_filename = filename
             zip_handler = SafeZipBC3(zip_bytes)
             bc3_name, bc3_bytes = zip_handler.read_bc3(self.bc3_filename)
             data = BC3Parser().parse(bc3_bytes, bc3_name)
