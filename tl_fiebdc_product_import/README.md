@@ -85,3 +85,8 @@ Si no aparece ninguno, Odoo no esta cargando esta carpeta del modulo o no se ha 
 ## 19.0.1.0.10
 
 Safe install build: removes the product form header button and server action bindings. The wizard is opened only from the top menu `BC3 / FIEBDC -> Importar productos BC3` to avoid stale XML action references during installation.
+
+
+## 19.0.1.0.11
+
+Compatibility fix for Odoo 19: the importer no longer writes `uom_po_id` unless that field exists on `product.template`. Some Odoo 19 builds removed/renamed the Purchase UoM field, causing `Invalid field 'uom_po_id' in 'product.template'` during import.

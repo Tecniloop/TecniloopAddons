@@ -207,11 +207,15 @@ class FiebdcImportWizard(models.TransientModel):
             vals['bc3_price_date'] = first_date
         if concept.text:
             vals['description_sale'] = concept.text
-        if uom:
-            vals['uom_id'] = uom.id
-            vals['uom_po_id'] = uom.id
-        product_type = self._map_product_type(concept.concept_type)
         Product = self.env['product.template']
+        if uom:
+            if 'uom_id' in Product._fields:
+                vals['uom_id'] = uom.id
+            # Odoo 19 no longer exposes uom_po_id on product.template in some builds.
+            # Keep compatibility with older databases by writing it only when it exists.
+            if 'uom_po_id' in Product._fields:
+                vals['uom_po_id'] = uom.id
+        product_type = self._map_product_type(concept.concept_type)
         if 'type' in Product._fields:
             vals['type'] = product_type
         elif 'detailed_type' in Product._fields:

@@ -2,7 +2,7 @@
 {
     'name': 'TL FIEBDC BC3 Product Import',
     'summary': 'Import products from a ZIP containing a BC3 file and related images/PDFs',
-    'version': '19.0.1.0.10',
+    'version': '19.0.1.0.11',
     'category': 'Inventory/Inventory',
     'author': 'APEN Solutions / ChatGPT',
     'license': 'LGPL-3',
