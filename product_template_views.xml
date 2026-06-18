@@ -30,9 +30,9 @@ class FiebdcImportWizard(models.TransientModel):
         string='ZIP File',
         help='Upload one ZIP file containing the BC3 and related images/PDFs.',
     )
-    # Legacy binary fallback. Kept for compatibility with older installed views; the visible upload
-    # field in Odoo 19 uses zip_attachment_ids with widget="many2many_binary".
-    zip_file = fields.Binary(string='ZIP File (legacy)', attachment=False)
+    # Main upload field. The filename is stored separately in zip_filename.
+    # It must be Binary for the Odoo web client to render an upload control with widget="binary".
+    zip_file = fields.Binary(string='ZIP File', required=True, attachment=False)
     zip_filename = fields.Char(string='ZIP Filename')
     bc3_filename = fields.Char(string='BC3 Filename', help='Optional. Leave empty to use the first .bc3 file found in the ZIP.')
 
