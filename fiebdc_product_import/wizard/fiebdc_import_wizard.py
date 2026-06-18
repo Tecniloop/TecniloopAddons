@@ -22,7 +22,7 @@ class FiebdcImportWizard(models.TransientModel):
     _name = 'fiebdc.import.wizard'
     _description = 'Import FIEBDC BC3 Products'
 
-    zip_file = fields.Binary(string='ZIP File', required=True, attachment=False)
+    zip_file = fields.Binary(string='ZIP File', required=True, attachment=True)
     zip_filename = fields.Char(string='ZIP Filename')
     bc3_filename = fields.Char(string='BC3 Filename', help='Optional. Leave empty to use the first .bc3 file found in the ZIP.')
 

@@ -6,7 +6,7 @@
         <field name="arch" type="xml">
             <form string="Import BC3 Products from ZIP">
                 <group>
-                    <field name="zip_file" filename="zip_filename"/>
+                    <field name="zip_file" widget="binary" filename="zip_filename" options="{'accepted_file_extensions': '.zip'}"/>
                     <field name="zip_filename" invisible="1"/>
                     <field name="bc3_filename" placeholder="Optional: path/to/file.bc3"/>
                 </group>
