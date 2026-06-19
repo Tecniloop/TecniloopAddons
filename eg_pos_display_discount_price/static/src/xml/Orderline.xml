@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="eg_pos_display_discount_price.Orderline" t-inherit="point_of_sale.Orderline"
+       t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('product-price price')]" position="replace">
+
+            <t t-if="this.env.services.pos.config.display_discount_price and line.product_id.discount_price > 0">
+                    <span class="product-stock text-center">
+                        <span style="text-decoration:line-through; color:red;">
+                           $ <t t-esc="line.product_id.lst_price"/>
+                        </span>
+                        <span style="color:#27ae60;">
+                              <div t-if="!props.basic_receipt and !line.combo_parent_id" t-out="line.getPriceString()"
+                                   class="product-price price"
+                                   t-attf-class="{{ props.mode == 'receipt' ? 'font-monospace' : 'fw-bolder' }}"/>
+                        </span>
+                    </span>
+                </t>
+            <t t-else="">
+                     <div t-if="!props.basic_receipt and !line.combo_parent_id" t-out="line.getPriceString()"
+                          class="product-price price"
+                          t-attf-class="{{ props.mode == 'receipt' ? 'font-monospace' : 'fw-bolder' }}"/>
+                </t>
+        </xpath>
+    </t>
+</templates>
+
+

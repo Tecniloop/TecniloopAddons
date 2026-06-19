@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_apps_data_inkerp,access.app.data.inkerp,model_app_data_inkerp,,1,1,1,1
+access_import_apps,access.import.apps,model_import_apps,,1,1,1,1
+access_special_category,access.special.category,model_special_category,,1,1,1,1
