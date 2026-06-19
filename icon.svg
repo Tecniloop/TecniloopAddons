@@ -1,0 +1,163 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <title>Techvaria</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    </head>
+
+    <style>
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .h1,
+        .h2,
+        .h3,
+        .h4,
+        .h5,
+        .h6 {
+            font-weight: 400;
+            line-height: 1.1;
+            color: #212529;
+        }
+        ul {
+            color: #212529;
+        }
+        .ts_btn
+        {
+            border: 2px solid #f78c24 !important;
+            color:#212529 !important;
+        }
+        .button-style {
+          border: 2px solid #f78c24;  /* Set border color */
+          color: #212529;  /* Set text color */
+          background-color: transparent;  /* Keep background transparent */
+          padding: 10px 20px;  /* Add padding for better appearance */
+          font-size: 16px;  /* Set font size */
+          cursor: pointer;  /* Change cursor to pointer when hovered */
+          transition: all 0.3s ease;  /* Smooth transition for hover effect */
+        }
+
+        .button-style:hover {
+          background-color: #f78c24;  /* Add background color on hover */
+          color: white;  /* Change text color to white on hover */
+          border-color: #f78c24;  /* Keep border color same on hover */
+        }
+        .gradient-background {
+            /* Add a gradient background */
+            background: linear-gradient(to right, #ff7e5f, #feb47b); /* Adjust colors as needed */
+            /* Optional: Set height and width to make it visible */
+            height: 300px;
+            width: 100%;
+            
+            /* Optional: Add some padding and center the text */
+            padding: 20px;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+        }
+    </style>
+
+    <body>
+        <!-- HEADER STARTS-->
+        <section>
+            <div class="container">
+                <div class="row justify-content-md-between justify-content-center border-bottom py-2 mx-0">
+                    <div class="text-start mt-4 mb-4 mb-lg-0 ml-md-5 col">
+                        <a class="btn" href="https://techvaria.com/">
+                            <img src="logo.svg" alt="Techvaria" style="height:50px">
+                        </a>
+                    </div>
+                    <div class="col text-end mt-4 mb-4 mb-lg-0 ml-md-5">
+                        <span class="btn btn-sm" style="border: 2px solid #f78c24 !important;">
+                            <i class="fa fa-check"></i> Enterprise</span>
+                        <span class="btn btn-sm" style="border: 2px solid #f78c24 !important;">
+                            <i class="fa fa-check"></i> Community</span>
+                        <span class="btn btn-sm" style="border: 2px solid #f78c24 !important;">
+                            <i class="fa fa-check"></i> Odoo.sh</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- HEADER ENDS-->
+
+    <section>
+        <!-- APP TITLE STARTS -->
+        <a href="#"  style="text-decoration:none" target="_blank">
+            <div class="container">
+                <h1 class="text-center mt-4">
+                    POS Advanced Search
+                </h1>
+                <h3 class="text-center">
+                    Smarter Product Search in Odoo 18 POS
+                </h3>
+                <hr class="w-50 mx-auto" style="border-style:solid;border-top-width:2px;border-color:#f78c24;" />
+            </div>
+        </a>
+        <!-- APP TITLE ENDS -->
+
+        <div class="container">
+            <section class="mt-4" style="border-radius: 20px; background: #764ba2;">
+                <div class="position-relative overflow-hidden" style="border-radius:20px; background-color:white"><img src="image_1.png" alt="App details" class="h-100 w-100 position-relative img-fluid" loading="eager">
+                </div>
+            </section>
+            <section class="mt-4" style="border-radius: 20px; background: #764ba2;">
+                <div class="position-relative overflow-hidden" style="border-radius:20px; background-color:white"><img src="image_2.png" alt="App details" class="h-100 w-100 position-relative img-fluid" loading="eager">
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <!-- FOOTER STARTS -->
+    <section>
+        <div class="container">
+            <section class="mt-4">
+                <h2 class="text-center mt-4"> Our Services </h2>
+                <hr class="w-50 mx-auto" style="border-style:solid;border-top-width:2px;border-color:#f78c24;" />
+                <div class="position-relative overflow-hidden" style="border-radius:20px; background-color:white"><img src="services.png" alt="Our services https://techvaria.com/odoo-implementation2.html" class="h-100 w-100 position-relative img-fluid" loading="eager">
+                </div>
+            </section>
+            <section>
+                <div class="container">
+                    <div style="background-image:url('gradient_2.png'); border-radius: 15px" class="mt-4 mb-4" >
+                        <div style="display: flex; flex-wrap: wrap;" class="justify-content-center">
+                            <div style="flex: 1; min-width: 280px;">
+                                <div style="border-radius: 15px; padding: 20px; height: 100%; display: flex; align-items: center; justify-content: center; transition: border-color 0.3s ease;" onmouseover="this.style.borderColor='#28a745'" onmouseout="this.style.borderColor='#212529'">
+                                    <div style="text-align: center;">
+                                        <h4 style="color: #212529; margin-bottom: 10px;"><i class="fa fa-envelope" style="margin-right: 8px;"></i> E-mail</h4>
+                                        <h5 style="color: #6c757d; margin: 0; word-break: break-word;">info@techvaria.com</h5>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="flex: 1; min-width: 280px;">
+                                <div style="border-radius: 15px; padding: 20px; height: 100%; display: flex; align-items: center; justify-content: center; transition: border-color 0.3s ease;" onmouseover="this.style.borderColor='#28a745'" onmouseout="this.style.borderColor='#212529'">
+                                    <div style="text-align: center;">
+                                        <h4 style="color: #212529; margin-bottom: 10px;"><i class="fa fa-globe" style="margin-right: 8px;"></i> Website</h4>
+                                        <h5 style="color: #6c757d; margin: 0; word-break: break-word;">https://techvaria.com</h5>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="flex: 1; min-width: 280px;">
+                                <div style="border-radius: 15px; padding: 20px; height: 100%; display: flex; align-items: center; justify-content: center; transition: border-color 0.3s ease;" onmouseover="this.style.borderColor='#28a745'" onmouseout="this.style.borderColor='#212529'">
+                                    <div style="text-align: center;">
+                                        <h4 style="color: #212529; margin-bottom: 10px;"><i class="fa fa-address-book" style="margin-right: 8px;"></i> Contact Us</h4>
+                                        <h5 style="color: #6c757d; margin: 0; word-break: break-word;">https://techvaria.com/contact-us.html</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+    <!-- FOOTER ENDS -->
+    </body>
+</html>
