@@ -8,6 +8,12 @@ import mimetypes
 import posixpath
 import re
 import zipfile
+
+try:
+    import rarfile
+except ImportError:  # pragma: no cover - optional runtime dependency
+    rarfile = None
+
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Tuple
 
@@ -19,18 +25,34 @@ EXECUTABLE_EXTENSIONS = {'.exe', '.dll', '.bat', '.cmd', '.com', '.msi', '.ps1',
 
 
 def sanitize_text(value):
-    """Return a PostgreSQL-safe text value.
+    """Return a PostgreSQL-safe, UI-safe text value.
 
-    Some BC3 files include NUL bytes/characters, especially when a source is
-    generated with an unexpected encoding. PostgreSQL refuses text values that
-    contain NUL (0x00), so remove them as early as possible and again before
-    writing user-visible text to Odoo models.
+    PostgreSQL rejects NUL bytes in text columns. BC3 files that are actually
+    compressed archives misread as text may also contain other control
+    characters. Preserve normal whitespace, but remove unsafe C0 controls before
+    writing values to Odoo models.
     """
     if value is None:
         return ''
     if not isinstance(value, str):
         value = str(value)
-    return value.replace('\x00', '')
+    return ''.join(ch for ch in value if ch in ('\t', '\n', '\r') or ord(ch) >= 32)
+
+
+def has_archive_magic(payload: bytes) -> bool:
+    payload = payload or b''
+    return payload.startswith(b'PK\x03\x04') or payload.startswith(b'PK\x05\x06') or payload.startswith(b'PK\x07\x08') or payload.startswith(b'Rar!\x1a\x07\x00') or payload.startswith(b'Rar!\x1a\x07\x01\x00')
+
+
+def is_probably_binary_payload(payload: bytes) -> bool:
+    payload = payload or b''
+    if not payload:
+        return False
+    probe = payload[:8192]
+    if has_archive_magic(probe):
+        return True
+    bad_controls = sum(1 for byte in probe if byte < 32 and byte not in (9, 10, 13, 26))
+    return bad_controls > max(16, len(probe) // 100)
 
 
 def sanitize_value(value):
@@ -120,9 +142,10 @@ class BC3ParseError(Exception):
 
 
 class SafeZipBC3:
-    def __init__(self, zip_bytes: bytes, max_members: int = 2000, max_total_size: int = 250 * 1024 * 1024, max_file_size: int = 75 * 1024 * 1024):
+    archive_label = 'ZIP'
+
+    def __init__(self, zip_bytes: bytes, max_total_size: int = 250 * 1024 * 1024, max_file_size: int = 75 * 1024 * 1024, **kwargs):
         self.zip_bytes = zip_bytes
-        self.max_members = max_members
         self.max_total_size = max_total_size
         self.max_file_size = max_file_size
         self._zip = zipfile.ZipFile(io.BytesIO(zip_bytes))
@@ -147,8 +170,6 @@ class SafeZipBC3:
 
     def _validate_and_index(self):
         infos = self._zip.infolist()
-        if len(infos) > self.max_members:
-            raise BC3ParseError('ZIP has too many files.')
         total_size = 0
         for info in infos:
             if info.is_dir():
@@ -156,9 +177,9 @@ class SafeZipBC3:
             normalized = self._normalize_member_name(info.filename)
             total_size += info.file_size
             if info.file_size > self.max_file_size:
-                raise BC3ParseError('ZIP contains a file larger than the allowed limit: %s' % normalized)
+                raise BC3ParseError('%s contains a file larger than the allowed limit: %s' % (self.archive_label, normalized))
             if total_size > self.max_total_size:
-                raise BC3ParseError('ZIP uncompressed size is larger than the allowed limit.')
+                raise BC3ParseError('%s uncompressed size is larger than the allowed limit.' % self.archive_label)
             self._members.append((normalized, info))
             self._by_path.setdefault(normalized.lower(), info)
             self._by_basename.setdefault(posixpath.basename(normalized).lower(), info)
@@ -169,7 +190,7 @@ class SafeZipBC3:
     def read_bc3(self, bc3_name: Optional[str] = None) -> Tuple[str, bytes]:
         bc3_files = self.list_bc3()
         if not bc3_files:
-            raise BC3ParseError('No BC3 file was found inside the ZIP.')
+            raise BC3ParseError('No BC3 file was found inside the %s.' % self.archive_label)
         selected = bc3_name or bc3_files[0]
         info = self._by_path.get(selected.lower()) or self._by_basename.get(posixpath.basename(selected).lower())
         if not info:
@@ -193,6 +214,87 @@ class SafeZipBC3:
         return normalized, self._zip.read(info)
 
 
+class SafeRarBC3:
+    archive_label = 'RAR'
+
+    def __init__(self, rar_bytes: bytes, max_total_size: int = 250 * 1024 * 1024, max_file_size: int = 75 * 1024 * 1024, **kwargs):
+        if rarfile is None:
+            raise BC3ParseError('RAR support requires the Python package "rarfile" and an extraction backend such as unrar, bsdtar or 7z on the Odoo server.')
+        self.rar_bytes = rar_bytes
+        self.max_total_size = max_total_size
+        self.max_file_size = max_file_size
+        self._rar = rarfile.RarFile(io.BytesIO(rar_bytes))
+        self._members = []
+        self._by_path = {}
+        self._by_basename = {}
+        self._validate_and_index()
+
+    def close(self):
+        self._rar.close()
+
+    def _normalize_member_name(self, name: str) -> str:
+        if not name or '\x00' in name:
+            raise BC3ParseError('Invalid file name in RAR.')
+        normalized = name.replace('\\', '/')
+        if normalized.startswith('/') or re.match(r'^[A-Za-z]:', normalized):
+            raise BC3ParseError('Absolute paths are not allowed in RAR files.')
+        normalized = posixpath.normpath(normalized)
+        if normalized == '.' or normalized.startswith('../') or normalized == '..':
+            raise BC3ParseError('Path traversal is not allowed in RAR files.')
+        return normalized
+
+    def _validate_and_index(self):
+        infos = self._rar.infolist()
+        total_size = 0
+        for info in infos:
+            if info.isdir():
+                continue
+            normalized = self._normalize_member_name(info.filename)
+            total_size += info.file_size
+            if info.file_size > self.max_file_size:
+                raise BC3ParseError('RAR contains a file larger than the allowed limit: %s' % normalized)
+            if total_size > self.max_total_size:
+                raise BC3ParseError('RAR uncompressed size is larger than the allowed limit.')
+            self._members.append((normalized, info))
+            self._by_path.setdefault(normalized.lower(), info)
+            self._by_basename.setdefault(posixpath.basename(normalized).lower(), info)
+
+    def list_bc3(self) -> List[str]:
+        return [name for name, info in self._members if name.lower().endswith('.bc3')]
+
+    def _read_info(self, info):
+        try:
+            return self._rar.read(info)
+        except Exception as exc:
+            raise BC3ParseError('Cannot extract file from RAR. Install/enable a RAR extraction backend on the Odoo server if needed: %s' % exc)
+
+    def read_bc3(self, bc3_name: Optional[str] = None) -> Tuple[str, bytes]:
+        bc3_files = self.list_bc3()
+        if not bc3_files:
+            raise BC3ParseError('No BC3 file was found inside the RAR.')
+        selected = bc3_name or bc3_files[0]
+        info = self._by_path.get(selected.lower()) or self._by_basename.get(posixpath.basename(selected).lower())
+        if not info:
+            raise BC3ParseError('Selected BC3 file was not found: %s' % selected)
+        return self._normalize_member_name(info.filename), self._read_info(info)
+
+    def read_related_file(self, filename: str) -> Tuple[Optional[str], Optional[bytes]]:
+        if not filename:
+            return None, None
+        candidate = filename.strip().replace('\\', '/')
+        candidate = candidate.lstrip('./')
+        key = posixpath.normpath(candidate).lower()
+        base_key = posixpath.basename(candidate).lower()
+        info = self._by_path.get(key) or self._by_basename.get(base_key)
+        if not info:
+            return None, None
+        normalized = self._normalize_member_name(info.filename)
+        ext = posixpath.splitext(normalized.lower())[1]
+        if ext in EXECUTABLE_EXTENSIONS:
+            return normalized, None
+        return normalized, self._read_info(info)
+
+
 class BC3Parser:
     ENCODING_MAP = {
         'ANSI': 'cp1252',
@@ -202,11 +304,18 @@ class BC3Parser:
 
     def parse(self, bc3_bytes: bytes, bc3_filename: str = '') -> BC3Data:
         raw = bc3_bytes.rstrip(b'\x1a')
+        if has_archive_magic(raw):
+            raise BC3ParseError('The selected BC3 payload is an archive. Select or extract the .bc3 file inside the archive before parsing.')
+        if is_probably_binary_payload(raw):
+            raise BC3ParseError('The selected file does not look like a text BC3 file; it contains binary/control data.')
         encoding, charset = self._detect_encoding(raw)
         text = sanitize_text(raw.decode(encoding, errors='replace'))
         data = BC3Data(bc3_filename=bc3_filename, encoding=encoding, charset=charset)
+        recognized_records = 0
         for record_type, fields, raw_record in self._iter_records(text):
             try:
+                if record_type in ('V', 'C', 'T', 'X', 'G', 'F'):
+                    recognized_records += 1
                 if record_type == 'V':
                     self._parse_v(fields, data)
                 elif record_type == 'C':
@@ -226,6 +335,8 @@ class BC3Parser:
                     self._parse_f(fields, data)
             except Exception as exc:
                 data.warnings.append('Cannot parse ~%s record: %s' % (record_type, exc))
+        if recognized_records == 0 or not data.concepts:
+            raise BC3ParseError('The selected file does not look like a valid FIEBDC/BC3 file: no product concepts were found.')
         return data
 
     def _detect_encoding(self, raw: bytes) -> Tuple[str, str]:

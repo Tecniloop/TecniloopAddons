@@ -118,3 +118,11 @@ En el mantenimiento de fabricantes se ha anadido la opcion **Permitir SSL sin ve
 - Removed the direct menu entry to the legacy file import wizard from the BC3 / FIEBDC app menus.
 - Reordered the top app menus so Operations appears before Configuration.
 
+
+## 19.0.1.0.19
+
+- URL/import sources can now be plain `.bc3`, `.zip`, or `.rar` files.
+- ZIP and RAR inputs are treated through archive-specific extraction paths before parsing.
+- Removed the limit by number of files inside ZIP/RAR archives; safety checks now focus on size limits, path traversal, executable attachments, and valid BC3 content.
+- Added binary/archive detection before BC3 parsing to prevent compressed data from creating products with garbled text.
+- Kept the legacy direct importer menu inactive so it does not appear in the Odoo root menu after updates.

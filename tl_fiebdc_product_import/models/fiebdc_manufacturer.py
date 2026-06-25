@@ -23,6 +23,7 @@ from .fiebdc_parser import (
     BC3ParseError,
     BC3Parser,
     SafeZipBC3,
+    SafeRarBC3,
     EXECUTABLE_EXTENSIONS,
     b64,
     guess_mimetype,
@@ -127,7 +128,7 @@ class FiebdcUrlResourceHandler:
 
 
 class FiebdcZipUrlResourceHandler:
-    """Read related files first from the downloaded ZIP and then from URLs."""
+    """Read related files first from the downloaded archive and then from URLs."""
 
     def __init__(self, manufacturer, data, zip_handler):
         self.zip_handler = zip_handler
@@ -149,10 +150,10 @@ class FiebdcManufacturer(models.Model):
     name = fields.Char(string='Fabricante', required=True, tracking=True)
     active = fields.Boolean(default=True)
     bc3_url = fields.Char(
-        string='URL del fichero BC3',
+        string='URL del fichero BC3/ZIP/RAR',
         required=True,
         tracking=True,
-        help='URL HTTP/HTTPS desde la que se descargara el fichero BC3 del fabricante.',
+        help='URL HTTP/HTTPS desde la que se descargara el fichero BC3, ZIP o RAR del fabricante.',
     )
     bc3_filename = fields.Char(
         string='Nombre del BC3',
@@ -173,7 +174,7 @@ class FiebdcManufacturer(models.Model):
         default=500,
         required=True,
         help=(
-            'Tamano maximo permitido para descargar el fichero BC3 principal desde la URL. '
+            'Tamano maximo permitido para descargar el fichero principal desde la URL. '
             'Aumente este valor solo para fabricantes de confianza con catalogos grandes.'
         ),
     )
@@ -414,6 +415,21 @@ class FiebdcManufacturer(models.Model):
         except Exception:
             return False
 
+    def _is_rar_payload(self, filename, payload):
+        if not payload:
+            return False
+        clean_name = sanitize_text(filename).lower()
+        if clean_name.endswith('.rar'):
+            return True
+        return payload.startswith(b'Rar!\x1a\x07\x00') or payload.startswith(b'Rar!\x1a\x07\x01\x00')
+
+    def _archive_handler_for_payload(self, filename, payload):
+        if self._is_zip_payload(filename, payload):
+            return SafeZipBC3(payload, **self._zip_limits())
+        if self._is_rar_payload(filename, payload):
+            return SafeRarBC3(payload, **self._zip_limits())
+        return None
+
     def _zip_limits(self):
         bc3_limit = self._download_limit_bytes(self.max_bc3_download_size_mb, default_mb=500)
         related_limit = self._download_limit_bytes(self.max_related_file_size_mb, default_mb=75)
@@ -422,18 +438,18 @@ class FiebdcManufacturer(models.Model):
             'max_file_size': max(bc3_limit, related_limit),
         }
 
-    def _selected_bc3_name_for_zip(self):
+    def _selected_bc3_name_for_archive(self):
         name = sanitize_text(self.bc3_filename or '').strip()
         return name if name.lower().endswith('.bc3') else None
 
     def _parse_bc3_url(self):
         try:
             filename, payload = self._download_url(self.bc3_url, required=True)
-            if self._is_zip_payload(filename, payload):
-                zip_handler = SafeZipBC3(payload, **self._zip_limits())
-                bc3_name, bc3_bytes = zip_handler.read_bc3(self._selected_bc3_name_for_zip())
+            archive_handler = self._archive_handler_for_payload(filename, payload)
+            if archive_handler:
+                bc3_name, bc3_bytes = archive_handler.read_bc3(self._selected_bc3_name_for_archive())
                 data = BC3Parser().parse(bc3_bytes, sanitize_text(bc3_name))
-                return data, FiebdcZipUrlResourceHandler(self, data, zip_handler)
+                return data, FiebdcZipUrlResourceHandler(self, data, archive_handler)
             bc3_name = sanitize_text(self.bc3_filename or filename or 'download.bc3')
             data = BC3Parser().parse(payload, bc3_name)
             return data, FiebdcUrlResourceHandler(self, data)
@@ -442,7 +458,7 @@ class FiebdcManufacturer(models.Model):
         except Exception as exc:
             if isinstance(exc, UserError):
                 raise
-            raise UserError(_('Cannot read the BC3 URL: %s') % exc)
+            raise UserError(_('Cannot read the BC3/ZIP/RAR URL: %s') % exc)
 
     def _create_or_update_product(self, concept, data):
         Product = self.env['product.template'].sudo()

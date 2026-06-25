@@ -45,7 +45,7 @@
                         <group>
                             <field name="name"/>
                             <field name="active" invisible="1"/>
-                            <field name="bc3_url" placeholder="https://fabricante.example/catalogo.bc3"/>
+                            <field name="bc3_url" placeholder="https://fabricante.example/catalogo.bc3, .zip o .rar"/>
                             <field name="bc3_filename" placeholder="Opcional: catalogo.bc3"/>
                             <field name="allow_insecure_ssl"/>
                             <field name="max_bc3_download_size_mb"/>

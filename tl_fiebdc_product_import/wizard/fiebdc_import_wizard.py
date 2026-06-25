@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import base64
 import html
+import io
 import ipaddress
 import posixpath
 import socket
@@ -22,6 +23,7 @@ from ..models.fiebdc_parser import (
     BC3ParseError,
     BC3Parser,
     SafeZipBC3,
+    SafeRarBC3,
     b64,
     guess_mimetype,
     json_dumps,
@@ -31,39 +33,45 @@ from ..models.fiebdc_parser import (
 )
 
 
+
+class EmptyResourceHandler:
+    def read_related_file(self, filename):
+        return None, None
+
+
 class FiebdcImportWizard(models.TransientModel):
     _name = 'fiebdc.import.wizard'
     _description = 'Import FIEBDC BC3 Products'
 
     source_type = fields.Selection([
-        ('upload', 'Subir ZIP'),
-        ('url', 'Descargar ZIP desde URL'),
+        ('upload', 'Subir archivo'),
+        ('url', 'Descargar archivo desde URL'),
     ], string='Origen', default='upload', required=True)
     zip_attachment_ids = fields.Many2many(
         'ir.attachment',
         'fiebdc_import_wizard_ir_attachment_rel',
         'wizard_id',
         'attachment_id',
-        string='ZIP File',
-        help='Upload one ZIP file containing the BC3 and related images/PDFs.',
+        string='Archivo BC3/ZIP/RAR',
+        help='Upload one BC3, ZIP or RAR file containing the BC3 and related images/PDFs.',
     )
     # Main upload field. The filename is stored separately in zip_filename.
     # It must be Binary for the Odoo web client to render an upload control with widget="binary".
-    zip_file = fields.Binary(string='ZIP File', attachment=False)
-    zip_filename = fields.Char(string='ZIP Filename')
+    zip_file = fields.Binary(string='Archivo BC3/ZIP/RAR', attachment=False)
+    zip_filename = fields.Char(string='Nombre archivo')
     zip_url = fields.Char(
-        string='URL del ZIP',
-        help='URL HTTP/HTTPS desde la que descargar un ZIP con el BC3 y sus adjuntos. Evita el limite de subida del navegador/proxy.',
+        string='URL del archivo',
+        help='URL HTTP/HTTPS desde la que descargar un BC3, ZIP o RAR con el BC3 y sus adjuntos. Evita el limite de subida del navegador/proxy.',
     )
     allow_insecure_ssl = fields.Boolean(
         string='Permitir SSL sin verificar',
         help='Usar solo para URLs de confianza con una cadena SSL no verificable.',
     )
     max_zip_download_size_mb = fields.Integer(
-        string='Limite descarga ZIP (MB)',
+        string='Limite descarga archivo (MB)',
         default=500,
         required=True,
-        help='Tamano maximo permitido para descargar el ZIP desde URL.',
+        help='Tamano maximo permitido para descargar el archivo desde URL.',
     )
     bc3_filename = fields.Char(string='BC3 Filename', help='Optional. Leave empty to use the first .bc3 file found in the ZIP.')
 
@@ -216,10 +224,10 @@ class FiebdcImportWizard(models.TransientModel):
     def _download_zip_url(self):
         self.ensure_one()
         if not self.zip_url:
-            raise UserError(_('Please enter a ZIP URL.'))
+            raise UserError(_('Please enter a file URL.'))
         max_size = self._download_limit_bytes(self.max_zip_download_size_mb, default_mb=500)
         parsed = self._validate_download_url(self.zip_url)
-        filename = sanitize_text(posixpath.basename(urllib.parse.unquote(parsed.path)) or 'import.zip')
+        filename = sanitize_text(posixpath.basename(urllib.parse.unquote(parsed.path)) or 'import.bc3')
         try:
             request = urllib.request.Request(self.zip_url, headers={'User-Agent': 'Odoo-FIEBDC-BC3-Importer/1.0'})
             with urllib.request.urlopen(request, timeout=30, context=self._get_ssl_context()) as response:
@@ -241,15 +249,15 @@ class FiebdcImportWizard(models.TransientModel):
                     chunks.append(chunk)
                 payload = b''.join(chunks)
                 if not payload:
-                    raise UserError(_('The downloaded ZIP file is empty.'))
+                    raise UserError(_('The downloaded file is empty.'))
                 self.zip_filename = filename
                 return payload, filename
         except UserError:
             raise
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError, ssl.SSLError, ValueError) as exc:
-            raise UserError(_('Cannot download ZIP URL %s: %s') % (self.zip_url, exc))
+            raise UserError(_('Cannot download file URL %s: %s') % (self.zip_url, exc))
 
-    def _get_uploaded_zip(self):
+    def _get_uploaded_archive(self):
         self.ensure_one()
         if self.source_type == 'url':
             return self._download_zip_url()
@@ -257,38 +265,70 @@ class FiebdcImportWizard(models.TransientModel):
         attachments = self.zip_attachment_ids
         if attachments:
             if len(attachments) != 1:
-                raise UserError(_('Please upload exactly one ZIP file.'))
+                raise UserError(_('Please upload exactly one BC3, ZIP or RAR file.'))
             attachment = attachments[0].sudo()
-            filename = attachment.name or self.zip_filename or 'import.zip'
-            if not filename.lower().endswith('.zip'):
-                raise UserError(_('The uploaded file must be a .zip file.'))
+            filename = attachment.name or self.zip_filename or 'import.bc3'
             if not attachment.datas:
-                raise UserError(_('The uploaded ZIP file is empty.'))
+                raise UserError(_('The uploaded file is empty.'))
             return base64.b64decode(attachment.datas), filename
 
         if self.zip_file:
-            filename = self.zip_filename or 'import.zip'
-            if filename and not filename.lower().endswith('.zip'):
-                raise UserError(_('The uploaded file must be a .zip file.'))
+            filename = self.zip_filename or 'import.bc3'
             return base64.b64decode(self.zip_file), filename
 
-        raise UserError(_('Please upload a ZIP file or choose URL as source.'))
+        raise UserError(_('Please upload a BC3, ZIP or RAR file or choose URL as source.'))
+
+    def _is_zip_payload(self, filename, payload):
+        if not payload:
+            return False
+        if sanitize_text(filename).lower().endswith('.zip'):
+            return True
+        try:
+            return zipfile.is_zipfile(io.BytesIO(payload))
+        except Exception:
+            return False
+
+    def _is_rar_payload(self, filename, payload):
+        if not payload:
+            return False
+        clean_name = sanitize_text(filename).lower()
+        if clean_name.endswith('.rar'):
+            return True
+        return payload.startswith(b'Rar!\x1a\x07\x00') or payload.startswith(b'Rar!\x1a\x07\x01\x00')
+
+    def _archive_limits(self):
+        max_size = self._download_limit_bytes(self.max_zip_download_size_mb, default_mb=500)
+        return {
+            'max_total_size': max(max_size * 4, 250 * 1024 * 1024),
+            'max_file_size': max_size,
+        }
+
+    def _archive_handler_for_payload(self, filename, payload):
+        if self._is_zip_payload(filename, payload):
+            return SafeZipBC3(payload, **self._archive_limits())
+        if self._is_rar_payload(filename, payload):
+            return SafeRarBC3(payload, **self._archive_limits())
+        return None
 
     def _parse_zip(self):
         try:
-            zip_bytes, filename = self._get_uploaded_zip()
+            payload, filename = self._get_uploaded_archive()
             if filename and not self.zip_filename:
                 self.zip_filename = filename
-            zip_handler = SafeZipBC3(zip_bytes, max_total_size=max(self._download_limit_bytes(self.max_zip_download_size_mb, default_mb=500) * 4, 250 * 1024 * 1024), max_file_size=self._download_limit_bytes(self.max_zip_download_size_mb, default_mb=500))
-            bc3_name, bc3_bytes = zip_handler.read_bc3(self.bc3_filename)
-            data = BC3Parser().parse(bc3_bytes, bc3_name)
-            return data, zip_handler
+            archive_handler = self._archive_handler_for_payload(filename, payload)
+            if archive_handler:
+                bc3_name, bc3_bytes = archive_handler.read_bc3(self.bc3_filename)
+                data = BC3Parser().parse(bc3_bytes, bc3_name)
+                return data, archive_handler
+            bc3_name = sanitize_text(self.bc3_filename or filename or 'import.bc3')
+            data = BC3Parser().parse(payload, bc3_name)
+            return data, EmptyResourceHandler()
         except zipfile.BadZipFile as exc:  # noqa: F821
             raise UserError(_('Invalid ZIP file: %s') % exc)
         except BC3ParseError as exc:
             raise UserError(str(exc))
         except Exception as exc:
-            raise UserError(_('Cannot read the ZIP/BC3 file: %s') % exc)
+            raise UserError(_('Cannot read the BC3/ZIP/RAR file: %s') % exc)
 
     def _create_or_update_product(self, concept, data):
         Product = self.env['product.template'].sudo()

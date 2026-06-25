@@ -8,8 +8,15 @@
         <field name="active" eval="True"/>
     </record>
 
-    <!-- Remove the legacy direct importer menu created by older versions. -->
-    <delete model="ir.ui.menu" search="[('name', '=', 'Importar productos BC3'), ('action', '=', 'ir.actions.act_window,%d' % ref('action_fiebdc_import_wizard'))]"/>
+    <!-- Hide the legacy direct importer menu created by older versions.
+         Keeping the XML id inactive avoids recreating it on update while ensuring
+         it no longer appears as a direct Odoo menu entry. -->
+    <record id="menu_fiebdc_import" model="ir.ui.menu">
+        <field name="name">Importar productos BC3</field>
+        <field name="parent_id" ref="menu_fiebdc_root"/>
+        <field name="action" eval="'ir.actions.act_window,%d' % ref('action_fiebdc_import_wizard')"/>
+        <field name="active" eval="False"/>
+    </record>
 
     <menuitem id="menu_fiebdc_operations" name="Operaciones" parent="menu_fiebdc_root" sequence="10"/>
     <menuitem id="menu_fiebdc_import_history" name="Historial de importaciones" parent="menu_fiebdc_operations" action="action_fiebdc_import_batch" sequence="20"/>
