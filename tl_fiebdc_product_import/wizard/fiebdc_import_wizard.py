@@ -1,11 +1,22 @@
 # -*- coding: utf-8 -*-
 import base64
 import html
+import ipaddress
 import posixpath
+import socket
+import ssl
+import urllib.error
+import urllib.parse
+import urllib.request
 import zipfile
 
 from odoo import _, fields, models
 from odoo.exceptions import UserError
+
+try:
+    import certifi
+except ImportError:  # pragma: no cover - optional runtime dependency
+    certifi = None
 
 from ..models.fiebdc_parser import (
     BC3ParseError,
@@ -24,6 +35,10 @@ class FiebdcImportWizard(models.TransientModel):
     _name = 'fiebdc.import.wizard'
     _description = 'Import FIEBDC BC3 Products'
 
+    source_type = fields.Selection([
+        ('upload', 'Subir ZIP'),
+        ('url', 'Descargar ZIP desde URL'),
+    ], string='Origen', default='upload', required=True)
     zip_attachment_ids = fields.Many2many(
         'ir.attachment',
         'fiebdc_import_wizard_ir_attachment_rel',
@@ -34,8 +49,22 @@ class FiebdcImportWizard(models.TransientModel):
     )
     # Main upload field. The filename is stored separately in zip_filename.
     # It must be Binary for the Odoo web client to render an upload control with widget="binary".
-    zip_file = fields.Binary(string='ZIP File', required=True, attachment=False)
+    zip_file = fields.Binary(string='ZIP File', attachment=False)
     zip_filename = fields.Char(string='ZIP Filename')
+    zip_url = fields.Char(
+        string='URL del ZIP',
+        help='URL HTTP/HTTPS desde la que descargar un ZIP con el BC3 y sus adjuntos. Evita el limite de subida del navegador/proxy.',
+    )
+    allow_insecure_ssl = fields.Boolean(
+        string='Permitir SSL sin verificar',
+        help='Usar solo para URLs de confianza con una cadena SSL no verificable.',
+    )
+    max_zip_download_size_mb = fields.Integer(
+        string='Limite descarga ZIP (MB)',
+        default=500,
+        required=True,
+        help='Tamano maximo permitido para descargar el ZIP desde URL.',
+    )
     bc3_filename = fields.Char(string='BC3 Filename', help='Optional. Leave empty to use the first .bc3 file found in the ZIP.')
 
     update_existing = fields.Boolean(string='Update Existing Products', default=True)
@@ -75,6 +104,7 @@ class FiebdcImportWizard(models.TransientModel):
         warning_rows = ''.join('<li>%s</li>' % html.escape(sanitize_text(w)) for w in data.warnings[:20])
         self.preview_html = '''
             <p><b>BC3:</b> %s<br/>
+            <b>Origen:</b> %s<br/>
             <b>Encoding:</b> %s<br/>
             <b>Total concepts:</b> %s<br/>
             <b>Importable concepts:</b> %s</p>
@@ -85,6 +115,7 @@ class FiebdcImportWizard(models.TransientModel):
             %s
         ''' % (
             html.escape(sanitize_text(data.bc3_filename)),
+            html.escape(sanitize_text(self.zip_url if self.source_type == 'url' else self.zip_filename)),
             html.escape(sanitize_text(data.encoding)),
             len(data.concepts),
             len(importable),
@@ -98,9 +129,9 @@ class FiebdcImportWizard(models.TransientModel):
         data, zip_handler = self._parse_zip()
         importable = data.importable_concepts(self.import_type_4, self.import_type_5)
         batch = self.env['fiebdc.import.batch'].sudo().create({
-            'name': sanitize_text(self.zip_filename) or 'FIEBDC Import',
+            'name': sanitize_text(self.zip_filename or self.zip_url) or 'FIEBDC Import',
             'zip_filename': sanitize_text(self.zip_filename),
-            'bc3_url': False,
+            'bc3_url': sanitize_text(self.zip_url) if self.source_type == 'url' else False,
             'bc3_filename': sanitize_text(data.bc3_filename),
             'total_concepts': len(data.concepts),
             'importable_concepts': len(importable),
@@ -137,8 +168,92 @@ class FiebdcImportWizard(models.TransientModel):
         batch.write({'state': state, **counters})
         return self._open_batch(batch)
 
+    def _has_control_chars(self, value):
+        return any(ord(ch) < 32 or ord(ch) == 127 for ch in sanitize_text(value))
+
+    def _validate_download_url(self, url):
+        if self._has_control_chars(url):
+            raise UserError(_('URL cannot contain control characters.'))
+        parsed = urllib.parse.urlparse(url or '')
+        if parsed.scheme not in ('http', 'https') or not parsed.netloc:
+            raise UserError(_('Only HTTP/HTTPS URLs are allowed.'))
+        hostname = parsed.hostname
+        if not hostname:
+            raise UserError(_('The URL does not contain a valid host.'))
+        try:
+            for addr_info in socket.getaddrinfo(hostname, None):
+                ip = ipaddress.ip_address(addr_info[4][0])
+                if ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_private or ip.is_reserved:
+                    raise UserError(_('The URL host resolves to a private or reserved address and was blocked.'))
+        except UserError:
+            raise
+        except Exception as exc:
+            raise UserError(_('Cannot resolve URL host: %s') % exc)
+        return parsed
+
+    def _get_ssl_context(self):
+        if self.allow_insecure_ssl:
+            return ssl._create_unverified_context()
+        if certifi:
+            return ssl.create_default_context(cafile=certifi.where())
+        return ssl.create_default_context()
+
+    def _download_limit_bytes(self, size_mb, default_mb=500):
+        try:
+            size_mb = int(size_mb or 0)
+        except (TypeError, ValueError):
+            size_mb = 0
+        if size_mb <= 0:
+            size_mb = default_mb
+        return size_mb * 1024 * 1024
+
+    def _raise_size_limit_error(self, max_size):
+        raise UserError(_(
+            'The remote file is larger than the allowed limit (%s MB). '
+            'Increase the URL download limit if this file is trusted.'
+        ) % int(max_size / 1024 / 1024))
+
+    def _download_zip_url(self):
+        self.ensure_one()
+        if not self.zip_url:
+            raise UserError(_('Please enter a ZIP URL.'))
+        max_size = self._download_limit_bytes(self.max_zip_download_size_mb, default_mb=500)
+        parsed = self._validate_download_url(self.zip_url)
+        filename = sanitize_text(posixpath.basename(urllib.parse.unquote(parsed.path)) or 'import.zip')
+        try:
+            request = urllib.request.Request(self.zip_url, headers={'User-Agent': 'Odoo-FIEBDC-BC3-Importer/1.0'})
+            with urllib.request.urlopen(request, timeout=30, context=self._get_ssl_context()) as response:
+                final_url = response.geturl()
+                final_parsed = self._validate_download_url(final_url)
+                filename = sanitize_text(posixpath.basename(urllib.parse.unquote(final_parsed.path)) or filename)
+                content_length = response.headers.get('Content-Length')
+                if content_length and int(content_length) > max_size:
+                    self._raise_size_limit_error(max_size)
+                chunks = []
+                total = 0
+                while True:
+                    chunk = response.read(1024 * 1024)
+                    if not chunk:
+                        break
+                    total += len(chunk)
+                    if total > max_size:
+                        self._raise_size_limit_error(max_size)
+                    chunks.append(chunk)
+                payload = b''.join(chunks)
+                if not payload:
+                    raise UserError(_('The downloaded ZIP file is empty.'))
+                self.zip_filename = filename
+                return payload, filename
+        except UserError:
+            raise
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError, ssl.SSLError, ValueError) as exc:
+            raise UserError(_('Cannot download ZIP URL %s: %s') % (self.zip_url, exc))
+
     def _get_uploaded_zip(self):
         self.ensure_one()
+        if self.source_type == 'url':
+            return self._download_zip_url()
+
         attachments = self.zip_attachment_ids
         if attachments:
             if len(attachments) != 1:
@@ -157,14 +272,14 @@ class FiebdcImportWizard(models.TransientModel):
                 raise UserError(_('The uploaded file must be a .zip file.'))
             return base64.b64decode(self.zip_file), filename
 
-        raise UserError(_('Please upload a ZIP file.'))
+        raise UserError(_('Please upload a ZIP file or choose URL as source.'))
 
     def _parse_zip(self):
         try:
             zip_bytes, filename = self._get_uploaded_zip()
             if filename and not self.zip_filename:
                 self.zip_filename = filename
-            zip_handler = SafeZipBC3(zip_bytes)
+            zip_handler = SafeZipBC3(zip_bytes, max_total_size=max(self._download_limit_bytes(self.max_zip_download_size_mb, default_mb=500) * 4, 250 * 1024 * 1024), max_file_size=self._download_limit_bytes(self.max_zip_download_size_mb, default_mb=500))
             bc3_name, bc3_bytes = zip_handler.read_bc3(self.bc3_filename)
             data = BC3Parser().parse(bc3_bytes, bc3_name)
             return data, zip_handler

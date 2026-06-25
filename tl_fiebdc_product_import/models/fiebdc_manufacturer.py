@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import base64
 import html
+import io
 import ipaddress
 import posixpath
 import socket
 import ssl
+import zipfile
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -20,6 +22,7 @@ except ImportError:  # pragma: no cover - optional runtime dependency
 from .fiebdc_parser import (
     BC3ParseError,
     BC3Parser,
+    SafeZipBC3,
     EXECUTABLE_EXTENSIONS,
     b64,
     guess_mimetype,
@@ -42,6 +45,15 @@ class FiebdcUrlResourceHandler:
         self.manufacturer = manufacturer
         self.data = data
 
+    def _has_control_chars(self, value):
+        return any(ord(ch) < 32 or ord(ch) == 127 for ch in sanitize_text(value))
+
+    def _is_safe_reference(self, value):
+        value = sanitize_text(value).strip()
+        if not value or self._has_control_chars(value):
+            return False
+        return True
+
     def _as_directory_url(self, url):
         if not url:
             return ''
@@ -58,17 +70,19 @@ class FiebdcUrlResourceHandler:
         return urllib.parse.urlunparse(parsed._replace(path=path, params='', query='', fragment=''))
 
     def _candidate_urls(self, ref):
-        filename = (ref.filename or '').strip().replace('\\', '/')
-        if not filename:
+        filename = sanitize_text(ref.filename or '').strip().replace('\\', '/')
+        if not self._is_safe_reference(filename):
             return []
         parsed_filename = urllib.parse.urlparse(filename)
         if parsed_filename.scheme in ('http', 'https'):
-            return [filename]
+            return [filename] if self._is_safe_reference(filename) else []
 
         candidates = []
         source_dir = self._as_directory_url(self.manufacturer.bc3_url)
         data_base = self._as_directory_url(self.data.url_base)
-        ref_ext = (ref.url_ext or '').strip().replace('\\', '/')
+        ref_ext = sanitize_text(ref.url_ext or '').strip().replace('\\', '/')
+        if ref_ext and not self._is_safe_reference(ref_ext):
+            ref_ext = ''
         ref_ext_parsed = urllib.parse.urlparse(ref_ext)
 
         if ref_ext:
@@ -83,11 +97,11 @@ class FiebdcUrlResourceHandler:
             if base:
                 candidates.append(urllib.parse.urljoin(base, filename.lstrip('/')))
 
-        # Keep order while removing duplicates.
+        # Keep order while removing duplicates and discard invalid/control-character URLs.
         seen = set()
         result = []
         for url in candidates:
-            if url and url not in seen:
+            if url and url not in seen and self._is_safe_reference(url):
                 result.append(url)
                 seen.add(url)
         return result
@@ -110,6 +124,20 @@ class FiebdcUrlResourceHandler:
             if payload:
                 return normalized_name, payload
         return None, None
+
+
+class FiebdcZipUrlResourceHandler:
+    """Read related files first from the downloaded ZIP and then from URLs."""
+
+    def __init__(self, manufacturer, data, zip_handler):
+        self.zip_handler = zip_handler
+        self.url_handler = FiebdcUrlResourceHandler(manufacturer, data)
+
+    def read_related_file(self, ref):
+        normalized_name, payload = self.zip_handler.read_related_file(sanitize_text(ref.filename))
+        if normalized_name:
+            return sanitize_text(normalized_name), payload
+        return self.url_handler.read_related_file(ref)
 
 
 class FiebdcManufacturer(models.Model):
@@ -271,7 +299,12 @@ class FiebdcManufacturer(models.Model):
             raise UserError(_('This manufacturer has no imports yet.'))
         return self._open_batch(self.last_import_batch_id)
 
+    def _has_control_chars(self, value):
+        return any(ord(ch) < 32 or ord(ch) == 127 for ch in sanitize_text(value))
+
     def _validate_download_url(self, url):
+        if self._has_control_chars(url):
+            raise UserError(_('URL cannot contain control characters.'))
         parsed = urllib.parse.urlparse(url or '')
         if parsed.scheme not in ('http', 'https') or not parsed.netloc:
             raise UserError(_('Only HTTP/HTTPS URLs are allowed.'))
@@ -359,7 +392,7 @@ class FiebdcManufacturer(models.Model):
             if required:
                 raise
             return filename, None
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError, ssl.SSLError) as exc:
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError, ssl.SSLError, ValueError) as exc:
             if required:
                 if self._is_ssl_certificate_error(exc) and not self.allow_insecure_ssl:
                     raise UserError(_(
@@ -371,11 +404,38 @@ class FiebdcManufacturer(models.Model):
                 raise UserError(_('Cannot download URL %s: %s') % (url, exc))
             return filename, None
 
+    def _is_zip_payload(self, filename, payload):
+        if not payload:
+            return False
+        if sanitize_text(filename).lower().endswith('.zip'):
+            return True
+        try:
+            return zipfile.is_zipfile(io.BytesIO(payload))
+        except Exception:
+            return False
+
+    def _zip_limits(self):
+        bc3_limit = self._download_limit_bytes(self.max_bc3_download_size_mb, default_mb=500)
+        related_limit = self._download_limit_bytes(self.max_related_file_size_mb, default_mb=75)
+        return {
+            'max_total_size': max(bc3_limit, related_limit) * 4,
+            'max_file_size': max(bc3_limit, related_limit),
+        }
+
+    def _selected_bc3_name_for_zip(self):
+        name = sanitize_text(self.bc3_filename or '').strip()
+        return name if name.lower().endswith('.bc3') else None
+
     def _parse_bc3_url(self):
         try:
-            filename, bc3_bytes = self._download_url(self.bc3_url, required=True)
+            filename, payload = self._download_url(self.bc3_url, required=True)
+            if self._is_zip_payload(filename, payload):
+                zip_handler = SafeZipBC3(payload, **self._zip_limits())
+                bc3_name, bc3_bytes = zip_handler.read_bc3(self._selected_bc3_name_for_zip())
+                data = BC3Parser().parse(bc3_bytes, sanitize_text(bc3_name))
+                return data, FiebdcZipUrlResourceHandler(self, data, zip_handler)
             bc3_name = sanitize_text(self.bc3_filename or filename or 'download.bc3')
-            data = BC3Parser().parse(bc3_bytes, bc3_name)
+            data = BC3Parser().parse(payload, bc3_name)
             return data, FiebdcUrlResourceHandler(self, data)
         except BC3ParseError as exc:
             raise UserError(str(exc))
