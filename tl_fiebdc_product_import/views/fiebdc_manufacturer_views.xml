@@ -70,6 +70,7 @@
                                 <field name="import_attachments"/>
                                 <field name="skip_duplicate_attachments"/>
                                 <field name="dry_run"/>
+                                <field name="import_batch_size"/>
                             </group>
                         </page>
                         <page string="Vista previa">

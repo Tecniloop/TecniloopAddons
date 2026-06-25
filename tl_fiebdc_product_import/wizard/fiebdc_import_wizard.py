@@ -93,6 +93,12 @@ class FiebdcImportWizard(models.TransientModel):
     overwrite_image = fields.Boolean(string='Overwrite Existing Product Image')
     skip_duplicate_attachments = fields.Boolean(string='Skip Duplicate Attachments', default=True)
     dry_run = fields.Boolean(string='Preview Only', default=False)
+    import_batch_size = fields.Integer(
+        string='Registros por lote',
+        default=200,
+        required=True,
+        help='Numero de productos que se procesan antes de guardar avance en la base de datos.',
+    )
 
     preview_html = fields.Html(string='Preview', readonly=True)
 
@@ -143,6 +149,8 @@ class FiebdcImportWizard(models.TransientModel):
             'bc3_filename': sanitize_text(data.bc3_filename),
             'total_concepts': len(data.concepts),
             'importable_concepts': len(importable),
+            'batch_size': max(int(self.import_batch_size or 200), 1),
+            'state': 'running' if importable and not self.dry_run else 'draft',
         })
         counters = {
             'created_products': 0,
@@ -158,22 +166,29 @@ class FiebdcImportWizard(models.TransientModel):
             batch.write({'state': 'done', **counters})
             return self._open_batch(batch)
 
+        batch_size = max(int(self.import_batch_size or 200), 1)
+        processed = 0
         for concept in importable:
             try:
-                product, created = self._create_or_update_product(concept, data)
-                if not product:
-                    counters['skipped_products'] += 1
-                    continue
-                if created:
-                    counters['created_products'] += 1
-                else:
-                    counters['updated_products'] += 1
-                counters['attachments_created'] += self._import_concept_attachments(product, concept, zip_handler, batch)
+                with self.env.cr.savepoint():
+                    product, created = self._create_or_update_product(concept, data)
+                    if not product:
+                        counters['skipped_products'] += 1
+                    else:
+                        if created:
+                            counters['created_products'] += 1
+                        else:
+                            counters['updated_products'] += 1
+                        counters['attachments_created'] += self._import_concept_attachments(product, concept, zip_handler, batch)
             except Exception as exc:
                 counters['error_count'] += 1
                 self._log(batch, 'error', concept.code, str(exc))
+            processed += 1
+            if processed % batch_size == 0:
+                batch.write({'state': 'partial', 'processed_concepts': processed, **counters})
+                self.env.cr.commit()
         state = 'error' if counters['error_count'] else 'done'
-        batch.write({'state': state, **counters})
+        batch.write({'state': state, 'processed_concepts': processed, 'finished_at': fields.Datetime.now(), **counters})
         return self._open_batch(batch)
 
     def _has_control_chars(self, value):

@@ -35,6 +35,7 @@
                         <field name="import_attachments"/>
                         <field name="skip_duplicate_attachments"/>
                         <field name="dry_run"/>
+                                <field name="import_batch_size"/>
                     </group>
                     <field name="preview_html" nolabel="1" readonly="1"/>
                 </sheet>

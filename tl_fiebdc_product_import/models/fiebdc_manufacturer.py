@@ -2,6 +2,7 @@
 import base64
 import html
 import io
+import json
 import ipaddress
 import posixpath
 import socket
@@ -22,6 +23,9 @@ except ImportError:  # pragma: no cover - optional runtime dependency
 from .fiebdc_parser import (
     BC3ParseError,
     BC3Parser,
+    BC3Data,
+    BC3Concept,
+    BC3AttachmentRef,
     SafeZipBC3,
     SafeRarBC3,
     EXECUTABLE_EXTENSIONS,
@@ -206,6 +210,12 @@ class FiebdcManufacturer(models.Model):
     overwrite_image = fields.Boolean(string='Overwrite Existing Product Image')
     skip_duplicate_attachments = fields.Boolean(string='Skip Duplicate Attachments', default=True)
     dry_run = fields.Boolean(string='Preview Only', default=False)
+    import_batch_size = fields.Integer(
+        string='Registros por lote',
+        default=200,
+        required=True,
+        help='Numero de productos que se procesan en cada lote para evitar timeouts con catalogos grandes.',
+    )
 
     preview_html = fields.Html(string='Preview', readonly=True)
     last_import_batch_id = fields.Many2one('fiebdc.import.batch', string='Ultima importacion', readonly=True, copy=False)
@@ -249,49 +259,34 @@ class FiebdcManufacturer(models.Model):
 
     def action_import(self):
         self.ensure_one()
-        data, resource_handler = self._parse_bc3_url()
+        data, _resource_handler, source_filename, source_payload = self._load_bc3_url()
         importable = data.importable_concepts(self.import_type_4, self.import_type_5)
+        batch_size = max(int(self.import_batch_size or 200), 1)
         batch = self.env['fiebdc.import.batch'].sudo().create({
             'name': sanitize_text('%s - %s' % (self.name, data.bc3_filename or 'FIEBDC Import')),
             'manufacturer_id': self.id,
             'bc3_url': sanitize_text(self.bc3_url),
-            'zip_filename': False,
+            'bc3_url_base': sanitize_text(data.url_base),
+            'zip_filename': sanitize_text(source_filename),
             'bc3_filename': sanitize_text(data.bc3_filename),
+            'bc3_encoding': sanitize_text(data.encoding),
             'total_concepts': len(data.concepts),
             'importable_concepts': len(importable),
-        })
-        counters = {
-            'created_products': 0,
-            'updated_products': 0,
-            'skipped_products': 0,
-            'attachments_created': 0,
+            'batch_size': batch_size,
             'warning_count': len(data.warnings),
-            'error_count': 0,
-        }
+            'state': 'done' if self.dry_run or not importable else 'queued',
+        })
         for warning in data.warnings:
             self._log(batch, 'warning', '', warning)
         if self.dry_run:
-            batch.write({'state': 'done', **counters})
+            batch.write({'finished_at': fields.Datetime.now()})
             self.write({'last_import_batch_id': batch.id, 'last_import_date': fields.Datetime.now()})
             return self._open_batch(batch)
-
-        for concept in importable:
-            try:
-                product, created = self._create_or_update_product(concept, data)
-                if not product:
-                    counters['skipped_products'] += 1
-                    continue
-                if created:
-                    counters['created_products'] += 1
-                else:
-                    counters['updated_products'] += 1
-                counters['attachments_created'] += self._import_concept_attachments(product, concept, resource_handler, batch)
-            except Exception as exc:
-                counters['error_count'] += 1
-                self._log(batch, 'error', concept.code, str(exc))
-        state = 'error' if counters['error_count'] else 'done'
-        batch.write({'state': state, **counters})
+        self._save_batch_source_attachment(batch, source_filename, source_payload)
+        self._stage_import_lines(batch, importable)
         self.write({'last_import_batch_id': batch.id, 'last_import_date': fields.Datetime.now()})
+        if importable:
+            self._process_import_batch(batch, limit=batch_size)
         return self._open_batch(batch)
 
     def action_open_last_import_batch(self):
@@ -442,23 +437,197 @@ class FiebdcManufacturer(models.Model):
         name = sanitize_text(self.bc3_filename or '').strip()
         return name if name.lower().endswith('.bc3') else None
 
-    def _parse_bc3_url(self):
+    def _load_bc3_url(self):
         try:
             filename, payload = self._download_url(self.bc3_url, required=True)
             archive_handler = self._archive_handler_for_payload(filename, payload)
             if archive_handler:
                 bc3_name, bc3_bytes = archive_handler.read_bc3(self._selected_bc3_name_for_archive())
                 data = BC3Parser().parse(bc3_bytes, sanitize_text(bc3_name))
-                return data, FiebdcZipUrlResourceHandler(self, data, archive_handler)
+                return data, FiebdcZipUrlResourceHandler(self, data, archive_handler), filename, payload
             bc3_name = sanitize_text(self.bc3_filename or filename or 'download.bc3')
             data = BC3Parser().parse(payload, bc3_name)
-            return data, FiebdcUrlResourceHandler(self, data)
+            return data, FiebdcUrlResourceHandler(self, data), filename, payload
         except BC3ParseError as exc:
             raise UserError(str(exc))
         except Exception as exc:
             if isinstance(exc, UserError):
                 raise
             raise UserError(_('Cannot read the BC3/ZIP/RAR URL: %s') % exc)
+
+    def _parse_bc3_url(self):
+        data, resource_handler, _source_filename, _source_payload = self._load_bc3_url()
+        return data, resource_handler
+
+    def _save_batch_source_attachment(self, batch, source_filename, payload):
+        if not payload:
+            return False
+        attachment = self.env['ir.attachment'].sudo().create({
+            'name': sanitize_text(source_filename or batch.bc3_filename or batch.name),
+            'type': 'binary',
+            'datas': b64(payload),
+            'res_model': 'fiebdc.import.batch',
+            'res_id': batch.id,
+            'mimetype': guess_mimetype(sanitize_text(source_filename or batch.bc3_filename or 'catalogo.bc3')),
+            'description': sanitize_text('Archivo fuente para importacion FIEBDC por lotes.'),
+        })
+        batch.write({'source_attachment_id': attachment.id})
+        return attachment
+
+    def _stage_import_lines(self, batch, importable):
+        Line = self.env['fiebdc.import.line'].sudo()
+        vals_list = []
+        for sequence, concept in enumerate(importable, start=1):
+            vals_list.append({
+                'batch_id': batch.id,
+                'sequence': sequence,
+                'code': sanitize_text(concept.code),
+                'name': sanitize_text(concept.summary or concept.code),
+                'concept_json': json_dumps(self._concept_to_dict(concept)),
+                'state': 'pending',
+            })
+            if len(vals_list) >= 500:
+                Line.create(vals_list)
+                vals_list = []
+        if vals_list:
+            Line.create(vals_list)
+
+    def _concept_to_dict(self, concept):
+        def ref_to_dict(ref):
+            return sanitize_value({
+                'code': ref.code,
+                'filename': ref.filename,
+                'source': ref.source,
+                'type_code': ref.type_code,
+                'description': ref.description,
+                'url_ext': ref.url_ext,
+            })
+        return sanitize_value({
+            'code': concept.code,
+            'aliases': concept.aliases,
+            'unit': concept.unit,
+            'summary': concept.summary,
+            'prices': concept.prices,
+            'price_dates': concept.price_dates,
+            'concept_type': concept.concept_type,
+            'text': concept.text,
+            'technical': concept.technical,
+            'graphics': [ref_to_dict(ref) for ref in concept.graphics],
+            'attachments': [ref_to_dict(ref) for ref in concept.attachments],
+            'raw_c_record': concept.raw_c_record,
+        })
+
+    def _concept_from_json(self, concept_json):
+        payload = sanitize_value(json.loads(concept_json or '{}'))
+        def make_ref(data):
+            return BC3AttachmentRef(
+                code=sanitize_text(data.get('code')),
+                filename=sanitize_text(data.get('filename')),
+                source=sanitize_text(data.get('source')),
+                type_code=sanitize_text(data.get('type_code')),
+                description=sanitize_text(data.get('description')),
+                url_ext=sanitize_text(data.get('url_ext')),
+            )
+        return BC3Concept(
+            code=sanitize_text(payload.get('code')),
+            aliases=[sanitize_text(alias) for alias in payload.get('aliases') or []],
+            unit=sanitize_text(payload.get('unit')),
+            summary=sanitize_text(payload.get('summary')),
+            prices=payload.get('prices') or [],
+            price_dates=[sanitize_text(date) for date in payload.get('price_dates') or []],
+            concept_type=sanitize_text(payload.get('concept_type')),
+            text=sanitize_text(payload.get('text')),
+            technical=sanitize_value(payload.get('technical') or {}),
+            graphics=[make_ref(ref) for ref in payload.get('graphics') or []],
+            attachments=[make_ref(ref) for ref in payload.get('attachments') or []],
+            raw_c_record=sanitize_text(payload.get('raw_c_record')),
+        )
+
+    def _batch_data_stub(self, batch):
+        return BC3Data(
+            bc3_filename=sanitize_text(batch.bc3_filename),
+            encoding=sanitize_text(batch.bc3_encoding or ''),
+            url_base=sanitize_text(batch.bc3_url_base or ''),
+        )
+
+    def _resource_handler_for_batch(self, batch, data):
+        payload = b''
+        if batch.source_attachment_id and batch.source_attachment_id.datas:
+            payload = base64.b64decode(batch.source_attachment_id.datas)
+        filename = sanitize_text(batch.zip_filename or batch.bc3_filename or 'catalogo.bc3')
+        archive_handler = self._archive_handler_for_payload(filename, payload) if payload else None
+        if archive_handler:
+            return FiebdcZipUrlResourceHandler(self, data, archive_handler)
+        return FiebdcUrlResourceHandler(self, data)
+
+    def _close_resource_handler(self, resource_handler):
+        archive_handler = getattr(resource_handler, 'zip_handler', None)
+        if archive_handler and hasattr(archive_handler, 'close'):
+            archive_handler.close()
+
+    def _process_import_batch(self, batch, limit=None):
+        self.ensure_one()
+        batch = batch.sudo()
+        limit = max(int(limit or batch.batch_size or 200), 1)
+        if batch.state in ('done', 'error'):
+            return batch
+        data = self._batch_data_stub(batch)
+        resource_handler = self._resource_handler_for_batch(batch, data)
+        Line = self.env['fiebdc.import.line'].sudo()
+        lines = Line.search([('batch_id', '=', batch.id), ('state', '=', 'pending')], order='sequence,id', limit=limit)
+        if not lines:
+            final_state = 'error' if batch.error_count else 'done'
+            batch.write({'state': final_state, 'finished_at': fields.Datetime.now()})
+            self._close_resource_handler(resource_handler)
+            return batch
+        counters = {
+            'created_products': batch.created_products,
+            'updated_products': batch.updated_products,
+            'skipped_products': batch.skipped_products,
+            'attachments_created': batch.attachments_created,
+            'warning_count': batch.warning_count,
+            'error_count': batch.error_count,
+            'processed_concepts': batch.processed_concepts,
+        }
+        batch.write({'state': 'running', 'started_at': batch.started_at or fields.Datetime.now()})
+        for line in lines:
+            try:
+                with self.env.cr.savepoint():
+                    concept = self._concept_from_json(line.concept_json)
+                    product, created = self._create_or_update_product(concept, data)
+                    if not product:
+                        counters['skipped_products'] += 1
+                        line.write({'state': 'skipped', 'message': sanitize_text('Product exists and update is disabled.')})
+                    else:
+                        if created:
+                            counters['created_products'] += 1
+                        else:
+                            counters['updated_products'] += 1
+                        attachment_count = self._import_concept_attachments(product, concept, resource_handler, batch)
+                        counters['attachments_created'] += attachment_count
+                        line.write({
+                            'state': 'done',
+                            'product_id': product.id,
+                            'attachment_count': attachment_count,
+                            'message': sanitize_text('Imported'),
+                        })
+            except Exception as exc:
+                counters['error_count'] += 1
+                line.write({'state': 'error', 'message': sanitize_text(str(exc))})
+                self._log(batch, 'error', line.code, str(exc))
+            counters['processed_concepts'] += 1
+        remaining = Line.search_count([('batch_id', '=', batch.id), ('state', '=', 'pending')])
+        vals = dict(counters)
+        if remaining:
+            vals['state'] = 'partial'
+        else:
+            vals['state'] = 'error' if counters['error_count'] else 'done'
+            vals['finished_at'] = fields.Datetime.now()
+        batch.write(vals)
+        self.write({'last_import_batch_id': batch.id, 'last_import_date': fields.Datetime.now()})
+        self._close_resource_handler(resource_handler)
+        self.env.cr.commit()
+        return batch
 
     def _create_or_update_product(self, concept, data):
         Product = self.env['product.template'].sudo()

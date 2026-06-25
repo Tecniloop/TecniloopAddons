@@ -10,7 +10,9 @@
                 <field name="manufacturer_id"/>
                 <field name="bc3_filename"/>
                 <field name="state"/>
-                <field name="total_concepts"/>
+                <field name="batch_size"/>
+                <field name="processed_concepts"/>
+                <field name="pending_concepts"/>
                 <field name="importable_concepts"/>
                 <field name="created_products"/>
                 <field name="updated_products"/>
@@ -26,28 +28,53 @@
         <field name="model">fiebdc.import.batch</field>
         <field name="arch" type="xml">
             <form string="FIEBDC Import">
+                <header>
+                    <button name="action_process_next_chunk" type="object" string="Procesar siguiente lote" class="btn-primary" invisible="state not in ('queued', 'partial', 'running')"/>
+                    <button name="action_process_ten_chunks" type="object" string="Procesar 10 lotes" class="btn-secondary" invisible="state not in ('queued', 'partial', 'running')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,queued,running,partial,done,error"/>
+                </header>
                 <sheet>
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="state"/>
                             <field name="manufacturer_id"/>
                             <field name="zip_filename"/>
                             <field name="bc3_url"/>
+                            <field name="bc3_url_base"/>
                             <field name="bc3_filename"/>
+                            <field name="bc3_encoding"/>
+                            <field name="source_attachment_id" readonly="1"/>
                         </group>
                         <group>
+                            <field name="batch_size"/>
                             <field name="total_concepts"/>
                             <field name="importable_concepts"/>
+                            <field name="processed_concepts"/>
+                            <field name="pending_concepts"/>
                             <field name="created_products"/>
                             <field name="updated_products"/>
                             <field name="skipped_products"/>
                             <field name="attachments_created"/>
                             <field name="warning_count"/>
                             <field name="error_count"/>
+                            <field name="started_at"/>
+                            <field name="finished_at"/>
                         </group>
                     </group>
                     <notebook>
+                        <page string="Lineas">
+                            <field name="line_ids" readonly="1">
+                                <list>
+                                    <field name="sequence"/>
+                                    <field name="state"/>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="product_id"/>
+                                    <field name="attachment_count"/>
+                                    <field name="message"/>
+                                </list>
+                            </field>
+                        </page>
                         <page string="Logs">
                             <field name="log_ids" readonly="1">
                                 <list>
