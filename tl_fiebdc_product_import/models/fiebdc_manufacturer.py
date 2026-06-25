@@ -25,6 +25,8 @@ from .fiebdc_parser import (
     guess_mimetype,
     json_dumps,
     parse_bc3_date,
+    sanitize_text,
+    sanitize_value,
 )
 
 
@@ -93,11 +95,18 @@ class FiebdcUrlResourceHandler:
     def read_related_file(self, ref):
         for url in self._candidate_urls(ref):
             parsed = urllib.parse.urlparse(url)
-            normalized_name = posixpath.basename(urllib.parse.unquote(parsed.path)) or posixpath.basename(ref.filename)
+            normalized_name = sanitize_text(posixpath.basename(urllib.parse.unquote(parsed.path)) or posixpath.basename(sanitize_text(ref.filename)))
             ext = posixpath.splitext(normalized_name.lower())[1]
             if ext in EXECUTABLE_EXTENSIONS:
                 return normalized_name, None
-            payload = self.manufacturer._download_url(url, required=False, max_size=75 * 1024 * 1024)[1]
+            payload = self.manufacturer._download_url(
+                url,
+                required=False,
+                max_size=self.manufacturer._download_limit_bytes(
+                    self.manufacturer.max_related_file_size_mb,
+                    default_mb=75,
+                ),
+            )[1]
             if payload:
                 return normalized_name, payload
         return None, None
@@ -131,6 +140,24 @@ class FiebdcManufacturer(models.Model):
             'desactiva la verificacion SSL para esta URL y sus adjuntos relacionados.'
         ),
     )
+    max_bc3_download_size_mb = fields.Integer(
+        string='Limite descarga BC3 (MB)',
+        default=500,
+        required=True,
+        help=(
+            'Tamano maximo permitido para descargar el fichero BC3 principal desde la URL. '
+            'Aumente este valor solo para fabricantes de confianza con catalogos grandes.'
+        ),
+    )
+    max_related_file_size_mb = fields.Integer(
+        string='Limite adjunto relacionado (MB)',
+        default=75,
+        required=True,
+        help=(
+            'Tamano maximo permitido para cada imagen, PDF o documento relacionado '
+            'referenciado por el BC3.'
+        ),
+    )
 
     update_existing = fields.Boolean(string='Update Existing Products', default=True)
     default_product_type = fields.Selection([
@@ -162,13 +189,13 @@ class FiebdcManufacturer(models.Model):
         rows = []
         for concept in importable[:50]:
             rows.append('<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (
-                html.escape(concept.code or ''),
-                html.escape(concept.unit or ''),
-                html.escape(concept.summary or ''),
+                html.escape(sanitize_text(concept.code)),
+                html.escape(sanitize_text(concept.unit)),
+                html.escape(sanitize_text(concept.summary)),
                 html.escape(str(concept.prices[0]) if concept.prices else ''),
                 html.escape(str(len(concept.all_attachment_refs()))),
             ))
-        warning_rows = ''.join('<li>%s</li>' % html.escape(w) for w in data.warnings[:20])
+        warning_rows = ''.join('<li>%s</li>' % html.escape(sanitize_text(w)) for w in data.warnings[:20])
         self.preview_html = '''
             <p><b>BC3:</b> %s<br/>
             <b>URL:</b> %s<br/>
@@ -181,9 +208,9 @@ class FiebdcManufacturer(models.Model):
             </table>
             %s
         ''' % (
-            html.escape(data.bc3_filename or ''),
-            html.escape(self.bc3_url or ''),
-            html.escape(data.encoding or ''),
+            html.escape(sanitize_text(data.bc3_filename)),
+            html.escape(sanitize_text(self.bc3_url)),
+            html.escape(sanitize_text(data.encoding)),
             len(data.concepts),
             len(importable),
             ''.join(rows) or '<tr><td colspan="5">No importable concepts found.</td></tr>',
@@ -196,11 +223,11 @@ class FiebdcManufacturer(models.Model):
         data, resource_handler = self._parse_bc3_url()
         importable = data.importable_concepts(self.import_type_4, self.import_type_5)
         batch = self.env['fiebdc.import.batch'].sudo().create({
-            'name': '%s - %s' % (self.name, data.bc3_filename or 'FIEBDC Import'),
+            'name': sanitize_text('%s - %s' % (self.name, data.bc3_filename or 'FIEBDC Import')),
             'manufacturer_id': self.id,
-            'bc3_url': self.bc3_url,
+            'bc3_url': sanitize_text(self.bc3_url),
             'zip_filename': False,
-            'bc3_filename': data.bc3_filename,
+            'bc3_filename': sanitize_text(data.bc3_filename),
             'total_concepts': len(data.concepts),
             'importable_concepts': len(importable),
         })
@@ -277,20 +304,43 @@ class FiebdcManufacturer(models.Model):
             or ('certificate' in text and ('verify' in text or 'issuer' in text))
         )
 
-    def _download_url(self, url, required=True, max_size=75 * 1024 * 1024):
+    def _download_limit_bytes(self, size_mb, default_mb=500):
+        try:
+            size_mb = int(size_mb or 0)
+        except (TypeError, ValueError):
+            size_mb = 0
+        if size_mb <= 0:
+            size_mb = default_mb
+        return size_mb * 1024 * 1024
+
+    def _download_limit_label(self, max_size):
+        try:
+            return '%.0f MB' % (float(max_size) / 1024 / 1024)
+        except Exception:
+            return str(max_size)
+
+    def _raise_size_limit_error(self, max_size):
+        raise UserError(_(
+            'The remote file is larger than the allowed limit (%s). '
+            'Increase the download limit on the manufacturer record if this file is trusted.'
+        ) % self._download_limit_label(max_size))
+
+    def _download_url(self, url, required=True, max_size=None):
+        if max_size is None:
+            max_size = self._download_limit_bytes(self.max_bc3_download_size_mb, default_mb=500)
         parsed = urllib.parse.urlparse(url or '')
-        filename = posixpath.basename(urllib.parse.unquote(parsed.path)) or 'download.bc3'
+        filename = sanitize_text(posixpath.basename(urllib.parse.unquote(parsed.path)) or 'download.bc3')
         try:
             parsed = self._validate_download_url(url)
-            filename = posixpath.basename(urllib.parse.unquote(parsed.path)) or filename
+            filename = sanitize_text(posixpath.basename(urllib.parse.unquote(parsed.path)) or filename)
             request = urllib.request.Request(url, headers={'User-Agent': 'Odoo-FIEBDC-BC3-Importer/1.0'})
             with urllib.request.urlopen(request, timeout=30, context=self._get_ssl_context()) as response:
                 final_url = response.geturl()
                 final_parsed = self._validate_download_url(final_url)
-                filename = posixpath.basename(urllib.parse.unquote(final_parsed.path)) or filename
+                filename = sanitize_text(posixpath.basename(urllib.parse.unquote(final_parsed.path)) or filename)
                 content_length = response.headers.get('Content-Length')
                 if content_length and int(content_length) > max_size:
-                    raise UserError(_('The remote file is larger than the allowed limit.'))
+                    self._raise_size_limit_error(max_size)
                 chunks = []
                 total = 0
                 while True:
@@ -299,7 +349,7 @@ class FiebdcManufacturer(models.Model):
                         break
                     total += len(chunk)
                     if total > max_size:
-                        raise UserError(_('The remote file is larger than the allowed limit.'))
+                        self._raise_size_limit_error(max_size)
                     chunks.append(chunk)
                 payload = b''.join(chunks)
                 if not payload and required:
@@ -324,7 +374,7 @@ class FiebdcManufacturer(models.Model):
     def _parse_bc3_url(self):
         try:
             filename, bc3_bytes = self._download_url(self.bc3_url, required=True)
-            bc3_name = self.bc3_filename or filename or 'download.bc3'
+            bc3_name = sanitize_text(self.bc3_filename or filename or 'download.bc3')
             data = BC3Parser().parse(bc3_bytes, bc3_name)
             return data, FiebdcUrlResourceHandler(self, data)
         except BC3ParseError as exc:
@@ -336,10 +386,11 @@ class FiebdcManufacturer(models.Model):
 
     def _create_or_update_product(self, concept, data):
         Product = self.env['product.template'].sudo()
-        domain = ['|', ('bc3_code', '=', concept.code), ('default_code', '=', concept.code)]
+        code = sanitize_text(concept.code)
+        domain = ['|', ('bc3_code', '=', code), ('default_code', '=', code)]
         product = Product.search(domain, limit=1)
         if product and not self.update_existing:
-            self._log_product_warning(concept.code, 'Product exists and update is disabled.')
+            self._log_product_warning(code, 'Product exists and update is disabled.')
             return False, False
         vals = self._product_values(concept, data)
         if product:
@@ -353,22 +404,22 @@ class FiebdcManufacturer(models.Model):
         first_date = parse_bc3_date(concept.price_dates[0]) if concept.price_dates else False
         uom = self._map_uom(concept.unit)
         vals = {
-            'name': concept.summary or concept.code,
-            'default_code': concept.code,
-            'bc3_code': concept.code,
-            'bc3_alias_codes': ','.join(concept.aliases),
-            'bc3_type': concept.concept_type,
-            'bc3_unit_code': concept.unit,
-            'bc3_source_file': data.bc3_filename,
+            'name': sanitize_text(concept.summary or concept.code),
+            'default_code': sanitize_text(concept.code),
+            'bc3_code': sanitize_text(concept.code),
+            'bc3_alias_codes': sanitize_text(','.join(concept.aliases)),
+            'bc3_type': sanitize_text(concept.concept_type),
+            'bc3_unit_code': sanitize_text(concept.unit),
+            'bc3_source_file': sanitize_text(data.bc3_filename),
             'bc3_raw_prices_json': json_dumps(concept.prices),
             'bc3_technical_json': json_dumps(concept.technical),
-            'bc3_long_description': html.escape(concept.text or '').replace('\n', '<br/>'),
+            'bc3_long_description': html.escape(sanitize_text(concept.text)).replace('\n', '<br/>'),
             'list_price': first_price,
         }
         if first_date:
             vals['bc3_price_date'] = first_date
         if concept.text:
-            vals['description_sale'] = concept.text
+            vals['description_sale'] = sanitize_text(concept.text)
         Product = self.env['product.template']
         if uom:
             if 'uom_id' in Product._fields:
@@ -382,7 +433,7 @@ class FiebdcManufacturer(models.Model):
             vals['detailed_type'] = product_type
         if 'is_storable' in Product._fields:
             vals['is_storable'] = bool(product_type == 'consu' and self.track_inventory)
-        return vals
+        return sanitize_value(vals)
 
     def _map_product_type(self, bc3_type):
         if bc3_type == '1':
@@ -394,7 +445,7 @@ class FiebdcManufacturer(models.Model):
         return self.default_product_type
 
     def _map_uom(self, unit_code):
-        unit_code = (unit_code or '').strip().lower().replace('²', '2').replace('³', '3')
+        unit_code = sanitize_text(unit_code).strip().lower().replace('²', '2').replace('³', '3')
         xmlid_map = {
             '': 'uom.product_uom_unit',
             'u': 'uom.product_uom_unit',
@@ -442,22 +493,22 @@ class FiebdcManufacturer(models.Model):
             if not payload:
                 self._log(batch, 'warning', concept.code, 'Remote attachment not found: %s' % ref.filename)
                 continue
-            attachment_name = '%s - %s' % (concept.code, posixpath.basename(normalized_name or ref.filename))
+            attachment_name = sanitize_text('%s - %s' % (concept.code, posixpath.basename(sanitize_text(normalized_name or ref.filename))))
             if self.skip_duplicate_attachments:
                 existing = self.env['ir.attachment'].sudo().search([
                     ('res_model', '=', 'product.template'),
                     ('res_id', '=', product.id),
-                    ('name', '=', attachment_name),
+                    ('name', '=', sanitize_text(attachment_name)),
                 ], limit=1)
                 if existing:
                     continue
             attachment = self.env['ir.attachment'].sudo().create({
-                'name': attachment_name,
+                'name': sanitize_text(attachment_name),
                 'datas': b64(payload),
                 'res_model': 'product.template',
                 'res_id': product.id,
-                'mimetype': guess_mimetype(normalized_name or ref.filename),
-                'description': ref.description or ref.source,
+                'mimetype': guess_mimetype(sanitize_text(normalized_name or ref.filename)),
+                'description': sanitize_text(ref.description or ref.source),
             })
             self._create_product_document_if_available(attachment, batch, concept.code)
             created += 1
@@ -482,8 +533,8 @@ class FiebdcManufacturer(models.Model):
         self.env['fiebdc.import.log'].sudo().create({
             'batch_id': batch.id,
             'level': level,
-            'bc3_code': code or '',
-            'message': message,
+            'bc3_code': sanitize_text(code),
+            'message': sanitize_text(message),
         })
 
     def _log_product_warning(self, code, message):

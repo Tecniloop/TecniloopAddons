@@ -15,7 +15,7 @@ The module does not execute DLL/EXE parametric files. Executable attachments fou
 
 ## Odoo 19 compatibility notes
 
-- Manifest version is `19.0.1.0.12`.
+- Manifest version is `19.0.1.0.14`.
 - List views use the Odoo 19 `<list>` root element.
 - Product type is mapped to Odoo 19 values: `consu` = Goods and `service` = Service.
 - The wizard includes `Track Inventory for Goods`, which sets `is_storable` when the Inventory/Stock module is installed.
@@ -104,3 +104,17 @@ Compatibility fix for Odoo 19: the importer no longer writes `uom_po_id` unless 
 ## Nota SSL
 
 En el mantenimiento de fabricantes se ha anadido la opcion **Permitir SSL sin verificar** para servidores HTTPS de fabricantes que publican el fichero BC3 con una cadena de certificados incompleta. Mantengala desactivada por defecto y activela solo en URLs de fabricantes conocidos.
+
+
+## 19.0.1.0.14
+
+- Added configurable download limits on each manufacturer:
+  - **Limite descarga BC3 (MB)**, default 500 MB for the main BC3 URL.
+  - **Limite adjunto relacionado (MB)**, default 75 MB per related file.
+- Improved the size-limit error message so it indicates the configured limit and tells the user where to increase it.
+- Existing manufacturer records with empty/zero values fall back to the safe defaults above.
+## Changes in 19.0.1.0.15
+
+- Removed the direct menu entry to the legacy file import wizard from the BC3 / FIEBDC app menus.
+- Reordered the top app menus so Operations appears before Configuration.
+

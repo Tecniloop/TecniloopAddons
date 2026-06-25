@@ -17,6 +17,34 @@ SUPPORTED_ATTACHMENT_EXTENSIONS = IMAGE_EXTENSIONS | {'.pdf', '.avi', '.ppt', '.
 EXECUTABLE_EXTENSIONS = {'.exe', '.dll', '.bat', '.cmd', '.com', '.msi', '.ps1', '.sh'}
 
 
+
+def sanitize_text(value):
+    """Return a PostgreSQL-safe text value.
+
+    Some BC3 files include NUL bytes/characters, especially when a source is
+    generated with an unexpected encoding. PostgreSQL refuses text values that
+    contain NUL (0x00), so remove them as early as possible and again before
+    writing user-visible text to Odoo models.
+    """
+    if value is None:
+        return ''
+    if not isinstance(value, str):
+        value = str(value)
+    return value.replace('\x00', '')
+
+
+def sanitize_value(value):
+    if isinstance(value, str) or value is None:
+        return sanitize_text(value)
+    if isinstance(value, list):
+        return [sanitize_value(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(sanitize_value(item) for item in value)
+    if isinstance(value, dict):
+        return {sanitize_text(key): sanitize_value(val) for key, val in value.items()}
+    return value
+
+
 @dataclass
 class BC3AttachmentRef:
     code: str
@@ -175,7 +203,7 @@ class BC3Parser:
     def parse(self, bc3_bytes: bytes, bc3_filename: str = '') -> BC3Data:
         raw = bc3_bytes.rstrip(b'\x1a')
         encoding, charset = self._detect_encoding(raw)
-        text = raw.decode(encoding, errors='replace')
+        text = sanitize_text(raw.decode(encoding, errors='replace'))
         data = BC3Data(bc3_filename=bc3_filename, encoding=encoding, charset=charset)
         for record_type, fields, raw_record in self._iter_records(text):
             try:
@@ -201,7 +229,7 @@ class BC3Parser:
         return data
 
     def _detect_encoding(self, raw: bytes) -> Tuple[str, str]:
-        probe = raw.decode('latin1', errors='ignore')
+        probe = sanitize_text(raw.decode('latin1', errors='ignore'))
         charset = ''
         for record_type, fields, raw_record in self._iter_records(probe):
             if record_type == 'V':
@@ -212,7 +240,7 @@ class BC3Parser:
 
     def _iter_records(self, text: str) -> Iterable[Tuple[str, List[str], str]]:
         for chunk in text.split('~'):
-            chunk = chunk.lstrip('\ufeff \t\r\n')
+            chunk = sanitize_text(chunk).lstrip('\ufeff \t\r\n')
             if not chunk:
                 continue
             raw_record = chunk
@@ -316,10 +344,10 @@ class BC3Parser:
             i += 3
 
     def _field(self, fields: List[str], index: int) -> str:
-        return fields[index] if len(fields) > index else ''
+        return sanitize_text(fields[index]) if len(fields) > index else ''
 
     def _subfields(self, value: str, keep_empty: bool = False) -> List[str]:
-        parts = [part.strip(' \t\r\n') for part in (value or '').split('\\')]
+        parts = [sanitize_text(part).strip(' \t\r\n') for part in sanitize_text(value).split('\\')]
         if keep_empty:
             return parts
         return [part for part in parts if part != '']
@@ -371,7 +399,7 @@ def parse_bc3_date(value: str) -> Optional[dt.date]:
 
 
 def json_dumps(value) -> str:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2)
+    return json.dumps(sanitize_value(value), ensure_ascii=False, sort_keys=True, indent=2)
 
 
 def guess_mimetype(filename: str) -> str:

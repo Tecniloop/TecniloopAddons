@@ -15,6 +15,8 @@ from ..models.fiebdc_parser import (
     guess_mimetype,
     json_dumps,
     parse_bc3_date,
+    sanitize_text,
+    sanitize_value,
 )
 
 
@@ -64,13 +66,13 @@ class FiebdcImportWizard(models.TransientModel):
         rows = []
         for concept in importable[:50]:
             rows.append('<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (
-                html.escape(concept.code or ''),
-                html.escape(concept.unit or ''),
-                html.escape(concept.summary or ''),
+                html.escape(sanitize_text(concept.code)),
+                html.escape(sanitize_text(concept.unit)),
+                html.escape(sanitize_text(concept.summary)),
                 html.escape(str(concept.prices[0]) if concept.prices else ''),
                 html.escape(str(len(concept.all_attachment_refs()))),
             ))
-        warning_rows = ''.join('<li>%s</li>' % html.escape(w) for w in data.warnings[:20])
+        warning_rows = ''.join('<li>%s</li>' % html.escape(sanitize_text(w)) for w in data.warnings[:20])
         self.preview_html = '''
             <p><b>BC3:</b> %s<br/>
             <b>Encoding:</b> %s<br/>
@@ -82,8 +84,8 @@ class FiebdcImportWizard(models.TransientModel):
             </table>
             %s
         ''' % (
-            html.escape(data.bc3_filename or ''),
-            html.escape(data.encoding or ''),
+            html.escape(sanitize_text(data.bc3_filename)),
+            html.escape(sanitize_text(data.encoding)),
             len(data.concepts),
             len(importable),
             ''.join(rows) or '<tr><td colspan="5">No importable concepts found.</td></tr>',
@@ -96,10 +98,10 @@ class FiebdcImportWizard(models.TransientModel):
         data, zip_handler = self._parse_zip()
         importable = data.importable_concepts(self.import_type_4, self.import_type_5)
         batch = self.env['fiebdc.import.batch'].sudo().create({
-            'name': self.zip_filename or 'FIEBDC Import',
-            'zip_filename': self.zip_filename,
+            'name': sanitize_text(self.zip_filename) or 'FIEBDC Import',
+            'zip_filename': sanitize_text(self.zip_filename),
             'bc3_url': False,
-            'bc3_filename': data.bc3_filename,
+            'bc3_filename': sanitize_text(data.bc3_filename),
             'total_concepts': len(data.concepts),
             'importable_concepts': len(importable),
         })
@@ -175,10 +177,11 @@ class FiebdcImportWizard(models.TransientModel):
 
     def _create_or_update_product(self, concept, data):
         Product = self.env['product.template'].sudo()
-        domain = ['|', ('bc3_code', '=', concept.code), ('default_code', '=', concept.code)]
+        code = sanitize_text(concept.code)
+        domain = ['|', ('bc3_code', '=', code), ('default_code', '=', code)]
         product = Product.search(domain, limit=1)
         if product and not self.update_existing:
-            self._log_product_warning(concept.code, 'Product exists and update is disabled.')
+            self._log_product_warning(code, 'Product exists and update is disabled.')
             return False, False
         vals = self._product_values(concept, data)
         if product:
@@ -192,22 +195,22 @@ class FiebdcImportWizard(models.TransientModel):
         first_date = parse_bc3_date(concept.price_dates[0]) if concept.price_dates else False
         uom = self._map_uom(concept.unit)
         vals = {
-            'name': concept.summary or concept.code,
-            'default_code': concept.code,
-            'bc3_code': concept.code,
-            'bc3_alias_codes': ','.join(concept.aliases),
-            'bc3_type': concept.concept_type,
-            'bc3_unit_code': concept.unit,
-            'bc3_source_file': data.bc3_filename,
+            'name': sanitize_text(concept.summary or concept.code),
+            'default_code': sanitize_text(concept.code),
+            'bc3_code': sanitize_text(concept.code),
+            'bc3_alias_codes': sanitize_text(','.join(concept.aliases)),
+            'bc3_type': sanitize_text(concept.concept_type),
+            'bc3_unit_code': sanitize_text(concept.unit),
+            'bc3_source_file': sanitize_text(data.bc3_filename),
             'bc3_raw_prices_json': json_dumps(concept.prices),
             'bc3_technical_json': json_dumps(concept.technical),
-            'bc3_long_description': html.escape(concept.text or '').replace('\n', '<br/>'),
+            'bc3_long_description': html.escape(sanitize_text(concept.text)).replace('\n', '<br/>'),
             'list_price': first_price,
         }
         if first_date:
             vals['bc3_price_date'] = first_date
         if concept.text:
-            vals['description_sale'] = concept.text
+            vals['description_sale'] = sanitize_text(concept.text)
         Product = self.env['product.template']
         if uom:
             if 'uom_id' in Product._fields:
@@ -223,7 +226,7 @@ class FiebdcImportWizard(models.TransientModel):
             vals['detailed_type'] = product_type
         if 'is_storable' in Product._fields:
             vals['is_storable'] = bool(product_type == 'consu' and self.track_inventory)
-        return vals
+        return sanitize_value(vals)
 
     def _map_product_type(self, bc3_type):
         if bc3_type == '1':
@@ -235,7 +238,7 @@ class FiebdcImportWizard(models.TransientModel):
         return self.default_product_type
 
     def _map_uom(self, unit_code):
-        unit_code = (unit_code or '').strip().lower().replace('²', '2').replace('³', '3')
+        unit_code = sanitize_text(unit_code).strip().lower().replace('²', '2').replace('³', '3')
         xmlid_map = {
             '': 'uom.product_uom_unit',
             'u': 'uom.product_uom_unit',
@@ -283,22 +286,22 @@ class FiebdcImportWizard(models.TransientModel):
             if not payload:
                 self._log(batch, 'warning', concept.code, 'Attachment not found in ZIP: %s' % ref.filename)
                 continue
-            attachment_name = '%s - %s' % (concept.code, posixpath.basename(normalized_name or ref.filename))
+            attachment_name = sanitize_text('%s - %s' % (concept.code, posixpath.basename(sanitize_text(normalized_name or ref.filename))))
             if self.skip_duplicate_attachments:
                 existing = self.env['ir.attachment'].sudo().search([
                     ('res_model', '=', 'product.template'),
                     ('res_id', '=', product.id),
-                    ('name', '=', attachment_name),
+                    ('name', '=', sanitize_text(attachment_name)),
                 ], limit=1)
                 if existing:
                     continue
             attachment = self.env['ir.attachment'].sudo().create({
-                'name': attachment_name,
+                'name': sanitize_text(attachment_name),
                 'datas': b64(payload),
                 'res_model': 'product.template',
                 'res_id': product.id,
-                'mimetype': guess_mimetype(normalized_name or ref.filename),
-                'description': ref.description or ref.source,
+                'mimetype': guess_mimetype(sanitize_text(normalized_name or ref.filename)),
+                'description': sanitize_text(ref.description or ref.source),
             })
             self._create_product_document_if_available(attachment, batch, concept.code)
             created += 1
@@ -325,8 +328,8 @@ class FiebdcImportWizard(models.TransientModel):
         self.env['fiebdc.import.log'].sudo().create({
             'batch_id': batch.id,
             'level': level,
-            'bc3_code': code or '',
-            'message': message,
+            'bc3_code': sanitize_text(code),
+            'message': sanitize_text(message),
         })
 
     def _log_product_warning(self, code, message):
