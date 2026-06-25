@@ -15,7 +15,7 @@ The module does not execute DLL/EXE parametric files. Executable attachments fou
 
 ## Odoo 19 compatibility notes
 
-- Manifest version is `19.0.1.0.0`.
+- Manifest version is `19.0.1.0.12`.
 - List views use the Odoo 19 `<list>` root element.
 - Product type is mapped to Odoo 19 values: `consu` = Goods and `service` = Service.
 - The wizard includes `Track Inventory for Goods`, which sets `is_storable` when the Inventory/Stock module is installed.
@@ -54,7 +54,7 @@ The module does not execute DLL/EXE parametric files. Executable attachments fou
 
 - Root and chapter concepts ending in `#` or `##` are skipped.
 - BC3 type 4 and 5 are skipped by default; they can be enabled in the wizard.
-- Remote URL download is intentionally not implemented in this first version. Files should be present inside the ZIP.
+- The manual wizard imports ZIP files. Manufacturer maintenance records can download a BC3 directly from a saved HTTP/HTTPS URL.
 - `~D` decompositions are not converted to BoM in this version.
 
 ## Compatibility
@@ -90,3 +90,12 @@ Safe install build: removes the product form header button and server action bin
 ## 19.0.1.0.11
 
 Compatibility fix for Odoo 19: the importer no longer writes `uom_po_id` unless that field exists on `product.template`. Some Odoo 19 builds removed/renamed the Purchase UoM field, causing `Invalid field 'uom_po_id' in 'product.template'` during import.
+
+## 19.0.1.0.12
+
+- Reorganized the root menu so **BC3 / FIEBDC** behaves as the application entry point and the existing options are grouped below it.
+- Added **BC3 / FIEBDC > Configuracion > Fabricantes**.
+- Each manufacturer stores a persistent **URL del fichero BC3** and the same import options as the existing wizard.
+- Manufacturer records provide **Vista previa** and **Importar** actions that download the BC3 from the configured URL.
+- Import history now stores the manufacturer and source BC3 URL when the import is launched from a manufacturer.
+- Remote related images/documents referenced by the BC3 are resolved from the BC3 URL directory, from the BC3 `~V` URL base, and from `~G`/`~F` URL extensions when available.

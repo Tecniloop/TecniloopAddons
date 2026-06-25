@@ -9,7 +9,9 @@ class FiebdcImportBatch(models.Model):
     _order = 'create_date desc, id desc'
 
     name = fields.Char(required=True, default='FIEBDC Import', tracking=True)
+    manufacturer_id = fields.Many2one('fiebdc.manufacturer', string='Fabricante', index=True)
     zip_filename = fields.Char(string='ZIP File')
+    bc3_url = fields.Char(string='BC3 URL')
     bc3_filename = fields.Char(string='BC3 File')
     state = fields.Selection([
         ('draft', 'Draft'),

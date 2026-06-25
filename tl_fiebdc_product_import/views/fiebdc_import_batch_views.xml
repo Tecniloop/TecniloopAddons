@@ -7,6 +7,7 @@
             <list string="FIEBDC Imports">
                 <field name="create_date"/>
                 <field name="name"/>
+                <field name="manufacturer_id"/>
                 <field name="bc3_filename"/>
                 <field name="state"/>
                 <field name="total_concepts"/>
@@ -30,7 +31,9 @@
                         <group>
                             <field name="name"/>
                             <field name="state"/>
+                            <field name="manufacturer_id"/>
                             <field name="zip_filename"/>
+                            <field name="bc3_url"/>
                             <field name="bc3_filename"/>
                         </group>
                         <group>
