@@ -99,3 +99,8 @@ Compatibility fix for Odoo 19: the importer no longer writes `uom_po_id` unless 
 - Manufacturer records provide **Vista previa** and **Importar** actions that download the BC3 from the configured URL.
 - Import history now stores the manufacturer and source BC3 URL when the import is launched from a manufacturer.
 - Remote related images/documents referenced by the BC3 are resolved from the BC3 URL directory, from the BC3 `~V` URL base, and from `~G`/`~F` URL extensions when available.
+
+
+## Nota SSL
+
+En el mantenimiento de fabricantes se ha anadido la opcion **Permitir SSL sin verificar** para servidores HTTPS de fabricantes que publican el fichero BC3 con una cadena de certificados incompleta. Mantengala desactivada por defecto y activela solo en URLs de fabricantes conocidos.

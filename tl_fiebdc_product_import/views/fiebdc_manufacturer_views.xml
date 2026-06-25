@@ -8,6 +8,7 @@
                 <field name="name"/>
                 <field name="bc3_url"/>
                 <field name="bc3_filename"/>
+                <field name="allow_insecure_ssl"/>
                 <field name="default_product_type"/>
                 <field name="update_existing"/>
                 <field name="last_import_date"/>
@@ -44,6 +45,7 @@
                             <field name="active" invisible="1"/>
                             <field name="bc3_url" placeholder="https://fabricante.example/catalogo.bc3"/>
                             <field name="bc3_filename" placeholder="Opcional: catalogo.bc3"/>
+                            <field name="allow_insecure_ssl"/>
                         </group>
                         <group>
                             <field name="last_import_date" readonly="1"/>

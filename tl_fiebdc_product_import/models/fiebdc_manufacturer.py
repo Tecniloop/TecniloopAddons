@@ -4,12 +4,18 @@ import html
 import ipaddress
 import posixpath
 import socket
+import ssl
 import urllib.error
 import urllib.parse
 import urllib.request
 
 from odoo import _, fields, models
 from odoo.exceptions import UserError
+
+try:
+    import certifi
+except ImportError:  # pragma: no cover - optional runtime dependency
+    certifi = None
 
 from .fiebdc_parser import (
     BC3ParseError,
@@ -114,6 +120,16 @@ class FiebdcManufacturer(models.Model):
     bc3_filename = fields.Char(
         string='Nombre del BC3',
         help='Opcional. Si se deja vacio se usara el nombre del fichero descargado.',
+    )
+    allow_insecure_ssl = fields.Boolean(
+        string='Permitir SSL sin verificar',
+        tracking=True,
+        help=(
+            'Active esta opcion solo para fabricantes conocidos cuyo servidor HTTPS tenga '
+            'una cadena de certificados incompleta o no verificable. La descarga se '
+            'intentara primero con certificados CA fiables; si marca esta opcion se '
+            'desactiva la verificacion SSL para esta URL y sus adjuntos relacionados.'
+        ),
     )
 
     update_existing = fields.Boolean(string='Update Existing Products', default=True)
@@ -246,6 +262,21 @@ class FiebdcManufacturer(models.Model):
             raise UserError(_('Cannot resolve URL host: %s') % exc)
         return parsed
 
+    def _get_ssl_context(self):
+        if self.allow_insecure_ssl:
+            return ssl._create_unverified_context()
+        if certifi:
+            return ssl.create_default_context(cafile=certifi.where())
+        return ssl.create_default_context()
+
+    def _is_ssl_certificate_error(self, exc):
+        text = str(exc).lower()
+        return (
+            isinstance(exc, ssl.SSLError)
+            or 'certificate_verify_failed' in text
+            or ('certificate' in text and ('verify' in text or 'issuer' in text))
+        )
+
     def _download_url(self, url, required=True, max_size=75 * 1024 * 1024):
         parsed = urllib.parse.urlparse(url or '')
         filename = posixpath.basename(urllib.parse.unquote(parsed.path)) or 'download.bc3'
@@ -253,7 +284,7 @@ class FiebdcManufacturer(models.Model):
             parsed = self._validate_download_url(url)
             filename = posixpath.basename(urllib.parse.unquote(parsed.path)) or filename
             request = urllib.request.Request(url, headers={'User-Agent': 'Odoo-FIEBDC-BC3-Importer/1.0'})
-            with urllib.request.urlopen(request, timeout=30) as response:
+            with urllib.request.urlopen(request, timeout=30, context=self._get_ssl_context()) as response:
                 final_url = response.geturl()
                 final_parsed = self._validate_download_url(final_url)
                 filename = posixpath.basename(urllib.parse.unquote(final_parsed.path)) or filename
@@ -278,8 +309,15 @@ class FiebdcManufacturer(models.Model):
             if required:
                 raise
             return filename, None
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError) as exc:
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError, ssl.SSLError) as exc:
             if required:
+                if self._is_ssl_certificate_error(exc) and not self.allow_insecure_ssl:
+                    raise UserError(_(
+                        'Cannot verify the SSL certificate for URL %s: %s\n\n'
+                        'Install/update CA certificates on the Odoo server or open the '
+                        'manufacturer record and enable "Permitir SSL sin verificar" '
+                        'only if this is a trusted manufacturer URL.'
+                    ) % (url, exc))
                 raise UserError(_('Cannot download URL %s: %s') % (url, exc))
             return filename, None
 
