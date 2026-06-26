@@ -12,3 +12,12 @@ Changelog
 
 * Compatibilidad con Odoo 19 para unidad de medida de ventas.
 * BC3-WORK-UNIT definido como servicio.
+
+
+Changelog
+=========
+
+19.0.1.0.6
+----------
+
+* Simplified certification search view for Odoo 19 view validation compatibility.

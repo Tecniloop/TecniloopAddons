@@ -20,18 +20,10 @@
         <field name="name">bc3.certification.search</field>
         <field name="model">bc3.certification</field>
         <field name="arch" type="xml">
-            <search>
+            <search string="BC3 Certifications">
                 <field name="name"/>
                 <field name="sale_order_id"/>
                 <field name="budget_id"/>
-                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
-                <filter name="confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"/>
-                <filter name="invoiced" string="Invoiced" domain="[('state', '=', 'invoiced')]"/>
-                <group expand="0" string="Group By">
-                    <filter name="group_sale_order" string="Sale Order" context="{'group_by': 'sale_order_id'}"/>
-                    <filter name="group_budget" string="BC3 Budget" context="{'group_by': 'budget_id'}"/>
-                    <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
-                </group>
             </search>
         </field>
     </record>
