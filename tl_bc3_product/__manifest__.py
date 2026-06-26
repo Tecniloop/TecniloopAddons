@@ -1,7 +1,7 @@
 {
     "name": "TL BC3 Product",
     "summary": "Import BC3/FIEBDC catalog concepts as eCommerce products",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.0.2",
     "category": "Construction/BC3",
     "author": "Tecniloop",
     "website": "https://www.tecniloop.com",

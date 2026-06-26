@@ -2,7 +2,7 @@ from odoo import fields, models
 
 
 class ProductTemplate(models.Model):
-    _inherit = ["product.template", "res.brand.mixin"]
+    _inherit = "product.template"
 
     bc3_is_imported = fields.Boolean(string="Imported from BC3", copy=False, index=True)
     bc3_file_id = fields.Many2one("bc3.file", string="BC3 File", copy=False, index=True)

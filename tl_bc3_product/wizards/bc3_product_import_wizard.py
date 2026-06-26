@@ -227,7 +227,7 @@ class Bc3ProductImportWizard(models.TransientModel):
             "bc3_media_refs": "\n".join(concept.media_ref_ids.mapped("filename")),
             "bc3_last_import_date": fields.Datetime.now(),
         }
-        if brand:
+        if brand and "brand_id" in self.env["product.template"]._fields:
             vals["brand_id"] = brand.id
         if concept.text:
             vals["description_sale"] = concept.text
