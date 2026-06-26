@@ -19,16 +19,41 @@ def order_line_uom_field(env):
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-    bc3_budget_id = fields.Many2one("bc3.budget", string="BC3 Budget", copy=False, index=True)
-    bc3_file_id = fields.Many2one(related="bc3_budget_id.file_id", string="BC3 File", store=True)
+    bc3_budget_id = fields.Many2one("bc3.budget", string="Presupuesto BC3", copy=False, index=True)
+    bc3_file_id = fields.Many2one(related="bc3_budget_id.file_id", string="Fichero BC3", store=True)
     bc3_generated_from_budget = fields.Boolean(copy=False)
+
+
+    def action_open_bc3_budget(self):
+        self.ensure_one()
+        if not self.bc3_budget_id:
+            raise UserError(_("Este presupuesto de venta no está vinculado a ningún presupuesto BC3."))
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Presupuesto BC3"),
+            "res_model": "bc3.budget",
+            "view_mode": "form",
+            "res_id": self.bc3_budget_id.id,
+        }
+
+    def action_open_bc3_file(self):
+        self.ensure_one()
+        if not self.bc3_file_id:
+            raise UserError(_("Este presupuesto de venta no está vinculado a ningún fichero BC3."))
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Fichero BC3"),
+            "res_model": "bc3.file",
+            "view_mode": "form",
+            "res_id": self.bc3_file_id.id,
+        }
 
     def action_fill_from_bc3_budget(self):
         for order in self:
             if not order.bc3_budget_id:
-                raise UserError(_("Select a BC3 budget first."))
+                raise UserError(_("Seleccione primero un presupuesto BC3."))
             if order.state not in ("draft", "sent"):
-                raise UserError(_("Only draft quotations can be filled from a BC3 budget."))
+                raise UserError(_("Solo se pueden rellenar presupuestos de venta en borrador desde un presupuesto BC3."))
             order.order_line.unlink()
             values = []
             product = self.env.ref("tl_bc3_sale.product_bc3_work_unit", raise_if_not_found=False)
@@ -97,11 +122,11 @@ class SaleOrder(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
-    bc3_budget_line_id = fields.Many2one("bc3.budget.line", string="BC3 Budget Line", copy=False, index=True)
+    bc3_budget_line_id = fields.Many2one("bc3.budget.line", string="Línea de presupuesto BC3", copy=False, index=True)
     bc3_code = fields.Char(copy=False, index=True)
     bc3_position_path = fields.Char(copy=False, index=True)
     bc3_line_type = fields.Selection(
-        [("root", "Root"), ("chapter", "Chapter"), ("work_unit", "Work Unit"), ("resource", "Resource"), ("percentage", "Percentage")],
+        [("root", "Raíz"), ("chapter", "Capítulo"), ("work_unit", "Partida"), ("resource", "Recurso"), ("percentage", "Porcentaje")],
         copy=False,
     )
     bc3_measurement_total = fields.Float(copy=False, digits="Product Unit of Measure")
@@ -112,8 +137,8 @@ class SaleOrderLine(models.Model):
         default="ok",
         copy=False,
     )
-    bc3_certified_qty = fields.Float(string="BC3 Certified Qty", copy=False, digits="Product Unit of Measure")
-    bc3_certified_amount = fields.Monetary(string="BC3 Certified Amount", copy=False, currency_field="currency_id")
+    bc3_certified_qty = fields.Float(string="Cantidad certificada BC3", copy=False, digits="Product Unit of Measure")
+    bc3_certified_amount = fields.Monetary(string="Importe certificado BC3", copy=False, currency_field="currency_id")
 
     @api.onchange("product_uom_qty", "price_unit")
     def _onchange_bc3_sync_state(self):
