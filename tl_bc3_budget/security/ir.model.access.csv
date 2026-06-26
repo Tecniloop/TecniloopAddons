@@ -3,3 +3,10 @@ access_bc3_budget_user,bc3.budget user,model_bc3_budget,base.group_user,1,1,1,1
 access_bc3_budget_line_user,bc3.budget.line user,model_bc3_budget_line,base.group_user,1,1,1,1
 access_bc3_budget_measurement_line_user,bc3.budget.measurement.line user,model_bc3_budget_measurement_line,base.group_user,1,1,1,1
 access_bc3_budget_catalog_insert_wizard_user,bc3.budget.catalog.insert.wizard user,model_bc3_budget_catalog_insert_wizard,base.group_user,1,1,1,1
+access_bc3_concept_price_line_user,bc3.concept.price.line user,model_bc3_concept_price_line,base.group_user,1,1,1,1
+access_bc3_budget_insert_code_wizard_user,bc3.budget.insert.code.wizard user,model_bc3_budget_insert_code_wizard,base.group_user,1,1,1,1
+access_bc3_budget_update_from_bank_wizard_user,bc3.budget.update.from.bank.wizard user,model_bc3_budget_update_from_bank_wizard,base.group_user,1,1,1,1
+access_bc3_budget_substitute_list_wizard_user,bc3.budget.substitute.list.wizard user,model_bc3_budget_substitute_list_wizard,base.group_user,1,1,1,1
+access_bc3_price_operate_wizard_user,bc3.price.operate.wizard user,model_bc3_price_operate_wizard,base.group_user,1,1,1,1
+access_bc3_concept_duplicate_wizard_user,bc3.concept.duplicate.wizard user,model_bc3_concept_duplicate_wizard,base.group_user,1,1,1,1
+access_bc3_concept_rename_wizard_user,bc3.concept.rename.wizard user,model_bc3_concept_rename_wizard,base.group_user,1,1,1,1

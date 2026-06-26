@@ -39,7 +39,7 @@
                         <group string="Origen">
                             <field name="file_id"/>
                             <field name="root_concept_id"/>
-                            <field name="catalog_file_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="catalog_file_ids" widget="many2many_tags" context="{'default_info_type': '1', 'default_state': 'parsed', 'default_source_type': 'upload', 'default_is_manual_price_bank': True, 'bc3_manual_price_bank': True}"/>
                             <field name="chapter_count"/>
                             <field name="work_unit_count"/>
                             <field name="amount_total"/>

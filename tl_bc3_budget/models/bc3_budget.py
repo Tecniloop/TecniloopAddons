@@ -504,7 +504,7 @@ class Bc3BudgetLine(models.Model):
     def _sync_quantity_from_factor_performance_vals(self, vals):
         """Keep BC3 relation quantity consistent with factor x performance.
 
-        In FIEBDC/Presto the quantity of a decomposition relation is the
+        In FIEBDC the quantity of a decomposition relation is the
         factor multiplied by the performance. The user can still edit quantity
         directly; then we derive performance from quantity and factor.
         """

@@ -1,7 +1,7 @@
 {
     "name": "TL BC3 Budget",
     "summary": "Presupuestos técnicos BC3 con capítulos, partidas y mediciones",
-    "version": "19.0.1.2.5",
+    "version": "19.0.1.2.8",
     "category": "Construction/BC3",
     "author": "Tecniloop",
     "website": "https://www.tecniloop.com",
@@ -10,10 +10,12 @@
     "data": [
         "security/ir.model.access.csv",
         "wizards/bc3_budget_catalog_insert_wizard_views.xml",
+        "wizards/bc3_budget_reference_wizards_views.xml",
         "views/bc3_budget_views.xml",
         "views/bc3_budget_line_views.xml",
         "views/bc3_file_views.xml",
         "views/bc3_menu_views.xml",
+        "views/bc3_reference_tools_views.xml",
         "reports/bc3_budget_report.xml",
         "reports/bc3_budget_templates.xml",
     ],

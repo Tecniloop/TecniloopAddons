@@ -1,0 +1,144 @@
+<odoo>
+    <record id="view_bc3_budget_insert_code_wizard_form" model="ir.ui.view">
+        <field name="name">bc3.budget.insert.code.wizard.form</field>
+        <field name="model">bc3.budget.insert.code.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Insertar concepto por código">
+                <group>
+                    <field name="budget_id"/>
+                    <field name="parent_id" domain="[('budget_id', '=', budget_id)]"/>
+                    <field name="catalog_file_id"/>
+                    <field name="code"/>
+                    <field name="quantity"/>
+                    <field name="copy_measurements"/>
+                </group>
+                <group string="Crear si no existe">
+                    <field name="create_if_missing"/>
+                    <field name="line_type" invisible="not create_if_missing"/>
+                    <field name="name" invisible="not create_if_missing"/>
+                    <field name="price_unit" invisible="not create_if_missing"/>
+                </group>
+                <footer>
+                    <button name="action_insert" type="object" string="Insertar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bc3_budget_update_from_bank_wizard_form" model="ir.ui.view">
+        <field name="name">bc3.budget.update.from.bank.wizard.form</field>
+        <field name="model">bc3.budget.update.from.bank.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Actualizar desde banco">
+                <group>
+                    <field name="budget_id"/>
+                    <field name="line_id" domain="[('budget_id', '=', budget_id)]"/>
+                    <field name="catalog_file_id"/>
+                    <field name="code"/>
+                    <field name="concept_id" domain="[('file_id', '=', catalog_file_id)]"/>
+                    <field name="price_line_id" domain="[('concept_id', '=', concept_id)]"/>
+                </group>
+                <group string="Actualizar">
+                    <field name="update_summary"/>
+                    <field name="update_unit"/>
+                    <field name="update_text"/>
+                    <field name="update_price"/>
+                    <field name="update_decomposition"/>
+                    <field name="update_nature"/>
+                    <field name="update_formula"/>
+                    <field name="keep_measurements"/>
+                </group>
+                <footer>
+                    <button name="action_update" type="object" string="Actualizar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bc3_budget_substitute_list_wizard_form" model="ir.ui.view">
+        <field name="name">bc3.budget.substitute.list.wizard.form</field>
+        <field name="model">bc3.budget.substitute.list.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Sustituir conceptos por lista">
+                <group>
+                    <field name="budget_id"/>
+                    <field name="catalog_file_id"/>
+                    <field name="update_decomposition"/>
+                    <field name="keep_measurements"/>
+                </group>
+                <group>
+                    <field name="mapping_text" placeholder="ANTIGUO&#9;NUEVO&#10;MAT*&#9;MAT2026*"/>
+                </group>
+                <footer>
+                    <button name="action_apply" type="object" string="Aplicar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bc3_price_operate_wizard_form" model="ir.ui.view">
+        <field name="name">bc3.price.operate.wizard.form</field>
+        <field name="model">bc3.price.operate.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Operar precios BC3">
+                <group>
+                    <field name="budget_id"/>
+                    <field name="file_id"/>
+                    <field name="only_unlocked"/>
+                </group>
+                <group string="Incrementos porcentuales">
+                    <field name="percent_work_unit"/>
+                    <field name="percent_labor"/>
+                    <field name="percent_material"/>
+                    <field name="percent_machinery"/>
+                    <field name="percent_other"/>
+                </group>
+                <footer>
+                    <button name="action_apply" type="object" string="Aplicar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bc3_concept_duplicate_wizard_form" model="ir.ui.view">
+        <field name="name">bc3.concept.duplicate.wizard.form</field>
+        <field name="model">bc3.concept.duplicate.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Duplicar concepto BC3">
+                <group>
+                    <field name="concept_id"/>
+                    <field name="target_file_id"/>
+                    <field name="new_code"/>
+                    <field name="copy_decomposition"/>
+                    <field name="copy_prices"/>
+                </group>
+                <footer>
+                    <button name="action_duplicate" type="object" string="Duplicar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bc3_concept_rename_wizard_form" model="ir.ui.view">
+        <field name="name">bc3.concept.rename.wizard.form</field>
+        <field name="model">bc3.concept.rename.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Renombrar concepto BC3">
+                <group>
+                    <field name="concept_id"/>
+                    <field name="new_code"/>
+                    <field name="update_relations"/>
+                </group>
+                <footer>
+                    <button name="action_rename" type="object" string="Renombrar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
