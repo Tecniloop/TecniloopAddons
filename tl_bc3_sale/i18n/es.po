@@ -10,18 +10,28 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#. module: tl_bc3_sale
+#: code:addons/tl_bc3_sale/:0
 msgid "BC3 Budget"
 msgstr "Presupuesto BC3"
 
+#. module: tl_bc3_sale
+#: code:addons/tl_bc3_sale/:0
 msgid "BC3 Work Unit"
 msgstr "Partida BC3"
 
+#. module: tl_bc3_sale
+#: code:addons/tl_bc3_sale/:0
 msgid "BC3-WORK-UNIT"
 msgstr "BC3-WORK-UNIT"
 
+#. module: tl_bc3_sale
+#: code:addons/tl_bc3_sale/:0
 msgid "Create Sale Order"
 msgstr "Crear presupuesto de venta"
 
+#. module: tl_bc3_sale
+#: code:addons/tl_bc3_sale/:0
 msgid "Sale Order"
 msgstr "Pedido de venta"
 

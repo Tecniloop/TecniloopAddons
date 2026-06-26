@@ -1,7 +1,7 @@
 {
     "name": "TL BC3 Sale",
     "summary": "Generate Odoo quotations from BC3 budgets using native sale sections",
-    "version": "19.0.1.0.3",
+    "version": '19.0.1.0.4',
     "category": "Construction/BC3",
     "author": "Tecniloop",
     "website": "https://www.tecniloop.com",

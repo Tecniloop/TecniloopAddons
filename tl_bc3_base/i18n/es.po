@@ -10,108 +10,178 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Allow Insecure SSL"
 msgstr "Permitir SSL sin verificar"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "BC3 / ZIP / RAR File"
 msgstr "Fichero BC3 / ZIP / RAR"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "BC3 Concepts"
 msgstr "Conceptos BC3"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "BC3 Decompositions"
 msgstr "Descomposiciones BC3"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "BC3 File"
 msgstr "Fichero BC3"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "BC3 Files"
 msgstr "Ficheros BC3"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "BC3 Measurements"
 msgstr "Mediciones BC3"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "BC3/FIEBDC parser, concepts, decompositions and measurements"
 msgstr "Parser BC3/FIEBDC, conceptos, descomposiciones y mediciones"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Budget"
 msgstr "Presupuesto"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Cancel"
 msgstr "Cancelar"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Certification"
-msgstr "Certificacion"
+msgstr "Certificación"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Concepts"
 msgstr "Conceptos"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Database"
 msgstr "Base de datos"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Database update"
-msgstr "Actualizacion de base de datos"
+msgstr "Actualización de base de datos"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Decompositions"
 msgstr "Descomposiciones"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Draft"
 msgstr "Borrador"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Error"
 msgstr "Error"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Filename"
 msgstr "Nombre de fichero"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Files"
 msgstr "Archivos"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Import"
 msgstr "Importar"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Import BC3"
 msgstr "Importar BC3"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Information Type"
-msgstr "Tipo de informacion"
+msgstr "Tipo de información"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Max URL Download Size (MB)"
-msgstr "Tamano maximo descarga URL (MB)"
+msgstr "Tamaño máximo de descarga URL (MB)"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Measurements"
-msgstr "Mediciones"
+msgstr "Measurements"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Media References"
-msgstr "Referencias de medios"
+msgstr "Media References"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Parsed"
-msgstr "Parseado"
+msgstr "Parsed"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Raw Records"
-msgstr "Registros brutos"
+msgstr "Raw Records"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Server File Path"
-msgstr "Ruta de fichero en servidor"
+msgstr "Server File Path"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Server Path"
-msgstr "Ruta de servidor"
+msgstr "Server Path"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Source"
-msgstr "Origen"
+msgstr "Source"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Source Type"
-msgstr "Tipo de origen"
+msgstr "Source Type"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "Source URL"
-msgstr "URL de origen"
+msgstr "Source URL"
 
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
+msgid "Unknown"
+msgstr "Unknown"
+
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
+msgid "Uploaded File"
+msgstr "Uploaded File"
+
+#. module: tl_bc3_base
+#: code:addons/tl_bc3_base/:0
 msgid "URL"
 msgstr "URL"
-
-msgid "Unknown"
-msgstr "Desconocido"
-
-msgid "Uploaded File"
-msgstr "Fichero subido"
 

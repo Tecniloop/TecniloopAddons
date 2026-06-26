@@ -10,195 +10,323 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Allow Insecure SSL"
 msgstr "Permitir SSL sin verificar"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "BC3 / ZIP / RAR File"
 msgstr "Fichero BC3 / ZIP / RAR"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "BC3 Filename"
 msgstr "Nombre del BC3"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "BC3 Manufacturer URLs"
 msgstr "URLs BC3 de fabricantes"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "BC3/ZIP URL"
 msgstr "URL BC3/ZIP"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Brand"
 msgstr "Marca"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Brand / Manufacturer"
 msgstr "Marca / Fabricante"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Create Import Batch"
-msgstr "Crear lote de importacion"
+msgstr "Crear lote de importación"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Created Products"
 msgstr "Productos creados"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Default Product Type"
 msgstr "Tipo de producto por defecto"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Done"
 msgstr "Hecho"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
+msgid "eCommerce Media"
+msgstr "eCommerce Media"
+
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Errors"
 msgstr "Errores"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Existing BC3 File"
 msgstr "Fichero BC3 existente"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Filename"
 msgstr "Nombre de fichero"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Goods"
 msgstr "Bienes"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Import BC3 Products"
 msgstr "Importar productos BC3"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Import BC3/FIEBDC catalog concepts as eCommerce products"
-msgstr "Importar conceptos de catalogos BC3/FIEBDC como productos ecommerce"
+msgstr "Importar conceptos de catálogos BC3/FIEBDC como productos ecommerce"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Import Images"
-msgstr "Importar imagenes"
+msgstr "Importar imágenes"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Import Other"
 msgstr "Importar otros"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Import Products"
 msgstr "Importar productos"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Import Resources"
 msgstr "Importar recursos"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Import Work Units"
 msgstr "Importar partidas"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Include Zero Price"
 msgstr "Incluir precio cero"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Last Import"
-msgstr "Ultima importacion"
+msgstr "Last Import"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Lines"
-msgstr "Lineas"
+msgstr "Lines"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Logs"
-msgstr "Registros"
+msgstr "Logs"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Manufacturer"
-msgstr "Fabricante"
+msgstr "Manufacturer"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Manufacturer URLs"
-msgstr "URLs de fabricantes"
+msgstr "Manufacturer URLs"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Max BC3 Download Size (MB)"
-msgstr "Tamano maximo descarga BC3 (MB)"
+msgstr "Max BC3 Download Size (MB)"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Max Related File Size (MB)"
-msgstr "Tamano maximo fichero relacionado (MB)"
+msgstr "Max Related File Size (MB)"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Max URL Download Size (MB)"
-msgstr "Tamano maximo descarga URL (MB)"
+msgstr "Tamaño máximo de descarga URL (MB)"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Media Created"
-msgstr "Medios creados"
+msgstr "Media Created"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Media Server Path"
-msgstr "Ruta de medios en servidor"
+msgstr "Media Server Path"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Media ZIP"
-msgstr "ZIP de medios"
+msgstr "Media ZIP"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Overwrite Existing Product Image"
-msgstr "Sobrescribir imagen existente"
+msgstr "Overwrite Existing Product Image"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Parent Website Category"
-msgstr "Categoria web padre"
+msgstr "Parent Website Category"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Partial"
-msgstr "Parcial"
+msgstr "Partial"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Pending"
-msgstr "Pendiente"
+msgstr "Pending"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Preview"
-msgstr "Previsualizar"
+msgstr "Preview"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Process 10 Chunks"
-msgstr "Procesar 10 lotes"
+msgstr "Process 10 Chunks"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Process Next Chunk"
-msgstr "Procesar siguiente lote"
+msgstr "Process Next Chunk"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Product Imports"
-msgstr "Importaciones de productos"
+msgstr "Product Imports"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Products"
-msgstr "Productos"
+msgstr "Products"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Publish On Website"
-msgstr "Publicar en web"
+msgstr "Publish On Website"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Queued"
-msgstr "En cola"
+msgstr "Queued"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Replace Existing Website Categories"
-msgstr "Sustituir categorias web existentes"
+msgstr "Replace Existing Website Categories"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Running"
-msgstr "En proceso"
+msgstr "Running"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Server File Path"
-msgstr "Ruta de fichero en servidor"
+msgstr "Server File Path"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Server Path"
-msgstr "Ruta de servidor"
+msgstr "Server Path"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Service"
-msgstr "Servicio"
+msgstr "Service"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Skipped"
-msgstr "Omitido"
+msgstr "Skipped"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Skipped Products"
-msgstr "Productos omitidos"
+msgstr "Skipped Products"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Source"
-msgstr "Origen"
+msgstr "Source"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Source Type"
-msgstr "Tipo de origen"
+msgstr "Source Type"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Source URL"
-msgstr "URL de origen"
+msgstr "Source URL"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Track Inventory"
-msgstr "Controlar inventario"
+msgstr "Track Inventory"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
+msgid "Update Existing"
+msgstr "Update Existing"
+
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
+msgid "Updated Products"
+msgstr "Updated Products"
+
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
+msgid "Uploaded File"
+msgstr "Uploaded File"
+
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "URL"
 msgstr "URL"
 
-msgid "Update Existing"
-msgstr "Actualizar existentes"
-
-msgid "Updated Products"
-msgstr "Productos actualizados"
-
-msgid "Uploaded File"
-msgstr "Fichero subido"
-
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Use First Image as Product Image"
-msgstr "Usar primera imagen como imagen del producto"
+msgstr "Use First Image as Product Image"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Warnings"
-msgstr "Avisos"
+msgstr "Warnings"
 
+#. module: tl_bc3_product
+#: code:addons/tl_bc3_product/:0
 msgid "Website Categories"
-msgstr "Categorias web"
-
-msgid "eCommerce Media"
-msgstr "Medios ecommerce"
+msgstr "Website Categories"
 
