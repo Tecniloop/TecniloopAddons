@@ -5,12 +5,12 @@
         <field name="inherit_id" ref="tl_bc3_budget.view_bc3_budget_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="action_create_sale_order" string="Create Quotation" type="object" class="btn-primary" invisible="state != 'ready'"/>
+                <button name="action_create_sale_order" string="Crear presupuesto de venta" type="object" class="btn-primary" invisible="state != 'ready'"/>
             </xpath>
             <xpath expr="//sheet" position="inside">
                 <div class="oe_button_box" name="button_box">
                     <button name="action_open_sale_orders" type="object" class="oe_stat_button" icon="fa-list">
-                        <field name="sale_order_count" widget="statinfo" string="Quotations"/>
+                        <field name="sale_order_count" widget="statinfo" string="Presupuestos de venta"/>
                     </button>
                 </div>
             </xpath>

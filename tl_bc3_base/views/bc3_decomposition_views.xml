@@ -15,7 +15,7 @@
         </field>
     </record>
     <record id="action_bc3_decomposition_line" model="ir.actions.act_window">
-        <field name="name">BC3 Decompositions</field>
+        <field name="name">Descomposiciones BC3</field>
         <field name="res_model">bc3.decomposition.line</field>
         <field name="view_mode">list</field>
     </record>

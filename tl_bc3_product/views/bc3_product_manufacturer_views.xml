@@ -19,14 +19,14 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_preview" string="Preview" type="object" class="btn-secondary"/>
-                    <button name="action_import" string="Import" type="object" class="btn-primary"/>
-                    <button name="action_open_last_import_batch" string="Last Import" type="object" invisible="not last_import_batch_id"/>
+                    <button name="action_preview" string="Previsualizar" type="object" class="btn-secondary"/>
+                    <button name="action_import" string="Importar" type="object" class="btn-primary"/>
+                    <button name="action_open_last_import_batch" string="Última importación" type="object" invisible="not last_import_batch_id"/>
                 </header>
                 <sheet>
                     <div class="oe_title"><h1><field name="name"/></h1></div>
                     <group>
-                        <group string="Source">
+                        <group string="Origen">
                             <field name="active"/>
                             <field name="brand_id"/>
                             <field name="bc3_url"/>
@@ -36,7 +36,7 @@
                             <field name="max_related_file_size_mb"/>
                             <field name="media_server_path"/>
                         </group>
-                        <group string="Import">
+                        <group string="Importar">
                             <field name="update_existing"/>
                             <field name="default_product_type"/>
                             <field name="track_inventory"/>
@@ -48,7 +48,7 @@
                             <field name="process_first_chunk"/>
                         </group>
                     </group>
-                    <group string="Website / eCommerce">
+                    <group string="Sitio web / ecommerce">
                         <field name="create_website_categories"/>
                         <field name="website_parent_categ_id" invisible="not create_website_categories"/>
                         <field name="replace_website_categories" invisible="not create_website_categories"/>
@@ -57,7 +57,7 @@
                         <field name="set_first_image" invisible="not import_images"/>
                         <field name="overwrite_image" invisible="not import_images"/>
                     </group>
-                    <group string="Last Import">
+                    <group string="Última importación">
                         <field name="file_id"/>
                         <field name="last_import_batch_id"/>
                         <field name="last_import_date"/>
@@ -69,7 +69,7 @@
         </field>
     </record>
     <record id="action_bc3_product_manufacturer" model="ir.actions.act_window">
-        <field name="name">BC3 Manufacturer URLs</field>
+        <field name="name">URLs BC3 de fabricantes</field>
         <field name="res_model">bc3.product.manufacturer</field>
         <field name="view_mode">list,form</field>
     </record>

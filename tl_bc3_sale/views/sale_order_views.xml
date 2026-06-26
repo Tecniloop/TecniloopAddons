@@ -5,7 +5,7 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="action_fill_from_bc3_budget" string="Fill from BC3" type="object" class="btn-secondary" invisible="not bc3_budget_id or state not in ('draft', 'sent')"/>
+                <button name="action_fill_from_bc3_budget" string="Rellenar desde BC3" type="object" class="btn-secondary" invisible="not bc3_budget_id or state not in ('draft', 'sent')"/>
             </xpath>
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="bc3_budget_id"/>

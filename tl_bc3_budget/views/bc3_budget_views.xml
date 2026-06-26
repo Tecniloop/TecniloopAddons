@@ -19,10 +19,15 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_rebuild_lines" string="Rebuild Lines" type="object" class="btn-secondary"/>
+                    <button name="action_rebuild_lines" string="Reconstruir líneas" type="object" class="btn-secondary"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,ready,locked"/>
                 </header>
                 <sheet>
+                    <div name="button_box" class="oe_button_box">
+                        <button name="action_open_origin_file" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <div class="o_field_widget o_stat_info"><span class="o_stat_text">Fichero BC3</span></div>
+                        </button>
+                    </div>
                     <div class="oe_title"><h1><field name="name"/></h1></div>
                     <group>
                         <field name="file_id"/>
@@ -32,7 +37,7 @@
                         <field name="amount_total"/>
                     </group>
                     <notebook>
-                        <page string="Budget Lines">
+                        <page string="Líneas de presupuesto">
                             <field name="line_ids">
                                 <list editable="bottom">
                                     <field name="sequence"/>
@@ -55,7 +60,7 @@
         </field>
     </record>
     <record id="action_bc3_budget" model="ir.actions.act_window">
-        <field name="name">BC3 Budgets</field>
+        <field name="name">Presupuestos BC3</field>
         <field name="res_model">bc3.budget</field>
         <field name="view_mode">list,form</field>
     </record>

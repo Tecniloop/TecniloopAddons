@@ -5,15 +5,15 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="action_create_bc3_certification" string="Create Certification" type="object" class="btn-secondary" invisible="not bc3_budget_id"/>
+                <button name="action_create_bc3_certification" string="Crear certificación" type="object" class="btn-secondary" invisible="not bc3_budget_id"/>
             </xpath>
             <xpath expr="//sheet//div[@name='button_box']" position="inside">
                 <button name="action_open_bc3_certifications" type="object" class="oe_stat_button" icon="fa-certificate" invisible="not bc3_budget_id">
-                    <field name="bc3_certification_count" widget="statinfo" string="Certifications"/>
+                    <field name="bc3_certification_count" widget="statinfo" string="Certificaciones"/>
                 </button>
             </xpath>
             <xpath expr="//notebook" position="inside">
-                <page string="BC3 Certifications" invisible="not bc3_budget_id">
+                <page string="Certificaciones BC3" invisible="not bc3_budget_id">
                     <field name="bc3_certification_ids" readonly="1" context="{'default_sale_order_id': id, 'default_budget_id': bc3_budget_id}">
                         <list>
                             <field name="name"/>

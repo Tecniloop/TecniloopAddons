@@ -1,6 +1,6 @@
 <odoo>
-    <menuitem id="menu_bc3_products" name="Products" parent="tl_bc3_base.menu_bc3_root" sequence="70"/>
-    <menuitem id="menu_bc3_product_import_wizard" name="Import Products" parent="menu_bc3_products" action="action_bc3_product_import_wizard" sequence="10"/>
-    <menuitem id="menu_bc3_product_imports" name="Product Imports" parent="menu_bc3_products" action="action_bc3_product_import_batch" sequence="20"/>
-    <menuitem id="menu_bc3_product_manufacturers" name="Manufacturer URLs" parent="menu_bc3_products" action="action_bc3_product_manufacturer" sequence="30"/>
+    <menuitem id="menu_bc3_products" name="Productos" parent="tl_bc3_base.menu_bc3_root" sequence="70"/>
+    <menuitem id="menu_bc3_product_import_wizard" name="Importar productos" parent="menu_bc3_products" action="action_bc3_product_import_wizard" sequence="10"/>
+    <menuitem id="menu_bc3_product_imports" name="Importaciones de productos" parent="menu_bc3_products" action="action_bc3_product_import_batch" sequence="20"/>
+    <menuitem id="menu_bc3_product_manufacturers" name="URLs de fabricantes" parent="menu_bc3_products" action="action_bc3_product_manufacturer" sequence="30"/>
 </odoo>

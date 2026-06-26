@@ -1,7 +1,7 @@
 {
     "name": "TL BC3 Certification",
-    "summary": "BC3 work certifications linked to sale orders and customer invoices",
-    "version": "19.0.1.1.0",
+    "summary": "Certificaciones de obra BC3 enlazadas a pedidos y facturas de cliente",
+    "version": "19.0.1.2.0",
     "category": "Construction/BC3",
     "author": "Tecniloop",
     "website": "https://www.tecniloop.com",

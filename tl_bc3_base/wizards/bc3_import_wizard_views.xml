@@ -16,17 +16,17 @@
                     <field name="parse_now"/>
                 </group>
                 <footer>
-                    <button name="action_import" string="Import" type="object" class="btn-primary"/>
-                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    <button name="action_import" string="Importar" type="object" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
     </record>
     <record id="action_bc3_import_wizard" model="ir.actions.act_window">
-        <field name="name">Import BC3</field>
+        <field name="name">Importar BC3</field>
         <field name="res_model">bc3.import.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>
-    <menuitem id="menu_bc3_import" name="Import BC3" parent="menu_bc3_files" action="action_bc3_import_wizard" sequence="15"/>
+    <menuitem id="menu_bc3_import" name="Importar BC3" parent="menu_bc3_files" action="action_bc3_import_wizard" sequence="15"/>
 </odoo>

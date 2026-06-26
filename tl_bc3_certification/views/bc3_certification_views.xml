@@ -22,13 +22,13 @@
         <field name="name">bc3.certification.search</field>
         <field name="model">bc3.certification</field>
         <field name="arch" type="xml">
-            <search string="BC3 Certifications">
+            <search string="Certificaciones BC3">
                 <field name="name"/>
                 <field name="sale_order_id"/>
                 <field name="budget_id"/>
-                <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
-                <filter name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
-                <filter name="invoiced" string="Invoiced" domain="[('state','=','invoiced')]"/>
+                <filter name="draft" string="Borrador" domain="[('state','=','draft')]"/>
+                <filter name="confirmed" string="Confirmada" domain="[('state','=','confirmed')]"/>
+                <filter name="invoiced" string="Facturada" domain="[('state','=','invoiced')]"/>
             </search>
         </field>
     </record>
@@ -39,11 +39,11 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_load_lines" string="Reload Lines" type="object" class="btn-secondary" invisible="state != 'draft'"/>
-                    <button name="action_apply_global_percent" string="Apply Global %" type="object" class="btn-secondary" invisible="state != 'draft' or certification_method != 'global_percent'"/>
-                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" invisible="state != 'draft'"/>
-                    <button name="action_create_invoice" string="Create Origin Invoice" type="object" class="btn-primary" invisible="state not in ('draft', 'confirmed')"/>
-                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('cancelled', 'invoiced')"/>
+                    <button name="action_load_lines" string="Recargar líneas" type="object" class="btn-secondary" invisible="state != 'draft'"/>
+                    <button name="action_apply_global_percent" string="Aplicar % global" type="object" class="btn-secondary" invisible="state != 'draft' or certification_method != 'global_percent'"/>
+                    <button name="action_confirm" string="Confirmar" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_create_invoice" string="Crear factura a origen" type="object" class="btn-primary" invisible="state not in ('draft', 'confirmed')"/>
+                    <button name="action_cancel" string="Cancelar" type="object" invisible="state in ('cancelled', 'invoiced')"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,invoiced"/>
                 </header>
                 <sheet>
@@ -52,7 +52,7 @@
                             <div class="o_field_widget o_stat_info"><span class="o_stat_text">Sale Order</span></div>
                         </button>
                         <button name="action_open_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o">
-                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                            <field name="invoice_count" widget="statinfo" string="Facturas"/>
                         </button>
                     </div>
                     <div class="oe_title"><h1><field name="name"/></h1></div>
@@ -63,7 +63,7 @@
                             <field name="previous_certification_id"/>
                             <field name="origin_bc3_file_id"/>
                         </group>
-                        <group string="Certification">
+                        <group string="Certificación">
                             <field name="certification_number"/>
                             <field name="certification_date"/>
                             <field name="certification_method"/>
@@ -71,7 +71,7 @@
                             <field name="currency_id"/>
                         </group>
                     </group>
-                    <group string="Invoice parameters">
+                    <group string="Parámetros de factura">
                         <group>
                             <field name="tax_ids" widget="many2many_tags"/>
                             <field name="award_discount_percent"/>
@@ -81,7 +81,7 @@
                             <field name="retention_fiscal_percent"/>
                         </group>
                     </group>
-                    <group string="Origin invoice summary">
+                    <group string="Resumen de factura a origen">
                         <group>
                             <field name="gross_amount_origin" readonly="1"/>
                             <field name="award_discount_amount" readonly="1"/>
@@ -97,7 +97,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Lines">
+                        <page string="Líneas">
                             <field name="line_ids">
                                 <list editable="bottom">
                                     <field name="bc3_code" readonly="1"/>
@@ -126,7 +126,7 @@
     </record>
 
     <record id="action_bc3_certification" model="ir.actions.act_window">
-        <field name="name">BC3 Certifications</field>
+        <field name="name">Certificaciones BC3</field>
         <field name="res_model">bc3.certification</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_bc3_certification_search"/>

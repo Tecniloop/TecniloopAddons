@@ -1,7 +1,7 @@
 {
     "name": "TL BC3 Budget",
-    "summary": "Technical BC3 budgets with chapters, work units and measurements",
-    "version": '19.0.1.0.4',
+    "summary": "Presupuestos técnicos BC3 con capítulos, partidas y mediciones",
+    "version": '19.0.1.1.0',
     "category": "Construction/BC3",
     "author": "Tecniloop",
     "website": "https://www.tecniloop.com",

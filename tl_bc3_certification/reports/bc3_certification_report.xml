@@ -1,133 +1,149 @@
 <odoo>
     <record id="action_report_bc3_certification_invoice" model="ir.actions.report">
-        <field name="name">BC3 Certification Invoice</field>
-        <field name="model">bc3.certification</field>
+        <field name="name">Factura de certificación de obra</field>
+        <field name="model">account.move</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">tl_bc3_certification.report_bc3_certification_invoice_document</field>
         <field name="report_file">tl_bc3_certification.report_bc3_certification_invoice_document</field>
-        <field name="binding_model_id" ref="model_bc3_certification"/>
+        <field name="binding_model_id" ref="account.model_account_move"/>
         <field name="binding_type">report</field>
     </record>
 
     <template id="report_bc3_certification_invoice_document">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
+                <t t-set="cert" t-value="o.bc3_certification_id"/>
                 <t t-call="web.external_layout">
                     <div class="page">
-                        <h2>Factura de certificación de obra</h2>
-                        <div class="row mt16 mb16">
-                            <div class="col-6">
-                                <h4>Datos de la factura</h4>
-                                <p>
-                                    <strong>Certificación nº:</strong>
-                                    <span t-field="o.certification_number"/><br/>
-                                    <strong>Fecha de emisión:</strong>
-                                    <span t-field="o.certification_date"/><br/>
-                                    <strong>Pedido de venta:</strong>
-                                    <span t-field="o.sale_order_id"/><br/>
-                                    <strong>Forma de pago:</strong>
-                                    <span t-field="o.sale_order_id.payment_term_id"/>
-                                </p>
+                        <t t-if="not cert">
+                            <h2>Factura</h2>
+                            <p>Esta factura no está vinculada a una certificación BC3.</p>
+                        </t>
+                        <t t-if="cert">
+                            <h2>Factura de certificación de obra</h2>
+                            <div class="row mt16 mb16">
+                                <div class="col-6">
+                                    <h4>Datos de la factura</h4>
+                                    <p>
+                                        <strong>Número:</strong>
+                                        <span t-field="o.name"/><br/>
+                                        <strong>Fecha de emisión:</strong>
+                                        <span t-field="o.invoice_date"/><br/>
+                                        <strong>Fecha de vencimiento:</strong>
+                                        <span t-field="o.invoice_date_due"/><br/>
+                                        <strong>Certificación nº:</strong>
+                                        <span t-field="cert.certification_number"/><br/>
+                                        <strong>Pedido de venta:</strong>
+                                        <span t-field="cert.sale_order_id"/><br/>
+                                        <strong>Forma de pago:</strong>
+                                        <span t-field="o.invoice_payment_term_id"/>
+                                    </p>
+                                </div>
+                                <div class="col-6">
+                                    <h4>Datos de la propiedad</h4>
+                                    <p>
+                                        <span t-field="o.partner_id"/><br/>
+                                        <span t-field="o.partner_id.street"/><br/>
+                                        <span t-field="o.partner_id.zip"/> <span t-field="o.partner_id.city"/><br/>
+                                        <span t-field="o.partner_id.state_id"/><br/>
+                                        <strong>NIF:</strong> <span t-field="o.partner_id.vat"/>
+                                    </p>
+                                </div>
                             </div>
-                            <div class="col-6">
-                                <h4>Datos de la propiedad</h4>
-                                <p>
-                                    <span t-field="o.partner_id"/><br/>
-                                    <span t-field="o.partner_id.street"/><br/>
-                                    <span t-field="o.partner_id.zip"/> <span t-field="o.partner_id.city"/><br/>
-                                    <span t-field="o.partner_id.vat"/>
-                                </p>
+                            <div class="row mt16 mb16">
+                                <div class="col-6">
+                                    <h4>Datos de la constructora</h4>
+                                    <p>
+                                        <span t-field="o.company_id.partner_id"/><br/>
+                                        <span t-field="o.company_id.partner_id.street"/><br/>
+                                        <span t-field="o.company_id.partner_id.zip"/> <span t-field="o.company_id.partner_id.city"/><br/>
+                                        <strong>NIF:</strong> <span t-field="o.company_id.partner_id.vat"/>
+                                    </p>
+                                </div>
+                                <div class="col-6">
+                                    <h4>Obra</h4>
+                                    <p>
+                                        <span t-field="cert.budget_id.name"/><br/>
+                                        <span t-field="cert.name"/>
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row mt16 mb16">
-                            <div class="col-6">
-                                <h4>Datos de la constructora</h4>
-                                <p>
-                                    <span t-field="o.company_id.partner_id"/><br/>
-                                    <span t-field="o.company_id.partner_id.street"/><br/>
-                                    <span t-field="o.company_id.partner_id.zip"/> <span t-field="o.company_id.partner_id.city"/><br/>
-                                    <span t-field="o.company_id.partner_id.vat"/>
-                                </p>
-                            </div>
-                            <div class="col-6">
-                                <h4>Obra</h4>
-                                <p>
-                                    <span t-field="o.budget_id.name"/><br/>
-                                    <span t-field="o.name"/>
-                                </p>
-                            </div>
-                        </div>
 
-                        <h4>Detalle de capítulos</h4>
-                        <table class="table table-sm o_main_table">
-                            <thead>
-                                <tr>
-                                    <th>Código</th>
-                                    <th>Capítulo</th>
-                                    <th class="text-end">Euros</th>
-                                    <th class="text-end">%</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <t t-foreach="o._get_report_chapter_lines()" t-as="chapter">
+                            <h4>Detalle de capítulos</h4>
+                            <table class="table table-sm o_main_table">
+                                <thead>
                                     <tr>
-                                        <td><span t-out="chapter['code']"/></td>
-                                        <td><span t-out="chapter['name']"/></td>
-                                        <td class="text-end"><span t-out="o._format_report_amount(chapter['amount'])"/></td>
-                                        <td class="text-end"><span t-out="o._format_report_percent(chapter['percent'])"/></td>
+                                        <th>Código</th>
+                                        <th>Capítulo</th>
+                                        <th class="text-end">Euros</th>
+                                        <th class="text-end">%</th>
                                     </tr>
-                                </t>
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="cert._get_report_chapter_lines()" t-as="chapter">
+                                        <tr>
+                                            <td><span t-out="chapter['code']"/></td>
+                                            <td><span t-out="chapter['name']"/></td>
+                                            <td class="text-end"><span t-out="cert._format_report_amount(chapter['amount'])"/></td>
+                                            <td class="text-end"><span t-out="cert._format_report_percent(chapter['percent'])"/></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
 
-                        <div class="row mt16">
-                            <div class="col-6">
-                                <p>
-                                    Asciende la presente certificación a la expresada cantidad de
-                                    <strong><span t-out="o._get_amount_total_text()"/></strong>
-                                </p>
+                            <div class="row mt16">
+                                <div class="col-6">
+                                    <p>
+                                        Asciende la presente certificación a la expresada cantidad de
+                                        <strong><span t-out="cert._get_amount_total_text()"/></strong>
+                                    </p>
+                                    <p>
+                                        <strong>Factura emitida desde la factura de Odoo:</strong>
+                                        <span t-field="o.name"/>
+                                    </p>
+                                </div>
+                                <div class="col-6">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td>EJECUCIÓN MATERIAL</td>
+                                            <td class="text-end"><span t-out="cert._format_report_amount(cert.gross_amount_origin)"/></td>
+                                        </tr>
+                                        <tr t-if="cert.award_discount_amount">
+                                            <td><span t-out="cert._format_report_percent(cert.award_discount_percent)"/>% Baja / Alza</td>
+                                            <td class="text-end">- <span t-out="cert._format_report_amount(cert.award_discount_amount)"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td>EJECUCIÓN DESPUÉS DE BAJA</td>
+                                            <td class="text-end"><span t-out="cert._format_report_amount(cert.net_amount_origin)"/></td>
+                                        </tr>
+                                        <tr t-if="cert.previous_certification_id">
+                                            <td>A deducir certificación nº <span t-field="cert.previous_certification_id.certification_number"/></td>
+                                            <td class="text-end">- <span t-out="cert._format_report_amount(cert.previous_amount_origin)"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>BASE IMPONIBLE CERTIFICACIÓN Nº <span t-field="cert.certification_number"/></strong></td>
+                                            <td class="text-end"><strong><span t-out="cert._format_report_amount(cert.current_base_amount)"/></strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>IVA / Impuestos</td>
+                                            <td class="text-end"><span t-out="cert._format_report_amount(cert.tax_amount)"/></td>
+                                        </tr>
+                                        <tr t-if="cert.retention_warranty_amount">
+                                            <td>Retención de garantía</td>
+                                            <td class="text-end">- <span t-out="cert._format_report_amount(cert.retention_warranty_amount)"/></td>
+                                        </tr>
+                                        <tr t-if="cert.retention_fiscal_amount">
+                                            <td>Retención fiscal</td>
+                                            <td class="text-end">- <span t-out="cert._format_report_amount(cert.retention_fiscal_amount)"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>TOTAL A PAGAR CERTIFICACIÓN Nº <span t-field="cert.certification_number"/></strong></td>
+                                            <td class="text-end"><strong><span t-out="cert._format_report_amount(cert.total_amount)"/></strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="col-6">
-                                <table class="table table-sm">
-                                    <tr>
-                                        <td>EJECUCIÓN MATERIAL</td>
-                                        <td class="text-end"><span t-out="o._format_report_amount(o.gross_amount_origin)"/></td>
-                                    </tr>
-                                    <tr t-if="o.award_discount_amount">
-                                        <td><span t-out="o._format_report_percent(o.award_discount_percent)"/>% Baja / Alza</td>
-                                        <td class="text-end">- <span t-out="o._format_report_amount(o.award_discount_amount)"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td>EJECUCIÓN DESPUÉS DE BAJA</td>
-                                        <td class="text-end"><span t-out="o._format_report_amount(o.net_amount_origin)"/></td>
-                                    </tr>
-                                    <tr t-if="o.previous_certification_id">
-                                        <td>A deducir certificación nº <span t-field="o.previous_certification_id.certification_number"/></td>
-                                        <td class="text-end">- <span t-out="o._format_report_amount(o.previous_amount_origin)"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>BASE IMPONIBLE CERTIFICACIÓN Nº <span t-field="o.certification_number"/></strong></td>
-                                        <td class="text-end"><strong><span t-out="o._format_report_amount(o.current_base_amount)"/></strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td>IVA / Impuestos</td>
-                                        <td class="text-end"><span t-out="o._format_report_amount(o.tax_amount)"/></td>
-                                    </tr>
-                                    <tr t-if="o.retention_warranty_amount">
-                                        <td>Retención de garantía</td>
-                                        <td class="text-end">- <span t-out="o._format_report_amount(o.retention_warranty_amount)"/></td>
-                                    </tr>
-                                    <tr t-if="o.retention_fiscal_amount">
-                                        <td>Retención fiscal</td>
-                                        <td class="text-end">- <span t-out="o._format_report_amount(o.retention_fiscal_amount)"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>TOTAL A PAGAR CERTIFICACIÓN Nº <span t-field="o.certification_number"/></strong></td>
-                                        <td class="text-end"><strong><span t-out="o._format_report_amount(o.total_amount)"/></strong></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
+                        </t>
                     </div>
                 </t>
             </t>

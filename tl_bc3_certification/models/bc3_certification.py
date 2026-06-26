@@ -4,7 +4,7 @@ from odoo.exceptions import UserError
 
 class Bc3Certification(models.Model):
     _name = "bc3.certification"
-    _description = "BC3 Certification"
+    _description = "Certificación BC3"
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "certification_number desc, id desc"
 
@@ -16,52 +16,52 @@ class Bc3Certification(models.Model):
     currency_id = fields.Many2one(related="sale_order_id.currency_id", store=True)
     certification_number = fields.Integer(required=True, default=1, tracking=True)
     certification_date = fields.Date(default=fields.Date.context_today, required=True, tracking=True)
-    previous_certification_id = fields.Many2one("bc3.certification", string="Previous Certification", readonly=True)
+    previous_certification_id = fields.Many2one("bc3.certification", string="Certificación anterior", readonly=True)
     certification_method = fields.Selection(
         [
-            ("quantity", "By cumulative quantity"),
-            ("line_percent", "By cumulative line percentage"),
-            ("global_percent", "By global cumulative percentage"),
+            ("quantity", "Por cantidad acumulada"),
+            ("line_percent", "Por porcentaje acumulado por línea"),
+            ("global_percent", "Por porcentaje global acumulado"),
         ],
-        string="Certification Method",
+        string="Método de certificación",
         default="quantity",
         required=True,
         tracking=True,
     )
-    global_percent = fields.Float(string="Global Cumulative %", default=0.0, tracking=True)
+    global_percent = fields.Float(string="% global acumulado", default=0.0, tracking=True)
     state = fields.Selection(
-        [("draft", "Draft"), ("confirmed", "Confirmed"), ("invoiced", "Invoiced"), ("cancelled", "Cancelled")],
+        [("draft", "Borrador"), ("confirmed", "Confirmada"), ("invoiced", "Facturada"), ("cancelled", "Cancelada")],
         default="draft",
         required=True,
         tracking=True,
     )
-    line_ids = fields.One2many("bc3.certification.line", "certification_id", string="Lines")
-    invoice_ids = fields.One2many("account.move", "bc3_certification_id", string="Invoices", readonly=True)
+    line_ids = fields.One2many("bc3.certification.line", "certification_id", string="Líneas")
+    invoice_ids = fields.One2many("account.move", "bc3_certification_id", string="Facturas", readonly=True)
     invoice_count = fields.Integer(compute="_compute_invoice_count")
     tax_ids = fields.Many2many(
         "account.tax",
         "bc3_certification_account_tax_rel",
         "certification_id",
         "tax_id",
-        string="Taxes",
+        string="Impuestos",
         domain="[('type_tax_use', '=', 'sale'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
     )
-    award_discount_percent = fields.Float(string="Award Discount / Increase %", default=0.0, tracking=True)
-    retention_warranty_percent = fields.Float(string="Warranty Retention %", default=0.0, tracking=True)
-    retention_fiscal_percent = fields.Float(string="Fiscal Retention %", default=0.0, tracking=True)
-    amount_previous = fields.Monetary(compute="_compute_amounts", store=True, string="Previous Gross Amount")
-    amount_current = fields.Monetary(compute="_compute_amounts", store=True, string="Current Gross Amount")
-    amount_cumulative = fields.Monetary(compute="_compute_amounts", store=True, string="Cumulative Gross Amount")
-    gross_amount_origin = fields.Monetary(compute="_compute_amounts", store=True, string="Gross Origin Amount")
-    award_discount_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Award Discount Amount")
-    net_amount_origin = fields.Monetary(compute="_compute_amounts", store=True, string="Net Origin Amount")
-    previous_amount_origin = fields.Monetary(compute="_compute_amounts", store=True, string="Previous Origin Amount")
-    current_base_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Current Tax Base")
-    tax_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Tax Amount")
-    retention_warranty_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Warranty Retention Amount")
-    retention_fiscal_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Fiscal Retention Amount")
-    total_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Total To Pay")
-    origin_bc3_file_id = fields.Many2one("bc3.file", string="Origin BC3 File")
+    award_discount_percent = fields.Float(string="Baja / alza de adjudicación %", default=0.0, tracking=True)
+    retention_warranty_percent = fields.Float(string="Retención de garantía %", default=0.0, tracking=True)
+    retention_fiscal_percent = fields.Float(string="Retención fiscal %", default=0.0, tracking=True)
+    amount_previous = fields.Monetary(compute="_compute_amounts", store=True, string="Importe bruto anterior")
+    amount_current = fields.Monetary(compute="_compute_amounts", store=True, string="Importe bruto actual")
+    amount_cumulative = fields.Monetary(compute="_compute_amounts", store=True, string="Importe bruto acumulado")
+    gross_amount_origin = fields.Monetary(compute="_compute_amounts", store=True, string="Ejecución material a origen")
+    award_discount_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Importe baja / alza")
+    net_amount_origin = fields.Monetary(compute="_compute_amounts", store=True, string="Ejecución después de baja")
+    previous_amount_origin = fields.Monetary(compute="_compute_amounts", store=True, string="Certificación anterior a deducir")
+    current_base_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Base imponible actual")
+    tax_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Importe impuestos")
+    retention_warranty_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Importe retención garantía")
+    retention_fiscal_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Importe retención fiscal")
+    total_amount = fields.Monetary(compute="_compute_amounts", store=True, string="Total a pagar")
+    origin_bc3_file_id = fields.Many2one("bc3.file", string="Fichero BC3 de origen")
 
     @api.depends("invoice_ids")
     def _compute_invoice_count(self):
@@ -259,7 +259,7 @@ class Bc3Certification(models.Model):
         self.ensure_one()
         return {
             "type": "ir.actions.act_window",
-            "name": _("Sale Order"),
+            "name": _("Pedido de venta"),
             "res_model": "sale.order",
             "view_mode": "form",
             "res_id": self.sale_order_id.id,
@@ -305,7 +305,7 @@ class Bc3Certification(models.Model):
         self.sale_order_id.message_post(body=_("BC3 certification %(cert)s has been invoiced in %(invoice)s.") % {"cert": self.name, "invoice": move.name or move.ref or move.id})
         return {
             "type": "ir.actions.act_window",
-            "name": _("Invoice"),
+            "name": _("Factura"),
             "res_model": "account.move",
             "view_mode": "form",
             "res_id": move.id,
@@ -432,11 +432,21 @@ class Bc3Certification(models.Model):
         self.ensure_one()
         return {
             "type": "ir.actions.act_window",
-            "name": _("Invoices"),
+            "name": _("Facturas"),
             "res_model": "account.move",
             "view_mode": "list,form",
             "domain": [("bc3_certification_id", "=", self.id)],
         }
+
+    def _sync_invoice_state_from_invoices(self):
+        for cert in self.exists():
+            active_invoices = cert.invoice_ids.exists().filtered(lambda move: move.state != "cancel")
+            if active_invoices:
+                if cert.state != "invoiced":
+                    cert.state = "invoiced"
+            elif cert.state == "invoiced":
+                cert.state = "confirmed"
+        return True
 
     def action_cancel(self):
         for cert in self:
@@ -446,7 +456,7 @@ class Bc3Certification(models.Model):
 
 class Bc3CertificationLine(models.Model):
     _name = "bc3.certification.line"
-    _description = "BC3 Certification Line"
+    _description = "Línea de certificación BC3"
     _order = "certification_id, budget_line_id"
 
     certification_id = fields.Many2one("bc3.certification", required=True, ondelete="cascade", index=True)
@@ -463,9 +473,9 @@ class Bc3CertificationLine(models.Model):
     current_certified_qty = fields.Float(compute="_compute_current", inverse="_inverse_current", store=True, digits="Product Unit of Measure")
     cumulative_certified_qty = fields.Float(digits="Product Unit of Measure")
     remaining_qty = fields.Float(compute="_compute_remaining", store=True, digits="Product Unit of Measure")
-    previous_percent = fields.Float(compute="_compute_percentages", store=True, string="Previous %")
-    current_percent = fields.Float(compute="_compute_percentages", store=True, string="Current %")
-    cumulative_percent = fields.Float(compute="_compute_percentages", inverse="_inverse_cumulative_percent", store=True, string="Cumulative %")
+    previous_percent = fields.Float(compute="_compute_percentages", store=True, string="% anterior")
+    current_percent = fields.Float(compute="_compute_percentages", store=True, string="% actual")
+    cumulative_percent = fields.Float(compute="_compute_percentages", inverse="_inverse_cumulative_percent", store=True, string="% acumulado")
     price_unit = fields.Float(digits="Product Price")
     previous_amount = fields.Monetary(compute="_compute_amounts", store=True)
     current_amount = fields.Monetary(compute="_compute_amounts", store=True)

@@ -4,7 +4,7 @@
         <field name="model">bc3.product.import.wizard</field>
         <field name="arch" type="xml">
             <form>
-                <group string="Source">
+                <group string="Origen">
                     <field name="source_type"/>
                     <field name="file_id" invisible="source_type != 'existing'" required="source_type == 'existing'"/>
                     <field name="data_file" filename="filename" invisible="source_type != 'upload'" required="source_type == 'upload'"/>
@@ -15,12 +15,12 @@
                     <field name="server_path" invisible="source_type != 'server_path'" required="source_type == 'server_path'"/>
                     <field name="bc3_filename" invisible="source_type not in ('url', 'upload', 'server_path')"/>
                 </group>
-                <group string="Brand / Manufacturer">
+                <group string="Marca / fabricante">
                     <field name="brand_id"/>
                     <field name="brand_name"/>
                     <field name="create_brand"/>
                 </group>
-                <group string="Products">
+                <group string="Productos">
                     <field name="import_work_units"/>
                     <field name="import_resources"/>
                     <field name="import_other"/>
@@ -32,12 +32,12 @@
                     <field name="batch_size"/>
                     <field name="process_first_chunk"/>
                 </group>
-                <group string="Website Categories">
+                <group string="Categorías del sitio web">
                     <field name="create_website_categories"/>
                     <field name="website_parent_categ_id" invisible="not create_website_categories"/>
                     <field name="replace_website_categories" invisible="not create_website_categories"/>
                 </group>
-                <group string="eCommerce Media">
+                <group string="Medios ecommerce">
                     <field name="import_images"/>
                     <field name="set_first_image" invisible="not import_images"/>
                     <field name="overwrite_image" invisible="not import_images"/>
@@ -48,15 +48,15 @@
                 </group>
                 <field name="preview_html" readonly="1" nolabel="1"/>
                 <footer>
-                    <button name="action_preview" string="Preview" type="object" class="btn-secondary"/>
-                    <button name="action_import" string="Create Import Batch" type="object" class="btn-primary"/>
-                    <button string="Cancel" special="cancel" class="btn-secondary"/>
+                    <button name="action_preview" string="Previsualizar" type="object" class="btn-secondary"/>
+                    <button name="action_import" string="Crear lote de importación" type="object" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
                 </footer>
             </form>
         </field>
     </record>
     <record id="action_bc3_product_import_wizard" model="ir.actions.act_window">
-        <field name="name">Import BC3 Products</field>
+        <field name="name">Importar productos BC3</field>
         <field name="res_model">bc3.product.import.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>

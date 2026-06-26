@@ -7,13 +7,13 @@
             <xpath expr="//sheet" position="inside">
                 <div class="oe_button_box" name="button_box">
                     <button name="action_open_product" type="object" class="oe_stat_button" icon="fa-cube" invisible="not product_tmpl_id">
-                        <field name="product_count" widget="statinfo" string="Product"/>
+                        <field name="product_count" widget="statinfo" string="Producto"/>
                     </button>
                 </div>
             </xpath>
             <xpath expr="//form/sheet" position="before">
                 <header>
-                    <button name="action_create_or_update_product" string="Create/Update Product" type="object" class="btn-primary" invisible="category in ('root', 'chapter', 'percentage')"/>
+                    <button name="action_create_or_update_product" string="Crear/actualizar producto" type="object" class="btn-primary" invisible="category in ('root', 'chapter', 'percentage')"/>
                 </header>
             </xpath>
         </field>

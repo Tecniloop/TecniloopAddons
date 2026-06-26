@@ -22,7 +22,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_parse" string="Parse" type="object" class="btn-primary"/>
+                    <button name="action_parse" string="Procesar" type="object" class="btn-primary"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,parsed,error"/>
                 </header>
                 <sheet>
@@ -30,7 +30,7 @@
                         <h1><field name="name"/></h1>
                     </div>
                     <group>
-                        <group string="Source">
+                        <group string="Origen">
                             <field name="source_type"/>
                             <field name="data_file" filename="filename" invisible="source_type != 'upload'"/>
                             <field name="filename"/>
@@ -61,7 +61,7 @@
                         <field name="measurement_count"/>
                     </group>
                     <notebook>
-                        <page string="Concepts">
+                        <page string="Conceptos">
                             <field name="concept_ids" readonly="1">
                                 <list>
                                     <field name="code"/>
@@ -72,7 +72,7 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Decomposition">
+                        <page string="Descomposición">
                             <field name="decomposition_line_ids" readonly="1">
                                 <list>
                                     <field name="parent_code"/>
@@ -84,7 +84,7 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Measurements">
+                        <page string="Mediciones">
                             <field name="measurement_line_ids" readonly="1">
                                 <list>
                                     <field name="parent_code"/>
@@ -99,7 +99,7 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Technical">
+                        <page string="Técnico">
                             <field name="raw_k"/>
                             <field name="warning_message"/>
                             <field name="error_message"/>
@@ -111,7 +111,7 @@
         </field>
     </record>
     <record id="action_bc3_file" model="ir.actions.act_window">
-        <field name="name">BC3 Files</field>
+        <field name="name">Ficheros BC3</field>
         <field name="res_model">bc3.file</field>
         <field name="view_mode">list,form</field>
     </record>

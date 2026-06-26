@@ -5,7 +5,7 @@
         <field name="inherit_id" ref="tl_bc3_base.view_bc3_file_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header" position="inside">
-                <button name="action_open_product_import_wizard" string="Import Products" type="object" class="btn-secondary" invisible="state != 'parsed'"/>
+                <button name="action_open_product_import_wizard" string="Importar productos" type="object" class="btn-secondary" invisible="state != 'parsed'"/>
             </xpath>
         </field>
     </record>

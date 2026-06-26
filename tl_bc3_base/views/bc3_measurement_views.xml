@@ -19,7 +19,7 @@
         </field>
     </record>
     <record id="action_bc3_measurement_line" model="ir.actions.act_window">
-        <field name="name">BC3 Measurements</field>
+        <field name="name">Mediciones BC3</field>
         <field name="res_model">bc3.measurement.line</field>
         <field name="view_mode">list</field>
     </record>

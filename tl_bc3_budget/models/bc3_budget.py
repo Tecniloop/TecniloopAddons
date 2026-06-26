@@ -4,20 +4,20 @@ from odoo.exceptions import UserError
 
 class Bc3Budget(models.Model):
     _name = "bc3.budget"
-    _description = "BC3 Budget"
+    _description = "Presupuesto BC3"
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "id desc"
 
     name = fields.Char(required=True, tracking=True)
     file_id = fields.Many2one("bc3.file", required=True, ondelete="restrict", tracking=True)
-    root_concept_id = fields.Many2one("bc3.concept", string="Root Concept")
+    root_concept_id = fields.Many2one("bc3.concept", string="Concepto raíz")
     state = fields.Selection(
-        [("draft", "Draft"), ("ready", "Ready"), ("locked", "Locked")],
+        [("draft", "Borrador"), ("ready", "Preparado"), ("locked", "Bloqueado")],
         default="draft",
         required=True,
         tracking=True,
     )
-    line_ids = fields.One2many("bc3.budget.line", "budget_id", string="Lines")
+    line_ids = fields.One2many("bc3.budget.line", "budget_id", string="Líneas")
     amount_total = fields.Float(compute="_compute_amount_total", store=True, digits="Product Price")
     work_unit_count = fields.Integer(compute="_compute_counts")
     chapter_count = fields.Integer(compute="_compute_counts")
@@ -61,17 +61,27 @@ class Bc3Budget(models.Model):
             budget.state = "ready"
         return True
 
+    def action_open_origin_file(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Fichero BC3"),
+            "res_model": "bc3.file",
+            "view_mode": "form",
+            "res_id": self.file_id.id,
+        }
+
 
 class Bc3BudgetLine(models.Model):
     _name = "bc3.budget.line"
-    _description = "BC3 Budget Line"
+    _description = "Línea de presupuesto BC3"
     _order = "budget_id, sequence, id"
     _rec_name = "display_name"
 
     budget_id = fields.Many2one("bc3.budget", required=True, ondelete="cascade", index=True)
     file_id = fields.Many2one(related="budget_id.file_id", store=True, index=True)
     parent_id = fields.Many2one("bc3.budget.line", ondelete="cascade", index=True)
-    child_ids = fields.One2many("bc3.budget.line", "parent_id", string="Children")
+    child_ids = fields.One2many("bc3.budget.line", "parent_id", string="Hijos")
     sequence = fields.Integer(default=10, index=True)
     level = fields.Integer(default=0)
     position_path = fields.Char(index=True)
@@ -80,7 +90,7 @@ class Bc3BudgetLine(models.Model):
     display_name = fields.Char(compute="_compute_display_name", store=True)
     name = fields.Char(required=True)
     line_type = fields.Selection(
-        [("root", "Root"), ("chapter", "Chapter"), ("work_unit", "Work Unit"), ("resource", "Resource"), ("percentage", "Percentage")],
+        [("root", "Raíz"), ("chapter", "Capítulo"), ("work_unit", "Partida"), ("resource", "Recurso"), ("percentage", "Porcentaje")],
         required=True,
         default="work_unit",
         index=True,
@@ -91,7 +101,7 @@ class Bc3BudgetLine(models.Model):
     price_unit = fields.Float(digits="Product Price")
     amount_total = fields.Float(compute="_compute_amount_total", store=True, digits="Product Price")
     text = fields.Text()
-    measurement_line_ids = fields.One2many("bc3.measurement.line", compute="_compute_measurement_lines", string="Measurements")
+    measurement_line_ids = fields.One2many("bc3.measurement.line", compute="_compute_measurement_lines", string="Mediciones")
 
     @api.depends("code", "name")
     def _compute_display_name(self):
@@ -128,7 +138,7 @@ class Bc3BudgetLine(models.Model):
 
 class Bc3BudgetLineBuilder(models.AbstractModel):
     _name = "bc3.budget.line.builder"
-    _description = "BC3 Budget Line Builder"
+    _description = "Constructor de líneas de presupuesto BC3"
 
     def build_budget_lines(self, budget):
         file_rec = budget.file_id

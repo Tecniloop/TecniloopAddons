@@ -1,7 +1,7 @@
 <odoo>
     <menuitem id="menu_bc3_root" name="BC3" sequence="90" web_icon="tl_bc3_base,static/description/icon.png"/>
-    <menuitem id="menu_bc3_files" name="Files" parent="menu_bc3_root" action="action_bc3_file" sequence="10"/>
-    <menuitem id="menu_bc3_concepts" name="Concepts" parent="menu_bc3_files" action="action_bc3_concept" sequence="20"/>
-    <menuitem id="menu_bc3_decompositions" name="Decompositions" parent="menu_bc3_files" action="action_bc3_decomposition_line" sequence="30"/>
-    <menuitem id="menu_bc3_measurements" name="Measurements" parent="menu_bc3_files" action="action_bc3_measurement_line" sequence="40"/>
+    <menuitem id="menu_bc3_files" name="Ficheros" parent="menu_bc3_root" action="action_bc3_file" sequence="10"/>
+    <menuitem id="menu_bc3_concepts" name="Conceptos" parent="menu_bc3_files" action="action_bc3_concept" sequence="20"/>
+    <menuitem id="menu_bc3_decompositions" name="Descomposiciones" parent="menu_bc3_files" action="action_bc3_decomposition_line" sequence="30"/>
+    <menuitem id="menu_bc3_measurements" name="Mediciones" parent="menu_bc3_files" action="action_bc3_measurement_line" sequence="40"/>
 </odoo>

@@ -29,37 +29,37 @@ except ImportError:  # pragma: no cover - optional runtime dependency
 
 class Bc3File(models.Model):
     _name = "bc3.file"
-    _description = "BC3 File"
+    _description = "Fichero BC3"
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "id desc"
 
     name = fields.Char(required=True, tracking=True)
     source_type = fields.Selection(
-        [("upload", "Uploaded File"), ("url", "URL"), ("server_path", "Server Path")],
-        string="Source Type",
+        [("upload", "Fichero subido"), ("url", "URL"), ("server_path", "Ruta de servidor")],
+        string="Tipo de origen",
         default="upload",
         required=True,
         tracking=True,
     )
-    data_file = fields.Binary(string="BC3 File", attachment=True)
+    data_file = fields.Binary(string="Fichero BC3", attachment=True)
     filename = fields.Char()
-    source_url = fields.Char(string="Source URL", tracking=True)
+    source_url = fields.Char(string="URL de origen", tracking=True)
     server_path = fields.Char(
-        string="Server File Path",
+        string="Ruta de fichero en servidor",
         help="Absolute path on the Odoo server. Use it for very large files to avoid browser/proxy upload limits.",
         tracking=True,
     )
     allow_insecure_ssl = fields.Boolean(
-        string="Allow Insecure SSL",
+        string="Permitir SSL sin verificar",
         help="Use only for trusted catalog URLs with broken certificate chains.",
     )
     max_download_size_mb = fields.Integer(
-        string="Max URL Download Size (MB)",
+        string="Tamaño máximo descarga URL (MB)",
         default=0,
         help="0 means no explicit module limit. Server memory and timeout limits still apply.",
     )
     state = fields.Selection(
-        [("draft", "Draft"), ("parsed", "Parsed"), ("error", "Error")],
+        [("draft", "Borrador"), ("parsed", "Procesado"), ("error", "Error")],
         default="draft",
         required=True,
         tracking=True,
@@ -73,23 +73,23 @@ class Bc3File(models.Model):
     encoding = fields.Char(readonly=True)
     comment = fields.Char(readonly=True)
     info_type = fields.Selection(
-        [("1", "Database"), ("2", "Budget"), ("3", "Certification"), ("4", "Database update"), ("", "Unknown")],
-        string="Information Type",
+        [("1", "Base de datos"), ("2", "Presupuesto"), ("3", "Certificación"), ("4", "Actualización de base de datos"), ("", "Desconocido")],
+        string="Tipo de información",
         readonly=True,
     )
     certification_number = fields.Char(readonly=True)
     certification_date = fields.Date(readonly=True)
     url_base = fields.Char(readonly=True)
-    raw_k = fields.Text(string="Raw ~K", readonly=True)
+    raw_k = fields.Text(string="Registro ~K bruto", readonly=True)
     record_count = fields.Integer(readonly=True)
     concept_count = fields.Integer(readonly=True)
     decomposition_count = fields.Integer(readonly=True)
     measurement_count = fields.Integer(readonly=True)
-    raw_record_ids = fields.One2many("bc3.raw.record", "file_id", string="Raw Records")
-    concept_ids = fields.One2many("bc3.concept", "file_id", string="Concepts")
-    decomposition_line_ids = fields.One2many("bc3.decomposition.line", "file_id", string="Decompositions")
-    measurement_line_ids = fields.One2many("bc3.measurement.line", "file_id", string="Measurements")
-    media_ref_ids = fields.One2many("bc3.concept.media", "file_id", string="Media References")
+    raw_record_ids = fields.One2many("bc3.raw.record", "file_id", string="Registros brutos")
+    concept_ids = fields.One2many("bc3.concept", "file_id", string="Conceptos")
+    decomposition_line_ids = fields.One2many("bc3.decomposition.line", "file_id", string="Descomposiciones")
+    measurement_line_ids = fields.One2many("bc3.measurement.line", "file_id", string="Mediciones")
+    media_ref_ids = fields.One2many("bc3.concept.media", "file_id", string="Referencias de medios")
 
     def action_parse(self):
         for rec in self:
