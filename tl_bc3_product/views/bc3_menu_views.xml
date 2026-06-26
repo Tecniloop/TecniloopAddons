@@ -1,3 +1,4 @@
 <odoo>
+    <menuitem id="menu_bc3_product_manufacturers" name="Manufacturer URLs" parent="tl_bc3_base.menu_bc3_root" action="action_bc3_product_manufacturer" sequence="65"/>
     <menuitem id="menu_bc3_product_imports" name="Product Imports" parent="tl_bc3_base.menu_bc3_root" action="action_bc3_product_import_batch" sequence="70"/>
 </odoo>

@@ -5,6 +5,7 @@
         <field name="arch" type="xml">
             <list>
                 <field name="name"/>
+                <field name="source_type"/>
                 <field name="info_type"/>
                 <field name="program"/>
                 <field name="version"/>
@@ -29,14 +30,19 @@
                         <h1><field name="name"/></h1>
                     </div>
                     <group>
-                        <group>
-                            <field name="data_file" filename="filename"/>
+                        <group string="Source">
+                            <field name="source_type"/>
+                            <field name="data_file" filename="filename" invisible="source_type != 'upload'"/>
                             <field name="filename"/>
+                            <field name="source_url" invisible="source_type != 'url'"/>
+                            <field name="allow_insecure_ssl" invisible="source_type != 'url'"/>
+                            <field name="max_download_size_mb" invisible="source_type != 'url'"/>
+                            <field name="server_path" invisible="source_type != 'server_path'"/>
+                        </group>
+                        <group string="BC3">
                             <field name="info_type"/>
                             <field name="certification_number" invisible="info_type != '3'"/>
                             <field name="certification_date" invisible="info_type != '3'"/>
-                        </group>
-                        <group>
                             <field name="property_file"/>
                             <field name="version"/>
                             <field name="program"/>

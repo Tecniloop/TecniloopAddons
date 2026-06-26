@@ -1,8 +1,13 @@
 import base64
 import html
 import io
+import os
 import posixpath
 import re
+import ssl
+import urllib.error
+import urllib.parse
+import urllib.request
 import zipfile
 
 from odoo import _, fields, models
@@ -78,6 +83,166 @@ class MediaZipReader:
         return normalized, archive.read(info)
 
 
+class MediaRelatedReader:
+    def __init__(self, wizard, batch=None):
+        self.wizard = wizard
+        self.batch = batch
+        zip_payload = b""
+        if batch and batch.media_zip_file:
+            zip_payload = base64.b64decode(batch.media_zip_file or b"")
+        elif wizard.media_zip_file:
+            zip_payload = base64.b64decode(wizard.media_zip_file or b"")
+        self.zip_reader = MediaZipReader(zip_payload) if zip_payload else MediaZipReader(b"")
+        self.source_archive_reader = None
+        self.source_archive_checked = False
+
+    def read(self, media):
+        filename, payload = self.zip_reader.read(media.filename)
+        if payload:
+            return filename, payload
+        filename, payload = self._read_from_server_path(media)
+        if payload:
+            return filename, payload
+        filename, payload = self._read_from_source_archive(media)
+        if payload:
+            return filename, payload
+        return self._read_from_url(media)
+
+
+    def _read_from_source_archive(self, media):
+        archive_reader = self._get_source_archive_reader()
+        if not archive_reader:
+            return None, None
+        return archive_reader.read(media.filename)
+
+    def _get_source_archive_reader(self):
+        if self.source_archive_checked:
+            return self.source_archive_reader
+        self.source_archive_checked = True
+        file_rec = self.wizard.file_id
+        if not file_rec.source_url:
+            return None
+        filename = posixpath.basename(urllib.parse.urlparse(file_rec.source_url).path or "").lower()
+        if not filename.endswith(".zip"):
+            return None
+        payload, _downloaded_name = file_rec._download_url(file_rec.source_url, required=False)
+        if not payload:
+            return None
+        try:
+            self.source_archive_reader = MediaZipReader(payload)
+        except Exception:
+            self.source_archive_reader = None
+        return self.source_archive_reader
+
+    def _read_from_server_path(self, media):
+        base_path = clean((self.batch and self.batch.media_server_path) or self.wizard.media_server_path)
+        if not base_path:
+            file_rec = self.wizard.file_id
+            if file_rec.source_type == "server_path" and file_rec.server_path:
+                base_path = os.path.dirname(file_rec.server_path)
+        if not base_path:
+            return None, None
+        filename = clean(media.filename).replace("\\", "/").lstrip("/")
+        if not filename:
+            return None, None
+        candidate = os.path.normpath(os.path.join(base_path, filename))
+        base_real = os.path.realpath(base_path)
+        candidate_real = os.path.realpath(candidate)
+        if not candidate_real.startswith(base_real):
+            return None, None
+        if not os.path.isfile(candidate_real):
+            candidate_real = os.path.join(base_real, os.path.basename(filename))
+        if not os.path.isfile(candidate_real):
+            return None, None
+        if os.path.splitext(candidate_real.lower())[1] in EXECUTABLE_EXTENSIONS:
+            return os.path.basename(candidate_real), None
+        with open(candidate_real, "rb") as handler:
+            return os.path.basename(candidate_real), handler.read()
+
+    def _read_from_url(self, media):
+        file_rec = self.wizard.file_id
+        for url in self._candidate_urls(file_rec, media):
+            filename, payload = self._download_url(file_rec, url)
+            if payload:
+                return filename, payload
+        return None, None
+
+    def _candidate_urls(self, file_rec, media):
+        filename = clean(media.filename).replace("\\", "/")
+        if not filename:
+            return []
+        parsed = urllib.parse.urlparse(filename)
+        if parsed.scheme in ("http", "https"):
+            return [filename]
+        candidates = []
+        bases = []
+        if file_rec.url_base:
+            bases.append(self._as_directory_url(file_rec.url_base))
+        if file_rec.source_url:
+            bases.append(self._as_directory_url(file_rec.source_url))
+        url_ext = clean(media.url_ext).replace("\\", "/")
+        if url_ext:
+            ext_parsed = urllib.parse.urlparse(url_ext)
+            if ext_parsed.scheme in ("http", "https"):
+                candidates.append(urllib.parse.urljoin(self._as_directory_url(url_ext), filename))
+            else:
+                for base in bases:
+                    if base:
+                        candidates.append(urllib.parse.urljoin(urllib.parse.urljoin(base, url_ext.rstrip("/") + "/"), filename))
+        for base in bases:
+            if base:
+                candidates.append(urllib.parse.urljoin(base, filename.lstrip("/")))
+        result = []
+        seen = set()
+        for url in candidates:
+            if url and url not in seen:
+                result.append(url)
+                seen.add(url)
+        return result
+
+    def _as_directory_url(self, url):
+        if not url:
+            return ""
+        parsed = urllib.parse.urlparse(url)
+        if not parsed.scheme:
+            return ""
+        if url.endswith("/"):
+            return url
+        path = parsed.path or "/"
+        if posixpath.basename(path) and "." in posixpath.basename(path):
+            path = posixpath.dirname(path.rstrip("/")) + "/"
+        elif not path.endswith("/"):
+            path += "/"
+        return urllib.parse.urlunparse(parsed._replace(path=path, params="", query="", fragment=""))
+
+    def _download_url(self, file_rec, url):
+        parsed = urllib.parse.urlparse(url or "")
+        filename = posixpath.basename(urllib.parse.unquote(parsed.path)) or posixpath.basename(clean(url))
+        if parsed.scheme not in ("http", "https"):
+            return filename, None
+        max_size = int(self.wizard.max_related_file_size_mb or 75) * 1024 * 1024
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": "Odoo-BC3-Importer/1.0"})
+            context = ssl._create_unverified_context() if file_rec.allow_insecure_ssl else ssl.create_default_context()
+            with urllib.request.urlopen(request, timeout=30, context=context) as response:
+                length = response.headers.get("Content-Length")
+                if length and int(length) > max_size:
+                    return filename, None
+                chunks = []
+                total = 0
+                while True:
+                    chunk = response.read(1024 * 512)
+                    if not chunk:
+                        break
+                    total += len(chunk)
+                    if total > max_size:
+                        return filename, None
+                    chunks.append(chunk)
+                return filename, b"".join(chunks)
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError, ssl.SSLError, ValueError):
+            return filename, None
+
+
 class Bc3ProductImportWizard(models.TransientModel):
     _name = "bc3.product.import.wizard"
     _description = "Import BC3 Products"
@@ -100,8 +265,12 @@ class Bc3ProductImportWizard(models.TransientModel):
     import_images = fields.Boolean(default=True)
     set_first_image = fields.Boolean(default=True)
     overwrite_image = fields.Boolean()
-    media_zip_file = fields.Binary(string="Media ZIP")
+    media_zip_file = fields.Binary(string="Media ZIP", attachment=True)
     media_zip_filename = fields.Char()
+    media_server_path = fields.Char(string="Media Server Path")
+    max_related_file_size_mb = fields.Integer(default=75)
+    batch_size = fields.Integer(default=200, required=True)
+    process_first_chunk = fields.Boolean(default=True)
     preview_html = fields.Html(readonly=True)
 
     def action_preview(self):
@@ -127,6 +296,11 @@ class Bc3ProductImportWizard(models.TransientModel):
 
     def action_import(self):
         self.ensure_one()
+        batch = self._create_import_batch(process_first_chunk=self.process_first_chunk)
+        return {"type": "ir.actions.act_window", "name": _("BC3 Product Import"), "res_model": "bc3.product.import.batch", "view_mode": "form", "res_id": batch.id}
+
+    def _create_import_batch(self, process_first_chunk=True, manufacturer=None):
+        self.ensure_one()
         if self.file_id.state != "parsed":
             raise UserError(_("Parse the BC3 file before importing products."))
         brand = self._get_or_create_brand()
@@ -134,31 +308,43 @@ class Bc3ProductImportWizard(models.TransientModel):
         batch = self.env["bc3.product.import.batch"].sudo().create({
             "name": _("BC3 product import - %s") % self.file_id.display_name,
             "file_id": self.file_id.id,
+            "manufacturer_id": manufacturer.id if manufacturer else False,
             "brand_id": brand.id if brand else False,
-            "state": "running",
+            "state": "queued" if concepts else "done",
+            "started_at": fields.Datetime.now(),
             "total_concepts": len(concepts),
+            "batch_size": self.batch_size or 200,
+            "create_website_categories": self.create_website_categories,
+            "website_parent_categ_id": self.website_parent_categ_id.id if self.website_parent_categ_id else False,
+            "replace_website_categories": self.replace_website_categories,
+            "include_zero_price": self.include_zero_price,
+            "update_existing": self.update_existing,
+            "publish_on_website": self.publish_on_website,
+            "default_product_type": self.default_product_type,
+            "track_inventory": self.track_inventory,
+            "import_images": self.import_images,
+            "set_first_image": self.set_first_image,
+            "overwrite_image": self.overwrite_image,
+            "media_zip_file": self.media_zip_file,
+            "media_zip_filename": self.media_zip_filename,
+            "media_server_path": self.media_server_path,
+            "max_related_file_size_mb": self.max_related_file_size_mb,
         })
-        counters = {"created_products": 0, "updated_products": 0, "skipped_products": 0, "media_created": 0, "warning_count": 0, "error_count": 0}
-        zip_reader = MediaZipReader(base64.b64decode(self.media_zip_file or b"")) if self.media_zip_file else MediaZipReader(b"")
-        for concept in concepts:
-            try:
-                with self.env.cr.savepoint():
-                    product, created = self._create_or_update_product(concept, brand)
-                    if not product:
-                        counters["skipped_products"] += 1
-                        continue
-                    if created:
-                        counters["created_products"] += 1
-                    else:
-                        counters["updated_products"] += 1
-                    media_created, warnings = self._import_ecommerce_media(product, concept, zip_reader)
-                    counters["media_created"] += media_created
-                    counters["warning_count"] += warnings
-            except Exception as exc:
-                counters["error_count"] += 1
-                self._log(batch, "error", concept.code, str(exc))
-        batch.write({**counters, "state": "error" if counters["error_count"] else "done", "finished_at": fields.Datetime.now()})
-        return {"type": "ir.actions.act_window", "name": _("BC3 Product Import"), "res_model": "bc3.product.import.batch", "view_mode": "form", "res_id": batch.id}
+        self._stage_lines(batch, concepts)
+        if process_first_chunk and concepts:
+            batch._process_next_chunk(limit=batch.batch_size)
+        return batch
+
+    def _stage_lines(self, batch, concepts):
+        Line = self.env["bc3.product.import.line"].sudo()
+        vals_list = []
+        for sequence, concept in enumerate(concepts, start=1):
+            vals_list.append({"batch_id": batch.id, "sequence": sequence, "concept_id": concept.id, "state": "pending"})
+            if len(vals_list) >= 500:
+                Line.create(vals_list)
+                vals_list = []
+        if vals_list:
+            Line.create(vals_list)
 
     def _get_importable_concepts(self):
         self.ensure_one()
@@ -337,7 +523,23 @@ class Bc3ProductImportWizard(models.TransientModel):
             return "%s - %s" % (code, concept.name or code)
         return concept.name or concept.code
 
+    def _make_media_reader(self, batch=None):
+        return MediaRelatedReader(self, batch=batch)
+
     def _import_ecommerce_media(self, product, concept, zip_reader):
+        # Backward-compatible call used by direct/non-batch imports.
+        class ZipOnlyReader:
+            def __init__(self, reader):
+                self.reader = reader
+            def read(self, media):
+                return self.reader.read(media.filename)
+        return self._import_ecommerce_media_with_reader(product, concept, ZipOnlyReader(zip_reader))
+
+    def _import_ecommerce_media_for_batch(self, product, concept, batch):
+        reader = MediaRelatedReader(self, batch=batch)
+        return self._import_ecommerce_media_with_reader(product, concept, reader)
+
+    def _import_ecommerce_media_with_reader(self, product, concept, reader):
         if not self.import_images:
             return 0, 0
         count = 0
@@ -345,7 +547,7 @@ class Bc3ProductImportWizard(models.TransientModel):
         first_set = False
         existing_names = set(product.product_template_image_ids.mapped("name")) if "product_template_image_ids" in product._fields else set()
         for media in concept.media_ref_ids.filtered("is_image"):
-            filename, payload = zip_reader.read(media.filename)
+            filename, payload = reader.read(media)
             if filename and payload is None:
                 warnings += 1
                 continue
@@ -368,11 +570,3 @@ class Bc3ProductImportWizard(models.TransientModel):
             existing_names.add(media_name)
             count += 1
         return count, warnings
-
-    def _log(self, batch, level, code, message):
-        self.env["bc3.product.import.log"].sudo().create({
-            "batch_id": batch.id,
-            "level": level,
-            "bc3_code": clean(code),
-            "message": clean(message),
-        })

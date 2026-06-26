@@ -1,4 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_bc3_product_manufacturer_user,bc3.product.manufacturer user,model_bc3_product_manufacturer,base.group_user,1,1,1,1
 access_bc3_product_import_batch_user,bc3.product.import.batch user,model_bc3_product_import_batch,base.group_user,1,1,1,1
+access_bc3_product_import_line_user,bc3.product.import.line user,model_bc3_product_import_line,base.group_user,1,1,1,1
 access_bc3_product_import_log_user,bc3.product.import.log user,model_bc3_product_import_log,base.group_user,1,1,1,1
 access_bc3_product_import_wizard_user,bc3.product.import.wizard user,model_bc3_product_import_wizard,base.group_user,1,1,1,1

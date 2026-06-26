@@ -1,13 +1,14 @@
 TL BC3 Product
 ==============
 
-Importa conceptos de catálogo BC3/FIEBDC como productos Odoo 19.
+Importa catálogos FIEBDC/BC3 como productos Odoo 19.
 
 Características principales:
 
-* Usa ``res.brand`` del módulo OCA ``brand`` para representar fabricantes como marcas.
-* Usa el campo de marca ya proporcionado en ``product.template`` por el módulo de marca instalado; este módulo no vuelve a declararlo ni lo inserta en la vista de producto.
-* Crea categorías de sitio web empezando por una categoría raíz con el nombre del fabricante/marca.
-* Crea subcategorías de eCommerce a partir de la estructura de capítulos BC3.
-* Importa imágenes referenciadas por ``~G`` y por ``~F`` como registros ``product.image`` de eCommerce.
-* No crea ``product.document`` para imágenes adicionales.
+* Importación desde ficheros BC3 ya parseados por ``tl_bc3_base``.
+* Maestro de fabricantes con URL BC3/ZIP del catálogo.
+* Importación por lotes para catálogos grandes, procesable manualmente o por cron.
+* Compatibilidad con OCA ``brand``: el fabricante se gestiona como ``res.brand`` y se escribe ``brand_id`` solo si el campo existe en producto.
+* Creación de categorías de sitio web empezando por la marca/fabricante y subcategorías por capítulos BC3.
+* Imágenes ``~G`` / ``~F`` como medios ecommerce ``product.image``; no se crean documentos para imágenes.
+* Medios relacionados desde ZIP, URL base del BC3 o carpeta de servidor.

@@ -6,8 +6,11 @@
             <list>
                 <field name="name"/>
                 <field name="file_id"/>
+                <field name="manufacturer_id"/>
                 <field name="brand_id"/>
                 <field name="total_concepts"/>
+                <field name="processed_concepts"/>
+                <field name="pending_concepts"/>
                 <field name="created_products"/>
                 <field name="updated_products"/>
                 <field name="media_created"/>
@@ -20,17 +23,29 @@
         <field name="model">bc3.product.import.batch</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_process_next_chunk" string="Process Next Chunk" type="object" class="btn-primary" invisible="state not in ('queued', 'partial', 'running')"/>
+                    <button name="action_process_ten_chunks" string="Process 10 Chunks" type="object" invisible="state not in ('queued', 'partial', 'running')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="queued,running,partial,done,error"/>
+                </header>
                 <sheet>
                     <group>
-                        <field name="name"/>
-                        <field name="file_id"/>
-                        <field name="brand_id"/>
-                        <field name="state"/>
-                        <field name="started_at"/>
-                        <field name="finished_at"/>
+                        <group>
+                            <field name="name"/>
+                            <field name="file_id"/>
+                            <field name="manufacturer_id"/>
+                            <field name="brand_id"/>
+                            <field name="batch_size"/>
+                        </group>
+                        <group>
+                            <field name="started_at"/>
+                            <field name="finished_at"/>
+                            <field name="total_concepts"/>
+                            <field name="processed_concepts"/>
+                            <field name="pending_concepts"/>
+                        </group>
                     </group>
                     <group>
-                        <field name="total_concepts"/>
                         <field name="created_products"/>
                         <field name="updated_products"/>
                         <field name="skipped_products"/>
@@ -39,6 +54,19 @@
                         <field name="error_count"/>
                     </group>
                     <notebook>
+                        <page string="Lines">
+                            <field name="line_ids" readonly="1">
+                                <list>
+                                    <field name="sequence"/>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="state"/>
+                                    <field name="product_id"/>
+                                    <field name="media_created"/>
+                                    <field name="message"/>
+                                </list>
+                            </field>
+                        </page>
                         <page string="Logs">
                             <field name="log_ids" readonly="1">
                                 <list>

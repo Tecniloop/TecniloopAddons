@@ -139,9 +139,11 @@ class Bc3BudgetLineBuilder(models.AbstractModel):
         if not root:
             raise UserError(_("No root or chapter concept was found."))
         decomp_by_parent = {}
+        empty_decomposition = self.env["bc3.decomposition.line"]
         for line in file_rec.decomposition_line_ids:
-            decomp_by_parent.setdefault(line.parent_code, self.env["bc3.decomposition.line"])
-            decomp_by_parent[line.parent_code] |= line
+            key = line.parent_concept_id.id if line.parent_concept_id else line.parent_code
+            decomp_by_parent.setdefault(key, empty_decomposition)
+            decomp_by_parent[key] |= line
         visited = set()
         counter = [10]
         self._create_line_recursive(budget, root, False, 0, "", 1.0, decomp_by_parent, visited, counter)
@@ -170,7 +172,9 @@ class Bc3BudgetLineBuilder(models.AbstractModel):
             "text": concept.text,
         })
         counter[0] += 10
-        children = decomp_by_parent.get(code, self.env["bc3.decomposition.line"])
+        children = decomp_by_parent.get(concept.id, self.env["bc3.decomposition.line"])
+        if not children:
+            children = decomp_by_parent.get(code, self.env["bc3.decomposition.line"])
         for child_rel in children.sorted(key=lambda item: (item.sequence, item.id)):
             child = child_rel.child_concept_id
             if not child:

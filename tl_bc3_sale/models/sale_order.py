@@ -19,26 +19,26 @@ class SaleOrder(models.Model):
             values = []
             product = self.env.ref("tl_bc3_sale.product_bc3_work_unit", raise_if_not_found=False)
             for line in order.bc3_budget_id.line_ids.sorted(key=lambda item: (item.sequence, item.id)):
+                if not order._bc3_should_create_sale_line(line):
+                    continue
                 values.append((0, 0, order._prepare_sale_line_from_bc3_line(line, product)))
             order.write({"order_line": values, "bc3_generated_from_budget": True})
         return True
+
+    def _bc3_should_create_sale_line(self, budget_line):
+        if budget_line.line_type in ("root", "chapter"):
+            return True
+        # Resources, percentages and lower decompositions remain in the BC3 technical budget.
+        # The commercial quotation is generated from the work units directly under chapters.
+        if budget_line.line_type != "work_unit":
+            return False
+        return bool(budget_line.parent_id and budget_line.parent_id.line_type == "chapter")
 
     def _prepare_sale_line_from_bc3_line(self, budget_line, product):
         if budget_line.line_type in ("root", "chapter"):
             return {
                 "display_type": self._bc3_section_display_type(budget_line),
                 "name": self._bc3_section_name(budget_line),
-                "sequence": budget_line.sequence,
-                "bc3_budget_line_id": budget_line.id,
-                "bc3_code": budget_line.code,
-                "bc3_position_path": budget_line.position_path,
-                "bc3_line_type": budget_line.line_type,
-            }
-        if budget_line.line_type in ("resource", "percentage"):
-            # Keep decomposed resources in the technical budget, not in the commercial quotation.
-            return {
-                "display_type": "line_note",
-                "name": _("BC3 decomposition: %(code)s - %(name)s") % {"code": budget_line.code, "name": budget_line.name},
                 "sequence": budget_line.sequence,
                 "bc3_budget_line_id": budget_line.id,
                 "bc3_code": budget_line.code,
