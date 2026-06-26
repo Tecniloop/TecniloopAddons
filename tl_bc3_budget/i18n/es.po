@@ -1,0 +1,54 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* tl_bc3_budget
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "BC3 Budget Lines"
+msgstr "Lineas de presupuesto BC3"
+
+msgid "BC3 Budgets"
+msgstr "Presupuestos BC3"
+
+msgid "Budget Lines"
+msgstr "Lineas de presupuesto"
+
+msgid "Budgets"
+msgstr "Presupuestos"
+
+msgid "Build Lines"
+msgstr "Construir lineas"
+
+msgid "Chapter"
+msgstr "Capitulo"
+
+msgid "Percentage"
+msgstr "Porcentaje"
+
+msgid "Quantity"
+msgstr "Cantidad"
+
+msgid "Rebuild Lines"
+msgstr "Reconstruir lineas"
+
+msgid "Resource"
+msgstr "Recurso"
+
+msgid "Root"
+msgstr "Raiz"
+
+msgid "Subtotal"
+msgstr "Subtotal"
+
+msgid "Unit Price"
+msgstr "Precio unitario"
+
+msgid "Work Unit"
+msgstr "Partida"
+

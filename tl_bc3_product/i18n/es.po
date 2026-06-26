@@ -1,0 +1,204 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* tl_bc3_product
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Allow Insecure SSL"
+msgstr "Permitir SSL sin verificar"
+
+msgid "BC3 / ZIP / RAR File"
+msgstr "Fichero BC3 / ZIP / RAR"
+
+msgid "BC3 Filename"
+msgstr "Nombre del BC3"
+
+msgid "BC3 Manufacturer URLs"
+msgstr "URLs BC3 de fabricantes"
+
+msgid "BC3/ZIP URL"
+msgstr "URL BC3/ZIP"
+
+msgid "Brand"
+msgstr "Marca"
+
+msgid "Brand / Manufacturer"
+msgstr "Marca / Fabricante"
+
+msgid "Create Import Batch"
+msgstr "Crear lote de importacion"
+
+msgid "Created Products"
+msgstr "Productos creados"
+
+msgid "Default Product Type"
+msgstr "Tipo de producto por defecto"
+
+msgid "Done"
+msgstr "Hecho"
+
+msgid "Errors"
+msgstr "Errores"
+
+msgid "Existing BC3 File"
+msgstr "Fichero BC3 existente"
+
+msgid "Filename"
+msgstr "Nombre de fichero"
+
+msgid "Goods"
+msgstr "Bienes"
+
+msgid "Import BC3 Products"
+msgstr "Importar productos BC3"
+
+msgid "Import BC3/FIEBDC catalog concepts as eCommerce products"
+msgstr "Importar conceptos de catalogos BC3/FIEBDC como productos ecommerce"
+
+msgid "Import Images"
+msgstr "Importar imagenes"
+
+msgid "Import Other"
+msgstr "Importar otros"
+
+msgid "Import Products"
+msgstr "Importar productos"
+
+msgid "Import Resources"
+msgstr "Importar recursos"
+
+msgid "Import Work Units"
+msgstr "Importar partidas"
+
+msgid "Include Zero Price"
+msgstr "Incluir precio cero"
+
+msgid "Last Import"
+msgstr "Ultima importacion"
+
+msgid "Lines"
+msgstr "Lineas"
+
+msgid "Logs"
+msgstr "Registros"
+
+msgid "Manufacturer"
+msgstr "Fabricante"
+
+msgid "Manufacturer URLs"
+msgstr "URLs de fabricantes"
+
+msgid "Max BC3 Download Size (MB)"
+msgstr "Tamano maximo descarga BC3 (MB)"
+
+msgid "Max Related File Size (MB)"
+msgstr "Tamano maximo fichero relacionado (MB)"
+
+msgid "Max URL Download Size (MB)"
+msgstr "Tamano maximo descarga URL (MB)"
+
+msgid "Media Created"
+msgstr "Medios creados"
+
+msgid "Media Server Path"
+msgstr "Ruta de medios en servidor"
+
+msgid "Media ZIP"
+msgstr "ZIP de medios"
+
+msgid "Overwrite Existing Product Image"
+msgstr "Sobrescribir imagen existente"
+
+msgid "Parent Website Category"
+msgstr "Categoria web padre"
+
+msgid "Partial"
+msgstr "Parcial"
+
+msgid "Pending"
+msgstr "Pendiente"
+
+msgid "Preview"
+msgstr "Previsualizar"
+
+msgid "Process 10 Chunks"
+msgstr "Procesar 10 lotes"
+
+msgid "Process Next Chunk"
+msgstr "Procesar siguiente lote"
+
+msgid "Product Imports"
+msgstr "Importaciones de productos"
+
+msgid "Products"
+msgstr "Productos"
+
+msgid "Publish On Website"
+msgstr "Publicar en web"
+
+msgid "Queued"
+msgstr "En cola"
+
+msgid "Replace Existing Website Categories"
+msgstr "Sustituir categorias web existentes"
+
+msgid "Running"
+msgstr "En proceso"
+
+msgid "Server File Path"
+msgstr "Ruta de fichero en servidor"
+
+msgid "Server Path"
+msgstr "Ruta de servidor"
+
+msgid "Service"
+msgstr "Servicio"
+
+msgid "Skipped"
+msgstr "Omitido"
+
+msgid "Skipped Products"
+msgstr "Productos omitidos"
+
+msgid "Source"
+msgstr "Origen"
+
+msgid "Source Type"
+msgstr "Tipo de origen"
+
+msgid "Source URL"
+msgstr "URL de origen"
+
+msgid "Track Inventory"
+msgstr "Controlar inventario"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Update Existing"
+msgstr "Actualizar existentes"
+
+msgid "Updated Products"
+msgstr "Productos actualizados"
+
+msgid "Uploaded File"
+msgstr "Fichero subido"
+
+msgid "Use First Image as Product Image"
+msgstr "Usar primera imagen como imagen del producto"
+
+msgid "Warnings"
+msgstr "Avisos"
+
+msgid "Website Categories"
+msgstr "Categorias web"
+
+msgid "eCommerce Media"
+msgstr "Medios ecommerce"
+

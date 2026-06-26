@@ -1,0 +1,27 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* tl_bc3_sale
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "BC3 Budget"
+msgstr "Presupuesto BC3"
+
+msgid "BC3 Work Unit"
+msgstr "Partida BC3"
+
+msgid "BC3-WORK-UNIT"
+msgstr "BC3-WORK-UNIT"
+
+msgid "Create Sale Order"
+msgstr "Crear presupuesto de venta"
+
+msgid "Sale Order"
+msgstr "Pedido de venta"
+

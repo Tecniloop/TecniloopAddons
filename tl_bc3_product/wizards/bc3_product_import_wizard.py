@@ -10,6 +10,11 @@ import urllib.parse
 import urllib.request
 import zipfile
 
+try:
+    import rarfile
+except ImportError:  # pragma: no cover - optional runtime dependency
+    rarfile = None
+
 from odoo import _, fields, models
 from odoo.exceptions import UserError
 
@@ -83,6 +88,64 @@ class MediaZipReader:
         return normalized, archive.read(info)
 
 
+class MediaRarReader:
+    def __init__(self, payload):
+        if rarfile is None:
+            raise UserError(_("RAR support requires the Python package 'rarfile' and an extraction backend such as unrar, bsdtar or 7z on the Odoo server."))
+        self.payload = payload or b""
+        self.by_path = {}
+        self.by_base = {}
+        if self.payload:
+            self._load()
+
+    def _normalize(self, name):
+        name = clean(name).replace("\\", "/")
+        if not name or "\x00" in name:
+            raise UserError(_("Invalid file name in media RAR."))
+        if name.startswith("/") or re.match(r"^[A-Za-z]:", name):
+            raise UserError(_("Absolute paths are not allowed in media RAR."))
+        normalized = posixpath.normpath(name)
+        if normalized in (".", "..") or normalized.startswith("../"):
+            raise UserError(_("Path traversal is not allowed in media RAR."))
+        return normalized
+
+    def _load(self):
+        try:
+            archive = rarfile.RarFile(io.BytesIO(self.payload))
+        except Exception as exc:
+            raise UserError(_("Invalid media RAR file: %s") % exc)
+        total_size = 0
+        for info in archive.infolist():
+            if info.isdir():
+                continue
+            normalized = self._normalize(info.filename)
+            total_size += info.file_size
+            if info.file_size > 75 * 1024 * 1024:
+                raise UserError(_("Media RAR contains a file larger than 75 MB: %s") % normalized)
+            if total_size > 500 * 1024 * 1024:
+                raise UserError(_("Media RAR uncompressed size is larger than 500 MB."))
+            self.by_path[normalized.lower()] = (archive, info, normalized)
+            self.by_base.setdefault(posixpath.basename(normalized).lower(), (archive, info, normalized))
+
+    def read(self, filename):
+        filename = clean(filename).replace("\\", "/").lstrip("./")
+        if not filename:
+            return None, None
+        key = posixpath.normpath(filename).lower()
+        base = posixpath.basename(filename).lower()
+        item = self.by_path.get(key) or self.by_base.get(base)
+        if not item:
+            return None, None
+        archive, info, normalized = item
+        ext = posixpath.splitext(normalized.lower())[1]
+        if ext in EXECUTABLE_EXTENSIONS:
+            return normalized, None
+        try:
+            return normalized, archive.read(info)
+        except Exception:
+            return normalized, None
+
+
 class MediaRelatedReader:
     def __init__(self, wizard, batch=None):
         self.wizard = wizard
@@ -120,16 +183,28 @@ class MediaRelatedReader:
             return self.source_archive_reader
         self.source_archive_checked = True
         file_rec = self.wizard.file_id
-        if not file_rec.source_url:
-            return None
-        filename = posixpath.basename(urllib.parse.urlparse(file_rec.source_url).path or "").lower()
-        if not filename.endswith(".zip"):
-            return None
-        payload, _downloaded_name = file_rec._download_url(file_rec.source_url, required=False)
+        payload = b""
+        filename = ""
+        try:
+            if file_rec.source_type == "url" and file_rec.source_url:
+                payload, filename = file_rec._download_url(file_rec.source_url, required=False)
+            elif file_rec.source_type == "server_path" and file_rec.server_path and os.path.isfile(file_rec.server_path):
+                filename = os.path.basename(file_rec.server_path)
+                with open(file_rec.server_path, "rb") as handler:
+                    payload = handler.read()
+            elif file_rec.data_file:
+                filename = file_rec.filename or file_rec.name or "source.bc3"
+                payload = base64.b64decode(file_rec.data_file or b"")
+        except Exception:
+            payload = b""
         if not payload:
             return None
+        lower_name = (filename or "").lower()
         try:
-            self.source_archive_reader = MediaZipReader(payload)
+            if lower_name.endswith(".zip") or zipfile.is_zipfile(io.BytesIO(payload)):
+                self.source_archive_reader = MediaZipReader(payload)
+            elif lower_name.endswith(".rar") or payload.startswith(b"Rar!\x1a\x07\x00") or payload.startswith(b"Rar!\x1a\x07\x01\x00"):
+                self.source_archive_reader = MediaRarReader(payload)
         except Exception:
             self.source_archive_reader = None
         return self.source_archive_reader
@@ -247,7 +322,21 @@ class Bc3ProductImportWizard(models.TransientModel):
     _name = "bc3.product.import.wizard"
     _description = "Import BC3 Products"
 
-    file_id = fields.Many2one("bc3.file", required=True, domain=[("state", "=", "parsed")])
+    source_type = fields.Selection(
+        [("existing", "Existing BC3 File"), ("upload", "Uploaded File"), ("url", "URL"), ("server_path", "Server Path")],
+        string="Source Type",
+        default="existing",
+        required=True,
+    )
+    file_id = fields.Many2one("bc3.file", domain=[("state", "=", "parsed")])
+    data_file = fields.Binary(string="BC3 / ZIP / RAR File", attachment=True)
+    filename = fields.Char(string="Filename")
+    source_url = fields.Char(string="Source URL")
+    server_path = fields.Char(string="Server File Path")
+    bc3_filename = fields.Char(string="BC3 Filename", help="Optional. Use it when the ZIP/RAR contains more than one BC3 file.")
+    allow_insecure_ssl = fields.Boolean(string="Allow Insecure SSL")
+    max_download_size_mb = fields.Integer(string="Max URL Download Size (MB)", default=0)
+
     brand_id = fields.Many2one("res.brand", string="Brand")
     brand_name = fields.Char(string="Brand / Manufacturer")
     create_brand = fields.Boolean(default=True)
@@ -275,6 +364,7 @@ class Bc3ProductImportWizard(models.TransientModel):
 
     def action_preview(self):
         self.ensure_one()
+        self._prepare_file_for_import()
         concepts = self._get_importable_concepts()
         rows = []
         for concept in concepts[:80]:
@@ -296,13 +386,58 @@ class Bc3ProductImportWizard(models.TransientModel):
 
     def action_import(self):
         self.ensure_one()
+        self._prepare_file_for_import()
         batch = self._create_import_batch(process_first_chunk=self.process_first_chunk)
         return {"type": "ir.actions.act_window", "name": _("BC3 Product Import"), "res_model": "bc3.product.import.batch", "view_mode": "form", "res_id": batch.id}
 
+    def _prepare_file_for_import(self):
+        self.ensure_one()
+        if self.source_type == "existing":
+            if not self.file_id:
+                raise UserError(_("Please select a parsed BC3 file."))
+            if self.file_id.state != "parsed":
+                self.file_id.action_parse()
+            return self.file_id
+        vals = {
+            "name": self._get_source_display_name(),
+            "source_type": self.source_type,
+            "filename": self.bc3_filename or self.filename,
+            "data_file": self.data_file,
+            "source_url": self.source_url,
+            "server_path": self.server_path,
+            "allow_insecure_ssl": self.allow_insecure_ssl,
+            "max_download_size_mb": self.max_download_size_mb,
+        }
+        if self.source_type == "upload" and not self.data_file:
+            raise UserError(_("Please upload a BC3, ZIP or RAR file."))
+        if self.source_type == "url" and not self.source_url:
+            raise UserError(_("Please set a URL."))
+        if self.source_type == "server_path" and not self.server_path:
+            raise UserError(_("Please set a server file path."))
+        bc3_file = self.env["bc3.file"].sudo().create(vals)
+        bc3_file.action_parse()
+        self.file_id = bc3_file.id
+        return bc3_file
+
+    def _get_source_display_name(self):
+        self.ensure_one()
+        if self.source_type == "existing" and self.file_id:
+            return self.file_id.display_name
+        if self.filename:
+            return self.filename
+        if self.source_type == "url" and self.source_url:
+            parsed = urllib.parse.urlparse(self.source_url)
+            return posixpath.basename(urllib.parse.unquote(parsed.path)) or self.source_url
+        if self.source_type == "server_path" and self.server_path:
+            return os.path.basename(self.server_path)
+        return _("BC3 product import")
+
     def _create_import_batch(self, process_first_chunk=True, manufacturer=None):
         self.ensure_one()
+        if not self.file_id:
+            raise UserError(_("Please select or import a BC3 file."))
         if self.file_id.state != "parsed":
-            raise UserError(_("Parse the BC3 file before importing products."))
+            self.file_id.action_parse()
         brand = self._get_or_create_brand()
         concepts = self._get_importable_concepts()
         batch = self.env["bc3.product.import.batch"].sudo().create({

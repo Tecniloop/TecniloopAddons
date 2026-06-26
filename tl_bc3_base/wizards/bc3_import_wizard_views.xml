@@ -28,5 +28,5 @@
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>
-    <menuitem id="menu_bc3_import" name="Import BC3" parent="menu_bc3_root" action="action_bc3_import_wizard" sequence="1"/>
+    <menuitem id="menu_bc3_import" name="Import BC3" parent="menu_bc3_files" action="action_bc3_import_wizard" sequence="15"/>
 </odoo>

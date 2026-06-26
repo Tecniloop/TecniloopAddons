@@ -1,0 +1,117 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* tl_bc3_base
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Allow Insecure SSL"
+msgstr "Permitir SSL sin verificar"
+
+msgid "BC3 / ZIP / RAR File"
+msgstr "Fichero BC3 / ZIP / RAR"
+
+msgid "BC3 Concepts"
+msgstr "Conceptos BC3"
+
+msgid "BC3 Decompositions"
+msgstr "Descomposiciones BC3"
+
+msgid "BC3 File"
+msgstr "Fichero BC3"
+
+msgid "BC3 Files"
+msgstr "Ficheros BC3"
+
+msgid "BC3 Measurements"
+msgstr "Mediciones BC3"
+
+msgid "BC3/FIEBDC parser, concepts, decompositions and measurements"
+msgstr "Parser BC3/FIEBDC, conceptos, descomposiciones y mediciones"
+
+msgid "Budget"
+msgstr "Presupuesto"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Certification"
+msgstr "Certificacion"
+
+msgid "Concepts"
+msgstr "Conceptos"
+
+msgid "Database"
+msgstr "Base de datos"
+
+msgid "Database update"
+msgstr "Actualizacion de base de datos"
+
+msgid "Decompositions"
+msgstr "Descomposiciones"
+
+msgid "Draft"
+msgstr "Borrador"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Filename"
+msgstr "Nombre de fichero"
+
+msgid "Files"
+msgstr "Archivos"
+
+msgid "Import"
+msgstr "Importar"
+
+msgid "Import BC3"
+msgstr "Importar BC3"
+
+msgid "Information Type"
+msgstr "Tipo de informacion"
+
+msgid "Max URL Download Size (MB)"
+msgstr "Tamano maximo descarga URL (MB)"
+
+msgid "Measurements"
+msgstr "Mediciones"
+
+msgid "Media References"
+msgstr "Referencias de medios"
+
+msgid "Parsed"
+msgstr "Parseado"
+
+msgid "Raw Records"
+msgstr "Registros brutos"
+
+msgid "Server File Path"
+msgstr "Ruta de fichero en servidor"
+
+msgid "Server Path"
+msgstr "Ruta de servidor"
+
+msgid "Source"
+msgstr "Origen"
+
+msgid "Source Type"
+msgstr "Tipo de origen"
+
+msgid "Source URL"
+msgstr "URL de origen"
+
+msgid "URL"
+msgstr "URL"
+
+msgid "Unknown"
+msgstr "Desconocido"
+
+msgid "Uploaded File"
+msgstr "Fichero subido"
+

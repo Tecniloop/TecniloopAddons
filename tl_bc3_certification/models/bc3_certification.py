@@ -77,7 +77,7 @@ class Bc3Certification(models.Model):
                     "sale_order_line_id": sale_line.id if sale_line else False,
                     "bc3_code": budget_line.code,
                     "name": budget_line.name,
-                    "uom_id": sale_line.product_uom.id if sale_line and sale_line.product_uom else budget_line.uom_id.id,
+                    "uom_id": (sale_line._get_bc3_sale_uom().id if sale_line and sale_line._get_bc3_sale_uom() else budget_line.uom_id.id),
                     "budget_qty": budget_line.quantity,
                     "previous_certified_qty": previous_qty,
                     "cumulative_certified_qty": previous_qty,

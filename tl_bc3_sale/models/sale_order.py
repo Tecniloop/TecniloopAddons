@@ -2,6 +2,20 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
+def order_line_uom_field(env):
+    """Return the sale order line UoM field name for the current Odoo version.
+
+    Odoo 19 uses product_uom_id, while older versions used product_uom.
+    Keeping the fallback avoids hard failures during upgrades.
+    """
+    fields_map = env["sale.order.line"]._fields
+    if "product_uom_id" in fields_map:
+        return "product_uom_id"
+    if "product_uom" in fields_map:
+        return "product_uom"
+    return False
+
+
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
@@ -64,7 +78,9 @@ class SaleOrder(models.Model):
         if product:
             vals["product_id"] = product.id
         if budget_line.uom_id:
-            vals["product_uom"] = budget_line.uom_id.id
+            uom_field = order_line_uom_field(self.env)
+            if uom_field:
+                vals[uom_field] = budget_line.uom_id.id
         return vals
 
     def _bc3_section_display_type(self, budget_line):
@@ -107,3 +123,11 @@ class SaleOrderLine(models.Model):
                     line.bc3_sync_state = "modified"
                 else:
                     line.bc3_sync_state = "ok"
+
+    def _get_bc3_sale_uom(self):
+        self.ensure_one()
+        if "product_uom_id" in self._fields:
+            return self.product_uom_id
+        if "product_uom" in self._fields:
+            return self.product_uom
+        return self.env["uom.uom"]

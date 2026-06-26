@@ -91,7 +91,6 @@ class Bc3BudgetLine(models.Model):
     price_unit = fields.Float(digits="Product Price")
     amount_total = fields.Float(compute="_compute_amount_total", store=True, digits="Product Price")
     text = fields.Text()
-    sale_order_line_id = fields.Many2one("sale.order.line", copy=False, readonly=True)
     measurement_line_ids = fields.One2many("bc3.measurement.line", compute="_compute_measurement_lines", string="Measurements")
 
     @api.depends("code", "name")

@@ -4,8 +4,16 @@
         <field name="model">bc3.product.import.wizard</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <field name="file_id"/>
+                <group string="Source">
+                    <field name="source_type"/>
+                    <field name="file_id" invisible="source_type != 'existing'" required="source_type == 'existing'"/>
+                    <field name="data_file" filename="filename" invisible="source_type != 'upload'" required="source_type == 'upload'"/>
+                    <field name="filename" invisible="source_type != 'upload'"/>
+                    <field name="source_url" invisible="source_type != 'url'" required="source_type == 'url'" placeholder="https://fabricante.example/catalogo.bc3, .zip o .rar"/>
+                    <field name="allow_insecure_ssl" invisible="source_type != 'url'"/>
+                    <field name="max_download_size_mb" invisible="source_type != 'url'"/>
+                    <field name="server_path" invisible="source_type != 'server_path'" required="source_type == 'server_path'"/>
+                    <field name="bc3_filename" invisible="source_type not in ('url', 'upload', 'server_path')"/>
                 </group>
                 <group string="Brand / Manufacturer">
                     <field name="brand_id"/>
@@ -46,5 +54,11 @@
                 </footer>
             </form>
         </field>
+    </record>
+    <record id="action_bc3_product_import_wizard" model="ir.actions.act_window">
+        <field name="name">Import BC3 Products</field>
+        <field name="res_model">bc3.product.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
     </record>
 </odoo>

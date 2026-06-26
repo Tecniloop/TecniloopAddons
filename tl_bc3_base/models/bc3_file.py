@@ -3,6 +3,7 @@ import ipaddress
 import io
 import os
 import posixpath
+import re
 import zipfile
 import socket
 import ssl
@@ -14,6 +15,11 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 from .bc3_parser import BC3Parser, BC3ParseError
+
+try:
+    import rarfile
+except ImportError:  # pragma: no cover - optional runtime dependency
+    rarfile = None
 
 try:
     import certifi
@@ -229,6 +235,68 @@ class Bc3File(models.Model):
         return self._extract_bc3_payload(base64.b64decode(self.data_file), self.filename or self.name)
 
 
+    def _is_rar_payload(self, payload, source_filename=None):
+        name = (source_filename or "").lower()
+        return name.endswith(".rar") or (payload or b"").startswith(b"Rar!\x1a\x07\x00") or (payload or b"").startswith(b"Rar!\x1a\x07\x01\x00")
+
+    def _normalize_archive_name(self, name, archive_label="archive"):
+        name = (name or "").replace("\\", "/")
+        if not name or "\x00" in name:
+            raise UserError(_("Invalid file name in %s.") % archive_label)
+        if name.startswith("/") or re.match(r"^[A-Za-z]:", name):
+            raise UserError(_("Absolute paths are not allowed in %s files.") % archive_label)
+        normalized = posixpath.normpath(name)
+        if normalized in (".", "..") or normalized.startswith("../"):
+            raise UserError(_("Path traversal is not allowed in %s files.") % archive_label)
+        return normalized
+
+    def _extract_from_zip_payload(self, payload, selected_name):
+        try:
+            archive = zipfile.ZipFile(io.BytesIO(payload))
+        except zipfile.BadZipFile as exc:
+            raise UserError(_("Invalid ZIP file: %s") % exc)
+        candidates = []
+        for info in archive.infolist():
+            if info.is_dir():
+                continue
+            normalized = self._normalize_archive_name(info.filename, "ZIP")
+            if normalized.lower().endswith(".bc3"):
+                candidates.append((normalized, info))
+        return self._select_archive_bc3(archive, candidates, selected_name, "ZIP")
+
+    def _extract_from_rar_payload(self, payload, selected_name):
+        if rarfile is None:
+            raise UserError(_("RAR support requires the Python package 'rarfile' and an extraction backend such as unrar, bsdtar or 7z on the Odoo server."))
+        try:
+            archive = rarfile.RarFile(io.BytesIO(payload))
+        except Exception as exc:
+            raise UserError(_("Invalid RAR file: %s") % exc)
+        candidates = []
+        for info in archive.infolist():
+            if info.isdir():
+                continue
+            normalized = self._normalize_archive_name(info.filename, "RAR")
+            if normalized.lower().endswith(".bc3"):
+                candidates.append((normalized, info))
+        return self._select_archive_bc3(archive, candidates, selected_name, "RAR")
+
+    def _select_archive_bc3(self, archive, candidates, selected_name, archive_label):
+        if selected_name and selected_name.lower().endswith(".bc3"):
+            normalized_selected = selected_name.replace("\\", "/").lower()
+            selected = [item for item in candidates if item[0].lower() == normalized_selected or posixpath.basename(item[0]).lower() == posixpath.basename(normalized_selected)]
+            if selected:
+                candidates = selected
+        if not candidates:
+            raise UserError(_("The %s file does not contain any .bc3 file.") % archive_label)
+        normalized, info = candidates[0]
+        file_size = getattr(info, "file_size", 0) or 0
+        if file_size > 0 and self.max_download_size_mb and file_size > int(self.max_download_size_mb) * 1024 * 1024:
+            raise UserError(_("The BC3 file inside the archive is larger than the configured limit."))
+        try:
+            return archive.read(info), posixpath.basename(normalized)
+        except Exception as exc:
+            raise UserError(_("Cannot extract BC3 from %s: %s") % (archive_label, exc))
+
     def _extract_bc3_payload(self, payload, source_filename):
         payload = payload or b""
         source_filename = source_filename or self.filename or self.name
@@ -239,24 +307,11 @@ class Bc3File(models.Model):
             is_zip = zipfile.is_zipfile(io.BytesIO(payload))
         except Exception:
             is_zip = False
-        if not is_zip:
-            return payload, selected_name or source_filename
-        try:
-            archive = zipfile.ZipFile(io.BytesIO(payload))
-        except zipfile.BadZipFile as exc:
-            raise UserError(_("Invalid ZIP file: %s") % exc)
-        candidates = [info for info in archive.infolist() if not info.is_dir() and info.filename.lower().endswith(".bc3")]
-        if selected_name and selected_name.lower().endswith(".bc3"):
-            normalized_selected = selected_name.replace("\\", "/").lower()
-            selected = [info for info in candidates if info.filename.replace("\\", "/").lower() == normalized_selected or posixpath.basename(info.filename).lower() == posixpath.basename(normalized_selected)]
-            if selected:
-                candidates = selected
-        if not candidates:
-            raise UserError(_("The ZIP file does not contain any .bc3 file."))
-        info = candidates[0]
-        if info.file_size > 0 and self.max_download_size_mb and info.file_size > int(self.max_download_size_mb) * 1024 * 1024:
-            raise UserError(_("The BC3 file inside the ZIP is larger than the configured limit."))
-        return archive.read(info), posixpath.basename(info.filename)
+        if is_zip:
+            return self._extract_from_zip_payload(payload, selected_name)
+        if self._is_rar_payload(payload, source_filename):
+            return self._extract_from_rar_payload(payload, selected_name)
+        return payload, selected_name or source_filename
 
     def _read_server_path(self, path):
         path = (path or "").strip()
