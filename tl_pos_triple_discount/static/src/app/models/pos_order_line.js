@@ -9,6 +9,14 @@ function parseDiscount(value) {
     return Math.min(parsed || 0, 100);
 }
 
+function hasAnyDiscount(values) {
+    return values.some((value) => Boolean(value));
+}
+
+function roundDisplay(value) {
+    return Math.round((value + Number.EPSILON) * 10000) / 10000;
+}
+
 for (const fieldName of ["discount2", "discount3", "discounting_type"]) {
     PosOrderline.accountingFields?.add?.(fieldName);
 }
@@ -32,20 +40,25 @@ patch(PosOrderline.prototype, {
             vals?.discounting_type ||
             this.sale_order_line_id?.discounting_type ||
             "multiplicative";
+        this.tl_discount_source = vals?.tl_discount_source || false;
+        this.applyPricelistTripleDiscount();
     },
 
     setDiscount(discount) {
         this.discount = parseDiscount(discount);
+        this.tl_discount_source = "manual";
         this.order_id?.triggerRecomputeAllPrices?.();
     },
 
     setDiscount2(discount) {
         this.discount2 = parseDiscount(discount);
+        this.tl_discount_source = "manual";
         this.order_id?.triggerRecomputeAllPrices?.();
     },
 
     setDiscount3(discount) {
         this.discount3 = parseDiscount(discount);
+        this.tl_discount_source = "manual";
         this.order_id?.triggerRecomputeAllPrices?.();
     },
 
@@ -53,7 +66,50 @@ patch(PosOrderline.prototype, {
         this.discounting_type = ["additive", "multiplicative"].includes(discountingType)
             ? discountingType
             : "multiplicative";
+        this.tl_discount_source = "manual";
         this.order_id?.triggerRecomputeAllPrices?.();
+    },
+
+    applyPricelistTripleDiscount({ force = false } = {}) {
+        if (this.sale_order_line_id || this.price_type !== "original") {
+            return;
+        }
+        const currentValues = [this.discount || 0, this.discount2 || 0, this.discount3 || 0];
+        if (!force && hasAnyDiscount(currentValues) && this.tl_discount_source !== "pricelist") {
+            return;
+        }
+        const productTemplate = this.product_id?.product_tmpl_id;
+        const pricelist = this.order_id?.pricelist_id;
+        if (!productTemplate?.getPricelistTripleDiscountValues || !pricelist) {
+            return;
+        }
+        const values = productTemplate.getPricelistTripleDiscountValues(
+            pricelist,
+            this.getQuantity(),
+            this.getPriceExtra(),
+            this.product_id
+        );
+        if (values.hasDiscounts) {
+            this.discount = parseDiscount(values.discount);
+            this.discount2 = parseDiscount(values.discount2);
+            this.discount3 = parseDiscount(values.discount3);
+            this.discounting_type = values.discounting_type || "multiplicative";
+            this.tl_discount_source = "pricelist";
+        } else if (force && this.tl_discount_source === "pricelist") {
+            this.discount = 0;
+            this.discount2 = 0;
+            this.discount3 = 0;
+            this.discounting_type = "multiplicative";
+            this.tl_discount_source = false;
+        }
+    },
+
+    setQuantity(quantity, keep_price) {
+        const result = super.setQuantity(...arguments);
+        if (result === true || result === undefined) {
+            this.applyPricelistTripleDiscount({ force: this.tl_discount_source === "pricelist" });
+        }
+        return result;
     },
 
     _discountFields() {
@@ -87,26 +143,30 @@ patch(PosOrderline.prototype, {
     },
 
     getDiscountStr() {
-        if (!this.hasTripleDiscount()) {
-            return this.discount ? this.discount.toString() : "";
-        }
-        return this.getDiscountBreakdownStr() || "";
+        const finalDiscount = this.getFinalDiscount();
+        return finalDiscount ? roundDisplay(finalDiscount).toString() : "";
     },
 
     hasTripleDiscount() {
         return Boolean(this.discount2 || this.discount3 || this.discounting_type === "additive");
     },
 
+    hasDiscountBreakdown() {
+        return Boolean(this.getDiscountBreakdownStr());
+    },
+
     getDiscountBreakdownStr() {
         const values = [this.discount || 0, this.discount2 || 0, this.discount3 || 0];
-        if (!values.some((value) => value)) {
+        if (!hasAnyDiscount(values)) {
             return "";
         }
+        if (!this.hasTripleDiscount()) {
+            return `${roundDisplay(values[0])}%`;
+        }
         const separator = this.discounting_type === "additive" ? " + " : " x ";
-        const detailed = values.map((value) => `${value}%`).join(separator);
-        const finalDiscount = this.getFinalDiscount();
-        const roundedFinal = Math.round((finalDiscount + Number.EPSILON) * 10000) / 10000;
-        return `${detailed} = ${roundedFinal}%`;
+        const detailed = values.map((value) => `${roundDisplay(value)}%`).join(separator);
+        const finalDiscount = roundDisplay(this.getFinalDiscount());
+        return `${detailed} = ${finalDiscount}%`;
     },
 
     canBeMergedWith(orderline) {

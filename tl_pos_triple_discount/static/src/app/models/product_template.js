@@ -3,63 +3,50 @@ import { roundPrecision } from "@web/core/utils/numbers";
 import { patch } from "@web/core/utils/patch";
 import { ProductTemplate } from "@point_of_sale/app/models/product_template";
 
+const TRIPLE_DISCOUNT_RULE_TYPES = ["percentage", "formula"];
+
 function getRuleMainDiscount(rule) {
-    if (rule.compute_price === "percentage") {
+    if (rule?.compute_price === "percentage") {
         return rule.percent_price || 0;
     }
-    if (rule.compute_price === "formula") {
+    if (rule?.compute_price === "formula") {
         return rule.price_discount || 0;
     }
     return 0;
 }
 
+function getRuleDiscounts(rule) {
+    return [getRuleMainDiscount(rule), rule?.discount2 || 0, rule?.discount3 || 0];
+}
+
+function hasRuleTripleDiscount(rule) {
+    return (
+        TRIPLE_DISCOUNT_RULE_TYPES.includes(rule?.compute_price) &&
+        getRuleDiscounts(rule).some((discount) => Boolean(discount))
+    );
+}
+
 function getRuleTripleDiscount(rule) {
-    const discounts = [getRuleMainDiscount(rule), rule.discount2 || 0, rule.discount3 || 0];
     let discountFactor = 1;
-    for (const discount of discounts) {
+    for (const discount of getRuleDiscounts(rule)) {
         discountFactor *= 1 - discount / 100;
     }
     return 100 - discountFactor * 100;
 }
 
-patch(ProductTemplate.prototype, {
-    // Port of the standard POS getPrice with the same adjustment made by
-    // sale_pricelist_triple_discount in Python: for percentage/formula rules,
-    // use the multiplicative aggregation of discount/discount2/discount3.
-    getPrice(
-        pricelist,
-        quantity,
-        price_extra = 0,
-        recurring = false,
-        variant = false,
-        original_line = false,
-        related_lines = []
-    ) {
-        if (recurring && !pricelist) {
-            alert(
-                _t(
-                    "An error occurred when loading product prices.\n" +
-                        "Make sure all pricelists are available in the POS."
-                )
-            );
-        }
+function shouldExposeRuleDiscounts(pricelist, rule) {
+    return Boolean(
+        pricelist?.discount_policy === "without_discount" && hasRuleTripleDiscount(rule)
+    );
+}
 
+patch(ProductTemplate.prototype, {
+    _tlFindPricelistRule(pricelist, quantity, variant = false) {
+        if (!pricelist) {
+            return null;
+        }
         const product = variant || false;
         const productTmpl = variant?.product_tmpl_id || this;
-        const standardPrice = variant ? variant.standard_price : this.standard_price;
-        const basePrice = variant ? variant.lst_price : this.list_price;
-        let price = basePrice + (price_extra || 0);
-        if (!pricelist) {
-            return price;
-        }
-
-        if (original_line && original_line.isLotTracked() && product) {
-            related_lines.push(
-                ...original_line.order_id.lines.filter((line) => line.product_id.id === product.id)
-            );
-            quantity = related_lines.reduce((sum, line) => sum + line.getQuantity(), 0);
-        }
-
         let rule = null;
         if (product) {
             const productRules = pricelist.getRulesByProductId(product.id);
@@ -83,8 +70,46 @@ patch(ProductTemplate.prototype, {
                 rule = pricelist.findBestRule(globalRules, quantity);
             }
         }
+        return rule;
+    },
+
+    _tlGetPriceComputation(
+        pricelist,
+        quantity,
+        price_extra = 0,
+        recurring = false,
+        variant = false,
+        original_line = false,
+        related_lines = []
+    ) {
+        if (recurring && !pricelist) {
+            alert(
+                _t(
+                    "An error occurred when loading product prices.\n" +
+                        "Make sure all pricelists are available in the POS."
+                )
+            );
+        }
+
+        const product = variant || false;
+        const productTmpl = variant?.product_tmpl_id || this;
+        const standardPrice = variant ? variant.standard_price : this.standard_price;
+        const basePrice = variant ? variant.lst_price : this.list_price;
+        let price = basePrice + (price_extra || 0);
+        if (!pricelist) {
+            return { price, rule: null, exposeDiscounts: false };
+        }
+
+        if (original_line && original_line.isLotTracked() && product) {
+            related_lines.push(
+                ...original_line.order_id.lines.filter((line) => line.product_id.id === product.id)
+            );
+            quantity = related_lines.reduce((sum, line) => sum + line.getQuantity(), 0);
+        }
+
+        const rule = this._tlFindPricelistRule(pricelist, quantity, variant);
         if (!rule) {
-            return price;
+            return { price, rule: null, exposeDiscounts: false };
         }
 
         if (rule.base === "pricelist") {
@@ -103,13 +128,18 @@ patch(ProductTemplate.prototype, {
             price *= pricelistCurrency.rate / posCurrency.rate;
         }
 
+        const exposeDiscounts = shouldExposeRuleDiscounts(pricelist, rule);
         if (rule.compute_price === "fixed") {
             price = rule.fixed_price;
         } else if (rule.compute_price === "percentage") {
-            price = price - price * (getRuleTripleDiscount(rule) / 100);
+            if (!exposeDiscounts) {
+                price -= price * (getRuleTripleDiscount(rule) / 100);
+            }
         } else {
             const price_limit = price;
-            price -= price * (getRuleTripleDiscount(rule) / 100);
+            if (!exposeDiscounts) {
+                price -= price * (getRuleTripleDiscount(rule) / 100);
+            }
             if (rule.price_round) {
                 price = roundPrecision(price, rule.price_round);
             }
@@ -127,6 +157,62 @@ patch(ProductTemplate.prototype, {
         if (needsCurrencyConversion) {
             price *= posCurrency.rate / pricelistCurrency.rate;
         }
-        return price;
+        return { price, rule, exposeDiscounts };
+    },
+
+    getPrice(
+        pricelist,
+        quantity,
+        price_extra = 0,
+        recurring = false,
+        variant = false,
+        original_line = false,
+        related_lines = []
+    ) {
+        return this._tlGetPriceComputation(
+            pricelist,
+            quantity,
+            price_extra,
+            recurring,
+            variant,
+            original_line,
+            related_lines
+        ).price;
+    },
+
+    getPricelistTripleDiscountValues(
+        pricelist,
+        quantity,
+        price_extra = 0,
+        variant = false,
+        original_line = false,
+        related_lines = []
+    ) {
+        const result = this._tlGetPriceComputation(
+            pricelist,
+            quantity,
+            price_extra,
+            false,
+            variant,
+            original_line,
+            related_lines
+        );
+        if (!result.exposeDiscounts) {
+            return {
+                discount: 0,
+                discount2: 0,
+                discount3: 0,
+                discounting_type: "multiplicative",
+                hasDiscounts: false,
+            };
+        }
+        const [discount, discount2, discount3] = getRuleDiscounts(result.rule);
+        return {
+            discount,
+            discount2,
+            discount3,
+            discounting_type: "multiplicative",
+            hasDiscounts: true,
+        };
     },
 });

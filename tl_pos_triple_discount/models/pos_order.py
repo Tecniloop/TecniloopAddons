@@ -89,4 +89,6 @@ class PosOrder(models.Model):
                 vals["discount2"] = pos_line.discount2
                 vals["discount3"] = pos_line.discount3
             vals.pop("discount", None)
+        else:
+            vals["discount"] = pos_line._get_final_discount()
         return vals

@@ -2,7 +2,7 @@
 {
     "name": "POS Triple Discount",
     "summary": "Triple discount support in POS and POS/Sale order integration",
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.2.0",
     "category": "Sales/Point of Sale",
     "author": "Tecniloop",
     "license": "AGPL-3",

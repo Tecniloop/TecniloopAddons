@@ -2,8 +2,8 @@
 <templates id="template" xml:space="preserve">
     <t t-name="tl_pos_triple_discount.Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
         <xpath expr="//ul[hasclass('info-list')]" position="inside">
-            <li t-if="line.hasTripleDiscount?.()">
-                <i class="fa fa-tags me-1" role="img" aria-label="Triple discount" title="Triple discount"/>
+            <li t-if="line.hasDiscountBreakdown?.()" class="tl-pos-triple-discount-breakdown">
+                <i class="fa fa-tags me-1" role="img" aria-label="Discount breakdown" title="Discount breakdown"/>
                 <span>Desc.: </span>
                 <t t-esc="line.getDiscountBreakdownStr()"/>
             </li>
