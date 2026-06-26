@@ -9,9 +9,9 @@
                 <field name="budget_id"/>
                 <field name="certification_number"/>
                 <field name="certification_date"/>
-                <field name="gross_amount_origin" sum="Total gross"/>
-                <field name="current_base_amount" sum="Tax base"/>
-                <field name="tax_amount" sum="Taxes"/>
+                <field name="gross_amount_origin" sum="Ejecución material"/>
+                <field name="current_base_amount" sum="Base imponible"/>
+                <field name="tax_amount" sum="Impuestos"/>
                 <field name="total_amount" sum="Total"/>
                 <field name="state"/>
             </list>
@@ -49,7 +49,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_sale_order" type="object" class="oe_stat_button" icon="fa-shopping-cart" invisible="not sale_order_id">
-                            <div class="o_field_widget o_stat_info"><span class="o_stat_text">Sale Order</span></div>
+                            <div class="o_field_widget o_stat_info"><span class="o_stat_text">Pedido de venta</span></div>
                         </button>
                         <button name="action_open_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o">
                             <field name="invoice_count" widget="statinfo" string="Facturas"/>

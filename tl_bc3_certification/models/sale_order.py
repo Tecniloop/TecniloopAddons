@@ -7,7 +7,7 @@ class SaleOrder(models.Model):
     bc3_certification_ids = fields.One2many(
         "bc3.certification",
         "sale_order_id",
-        string="BC3 Certifications",
+        string="Certificaciones BC3",
         copy=False,
     )
     bc3_certification_count = fields.Integer(compute="_compute_bc3_certification_count")
@@ -27,7 +27,7 @@ class SaleOrder(models.Model):
         cert = self.env["bc3.certification"].create_from_sale_order(self)
         return {
             "type": "ir.actions.act_window",
-            "name": _("BC3 Certification"),
+            "name": _("Certificación BC3"),
             "res_model": "bc3.certification",
             "view_mode": "form",
             "res_id": cert.id,
@@ -38,7 +38,7 @@ class SaleOrder(models.Model):
         self.ensure_one()
         action = {
             "type": "ir.actions.act_window",
-            "name": _("BC3 Certifications"),
+            "name": _("Certificaciones BC3"),
             "res_model": "bc3.certification",
             "view_mode": "list,form",
             "domain": [("sale_order_id", "=", self.id)],

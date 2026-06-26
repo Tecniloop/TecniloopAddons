@@ -117,22 +117,32 @@ class Bc3Certification(models.Model):
                 cert.budget_id = cert.sale_order_id.bc3_budget_id
                 cert.tax_ids = cert._get_default_taxes_from_order(cert.sale_order_id)
 
-    @api.model
-    def create(self, vals):
-        if vals.get("sale_order_id") and not vals.get("budget_id"):
-            order = self.env["sale.order"].browse(vals["sale_order_id"])
-            if order.bc3_budget_id:
-                vals["budget_id"] = order.bc3_budget_id.id
-        if vals.get("sale_order_id") and not vals.get("tax_ids"):
-            taxes = self._get_default_taxes_from_order(self.env["sale.order"].browse(vals["sale_order_id"]))
-            if taxes:
-                vals["tax_ids"] = [(6, 0, taxes.ids)]
-        return super().create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Create certifications using the Odoo 19 multi-create API.
+
+        Odoo 19 always calls create with a list of dictionaries.  The
+        previous implementation expected a single dictionary and failed with
+        ``AttributeError: 'list' object has no attribute 'get'`` when a
+        certification was created from a sale order.
+        """
+        if isinstance(vals_list, dict):
+            vals_list = [vals_list]
+        for vals in vals_list:
+            if vals.get("sale_order_id") and not vals.get("budget_id"):
+                order = self.env["sale.order"].browse(vals["sale_order_id"])
+                if order.bc3_budget_id:
+                    vals["budget_id"] = order.bc3_budget_id.id
+            if vals.get("sale_order_id") and not vals.get("tax_ids"):
+                taxes = self._get_default_taxes_from_order(self.env["sale.order"].browse(vals["sale_order_id"]))
+                if taxes:
+                    vals["tax_ids"] = [(6, 0, taxes.ids)]
+        return super().create(vals_list)
 
     @api.model
     def create_from_sale_order(self, order):
         if not order.bc3_budget_id:
-            raise UserError(_("The sale order is not linked to a BC3 budget."))
+            raise UserError(_("El pedido de venta no está vinculado a un presupuesto BC3."))
         previous = self.search([
             ("sale_order_id", "=", order.id),
             ("state", "in", ("confirmed", "invoiced")),
@@ -140,7 +150,7 @@ class Bc3Certification(models.Model):
         number = (previous.certification_number or 0) + 1 if previous else 1
         taxes = self._get_default_taxes_from_order(order)
         vals = {
-            "name": _("Certification %(number)s - %(order)s") % {"number": number, "order": order.name},
+            "name": _("Certificación %(number)s - %(order)s") % {"number": number, "order": order.name},
             "budget_id": order.bc3_budget_id.id,
             "sale_order_id": order.id,
             "certification_number": number,
@@ -150,7 +160,7 @@ class Bc3Certification(models.Model):
             vals["tax_ids"] = [(6, 0, taxes.ids)]
         cert = self.create(vals)
         cert.action_load_lines()
-        order.message_post(body=_("BC3 certification %s has been created.") % cert.name)
+        order.message_post(body=_("Se ha creado la certificación BC3 %s.") % cert.name)
         return cert
 
     @api.model
@@ -171,9 +181,9 @@ class Bc3Certification(models.Model):
     def action_load_lines(self):
         for cert in self:
             if cert.state != "draft":
-                raise UserError(_("Only draft certifications can be reloaded."))
+                raise UserError(_("Solo se pueden recargar certificaciones en borrador."))
             if not cert.sale_order_id:
-                raise UserError(_("Select a sale order before loading certification lines."))
+                raise UserError(_("Selecciona un pedido de venta antes de cargar las líneas de certificación."))
             cert.line_ids.unlink()
             vals = cert._prepare_certification_line_commands()
             cert.write({"line_ids": vals})
@@ -182,7 +192,7 @@ class Bc3Certification(models.Model):
     def action_apply_global_percent(self):
         for cert in self:
             if cert.state != "draft":
-                raise UserError(_("The global percentage can only be applied on draft certifications."))
+                raise UserError(_("El porcentaje global solo puede aplicarse en certificaciones en borrador."))
             for line in cert.line_ids:
                 line.cumulative_certified_qty = (line.budget_qty or 0.0) * (cert.global_percent or 0.0) / 100.0
         return True
@@ -270,21 +280,21 @@ class Bc3Certification(models.Model):
             if cert.state != "draft":
                 continue
             if cert.current_base_amount <= 0:
-                raise UserError(_("The current certification amount must be greater than zero."))
+                raise UserError(_("El importe actual de la certificación debe ser mayor que cero."))
             cert.state = "confirmed"
             cert.sale_order_id.order_line._compute_bc3_certification_values()
-            cert.sale_order_id.message_post(body=_("BC3 certification %s has been confirmed.") % cert.name)
+            cert.sale_order_id.message_post(body=_("Se ha confirmado la certificación BC3 %s.") % cert.name)
         return True
 
     def action_create_invoice(self):
         self.ensure_one()
         if self.state not in ("confirmed", "draft"):
-            raise UserError(_("Only draft or confirmed certifications can be invoiced."))
+            raise UserError(_("Solo se pueden facturar certificaciones en borrador o confirmadas."))
         if self.current_base_amount <= 0:
-            raise UserError(_("There is no positive amount to invoice for this certification."))
+            raise UserError(_("No hay importe positivo que facturar para esta certificación."))
         invoice_lines = self._prepare_origin_invoice_line_commands()
         if not invoice_lines:
-            raise UserError(_("There are no amounts to invoice."))
+            raise UserError(_("No hay importes que facturar."))
         move_vals = {
             "move_type": "out_invoice",
             "partner_id": self.sale_order_id.partner_invoice_id.id,
@@ -302,7 +312,7 @@ class Bc3Certification(models.Model):
         self.line_ids.filtered(lambda line: line.current_certified_qty).write({"invoice_line_id": False})
         self.state = "invoiced"
         self.sale_order_id.order_line._compute_bc3_certification_values()
-        self.sale_order_id.message_post(body=_("BC3 certification %(cert)s has been invoiced in %(invoice)s.") % {"cert": self.name, "invoice": move.name or move.ref or move.id})
+        self.sale_order_id.message_post(body=_("La certificación BC3 %(cert)s se ha facturado en %(invoice)s.") % {"cert": self.name, "invoice": move.name or move.ref or move.id})
         return {
             "type": "ir.actions.act_window",
             "name": _("Factura"),
@@ -316,7 +326,7 @@ class Bc3Certification(models.Model):
         product = self._get_certification_product()
         account = self._get_income_account(product)
         if not account:
-            raise UserError(_("No income account could be found for the BC3 certification product."))
+            raise UserError(_("No se ha encontrado cuenta de ingresos para el producto de certificación BC3."))
         commands = []
         for chapter in self._get_report_chapter_lines():
             if not chapter["amount"]:
@@ -333,7 +343,7 @@ class Bc3Certification(models.Model):
             commands.append((0, 0, vals))
         if self.award_discount_amount:
             commands.append((0, 0, self._prepare_account_move_line_vals(
-                name=_("%(percent).2f%% Award discount / increase") % {"percent": self.award_discount_percent},
+                name=_("%(percent).2f%% Baja / alza de adjudicación") % {"percent": self.award_discount_percent},
                 amount=-self.award_discount_amount,
                 account=account,
                 product=product,
@@ -342,7 +352,7 @@ class Bc3Certification(models.Model):
             )))
         if self.previous_amount_origin:
             commands.append((0, 0, self._prepare_account_move_line_vals(
-                name=_("To deduct previous certification %(number)s") % {"number": self.previous_certification_id.certification_number},
+                name=_("A deducir certificación anterior %(number)s") % {"number": self.previous_certification_id.certification_number},
                 amount=-self.previous_amount_origin,
                 account=account,
                 product=product,
@@ -351,7 +361,7 @@ class Bc3Certification(models.Model):
             )))
         if self.retention_warranty_amount:
             commands.append((0, 0, self._prepare_account_move_line_vals(
-                name=_("Warranty retention"),
+                name=_("Retención de garantía"),
                 amount=-self.retention_warranty_amount,
                 account=account,
                 product=product,
@@ -360,7 +370,7 @@ class Bc3Certification(models.Model):
             )))
         if self.retention_fiscal_amount:
             commands.append((0, 0, self._prepare_account_move_line_vals(
-                name=_("Fiscal retention"),
+                name=_("Retención fiscal"),
                 amount=-self.retention_fiscal_amount,
                 account=account,
                 product=product,
@@ -395,8 +405,8 @@ class Bc3Certification(models.Model):
             if key not in summaries:
                 summaries[key] = {
                     "sequence": chapter.sequence if chapter else 0,
-                    "code": chapter.code if chapter else _("No chapter"),
-                    "name": chapter.name if chapter else _("No chapter"),
+                    "code": chapter.code if chapter else _("Sin capítulo"),
+                    "name": chapter.name if chapter else _("Sin capítulo"),
                     "amount": 0.0,
                     "percent": 0.0,
                 }
@@ -527,7 +537,7 @@ class Bc3CertificationLine(models.Model):
         product = sale_line.product_id if sale_line else self.env.ref("tl_bc3_sale.product_bc3_work_unit", raise_if_not_found=False)
         account = self._get_income_account(product)
         if not account:
-            raise UserError(_("No income account could be found for BC3 certification line %s.") % self.bc3_code)
+            raise UserError(_("No se ha encontrado cuenta de ingresos para la línea de certificación BC3 %s.") % self.bc3_code)
         vals = {
             "name": "[%s] %s" % (self.bc3_code, self.name),
             "quantity": self.current_certified_qty,

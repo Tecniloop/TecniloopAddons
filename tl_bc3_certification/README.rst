@@ -21,3 +21,9 @@ Changelog
 ----------
 
 * Simplified certification search view for Odoo 19 view validation compatibility.
+
+19.0.1.2.1
+~~~~~~~~~~
+
+* Adapta create() a la API multi-create de Odoo 19.
+* Completa textos directos en castellano en certificaciones.
