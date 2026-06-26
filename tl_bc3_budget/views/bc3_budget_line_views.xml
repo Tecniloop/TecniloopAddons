@@ -27,6 +27,9 @@
                 <header>
                     <button name="action_update_quantity_from_measurements" string="Actualizar cantidad desde mediciones" type="object" class="btn-secondary"/>
                     <button name="action_open_measurements" string="Mediciones" type="object" class="btn-secondary"/>
+                    <button name="action_open_insert_from_catalog" string="Insertar inferior desde banco" type="object" class="btn-secondary" invisible="line_type not in ['root', 'chapter', 'work_unit']"/>
+                    <button name="action_open_replace_from_catalog" string="Sustituir desde banco" type="object" class="btn-secondary" invisible="line_type in ['root']"/>
+                    <button name="action_update_apu_from_catalog" string="Actualizar APU desde banco" type="object" class="btn-secondary" invisible="not concept_id"/>
                 </header>
                 <sheet>
                     <group>

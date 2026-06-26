@@ -33,6 +33,215 @@ class Bc3Budget(models.Model):
     export_file = fields.Binary(string="Archivo BC3 exportado", attachment=True, readonly=True)
     export_filename = fields.Char(readonly=True)
     export_date = fields.Datetime(readonly=True)
+    catalog_file_ids = fields.Many2many(
+        "bc3.file",
+        "bc3_budget_catalog_file_rel",
+        "budget_id",
+        "file_id",
+        string="Bancos de precios / referencias",
+        domain=[("state", "=", "parsed")],
+        help="Ficheros BC3 usados como referencia para insertar partidas, recursos y descomposiciones.",
+    )
+    catalog_count = fields.Integer(string="Referencias", compute="_compute_catalog_count")
+
+    @api.depends("catalog_file_ids")
+    def _compute_catalog_count(self):
+        for budget in self:
+            budget.catalog_count = len(budget.catalog_file_ids)
+
+    def action_open_insert_from_catalog(self):
+        self.ensure_one()
+        parent = self.line_ids.filtered(lambda line: line.line_type in ("root", "chapter"))[:1]
+        if not parent:
+            parent = self.line_ids.filtered(lambda line: not line.parent_id)[:1]
+        catalog = self.catalog_file_ids[:1] or self.env["bc3.file"].search([("state", "=", "parsed"), ("info_type", "=", "1")], limit=1)
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Insertar desde banco de precios"),
+            "res_model": "bc3.budget.catalog.insert.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_budget_id": self.id,
+                "default_parent_id": parent.id if parent else False,
+                "default_catalog_file_id": catalog.id if catalog else False,
+                "default_mode": "insert",
+            },
+        }
+
+    def action_open_catalog_files(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Bancos de precios / referencias"),
+            "res_model": "bc3.file",
+            "view_mode": "list,form",
+            "domain": [("id", "in", self.catalog_file_ids.ids)],
+        }
+
+    def _catalog_line_type(self, concept):
+        if concept.category == "root":
+            return "root"
+        if concept.category == "chapter":
+            return "chapter"
+        if concept.category == "percentage":
+            return "percentage"
+        if concept.category == "resource":
+            return "resource"
+        return "work_unit"
+
+    def _validate_catalog_parent(self, concept, parent_line):
+        concept_type = self._catalog_line_type(concept)
+        if not parent_line:
+            if concept_type == "root":
+                return
+            raise UserError(_("Debe indicar una línea superior donde insertar el concepto."))
+        if parent_line.budget_id != self:
+            raise UserError(_("La línea superior no pertenece a este presupuesto."))
+        if concept_type in ("chapter", "work_unit") and parent_line.line_type not in ("root", "chapter"):
+            raise UserError(_("Las partidas y capítulos solo pueden insertarse bajo raíz o capítulo."))
+        if concept_type in ("resource", "percentage") and parent_line.line_type != "work_unit":
+            raise UserError(_("Los recursos y porcentajes solo pueden insertarse dentro de una partida."))
+        if concept_type == "root" and parent_line:
+            raise UserError(_("No se puede insertar una raíz dentro de otra línea."))
+
+    def _next_child_sequence(self, parent_line):
+        children = parent_line.child_ids if parent_line else self.line_ids.filtered(lambda line: not line.parent_id)
+        return (max(children.mapped("sequence") or [0]) + 10) or 10
+
+    def _catalog_decomposition_lines(self, concept):
+        Concept = self.env["bc3.concept"]
+        normalized = Concept._normalize_code(concept.code)
+        lines = self.env["bc3.decomposition.line"].search([("file_id", "=", concept.file_id.id)])
+        return lines.filtered(
+            lambda item: item.parent_concept_id.id == concept.id
+            or Concept._normalize_code(item.parent_code) == normalized
+        ).sorted(key=lambda item: (item.sequence, item.id))
+
+    def _copy_catalog_measurements(self, budget_line, source_concept):
+        if budget_line.line_type != "work_unit":
+            return
+        Concept = self.env["bc3.concept"]
+        normalized_code = Concept._normalize_code(source_concept.code)
+        measurements = self.env["bc3.measurement.line"].search([("file_id", "=", source_concept.file_id.id)]).filtered(
+            lambda item: Concept._normalize_code(item.child_code) == normalized_code
+        )
+        vals = []
+        for item in measurements.sorted(key=lambda m: (m.position_path or "", m.sequence, m.id)):
+            vals.append({
+                "budget_line_id": budget_line.id,
+                "sequence": item.sequence,
+                "line_type": item.line_type or "",
+                "comment": item.comment,
+                "bim_id": item.bim_id,
+                "units": item.units,
+                "length": item.length,
+                "width": item.width,
+                "height": item.height,
+                "label": item.label,
+            })
+        if vals:
+            self.env["bc3.budget.measurement.line"].with_context(bc3_skip_recompute=True).create(vals)
+            total = sum(budget_line.budget_measurement_line_ids.mapped("subtotal"))
+            if total:
+                budget_line.with_context(bc3_skip_recompute=True).write({
+                    "measurement_label": measurements[:1].label if measurements[:1] else "",
+                    "quantity": total,
+                    "performance": total / (budget_line.factor or 1.0) if budget_line.factor else total,
+                })
+
+    def _create_catalog_line_recursive(self, concept, parent_line=False, sequence=False, level=False, position_path=False,
+                                       factor=1.0, performance=1.0, quantity=False, copy_measurements=False, visited=None):
+        self.ensure_one()
+        visited = visited or set()
+        key = (concept.file_id.id, concept.code, position_path or "")
+        if key in visited:
+            return self.env["bc3.budget.line"]
+        visited.add(key)
+        line_type = self._catalog_line_type(concept)
+        if line_type in ("root", "chapter"):
+            factor = 1.0
+            performance = 1.0
+            quantity = 1.0
+        else:
+            factor = factor or 1.0
+            performance = performance if performance not in (None, False) else 1.0
+            quantity = quantity if quantity not in (None, False) else factor * performance
+        if level is False:
+            level = (parent_line.level + 1) if parent_line else 0
+        if not sequence:
+            sequence = self._next_child_sequence(parent_line)
+        if not position_path:
+            position_path = "%s/%s" % (parent_line.position_path, sequence) if parent_line and parent_line.position_path else str(sequence)
+        line = self.env["bc3.budget.line"].with_context(bc3_skip_recompute=True).create({
+            "budget_id": self.id,
+            "parent_id": parent_line.id if parent_line else False,
+            "sequence": sequence,
+            "level": level,
+            "position_path": position_path,
+            "concept_id": concept.id,
+            "code": concept.code,
+            "name": concept.name,
+            "line_type": line_type,
+            "unit_name": concept.unit_name,
+            "uom_id": concept.uom_id.id if concept.uom_id else False,
+            "factor": factor,
+            "performance": performance,
+            "quantity": quantity,
+            "price_unit": concept.price_unit,
+            "text": concept.text,
+        })
+        if copy_measurements:
+            self._copy_catalog_measurements(line, concept)
+        for rel in self._catalog_decomposition_lines(concept):
+            child = rel.child_concept_id
+            if not child:
+                continue
+            child_factor = rel.factor or 1.0
+            child_performance = rel.performance or 1.0
+            child_sequence = rel.sequence or self._next_child_sequence(line)
+            child_position = "%s/%s" % (line.position_path, child_sequence) if line.position_path else str(child_sequence)
+            self._create_catalog_line_recursive(
+                child,
+                parent_line=line,
+                sequence=child_sequence,
+                level=line.level + 1,
+                position_path=child_position,
+                factor=child_factor,
+                performance=child_performance,
+                quantity=child_factor * child_performance,
+                copy_measurements=copy_measurements,
+                visited=visited,
+            )
+        return line
+
+    def _insert_catalog_concept(self, concept, parent_line, quantity=1.0, sequence=False, copy_measurements=False):
+        self.ensure_one()
+        self._validate_catalog_parent(concept, parent_line)
+        concept_type = self._catalog_line_type(concept)
+        if concept_type in ("chapter", "root"):
+            quantity = 1.0
+        elif quantity in (None, False):
+            quantity = 1.0
+        if not sequence:
+            sequence = self._next_child_sequence(parent_line)
+        position_path = "%s/%s" % (parent_line.position_path, sequence) if parent_line and parent_line.position_path else str(sequence)
+        factor = 1.0
+        performance = quantity or 0.0
+        new_line = self._create_catalog_line_recursive(
+            concept,
+            parent_line=parent_line,
+            sequence=sequence,
+            level=(parent_line.level + 1) if parent_line else 0,
+            position_path=position_path,
+            factor=factor,
+            performance=performance,
+            quantity=quantity,
+            copy_measurements=copy_measurements,
+            visited=set(),
+        )
+        new_line._recompute_after_change()
+        return new_line
 
     def _recompute_budget_total(self):
         for budget in self:
@@ -164,7 +373,10 @@ class Bc3Budget(models.Model):
             chunks = []
             for child in parent.child_ids.sorted(key=lambda item: (item.sequence, item.id)):
                 factor = child.factor if child.factor not in (0.0, None) else 1.0
-                performance = child.performance if child.performance not in (0.0, None) else (child.quantity or 1.0)
+                if child.line_type == "percentage":
+                    performance = child._percentage_rate()
+                else:
+                    performance = child.performance if child.performance not in (0.0, None) else (child.quantity or 1.0)
                 chunks.append("%s\\%s\\%s" % (self._escape(child.code), self._fmt(factor), self._fmt(performance)))
             if chunks:
                 lines.append("~D|%s|%s\\|" % (self._escape(parent.code), "\\".join(chunks)))
@@ -460,6 +672,101 @@ class Bc3BudgetLine(models.Model):
         for line in self:
             if line.line_type not in ("root", "chapter") and line.factor:
                 line.performance = (line.quantity or 0.0) / line.factor
+
+    def action_open_insert_from_catalog(self):
+        self.ensure_one()
+        catalog = self.budget_id.catalog_file_ids[:1] or self.env["bc3.file"].search([("state", "=", "parsed"), ("info_type", "=", "1")], limit=1)
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Insertar desde banco de precios"),
+            "res_model": "bc3.budget.catalog.insert.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_budget_id": self.budget_id.id,
+                "default_parent_id": self.id,
+                "default_catalog_file_id": catalog.id if catalog else False,
+                "default_mode": "insert",
+            },
+        }
+
+    def action_open_replace_from_catalog(self):
+        self.ensure_one()
+        catalog = self.budget_id.catalog_file_ids[:1] or (self.concept_id.file_id if self.concept_id else False)
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Sustituir desde banco de precios"),
+            "res_model": "bc3.budget.catalog.insert.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_budget_id": self.budget_id.id,
+                "default_parent_id": self.parent_id.id,
+                "default_catalog_file_id": catalog.id if catalog else False,
+                "default_replace_line_id": self.id,
+                "default_mode": "replace",
+                "default_quantity": self.quantity,
+            },
+        }
+
+    def action_update_apu_from_catalog(self):
+        for line in self:
+            if not line.concept_id:
+                raise UserError(_("La línea no tiene concepto de catálogo asociado."))
+            line._apply_catalog_concept(line.concept_id, keep_measurements=True)
+        return True
+
+    def _apply_catalog_concept(self, concept, keep_measurements=True):
+        self.ensure_one()
+        self.budget_id._validate_catalog_parent(concept, self.parent_id)
+        line_type = self.budget_id._catalog_line_type(concept)
+        preserved_quantity = self.quantity
+        preserved_factor = self.factor or 1.0
+        preserved_performance = self.performance
+        self.child_ids.with_context(bc3_skip_recompute=True).unlink()
+        vals = {
+            "concept_id": concept.id,
+            "code": concept.code,
+            "name": concept.name,
+            "line_type": line_type,
+            "unit_name": concept.unit_name,
+            "uom_id": concept.uom_id.id if concept.uom_id else False,
+            "price_unit": concept.price_unit,
+            "text": concept.text,
+        }
+        if line_type in ("root", "chapter"):
+            vals.update({"factor": 1.0, "performance": 1.0, "quantity": 1.0})
+        else:
+            vals.update({
+                "factor": preserved_factor,
+                "performance": preserved_performance,
+                "quantity": preserved_quantity,
+            })
+        if not keep_measurements:
+            self.budget_measurement_line_ids.with_context(bc3_skip_recompute=True).unlink()
+        self.with_context(bc3_skip_recompute=True).write(vals)
+        for rel in self.budget_id._catalog_decomposition_lines(concept):
+            child = rel.child_concept_id
+            if not child:
+                continue
+            child_factor = rel.factor or 1.0
+            child_performance = rel.performance or 1.0
+            child_sequence = rel.sequence or self.budget_id._next_child_sequence(self)
+            child_position = "%s/%s" % (self.position_path, child_sequence) if self.position_path else str(child_sequence)
+            self.budget_id._create_catalog_line_recursive(
+                child,
+                parent_line=self,
+                sequence=child_sequence,
+                level=self.level + 1,
+                position_path=child_position,
+                factor=child_factor,
+                performance=child_performance,
+                quantity=child_factor * child_performance,
+                copy_measurements=False,
+                visited=set(),
+            )
+        self._recompute_after_change()
+        return self
 
     def _compute_measurement_lines(self):
         Measurement = self.env["bc3.measurement.line"]

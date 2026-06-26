@@ -21,6 +21,7 @@
                 <header>
                     <button name="action_rebuild_lines" string="Reconstruir líneas" type="object" class="btn-secondary"/>
                     <button name="action_update_quantities_from_measurements" string="Actualizar cantidades desde mediciones" type="object" class="btn-secondary"/>
+                    <button name="action_open_insert_from_catalog" string="Insertar desde banco" type="object" class="btn-secondary" invisible="not line_ids"/>
                     <button name="action_export_bc3" string="Exportar BC3" type="object" class="btn-primary" invisible="not line_ids"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,ready,locked"/>
                 </header>
@@ -29,12 +30,16 @@
                         <button name="action_open_origin_file" type="object" class="oe_stat_button" icon="fa-file-text-o">
                             <div class="o_field_widget o_stat_info"><span class="o_stat_text">Fichero BC3</span></div>
                         </button>
+                        <button name="action_open_catalog_files" type="object" class="oe_stat_button" icon="fa-book" invisible="catalog_count == 0">
+                            <field name="catalog_count" widget="statinfo" string="Referencias"/>
+                        </button>
                     </div>
                     <div class="oe_title"><h1><field name="name"/></h1></div>
                     <group>
                         <group string="Origen">
                             <field name="file_id"/>
                             <field name="root_concept_id"/>
+                            <field name="catalog_file_ids" widget="many2many_tags" options="{'no_create': True}"/>
                             <field name="chapter_count"/>
                             <field name="work_unit_count"/>
                             <field name="amount_total"/>
@@ -87,6 +92,9 @@
                                     <header>
                                         <button name="action_update_quantity_from_measurements" string="Actualizar cantidad desde mediciones" type="object" class="btn-secondary"/>
                                         <button name="action_open_measurements" string="Abrir mediciones" type="object" class="btn-secondary"/>
+                                        <button name="action_open_insert_from_catalog" string="Insertar inferior desde banco" type="object" class="btn-secondary" invisible="line_type not in ['root', 'chapter', 'work_unit']"/>
+                                        <button name="action_open_replace_from_catalog" string="Sustituir desde banco" type="object" class="btn-secondary" invisible="line_type in ['root']"/>
+                                        <button name="action_update_apu_from_catalog" string="Actualizar APU desde banco" type="object" class="btn-secondary" invisible="not concept_id"/>
                                     </header>
                                     <sheet>
                                         <group>

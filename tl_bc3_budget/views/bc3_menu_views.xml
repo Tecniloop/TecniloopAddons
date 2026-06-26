@@ -2,4 +2,12 @@
     <menuitem id="menu_bc3_budget" name="Presupuestos" parent="tl_bc3_base.menu_bc3_root" action="action_bc3_budget" sequence="50"/>
     <menuitem id="menu_bc3_budget_lines" name="Líneas de presupuesto" parent="tl_bc3_base.menu_bc3_root" action="action_bc3_budget_line" sequence="55"/>
     <menuitem id="menu_bc3_budget_measurements" name="Mediciones de presupuesto" parent="tl_bc3_base.menu_bc3_root" action="action_bc3_budget_measurement_line" sequence="25"/>
+    <record id="action_bc3_price_bank_files" model="ir.actions.act_window">
+        <field name="name">Bancos de precios BC3</field>
+        <field name="res_model">bc3.file</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('info_type', '=', '1')]</field>
+        <field name="context">{'default_info_type': '1'}</field>
+    </record>
+    <menuitem id="menu_bc3_price_banks" name="Bancos de precios" parent="tl_bc3_base.menu_bc3_root" action="action_bc3_price_bank_files" sequence="15"/>
 </odoo>

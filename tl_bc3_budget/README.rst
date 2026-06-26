@@ -20,3 +20,9 @@ Informe de presupuesto y mediciones
 ===================================
 
 Incluye un informe PDF de presupuesto y mediciones basado en la estructura del Excel de referencia: cabecera, capítulos, partidas, descripción, líneas de medición y totales.
+
+
+Banco de precios / referencias
+================================
+
+Permite asociar ficheros BC3 procesados como bancos de precios o referencias al presupuesto y copiar capítulos, partidas, recursos y porcentajes con su descomposición. Las mediciones quedan en el presupuesto de obra y se pueden conservar al sustituir una partida.
