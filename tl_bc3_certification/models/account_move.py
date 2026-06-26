@@ -5,6 +5,13 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     bc3_certification_id = fields.Many2one("bc3.certification", string="BC3 Certification", copy=False, index=True)
+    bc3_sale_order_id = fields.Many2one(
+        "sale.order",
+        string="BC3 Sale Order",
+        related="bc3_certification_id.sale_order_id",
+        store=True,
+        readonly=True,
+    )
 
 
 class AccountMoveLine(models.Model):

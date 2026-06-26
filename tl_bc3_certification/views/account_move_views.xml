@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='invoice_origin']" position="after">
                 <field name="bc3_certification_id" readonly="1"/>
+                <field name="bc3_sale_order_id" readonly="1"/>
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']/list//field[@name='name']" position="after">
                 <field name="bc3_code" optional="hide"/>

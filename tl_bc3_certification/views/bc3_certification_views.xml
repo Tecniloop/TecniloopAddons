@@ -6,6 +6,7 @@
             <list>
                 <field name="name"/>
                 <field name="sale_order_id"/>
+                <field name="budget_id"/>
                 <field name="certification_number"/>
                 <field name="certification_date"/>
                 <field name="amount_current"/>
@@ -14,6 +15,27 @@
             </list>
         </field>
     </record>
+
+    <record id="view_bc3_certification_search" model="ir.ui.view">
+        <field name="name">bc3.certification.search</field>
+        <field name="model">bc3.certification</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="sale_order_id"/>
+                <field name="budget_id"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="confirmed" string="Confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="invoiced" string="Invoiced" domain="[('state', '=', 'invoiced')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_sale_order" string="Sale Order" context="{'group_by': 'sale_order_id'}"/>
+                    <filter name="group_budget" string="BC3 Budget" context="{'group_by': 'budget_id'}"/>
+                    <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="view_bc3_certification_form" model="ir.ui.view">
         <field name="name">bc3.certification.form</field>
         <field name="model">bc3.certification</field>
@@ -28,6 +50,9 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
+                        <button name="action_open_sale_order" type="object" class="oe_stat_button" icon="fa-shopping-cart" invisible="not sale_order_id">
+                            <div class="o_field_widget o_stat_info"><span class="o_stat_text">Sale Order</span></div>
+                        </button>
                         <button name="action_open_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o">
                             <field name="invoice_count" widget="statinfo" string="Invoices"/>
                         </button>
@@ -35,8 +60,8 @@
                     <div class="oe_title"><h1><field name="name"/></h1></div>
                     <group>
                         <group>
-                            <field name="sale_order_id"/>
-                            <field name="budget_id"/>
+                            <field name="sale_order_id" required="1"/>
+                            <field name="budget_id" required="1"/>
                             <field name="previous_certification_id"/>
                         </group>
                         <group>
@@ -56,6 +81,7 @@
                                 <list editable="bottom">
                                     <field name="bc3_code" readonly="1"/>
                                     <field name="name" readonly="1"/>
+                                    <field name="sale_order_line_id" readonly="1" optional="show"/>
                                     <field name="budget_qty" readonly="1"/>
                                     <field name="previous_certified_qty" readonly="1"/>
                                     <field name="current_certified_qty"/>
@@ -73,9 +99,11 @@
             </form>
         </field>
     </record>
+
     <record id="action_bc3_certification" model="ir.actions.act_window">
         <field name="name">BC3 Certifications</field>
         <field name="res_model">bc3.certification</field>
         <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_bc3_certification_search"/>
     </record>
 </odoo>
