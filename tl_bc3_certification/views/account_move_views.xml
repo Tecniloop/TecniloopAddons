@@ -4,6 +4,11 @@
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//sheet//div[@name='button_box']" position="inside">
+                <button name="action_open_bc3_certification" type="object" class="oe_stat_button" icon="fa-certificate" invisible="not bc3_certification_id">
+                    <div class="o_field_widget o_stat_info"><span class="o_stat_text">BC3 Certification</span></div>
+                </button>
+            </xpath>
             <xpath expr="//field[@name='invoice_origin']" position="after">
                 <field name="bc3_certification_id" readonly="1"/>
                 <field name="bc3_sale_order_id" readonly="1"/>

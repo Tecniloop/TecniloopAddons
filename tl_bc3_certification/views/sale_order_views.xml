@@ -19,9 +19,9 @@
                             <field name="name"/>
                             <field name="certification_number"/>
                             <field name="certification_date"/>
-                            <field name="amount_previous"/>
-                            <field name="amount_current"/>
-                            <field name="amount_cumulative"/>
+                            <field name="previous_amount_origin"/>
+                            <field name="current_base_amount"/>
+                            <field name="total_amount"/>
                             <field name="state"/>
                         </list>
                     </field>

@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import _, fields, models
 
 
 class AccountMove(models.Model):
@@ -12,6 +12,16 @@ class AccountMove(models.Model):
         store=True,
         readonly=True,
     )
+
+    def action_open_bc3_certification(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("BC3 Certification"),
+            "res_model": "bc3.certification",
+            "view_mode": "form",
+            "res_id": self.bc3_certification_id.id,
+        }
 
 
 class AccountMoveLine(models.Model):

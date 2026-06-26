@@ -9,8 +9,10 @@
                 <field name="budget_id"/>
                 <field name="certification_number"/>
                 <field name="certification_date"/>
-                <field name="amount_current"/>
-                <field name="amount_cumulative"/>
+                <field name="gross_amount_origin" sum="Total gross"/>
+                <field name="current_base_amount" sum="Tax base"/>
+                <field name="tax_amount" sum="Taxes"/>
+                <field name="total_amount" sum="Total"/>
                 <field name="state"/>
             </list>
         </field>
@@ -24,6 +26,9 @@
                 <field name="name"/>
                 <field name="sale_order_id"/>
                 <field name="budget_id"/>
+                <filter name="draft" string="Draft" domain="[('state','=','draft')]"/>
+                <filter name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+                <filter name="invoiced" string="Invoiced" domain="[('state','=','invoiced')]"/>
             </search>
         </field>
     </record>
@@ -35,8 +40,9 @@
             <form>
                 <header>
                     <button name="action_load_lines" string="Reload Lines" type="object" class="btn-secondary" invisible="state != 'draft'"/>
+                    <button name="action_apply_global_percent" string="Apply Global %" type="object" class="btn-secondary" invisible="state != 'draft' or certification_method != 'global_percent'"/>
                     <button name="action_confirm" string="Confirm" type="object" class="btn-primary" invisible="state != 'draft'"/>
-                    <button name="action_create_invoice" string="Create Invoice" type="object" class="btn-primary" invisible="state not in ('draft', 'confirmed')"/>
+                    <button name="action_create_invoice" string="Create Origin Invoice" type="object" class="btn-primary" invisible="state not in ('draft', 'confirmed')"/>
                     <button name="action_cancel" string="Cancel" type="object" invisible="state in ('cancelled', 'invoiced')"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,invoiced"/>
                 </header>
@@ -51,21 +57,44 @@
                     </div>
                     <div class="oe_title"><h1><field name="name"/></h1></div>
                     <group>
-                        <group>
+                        <group string="General">
                             <field name="sale_order_id" required="1"/>
                             <field name="budget_id" required="1"/>
                             <field name="previous_certification_id"/>
+                            <field name="origin_bc3_file_id"/>
                         </group>
-                        <group>
+                        <group string="Certification">
                             <field name="certification_number"/>
                             <field name="certification_date"/>
+                            <field name="certification_method"/>
+                            <field name="global_percent" invisible="certification_method != 'global_percent'"/>
                             <field name="currency_id"/>
                         </group>
                     </group>
-                    <group>
-                        <field name="amount_previous"/>
-                        <field name="amount_current"/>
-                        <field name="amount_cumulative"/>
+                    <group string="Invoice parameters">
+                        <group>
+                            <field name="tax_ids" widget="many2many_tags"/>
+                            <field name="award_discount_percent"/>
+                        </group>
+                        <group>
+                            <field name="retention_warranty_percent"/>
+                            <field name="retention_fiscal_percent"/>
+                        </group>
+                    </group>
+                    <group string="Origin invoice summary">
+                        <group>
+                            <field name="gross_amount_origin" readonly="1"/>
+                            <field name="award_discount_amount" readonly="1"/>
+                            <field name="net_amount_origin" readonly="1"/>
+                            <field name="previous_amount_origin" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="current_base_amount" readonly="1"/>
+                            <field name="tax_amount" readonly="1"/>
+                            <field name="retention_warranty_amount" readonly="1"/>
+                            <field name="retention_fiscal_amount" readonly="1"/>
+                            <field name="total_amount" readonly="1"/>
+                        </group>
                     </group>
                     <notebook>
                         <page string="Lines">
@@ -76,10 +105,14 @@
                                     <field name="sale_order_line_id" readonly="1" optional="show"/>
                                     <field name="budget_qty" readonly="1"/>
                                     <field name="previous_certified_qty" readonly="1"/>
-                                    <field name="current_certified_qty"/>
-                                    <field name="cumulative_certified_qty"/>
+                                    <field name="previous_percent" readonly="1" optional="hide"/>
+                                    <field name="current_certified_qty" optional="show"/>
+                                    <field name="current_percent" readonly="1" optional="show"/>
+                                    <field name="cumulative_certified_qty" optional="show"/>
+                                    <field name="cumulative_percent" optional="show"/>
                                     <field name="remaining_qty" readonly="1"/>
                                     <field name="price_unit"/>
+                                    <field name="previous_amount" readonly="1" optional="hide"/>
                                     <field name="current_amount" readonly="1"/>
                                     <field name="cumulative_amount" readonly="1"/>
                                 </list>

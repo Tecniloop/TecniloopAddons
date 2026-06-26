@@ -1,7 +1,7 @@
 {
     "name": "TL BC3 Certification",
     "summary": "BC3 work certifications linked to sale orders and customer invoices",
-    "version": "19.0.1.0.6",
+    "version": "19.0.1.1.0",
     "category": "Construction/BC3",
     "author": "Tecniloop",
     "website": "https://www.tecniloop.com",
@@ -13,6 +13,7 @@
         "views/sale_order_views.xml",
         "views/account_move_views.xml",
         "views/bc3_menu_views.xml",
+        "reports/bc3_certification_report.xml",
     ],
     "installable": True,
 }
