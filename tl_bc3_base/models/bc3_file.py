@@ -81,6 +81,16 @@ class Bc3File(models.Model):
     certification_date = fields.Date(readonly=True)
     url_base = fields.Char(readonly=True)
     raw_k = fields.Text(string="Registro ~K bruto", readonly=True)
+    k_ci = fields.Float(string="% costes indirectos", readonly=True)
+    k_gg = fields.Float(string="% gastos generales", readonly=True)
+    k_bi = fields.Float(string="% beneficio industrial", readonly=True)
+    k_baja = fields.Float(string="% baja/alza", readonly=True)
+    k_iva = fields.Float(string="% IVA", readonly=True)
+    k_currency = fields.Char(string="Divisa BC3", readonly=True)
+    k_decimal_profile = fields.Text(string="Perfil de decimales", readonly=True)
+    record_stats_text = fields.Text(string="Resumen de registros", readonly=True)
+    parametric_record_count = fields.Integer(string="Registros paramétricos", readonly=True)
+    parametric_records_text = fields.Text(string="Registros ~P", readonly=True)
     record_count = fields.Integer(readonly=True)
     concept_count = fields.Integer(readonly=True)
     decomposition_count = fields.Integer(readonly=True)
@@ -213,6 +223,16 @@ class Bc3File(models.Model):
             "certification_date": parsed.certification_date,
             "url_base": parsed.url_base,
             "raw_k": parsed.raw_k,
+            "k_ci": parsed.k_ci,
+            "k_gg": parsed.k_gg,
+            "k_bi": parsed.k_bi,
+            "k_baja": parsed.k_baja,
+            "k_iva": parsed.k_iva,
+            "k_currency": parsed.k_currency,
+            "k_decimal_profile": parsed.k_decimal_profile,
+            "record_stats_text": "\n".join("%s: %s" % (key, parsed.record_stats[key]) for key in sorted(parsed.record_stats)),
+            "parametric_record_count": len(parsed.parametric_records),
+            "parametric_records_text": "\n~".join(parsed.parametric_records),
             "record_count": len(parsed.records),
             "concept_count": concept_count,
             "decomposition_count": len(parsed.decomposition_lines),

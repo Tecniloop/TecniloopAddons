@@ -146,6 +146,15 @@ class ParsedBC3:
     certification_date: Optional[dt.date] = None
     url_base: str = ""
     raw_k: str = ""
+    k_ci: float = 0.0
+    k_gg: float = 0.0
+    k_bi: float = 0.0
+    k_baja: float = 0.0
+    k_iva: float = 0.0
+    k_currency: str = ""
+    k_decimal_profile: str = ""
+    record_stats: Dict[str, int] = field(default_factory=dict)
+    parametric_records: List[str] = field(default_factory=list)
     records: List[ParsedRecord] = field(default_factory=list)
     concepts: Dict[str, ParsedConcept] = field(default_factory=dict)
     decomposition_lines: List[ParsedDecompositionLine] = field(default_factory=list)
@@ -169,6 +178,7 @@ class BC3Parser:
         data = ParsedBC3(name=filename, encoding=encoding, charset=charset)
         for record in self._iter_records(text):
             data.records.append(record)
+            data.record_stats[record.record_type] = data.record_stats.get(record.record_type, 0) + 1
             try:
                 self._parse_record(record, data)
             except Exception as exc:
@@ -205,7 +215,7 @@ class BC3Parser:
         if record.record_type == "V":
             self._parse_v(record.fields, data)
         elif record.record_type == "K":
-            data.raw_k = record.raw
+            self._parse_k(record.fields, record.raw, data)
         elif record.record_type == "C":
             concept = self._parse_c(record.fields)
             if concept.code:
@@ -224,6 +234,8 @@ class BC3Parser:
             data.decomposition_lines.extend(self._parse_d(record.fields))
         elif record.record_type in ("M", "N"):
             data.measurements.append(self._parse_m(record.fields))
+        elif record.record_type == "P":
+            data.parametric_records.append(record.raw)
 
     def _parse_v(self, fields: List[str], data: ParsedBC3):
         data.property_file = self._field(fields, 1).strip()
@@ -235,6 +247,40 @@ class BC3Parser:
         data.certification_number = self._field(fields, 8).strip()
         data.certification_date = parse_bc3_date(self._field(fields, 9))
         data.url_base = self._field(fields, 10).strip()
+
+    def _parse_k(self, fields: List[str], raw: str, data: ParsedBC3):
+        """Parse the FIEBDC ~K record enough for budgeting/certification defaults.
+
+        The format has two relevant zones:
+        - field 1: legacy decimal profile, ending with currency.
+        - field 2: CI, GG, BI, BAJA, IVA.
+        - field 3: extended decimal profiles and currency repetitions.
+        """
+        data.raw_k = raw
+        data.k_decimal_profile = self._field(fields, 1).strip()
+        legacy = self._subfields(self._field(fields, 1), keep_empty=True)
+        if legacy:
+            # The legacy profile convention places currency in the 9th subfield.
+            for value in reversed(legacy):
+                value = (value or "").strip()
+                if value and not re.fullmatch(r"[-+]?\d+(?:[\.,]\d+)?", value):
+                    data.k_currency = value
+                    break
+        coeffs = self._subfields(self._field(fields, 2), keep_empty=True)
+        if coeffs:
+            data.k_ci = to_float(coeffs[0]) if len(coeffs) > 0 else 0.0
+            data.k_gg = to_float(coeffs[1]) if len(coeffs) > 1 else 0.0
+            data.k_bi = to_float(coeffs[2]) if len(coeffs) > 2 else 0.0
+            data.k_baja = to_float(coeffs[3]) if len(coeffs) > 3 else 0.0
+            data.k_iva = to_float(coeffs[4]) if len(coeffs) > 4 else 0.0
+        extended = self._subfields(self._field(fields, 3), keep_empty=True)
+        if extended:
+            data.k_decimal_profile = self._field(fields, 3).strip()
+            for value in reversed(extended):
+                value = (value or "").strip()
+                if value and not re.fullmatch(r"[-+]?\d+(?:[\.,]\d+)?", value):
+                    data.k_currency = value
+                    break
 
     def _parse_c(self, fields: List[str]) -> ParsedConcept:
         codes = self._subfields(self._field(fields, 1))

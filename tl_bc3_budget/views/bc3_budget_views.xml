@@ -20,6 +20,8 @@
             <form>
                 <header>
                     <button name="action_rebuild_lines" string="Reconstruir líneas" type="object" class="btn-secondary"/>
+                    <button name="action_update_quantities_from_measurements" string="Actualizar cantidades desde mediciones" type="object" class="btn-secondary"/>
+                    <button name="action_export_bc3" string="Exportar BC3" type="object" class="btn-primary" invisible="not line_ids"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,ready,locked"/>
                 </header>
                 <sheet>
@@ -30,11 +32,26 @@
                     </div>
                     <div class="oe_title"><h1><field name="name"/></h1></div>
                     <group>
-                        <field name="file_id"/>
-                        <field name="root_concept_id"/>
-                        <field name="chapter_count"/>
-                        <field name="work_unit_count"/>
-                        <field name="amount_total"/>
+                        <group string="Origen">
+                            <field name="file_id"/>
+                            <field name="root_concept_id"/>
+                            <field name="chapter_count"/>
+                            <field name="work_unit_count"/>
+                            <field name="amount_total"/>
+                        </group>
+                        <group string="Coeficientes">
+                            <field name="currency_code"/>
+                            <field name="ci_percent"/>
+                            <field name="gg_percent"/>
+                            <field name="bi_percent"/>
+                            <field name="baja_percent"/>
+                            <field name="iva_percent"/>
+                        </group>
+                    </group>
+                    <group string="Última exportación" invisible="not export_file">
+                        <field name="export_filename"/>
+                        <field name="export_date"/>
+                        <field name="export_file" filename="export_filename"/>
                     </group>
                     <notebook>
                         <page string="Líneas de presupuesto">
@@ -43,14 +60,90 @@
                                     <field name="sequence"/>
                                     <field name="level"/>
                                     <field name="position_path"/>
+                                    <field name="parent_id"/>
                                     <field name="code"/>
                                     <field name="line_type"/>
                                     <field name="unit_name"/>
+                                    <field name="name"/>
+                                    <field name="factor"/>
+                                    <field name="performance"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="amount_total"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Edición detallada">
+                            <field name="line_ids" mode="list,form">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="line_type"/>
                                     <field name="name"/>
                                     <field name="quantity"/>
                                     <field name="price_unit"/>
                                     <field name="amount_total"/>
                                 </list>
+                                <form>
+                                    <header>
+                                        <button name="action_update_quantity_from_measurements" string="Actualizar cantidad desde mediciones" type="object" class="btn-secondary"/>
+                                        <button name="action_open_measurements" string="Abrir mediciones" type="object" class="btn-secondary"/>
+                                    </header>
+                                    <sheet>
+                                        <group>
+                                            <group>
+                                                <field name="parent_id"/>
+                                                <field name="code"/>
+                                                <field name="line_type"/>
+                                                <field name="unit_name"/>
+                                                <field name="uom_id"/>
+                                            </group>
+                                            <group>
+                                                <field name="factor"/>
+                                                <field name="performance"/>
+                                                <field name="quantity"/>
+                                                <field name="price_unit"/>
+                                                <field name="amount_total"/>
+                                            </group>
+                                        </group>
+                                        <group>
+                                            <field name="name"/>
+                                            <field name="text"/>
+                                        </group>
+                                        <notebook>
+                                            <page string="Mediciones editables">
+                                                <field name="budget_measurement_line_ids">
+                                                    <list editable="bottom">
+                                                        <field name="sequence"/>
+                                                        <field name="line_type"/>
+                                                        <field name="comment"/>
+                                                        <field name="units"/>
+                                                        <field name="length"/>
+                                                        <field name="width"/>
+                                                        <field name="height"/>
+                                                        <field name="subtotal"/>
+                                                        <field name="label"/>
+                                                    </list>
+                                                </field>
+                                            </page>
+                                            <page string="Mediciones origen">
+                                                <field name="measurement_line_ids" readonly="1">
+                                                    <list>
+                                                        <field name="parent_code"/>
+                                                        <field name="child_code"/>
+                                                        <field name="position_path"/>
+                                                        <field name="measurement_total"/>
+                                                        <field name="comment"/>
+                                                        <field name="units"/>
+                                                        <field name="length"/>
+                                                        <field name="width"/>
+                                                        <field name="height"/>
+                                                        <field name="subtotal"/>
+                                                    </list>
+                                                </field>
+                                            </page>
+                                        </notebook>
+                                    </sheet>
+                                </form>
                             </field>
                         </page>
                     </notebook>

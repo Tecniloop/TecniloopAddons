@@ -1,7 +1,7 @@
 {
     'name': 'TL BC3 Base',
     'summary': 'Parser BC3/FIEBDC, conceptos, descomposiciones y mediciones',
-    'version': '19.0.1.1.6',
+    'version': '19.0.1.2.0',
     'category': 'Construction/BC3',
     'author': 'Tecniloop',
     'website': 'https://www.tecniloop.com',

@@ -59,6 +59,7 @@
                         <field name="concept_count"/>
                         <field name="decomposition_count"/>
                         <field name="measurement_count"/>
+                        <field name="parametric_record_count"/>
                     </group>
                     <notebook>
                         <page string="Conceptos">
@@ -99,8 +100,21 @@
                                 </list>
                             </field>
                         </page>
-                        <page string="Técnico">
+                        <page string="Coeficientes">
+                            <group>
+                                <field name="k_currency"/>
+                                <field name="k_ci"/>
+                                <field name="k_gg"/>
+                                <field name="k_bi"/>
+                                <field name="k_baja"/>
+                                <field name="k_iva"/>
+                            </group>
                             <field name="raw_k"/>
+                            <field name="k_decimal_profile"/>
+                        </page>
+                        <page string="Diagnóstico">
+                            <field name="record_stats_text"/>
+                            <field name="parametric_records_text"/>
                             <field name="warning_message"/>
                             <field name="error_message"/>
                         </page>

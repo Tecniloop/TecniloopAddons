@@ -1,7 +1,7 @@
 {
     "name": "TL BC3 Venta",
     "summary": "Genera presupuestos de venta de Odoo desde presupuestos BC3 usando secciones nativas",
-    "version": "19.0.1.0.6",
+    "version": "19.0.1.1.0",
     "category": "Construction/BC3",
     "author": "Tecniloop",
     "website": "https://www.tecniloop.com",

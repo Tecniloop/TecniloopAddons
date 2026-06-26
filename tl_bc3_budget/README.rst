@@ -1,13 +1,16 @@
-tl_bc3_budget
+TL BC3 Budget
 =============
 
-Tecniloop module for BC3/FIEBDC workflows in Odoo 19.
+Presupuestos técnicos BC3 editables para Odoo 19.
 
+Funciones principales
+---------------------
 
-Changelog
-=========
+* Generación de presupuesto técnico desde un fichero BC3 importado.
+* Edición de capítulos, partidas, recursos, rendimientos, precios y textos.
+* Edición de líneas de medición asociadas a cada partida.
+* Actualización de cantidades de partida a partir de las mediciones.
+* Conservación de coeficientes económicos BC3: CI, GG, BI, baja/alza, IVA y divisa.
+* Exportación del presupuesto editado a formato BC3 con registros ~V, ~K, ~C, ~T, ~D y ~M.
 
-19.0.1.0.2
-----------
-
-* Removed sale.order.line dependency from technical budget model. Sale links are handled by tl_bc3_sale.
+El objetivo es poder usar Odoo como editor de presupuesto BC3 y reenviar el resultado a otras herramientas compatibles FIEBDC/BC3.

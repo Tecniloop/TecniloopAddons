@@ -1,4 +1,5 @@
 <odoo>
     <menuitem id="menu_bc3_budget" name="Presupuestos" parent="tl_bc3_base.menu_bc3_root" action="action_bc3_budget" sequence="50"/>
     <menuitem id="menu_bc3_budget_lines" name="Líneas de presupuesto" parent="tl_bc3_base.menu_bc3_root" action="action_bc3_budget_line" sequence="55"/>
+    <menuitem id="menu_bc3_budget_measurements" name="Mediciones de presupuesto" parent="tl_bc3_base.menu_bc3_root" action="action_bc3_budget_measurement_line" sequence="25"/>
 </odoo>
