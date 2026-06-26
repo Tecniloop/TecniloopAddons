@@ -1,0 +1,23 @@
+<odoo>
+    <record id="view_order_form_inherit_bc3" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.bc3</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_fill_from_bc3_budget" string="Fill from BC3" type="object" class="btn-secondary" invisible="not bc3_budget_id or state not in ('draft', 'sent')"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="bc3_budget_id"/>
+                <field name="bc3_file_id" readonly="1"/>
+                <field name="bc3_generated_from_budget" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list//field[@name='name']" position="after">
+                <field name="bc3_code" optional="hide"/>
+                <field name="bc3_line_type" optional="hide"/>
+                <field name="bc3_sync_state" optional="hide"/>
+                <field name="bc3_certified_qty" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

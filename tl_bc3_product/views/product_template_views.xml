@@ -1,0 +1,36 @@
+<odoo>
+    <record id="view_product_template_form_inherit_bc3_product" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.bc3.product</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='default_code']" position="after">
+                <field name="brand_use_level" invisible="1"/>
+                <field name="is_brand_required" invisible="1"/>
+                <field name="brand_id"/>
+                <field name="bc3_is_imported" readonly="1"/>
+                <field name="bc3_code" readonly="1"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="BC3">
+                    <group>
+                        <field name="bc3_file_id" readonly="1"/>
+                        <field name="bc3_concept_id" readonly="1"/>
+                        <field name="bc3_normalized_code" readonly="1"/>
+                        <field name="bc3_alias_codes" readonly="1"/>
+                        <field name="bc3_category" readonly="1"/>
+                        <field name="bc3_type" readonly="1"/>
+                        <field name="bc3_unit_name" readonly="1"/>
+                        <field name="bc3_price_date_raw" readonly="1"/>
+                        <field name="bc3_last_import_date" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="bc3_text" readonly="1"/>
+                        <field name="bc3_technical_json" readonly="1"/>
+                        <field name="bc3_media_refs" readonly="1"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,27 @@
+<odoo>
+    <record id="view_bc3_import_wizard_form" model="ir.ui.view">
+        <field name="name">bc3.import.wizard.form</field>
+        <field name="model">bc3.import.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="name"/>
+                    <field name="data_file" filename="filename"/>
+                    <field name="filename"/>
+                    <field name="parse_now"/>
+                </group>
+                <footer>
+                    <button name="action_import" string="Import" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="action_bc3_import_wizard" model="ir.actions.act_window">
+        <field name="name">Import BC3</field>
+        <field name="res_model">bc3.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    <menuitem id="menu_bc3_import" name="Import BC3" parent="menu_bc3_root" action="action_bc3_import_wizard" sequence="1"/>
+</odoo>

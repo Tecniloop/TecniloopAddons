@@ -1,0 +1,9 @@
+<odoo noupdate="1">
+    <record id="product_bc3_work_unit" model="product.product">
+        <field name="name">BC3 partida de obra</field>
+        <field name="default_code">BC3-WORK-UNIT</field>
+        <field name="sale_ok">1</field>
+        <field name="purchase_ok">0</field>
+        <field name="list_price">0.0</field>
+    </record>
+</odoo>

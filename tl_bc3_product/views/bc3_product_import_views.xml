@@ -1,0 +1,61 @@
+<odoo>
+    <record id="view_bc3_product_import_batch_list" model="ir.ui.view">
+        <field name="name">bc3.product.import.batch.list</field>
+        <field name="model">bc3.product.import.batch</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="file_id"/>
+                <field name="brand_id"/>
+                <field name="total_concepts"/>
+                <field name="created_products"/>
+                <field name="updated_products"/>
+                <field name="media_created"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_bc3_product_import_batch_form" model="ir.ui.view">
+        <field name="name">bc3.product.import.batch.form</field>
+        <field name="model">bc3.product.import.batch</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="file_id"/>
+                        <field name="brand_id"/>
+                        <field name="state"/>
+                        <field name="started_at"/>
+                        <field name="finished_at"/>
+                    </group>
+                    <group>
+                        <field name="total_concepts"/>
+                        <field name="created_products"/>
+                        <field name="updated_products"/>
+                        <field name="skipped_products"/>
+                        <field name="media_created"/>
+                        <field name="warning_count"/>
+                        <field name="error_count"/>
+                    </group>
+                    <notebook>
+                        <page string="Logs">
+                            <field name="log_ids" readonly="1">
+                                <list>
+                                    <field name="level"/>
+                                    <field name="bc3_code"/>
+                                    <field name="message"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_bc3_product_import_batch" model="ir.actions.act_window">
+        <field name="name">BC3 Product Imports</field>
+        <field name="res_model">bc3.product.import.batch</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

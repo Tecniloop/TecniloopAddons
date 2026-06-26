@@ -1,0 +1,62 @@
+<odoo>
+    <record id="view_bc3_budget_list" model="ir.ui.view">
+        <field name="name">bc3.budget.list</field>
+        <field name="model">bc3.budget</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="file_id"/>
+                <field name="chapter_count"/>
+                <field name="work_unit_count"/>
+                <field name="amount_total"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_bc3_budget_form" model="ir.ui.view">
+        <field name="name">bc3.budget.form</field>
+        <field name="model">bc3.budget</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_rebuild_lines" string="Rebuild Lines" type="object" class="btn-secondary"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,ready,locked"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <field name="file_id"/>
+                        <field name="root_concept_id"/>
+                        <field name="chapter_count"/>
+                        <field name="work_unit_count"/>
+                        <field name="amount_total"/>
+                    </group>
+                    <notebook>
+                        <page string="Budget Lines">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="sequence"/>
+                                    <field name="level"/>
+                                    <field name="position_path"/>
+                                    <field name="code"/>
+                                    <field name="line_type"/>
+                                    <field name="unit_name"/>
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="price_unit"/>
+                                    <field name="amount_total"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_bc3_budget" model="ir.actions.act_window">
+        <field name="name">BC3 Budgets</field>
+        <field name="res_model">bc3.budget</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

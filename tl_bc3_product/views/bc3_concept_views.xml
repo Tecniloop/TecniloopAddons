@@ -1,0 +1,21 @@
+<odoo>
+    <record id="view_bc3_concept_form_inherit_product" model="ir.ui.view">
+        <field name="name">bc3.concept.form.inherit.product</field>
+        <field name="model">bc3.concept</field>
+        <field name="inherit_id" ref="tl_bc3_base.view_bc3_concept_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_open_product" type="object" class="oe_stat_button" icon="fa-cube" invisible="not product_tmpl_id">
+                        <field name="product_count" widget="statinfo" string="Product"/>
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//form/sheet" position="before">
+                <header>
+                    <button name="action_create_or_update_product" string="Create/Update Product" type="object" class="btn-primary" invisible="category in ('root', 'chapter', 'percentage')"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+</odoo>

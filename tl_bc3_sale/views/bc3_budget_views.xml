@@ -1,0 +1,19 @@
+<odoo>
+    <record id="view_bc3_budget_form_inherit_sale" model="ir.ui.view">
+        <field name="name">bc3.budget.form.inherit.sale</field>
+        <field name="model">bc3.budget</field>
+        <field name="inherit_id" ref="tl_bc3_budget.view_bc3_budget_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_create_sale_order" string="Create Quotation" type="object" class="btn-primary" invisible="state != 'ready'"/>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_open_sale_orders" type="object" class="oe_stat_button" icon="fa-list">
+                        <field name="sale_order_count" widget="statinfo" string="Quotations"/>
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

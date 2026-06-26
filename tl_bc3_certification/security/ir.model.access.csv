@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_bc3_certification_user,bc3.certification user,model_bc3_certification,base.group_user,1,1,1,1
+access_bc3_certification_line_user,bc3.certification.line user,model_bc3_certification_line,base.group_user,1,1,1,1

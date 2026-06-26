@@ -1,0 +1,12 @@
+<odoo>
+    <record id="view_bc3_file_form_inherit_budget" model="ir.ui.view">
+        <field name="name">bc3.file.form.inherit.budget</field>
+        <field name="model">bc3.file</field>
+        <field name="inherit_id" ref="tl_bc3_base.view_bc3_file_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_create_budget" string="Create Budget" type="object" class="btn-secondary" invisible="state != 'parsed'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

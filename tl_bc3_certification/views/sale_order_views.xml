@@ -1,0 +1,19 @@
+<odoo>
+    <record id="view_order_form_inherit_bc3_certification" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.bc3.certification</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_create_bc3_certification" string="Create Certification" type="object" class="btn-secondary" invisible="not bc3_budget_id"/>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <div class="oe_button_box" name="bc3_certification_button_box">
+                    <button name="action_open_bc3_certifications" type="object" class="oe_stat_button" icon="fa-certificate" invisible="not bc3_budget_id">
+                        <field name="bc3_certification_count" widget="statinfo" string="Certifications"/>
+                    </button>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
