@@ -21,7 +21,7 @@ class Bc3Budget(models.Model):
         tracking=True,
     )
     line_ids = fields.One2many("bc3.budget.line", "budget_id", string="Líneas")
-    amount_total = fields.Float(compute="_compute_amount_total", store=True, digits="Product Price")
+    amount_total = fields.Float(string="Total", digits="Product Price", readonly=True)
     work_unit_count = fields.Integer(compute="_compute_counts")
     chapter_count = fields.Integer(compute="_compute_counts")
     ci_percent = fields.Float(string="% costes indirectos")
@@ -34,14 +34,31 @@ class Bc3Budget(models.Model):
     export_filename = fields.Char(readonly=True)
     export_date = fields.Datetime(readonly=True)
 
-    @api.depends("line_ids.amount_total", "line_ids.line_type")
-    def _compute_amount_total(self):
+    def _recompute_budget_total(self):
         for budget in self:
             roots = budget.line_ids.filtered(lambda line: line.line_type == "root")
             if roots:
-                budget.amount_total = sum(roots.mapped("amount_total"))
+                total = sum(roots.mapped("amount_total"))
             else:
-                budget.amount_total = sum(budget.line_ids.filtered(lambda line: line.line_type == "work_unit").mapped("amount_total"))
+                top_lines = budget.line_ids.filtered(lambda line: not line.parent_id)
+                if top_lines:
+                    total = sum(top_lines.mapped("amount_total"))
+                else:
+                    total = sum(budget.line_ids.filtered(lambda line: line.line_type == "work_unit").mapped("amount_total"))
+            budget.with_context(bc3_skip_recompute=True).write({"amount_total": total})
+
+    def _recompute_all_lines(self):
+        for budget in self:
+            roots = budget.line_ids.filtered(lambda line: line.line_type == "root")
+            targets = roots or budget.line_ids.filtered(lambda line: not line.parent_id)
+            for line in targets.sorted(key=lambda item: (item.sequence, item.id)):
+                line._recompute_branch()
+            budget._recompute_budget_total()
+
+    def action_recalculate_amounts(self):
+        for budget in self:
+            budget._recompute_all_lines()
+        return True
 
     def _compute_counts(self):
         for budget in self:
@@ -70,6 +87,7 @@ class Bc3Budget(models.Model):
         else:
             budget = self.create(vals)
         self.env["bc3.budget.line.builder"].build_budget_lines(budget)
+        budget._recompute_all_lines()
         budget.write({"state": "ready"})
         return budget
 
@@ -77,13 +95,15 @@ class Bc3Budget(models.Model):
         for budget in self:
             budget.line_ids.unlink()
             self.env["bc3.budget.line.builder"].build_budget_lines(budget)
+            budget._recompute_all_lines()
             budget.state = "ready"
         return True
 
     def action_update_quantities_from_measurements(self):
         for budget in self:
             for line in budget.line_ids.filtered(lambda item: item.line_type == "work_unit"):
-                line.action_update_quantity_from_measurements()
+                line.with_context(bc3_skip_recompute=True).action_update_quantity_from_measurements()
+            budget._recompute_all_lines()
         return True
 
     def action_export_bc3(self):
@@ -203,7 +223,8 @@ class Bc3Budget(models.Model):
             number = 0.0
         if blank_zero and abs(number) < 0.0000001:
             return ""
-        text = ("%%,.%sf" % int(decimals)) % number
+        decimals = max(0, int(decimals or 0))
+        text = format(number, ",.%df" % decimals)
         text = text.replace(",", "X").replace(".", ",").replace("X", ".")
         if trim and "," in text:
             text = text.rstrip("0").rstrip(",")
@@ -249,7 +270,7 @@ class Bc3BudgetLine(models.Model):
     performance = fields.Float(default=1.0, digits="Product Unit of Measure")
     quantity = fields.Float(digits="Product Unit of Measure")
     price_unit = fields.Float(digits="Product Price")
-    amount_total = fields.Float(compute="_compute_amount_total", store=True, digits="Product Price")
+    amount_total = fields.Float(string="Importe", digits="Product Price", readonly=True)
     text = fields.Text()
     measurement_label = fields.Char()
     measurement_line_ids = fields.One2many("bc3.measurement.line", compute="_compute_measurement_lines", string="Mediciones origen")
@@ -260,19 +281,185 @@ class Bc3BudgetLine(models.Model):
         for line in self:
             line.display_name = "[%s] %s" % (line.code or "", line.name or "")
 
-    @api.depends("quantity", "price_unit", "child_ids.amount_total", "line_type")
-    def _compute_amount_total(self):
+    def _float_diff(self, value1, value2):
+        return abs((value1 or 0.0) - (value2 or 0.0)) > 0.0000001
+
+    def _write_recalculated_values(self, vals):
+        if not vals:
+            return True
+        return self.with_context(bc3_skip_recompute=True).write(vals)
+
+    def _sync_quantity_from_factor_performance_vals(self, vals):
+        """Keep BC3 relation quantity consistent with factor x performance.
+
+        In FIEBDC/Presto the quantity of a decomposition relation is the
+        factor multiplied by the performance. The user can still edit quantity
+        directly; then we derive performance from quantity and factor.
+        """
+        self.ensure_one()
+        vals = dict(vals)
+        if self.line_type in ("root", "chapter"):
+            return vals
+        factor = vals.get("factor", self.factor or 1.0) or 1.0
+        performance = vals.get("performance", self.performance or 0.0)
+        if "quantity" in vals and "performance" not in vals:
+            qty = vals.get("quantity") or 0.0
+            vals["performance"] = qty / factor if factor else qty
+        elif ("factor" in vals or "performance" in vals) and "quantity" not in vals:
+            vals["quantity"] = factor * (performance or 0.0)
+        return vals
+
+    def _percentage_rate(self):
+        self.ensure_one()
+        # Prefer the editable quantity shown in the budget line. This makes an
+        # inline change of the percentage/units immediately affect the partida.
+        rate = self.quantity if self.quantity not in (0.0, None) else (self.factor or 1.0) * (self.performance or 0.0)
+        if abs(rate or 0.0) > 1.0:
+            rate = rate / 100.0
+        return rate or 0.0
+
+    def _leaf_amount_from_running_base(self, running_base=0.0):
+        self.ensure_one()
+        if self.line_type == "percentage":
+            return (running_base or 0.0) * self._percentage_rate()
+        return (self.quantity or 0.0) * (self.price_unit or 0.0)
+
+    def _recompute_from_existing_children(self):
+        """Recompute only this line from already-calculated children.
+
+        Used for ancestors to avoid recalculating the whole chapter/root tree
+        after changing a single resource or percentage.
+        """
         for line in self:
-            if line.child_ids and line.line_type in ("root", "chapter"):
-                line.amount_total = sum(line.child_ids.mapped("amount_total"))
+            children = line.child_ids.sorted(key=lambda item: (item.sequence, item.id))
+            if not children:
+                amount = line._leaf_amount_from_running_base(0.0)
+                if line._float_diff(line.amount_total, amount):
+                    line._write_recalculated_values({"amount_total": amount})
+                continue
+            children_total = sum(children.mapped("amount_total"))
+            vals = {}
+            if line.line_type == "work_unit":
+                if line._float_diff(line.price_unit, children_total):
+                    vals["price_unit"] = children_total
+                amount = (line.quantity or 0.0) * children_total
+                if line._float_diff(line.amount_total, amount):
+                    vals["amount_total"] = amount
             else:
-                line.amount_total = (line.quantity or 0.0) * (line.price_unit or 0.0)
+                if line._float_diff(line.amount_total, children_total):
+                    vals["amount_total"] = children_total
+            if vals:
+                line._write_recalculated_values(vals)
+
+    def _recompute_branch(self):
+        """Recompute a full branch.
+
+        This is used after import/rebuild and for the affected partida, because
+        percentages depend on the ordered amounts of previous sibling lines.
+        """
+        for line in self:
+            children = line.child_ids.sorted(key=lambda item: (item.sequence, item.id))
+            if children:
+                running_base = 0.0
+                for child in children:
+                    if child.child_ids:
+                        child._recompute_branch()
+                    else:
+                        new_amount = child._leaf_amount_from_running_base(running_base)
+                        if child._float_diff(child.amount_total, new_amount):
+                            child._write_recalculated_values({"amount_total": new_amount})
+                    running_base += child.amount_total or 0.0
+                line._recompute_from_existing_children()
+            else:
+                amount = line._leaf_amount_from_running_base(0.0)
+                if line._float_diff(line.amount_total, amount):
+                    line._write_recalculated_values({"amount_total": amount})
+
+    def _recompute_after_change(self):
+        budgets = self.mapped("budget_id")
+        targets = self.env["bc3.budget.line"]
+        for line in self:
+            # Percentages depend on previous sibling lines, so recalculate the
+            # whole immediate parent branch, not just the edited leaf.
+            if line.parent_id and line.line_type in ("resource", "percentage"):
+                target = line.parent_id
+            elif line.child_ids:
+                target = line
+            else:
+                target = line.parent_id or line
+            targets |= target
+        processed_targets = self.env["bc3.budget.line"]
+        processed_ancestors = self.env["bc3.budget.line"]
+        for target in targets.sorted(key=lambda item: (item.level, item.sequence, item.id), reverse=True):
+            if target in processed_targets or target in processed_ancestors:
+                continue
+            target._recompute_branch()
+            processed_targets |= target
+            current = target.parent_id
+            while current:
+                if current not in processed_ancestors:
+                    current._recompute_from_existing_children()
+                    processed_ancestors |= current
+                current = current.parent_id
+        budgets._recompute_budget_total()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        prepared = []
+        for vals in vals_list:
+            vals = dict(vals)
+            if vals.get("line_type") not in ("root", "chapter"):
+                factor = vals.get("factor", 1.0) or 1.0
+                performance = vals.get("performance", 0.0)
+                if "quantity" in vals and "performance" not in vals:
+                    qty = vals.get("quantity") or 0.0
+                    vals["performance"] = qty / factor if factor else qty
+                elif ("factor" in vals or "performance" in vals) and "quantity" not in vals:
+                    vals["quantity"] = factor * (performance or 0.0)
+            prepared.append(vals)
+        records = super().create(prepared)
+        if not self.env.context.get("bc3_skip_recompute"):
+            records._recompute_after_change()
+        return records
+
+    def write(self, vals):
+        trigger_fields = {"parent_id", "sequence", "line_type", "factor", "performance", "quantity", "price_unit"}
+        recalc = bool(trigger_fields.intersection(vals)) and not self.env.context.get("bc3_skip_recompute")
+        if {"factor", "performance", "quantity"}.intersection(vals) and len(self) > 1:
+            for line in self:
+                prepared_vals = line._sync_quantity_from_factor_performance_vals(vals)
+                super(Bc3BudgetLine, line.with_context(bc3_skip_recompute=True)).write(prepared_vals)
+            if recalc:
+                self._recompute_after_change()
+            return True
+        prepared_vals = vals
+        if {"factor", "performance", "quantity"}.intersection(vals) and len(self) == 1:
+            prepared_vals = self._sync_quantity_from_factor_performance_vals(vals)
+        res = super().write(prepared_vals)
+        if trigger_fields.intersection(prepared_vals) and not self.env.context.get("bc3_skip_recompute"):
+            self._recompute_after_change()
+        return res
+
+    def unlink(self):
+        parents = self.mapped("parent_id")
+        budgets = self.mapped("budget_id")
+        res = super().unlink()
+        if not self.env.context.get("bc3_skip_recompute"):
+            parents._recompute_after_change()
+            budgets._recompute_budget_total()
+        return res
 
     @api.onchange("factor", "performance")
     def _onchange_factor_performance(self):
         for line in self:
             if line.line_type not in ("root", "chapter"):
-                line.quantity = (line.factor or 1.0) * (line.performance or 1.0)
+                line.quantity = (line.factor or 1.0) * (line.performance or 0.0)
+
+    @api.onchange("quantity")
+    def _onchange_quantity(self):
+        for line in self:
+            if line.line_type not in ("root", "chapter") and line.factor:
+                line.performance = (line.quantity or 0.0) / line.factor
 
     def _compute_measurement_lines(self):
         Measurement = self.env["bc3.measurement.line"]
@@ -296,8 +483,12 @@ class Bc3BudgetLine(models.Model):
         for line in self:
             total = sum(line.budget_measurement_line_ids.mapped("subtotal"))
             if total:
-                line.quantity = total
-                line.performance = total / (line.factor or 1.0)
+                line.with_context(bc3_skip_recompute=True).write({
+                    "quantity": total,
+                    "performance": total / (line.factor or 1.0),
+                })
+                if not self.env.context.get("bc3_skip_recompute"):
+                    line._recompute_after_change()
         return True
 
     def action_open_measurements(self):
@@ -348,6 +539,41 @@ class Bc3BudgetMeasurementLine(models.Model):
                 subtotal *= value
             line.subtotal = subtotal
 
+    def _recompute_owner_budget_lines(self):
+        lines = self.mapped("budget_line_id")
+        for line in lines:
+            total = sum(line.budget_measurement_line_ids.mapped("subtotal"))
+            vals = {"quantity": total, "performance": total / (line.factor or 1.0) if line.factor else total}
+            line.with_context(bc3_skip_recompute=True).write(vals)
+        lines._recompute_after_change()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        if not self.env.context.get("bc3_skip_recompute"):
+            records._recompute_owner_budget_lines()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        trigger_fields = {"line_type", "units", "length", "width", "height", "budget_line_id"}
+        if trigger_fields.intersection(vals) and not self.env.context.get("bc3_skip_recompute"):
+            self._recompute_owner_budget_lines()
+        return res
+
+    def unlink(self):
+        lines = self.mapped("budget_line_id")
+        res = super().unlink()
+        if not self.env.context.get("bc3_skip_recompute"):
+            for line in lines:
+                total = sum(line.budget_measurement_line_ids.mapped("subtotal"))
+                line.with_context(bc3_skip_recompute=True).write({
+                    "quantity": total,
+                    "performance": total / (line.factor or 1.0) if line.factor else total,
+                })
+            lines._recompute_after_change()
+        return res
+
 
 class Bc3BudgetLineBuilder(models.AbstractModel):
     _name = "bc3.budget.line.builder"
@@ -381,7 +607,7 @@ class Bc3BudgetLineBuilder(models.AbstractModel):
             factor = 1.0
             performance = 1.0
             quantity = 1.0
-        line = self.env["bc3.budget.line"].create({
+        line = self.env["bc3.budget.line"].with_context(bc3_skip_recompute=True).create({
             "budget_id": budget.id,
             "parent_id": parent_line.id if parent_line else False,
             "sequence": counter[0],
@@ -454,10 +680,10 @@ class Bc3BudgetLineBuilder(models.AbstractModel):
                 "label": item.label,
             })
         if vals:
-            self.env["bc3.budget.measurement.line"].create(vals)
+            self.env["bc3.budget.measurement.line"].with_context(bc3_skip_recompute=True).create(vals)
             label = measurements[:1].label if measurements[:1] else ""
             total = sum(self.env["bc3.budget.measurement.line"].search([("budget_line_id", "=", budget_line.id)]).mapped("subtotal"))
-            budget_line.write({"measurement_label": label, "quantity": total or budget_line.quantity, "performance": (total or budget_line.quantity) / (budget_line.factor or 1.0)})
+            budget_line.with_context(bc3_skip_recompute=True).write({"measurement_label": label, "quantity": total or budget_line.quantity, "performance": (total or budget_line.quantity) / (budget_line.factor or 1.0)})
 
     def _line_type(self, concept):
         if concept.category == "root":
