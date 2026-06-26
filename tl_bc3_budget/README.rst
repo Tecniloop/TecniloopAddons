@@ -14,3 +14,9 @@ Funciones principales
 * Exportación del presupuesto editado a formato BC3 con registros ~V, ~K, ~C, ~T, ~D y ~M.
 
 El objetivo es poder usar Odoo como editor de presupuesto BC3 y reenviar el resultado a otras herramientas compatibles FIEBDC/BC3.
+
+
+Informe de presupuesto y mediciones
+===================================
+
+Incluye un informe PDF de presupuesto y mediciones basado en la estructura del Excel de referencia: cabecera, capítulos, partidas, descripción, líneas de medición y totales.

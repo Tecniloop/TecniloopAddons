@@ -1,0 +1,27 @@
+<odoo>
+    <record id="paperformat_bc3_budget_landscape" model="report.paperformat">
+        <field name="name">BC3 Presupuesto apaisado</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">8</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_left">6</field>
+        <field name="margin_right">6</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_report_bc3_budget" model="ir.actions.report">
+        <field name="name">Presupuesto y mediciones</field>
+        <field name="model">bc3.budget</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">tl_bc3_budget.report_bc3_budget_document</field>
+        <field name="report_file">tl_bc3_budget.report_bc3_budget_document</field>
+        <field name="paperformat_id" ref="paperformat_bc3_budget_landscape"/>
+        <field name="binding_model_id" ref="model_bc3_budget"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Presupuesto y mediciones - %s' % (object.name or '')</field>
+    </record>
+</odoo>

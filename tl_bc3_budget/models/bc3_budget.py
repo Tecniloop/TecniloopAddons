@@ -180,6 +180,35 @@ class Bc3Budget(models.Model):
     def _escape(self, value):
         return (value or "").replace("|", "/").replace("\r", " ").replace("\n", " ")
 
+
+    def _report_title(self):
+        self.ensure_one()
+        root_line = self.line_ids.filtered(lambda line: line.line_type == "root")[:1]
+        return root_line.name or self.root_concept_id.name or self.name or ""
+
+    def _report_print_lines(self):
+        self.ensure_one()
+        return self.line_ids.filtered(lambda line: line.line_type in ("chapter", "work_unit")).sorted(key=lambda line: (line.sequence, line.id))
+
+    def _report_format_amount(self, value):
+        return self._report_format_number(value, 2, False, False)
+
+    def _report_format_measure(self, value, blank_zero=True):
+        return self._report_format_number(value, 2, blank_zero, True)
+
+    def _report_format_number(self, value, decimals=2, blank_zero=False, trim=False):
+        try:
+            number = float(value or 0.0)
+        except (TypeError, ValueError):
+            number = 0.0
+        if blank_zero and abs(number) < 0.0000001:
+            return ""
+        text = ("%%,.%sf" % int(decimals)) % number
+        text = text.replace(",", "X").replace(".", ",").replace("X", ".")
+        if trim and "," in text:
+            text = text.rstrip("0").rstrip(",")
+        return text
+
     def action_open_origin_file(self):
         self.ensure_one()
         return {
@@ -256,6 +285,12 @@ class Bc3BudgetLine(models.Model):
                 lambda item: Concept._normalize_code(item.child_code) == normalized_code
                 and (not line.position_path or item.position_path == line.position_path)
             )
+
+
+    def _report_nature(self):
+        self.ensure_one()
+        labels = dict(self._fields["line_type"].selection)
+        return labels.get(self.line_type, self.line_type or "")
 
     def action_update_quantity_from_measurements(self):
         for line in self:
