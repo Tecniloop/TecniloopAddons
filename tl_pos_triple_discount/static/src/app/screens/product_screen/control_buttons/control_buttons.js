@@ -1,7 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { parseFloat } from "@web/views/fields/parsers";
 import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";
-import { SelectionPopup } from "@point_of_sale/app/components/popups/selection_popup/selection_popup";
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { ControlButtons } from "@point_of_sale/app/screens/product_screen/control_buttons/control_buttons";
 import { patch } from "@web/core/utils/patch";
@@ -18,12 +17,6 @@ patch(ControlButtons.prototype, {
             return;
         }
 
-        const discountingType = await this._askDiscountingType(
-            line.discounting_type || "multiplicative"
-        );
-        if (!discountingType) {
-            return;
-        }
         const d1 = await this._askTripleDiscountValue(_t("Discount 1 (%)"), line.discount || 0);
         if (d1 === null) {
             return;
@@ -37,30 +30,10 @@ patch(ControlButtons.prototype, {
             return;
         }
 
-        line.setDiscountingType(discountingType);
+        line.setDiscountingType("multiplicative");
         line.setDiscount(d1);
         line.setDiscount2(d2);
         line.setDiscount3(d3);
-    },
-
-    async _askDiscountingType(currentValue) {
-        return await makeAwaitable(this.dialog, SelectionPopup, {
-            title: _t("Discounting type"),
-            list: [
-                {
-                    id: "multiplicative",
-                    label: _t("Multiplicative"),
-                    item: "multiplicative",
-                    isSelected: currentValue === "multiplicative",
-                },
-                {
-                    id: "additive",
-                    label: _t("Additive"),
-                    item: "additive",
-                    isSelected: currentValue === "additive",
-                },
-            ],
-        });
     },
 
     async _askTripleDiscountValue(title, currentValue) {

@@ -34,10 +34,12 @@ function getRuleTripleDiscount(rule) {
     return 100 - discountFactor * 100;
 }
 
-function shouldExposeRuleDiscounts(pricelist, rule) {
-    return Boolean(
-        pricelist?.discount_policy === "without_discount" && hasRuleTripleDiscount(rule)
-    );
+function shouldExposeRuleDiscounts(rule) {
+    // Odoo 19 sales dropped the visible discount-policy selector. To mimic
+    // sale_triple_discount + sale_pricelist_triple_discount, a POS line must
+    // keep the base price and split discounts whenever the matching pricelist
+    // rule carries discount values.
+    return hasRuleTripleDiscount(rule);
 }
 
 patch(ProductTemplate.prototype, {
@@ -57,7 +59,7 @@ patch(ProductTemplate.prototype, {
             rule = pricelist.findBestRule(tmplRules, quantity);
         }
         if (!rule) {
-            const categoryRulesIds = pricelist.getCategoryRulesIds(this.parentCategories);
+            const categoryRulesIds = pricelist.getCategoryRulesIds(productTmpl.parentCategories);
             if (categoryRulesIds.length > 0) {
                 const categoryRules = this.models["product.pricelist.item"].readMany(categoryRulesIds);
                 rule = pricelist.findBestRule(categoryRules, quantity);
@@ -92,7 +94,6 @@ patch(ProductTemplate.prototype, {
         }
 
         const product = variant || false;
-        const productTmpl = variant?.product_tmpl_id || this;
         const standardPrice = variant ? variant.standard_price : this.standard_price;
         const basePrice = variant ? variant.lst_price : this.list_price;
         let price = basePrice + (price_extra || 0);
@@ -128,7 +129,7 @@ patch(ProductTemplate.prototype, {
             price *= pricelistCurrency.rate / posCurrency.rate;
         }
 
-        const exposeDiscounts = shouldExposeRuleDiscounts(pricelist, rule);
+        const exposeDiscounts = shouldExposeRuleDiscounts(rule);
         if (rule.compute_price === "fixed") {
             price = rule.fixed_price;
         } else if (rule.compute_price === "percentage") {

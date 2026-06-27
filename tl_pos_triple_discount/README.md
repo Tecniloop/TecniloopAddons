@@ -1,41 +1,68 @@
 # POS Triple Discount
 
-Modulo para Odoo 19 que añade soporte de triple descuento en TPV y en la integracion POS/Ventas.
+Modulo Tecniloop para Odoo 19 que adapta el TPV al comportamiento de
+`sale_triple_discount` y `sale_pricelist_triple_discount`.
 
-## Alcance
+## Funcionalidad
 
-- Añade `discount2`, `discount3` y `discounting_type` en `pos.order.line`.
-- Calcula el descuento final en POS de forma multiplicativa o aditiva.
-- Copia descuentos adicionales desde `sale.order.line` cuando existen campos `discount1`, `discount2`, `discount3` y `discounting_type`.
-- Ajusta la base fiscal del POS para que impuestos, totales y factura usen el descuento final.
-- Si existe `account_invoice_triple_discount`, traspasa los descuentos separados a la factura en modo multiplicativo.
-- Si no existe `account_invoice_triple_discount`, traspasa a factura el descuento final agregado en el campo estandar `discount`.
+- Anade `discount2` y `discount3` a las lineas de TPV.
+- El tipo de calculo queda fijado a multiplicativo, igual que
+  `sale_triple_discount` 19.0.
+- El boton **Triple desc.** solo pregunta por los tres descuentos; ya no pregunta
+  por tipo aditivo/multiplicativo.
+- El descuento final se calcula de forma multiplicativa:
 
-## Integracion con tarifas triple descuento
+```text
+D.final = 1 - ((1 - D1) x (1 - D2) x (1 - D3))
+```
 
-Si esta instalado `sale_pricelist_triple_discount`, el TPV carga `discount2` y `discount3` de `product.pricelist.item` y tambien carga `discount_policy` de `product.pricelist`.
-
-Cuando la tarifa tiene politica `Show public price & discount to the customer` (`discount_policy = without_discount`), el TPV replica el comportamiento de Ventas:
-
-- conserva el precio base/publico en `price_unit`;
-- guarda `discount`, `discount2` y `discount3` separados en la linea POS;
-- calcula impuestos y total con el descuento final multiplicativo;
-- muestra el desglose de descuentos en la linea del TPV y en el ticket.
-
-Cuando la tarifa tiene politica `Discount included in the price` (`discount_policy = with_discount`), el TPV mantiene el comportamiento estandar: precio neto ya descontado sin desglose de descuentos de tarifa, igual que hace el modulo OCA en pedidos de venta.
-
-## Visualizacion
-
-En pantalla y en el ticket se muestra una linea adicional por producto cuando hay desglose:
+- El desglose se muestra en la linea del TPV:
 
 ```text
 Desc.: 10% x 20% x 30% = 49.6%
 ```
 
-La visualizacion aplica tanto a descuentos procedentes de tarifa como a descuentos introducidos manualmente con el boton `Triple desc.`.
+- El mismo desglose se muestra en el ticket, al heredarse el componente
+  `point_of_sale.Orderline` usado por pantalla y recibo.
+- Si existe `account_invoice_triple_discount`, la factura generada desde TPV
+  recibe `discount1`, `discount2` y `discount3`. Si no existe, la factura recibe
+  el descuento final agregado en el campo estandar `discount`.
 
-## Nota importante
+## Tarifas con triple descuento
 
-El modo aditivo se conserva en POS, pero al facturar contra `account_invoice_triple_discount` se envia el descuento final como `discount1` para evitar diferencias de total, ya que ese modulo de factura normalmente agrega los descuentos de forma multiplicativa.
+Si esta instalado `sale_pricelist_triple_discount`, el TPV carga `discount2` y
+`discount3` de `product.pricelist.item`.
 
-En Odoo 19 `sale_triple_discount` convierte `sale.order.line.discount` en descuento total calculado; por eso al traer un pedido de venta al TPV se usa `discount1` como primer descuento de la linea POS y no el total agregado, evitando aplicar doblemente `discount2` y `discount3`.
+En Odoo 19 no se depende de la politica visible de tarifa. Cuando la regla de
+tarifa de tipo **Descuento** o **Formula** tiene descuentos, el TPV conserva el
+precio base en la linea y aplica los descuentos separados:
+
+```text
+price_unit = precio base
+D1 = percent_price / price_discount
+D2 = discount2
+D3 = discount3
+```
+
+Esto hace que el producto insertado directamente en TPV se comporte como una
+linea de pedido de venta: precio base visible, descuentos desglosados, total
+neto calculado correctamente.
+
+## Casos cubiertos
+
+1. Producto directo en TPV con regla de tarifa con dos o tres descuentos.
+2. Descuento manual desde el boton **Triple desc.**.
+3. Pedido de venta con `discount1`, `discount2` y `discount3` cargado en TPV por
+   `pos_sale`.
+4. Recalculo al cambiar cantidad o tarifa del cliente.
+5. Factura desde TPV con campos separados si existe
+   `account_invoice_triple_discount`.
+
+## Instalacion
+
+1. Copiar el modulo en el addons path.
+2. Actualizar lista de aplicaciones.
+3. Actualizar o instalar `POS Triple Discount`.
+4. Reiniciar Odoo y recargar assets del TPV.
+5. Cerrar y abrir de nuevo la sesion TPV, limpiando cache del navegador si se
+   mantienen assets antiguos.

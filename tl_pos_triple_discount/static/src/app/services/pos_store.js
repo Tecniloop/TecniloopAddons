@@ -36,10 +36,6 @@ patch(PosStore.prototype, {
             ? soLine.discount1 || 0
             : soLine.discount || 0;
         const discounts = [discount1, soLine.discount2 || 0, soLine.discount3 || 0];
-        if (soLine.discounting_type === "additive") {
-            const total = discounts.reduce((sum, value) => sum + value, 0);
-            return Math.min(Math.max(total, 0), 100);
-        }
         let discountFactor = 1;
         for (const discount of discounts) {
             discountFactor *= 1 - discount / 100;

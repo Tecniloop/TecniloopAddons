@@ -35,43 +35,39 @@ patch(PosOrderline.prototype, {
         this.discount3 = parseDiscount(
             this.discount3 ?? vals?.discount3 ?? this.sale_order_line_id?.discount3 ?? 0
         );
-        this.discounting_type =
-            this.discounting_type ||
-            vals?.discounting_type ||
-            this.sale_order_line_id?.discounting_type ||
-            "multiplicative";
+        this.discounting_type = "multiplicative";
         this.tl_discount_source = vals?.tl_discount_source || false;
         this.applyPricelistTripleDiscount();
     },
 
     setDiscount(discount) {
         this.discount = parseDiscount(discount);
+        this.discounting_type = "multiplicative";
         this.tl_discount_source = "manual";
         this.order_id?.triggerRecomputeAllPrices?.();
     },
 
     setDiscount2(discount) {
         this.discount2 = parseDiscount(discount);
+        this.discounting_type = "multiplicative";
         this.tl_discount_source = "manual";
         this.order_id?.triggerRecomputeAllPrices?.();
     },
 
     setDiscount3(discount) {
         this.discount3 = parseDiscount(discount);
+        this.discounting_type = "multiplicative";
         this.tl_discount_source = "manual";
         this.order_id?.triggerRecomputeAllPrices?.();
     },
 
-    setDiscountingType(discountingType) {
-        this.discounting_type = ["additive", "multiplicative"].includes(discountingType)
-            ? discountingType
-            : "multiplicative";
-        this.tl_discount_source = "manual";
-        this.order_id?.triggerRecomputeAllPrices?.();
+    setDiscountingType() {
+        this.discounting_type = "multiplicative";
     },
 
     applyPricelistTripleDiscount({ force = false } = {}) {
-        if (this.sale_order_line_id || this.price_type !== "original") {
+        const priceType = this.price_type || "original";
+        if (this.sale_order_line_id || priceType !== "original") {
             return;
         }
         const currentValues = [this.discount || 0, this.discount2 || 0, this.discount3 || 0];
@@ -93,7 +89,7 @@ patch(PosOrderline.prototype, {
             this.discount = parseDiscount(values.discount);
             this.discount2 = parseDiscount(values.discount2);
             this.discount3 = parseDiscount(values.discount3);
-            this.discounting_type = values.discounting_type || "multiplicative";
+            this.discounting_type = "multiplicative";
             this.tl_discount_source = "pricelist";
         } else if (force && this.tl_discount_source === "pricelist") {
             this.discount = 0;
@@ -116,14 +112,6 @@ patch(PosOrderline.prototype, {
         return ["discount", "discount2", "discount3"];
     },
 
-    _additiveDiscount() {
-        const total = this._discountFields().reduce(
-            (sum, fieldName) => sum + (this[fieldName] || 0),
-            0
-        );
-        return Math.min(Math.max(total, 0), 100);
-    },
-
     _multiplicativeDiscount() {
         let discountFactor = 1;
         for (const fieldName of this._discountFields()) {
@@ -133,9 +121,7 @@ patch(PosOrderline.prototype, {
     },
 
     getFinalDiscount() {
-        return this.discounting_type === "additive"
-            ? this._additiveDiscount()
-            : this._multiplicativeDiscount();
+        return this._multiplicativeDiscount();
     },
 
     getDiscount() {
@@ -148,7 +134,7 @@ patch(PosOrderline.prototype, {
     },
 
     hasTripleDiscount() {
-        return Boolean(this.discount2 || this.discount3 || this.discounting_type === "additive");
+        return Boolean(this.discount2 || this.discount3);
     },
 
     hasDiscountBreakdown() {
@@ -163,8 +149,7 @@ patch(PosOrderline.prototype, {
         if (!this.hasTripleDiscount()) {
             return `${roundDisplay(values[0])}%`;
         }
-        const separator = this.discounting_type === "additive" ? " + " : " x ";
-        const detailed = values.map((value) => `${roundDisplay(value)}%`).join(separator);
+        const detailed = values.map((value) => `${roundDisplay(value)}%`).join(" x ");
         const finalDiscount = roundDisplay(this.getFinalDiscount());
         return `${detailed} = ${finalDiscount}%`;
     },
@@ -173,9 +158,7 @@ patch(PosOrderline.prototype, {
         return (
             super.canBeMergedWith(...arguments) &&
             (this.discount2 || 0) === (orderline.discount2 || 0) &&
-            (this.discount3 || 0) === (orderline.discount3 || 0) &&
-            (this.discounting_type || "multiplicative") ===
-                (orderline.discounting_type || "multiplicative")
+            (this.discount3 || 0) === (orderline.discount3 || 0)
         );
     },
 });

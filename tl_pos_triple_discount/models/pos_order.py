@@ -28,15 +28,6 @@ class PosOrderLine(models.Model):
     def _discount_fields(self):
         return ["discount", "discount2", "discount3"]
 
-    def _additive_discount(self):
-        self.ensure_one()
-        discount = sum(self[field_name] or 0.0 for field_name in self._discount_fields())
-        if discount <= 0:
-            return 0.0
-        if discount >= 100:
-            return 100.0
-        return discount
-
     def _multiplicative_discount(self):
         self.ensure_one()
         discount_factor = 1.0
@@ -46,8 +37,7 @@ class PosOrderLine(models.Model):
 
     def _get_final_discount(self):
         self.ensure_one()
-        if self.discounting_type == "additive":
-            return self._additive_discount()
+        # sale_triple_discount 19.0 only supports the multiplicative mode.
         return self._multiplicative_discount()
 
     def _prepare_tax_base_line_values(self):
@@ -75,19 +65,13 @@ class PosOrder(models.Model):
             return vals
 
         # If account_invoice_triple_discount is installed, preserve the split
-        # discounts on invoice lines. For additive lines, write the final
-        # discount in discount1 to keep invoice totals aligned because the OCA
-        # invoice module only aggregates multiplicatively.
+        # discounts on invoice lines. sale_triple_discount 19.0 only supports
+        # multiplicative aggregation.
         invoice_line_fields = self.env["account.move.line"]._fields
         if all(field_name in invoice_line_fields for field_name in ("discount1", "discount2", "discount3")):
-            if pos_line.discounting_type == "additive":
-                vals["discount1"] = pos_line._get_final_discount()
-                vals["discount2"] = 0.0
-                vals["discount3"] = 0.0
-            else:
-                vals["discount1"] = pos_line.discount
-                vals["discount2"] = pos_line.discount2
-                vals["discount3"] = pos_line.discount3
+            vals["discount1"] = pos_line.discount
+            vals["discount2"] = pos_line.discount2
+            vals["discount3"] = pos_line.discount3
             vals.pop("discount", None)
         else:
             vals["discount"] = pos_line._get_final_discount()
