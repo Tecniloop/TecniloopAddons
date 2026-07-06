@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail_cc_bcc_partner_reply_all.MessageNotificationPopover"
+       t-inherit="mail.MessageNotificationPopover"
+       t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class, 'o-mail-MessageNotificationPopover')]" position="inside">
+            <div t-if="props.message.recipient_cc_ids?.length" class="mt-2 pt-2 border-top">
+                <div class="fw-bold small text-muted mb-1">Cc</div>
+                <div t-foreach="props.message.recipient_cc_ids" t-as="partner" t-key="partner.id" class="d-flex align-items-center">
+                    <i class="me-2 fa fa-fw fa-copy" title="Cc"/>
+                    <span t-esc="props.message.getPersonaName(partner)"/>
+                    <span t-if="partner.email" class="text-muted ms-1">(<t t-esc="partner.email"/>)</span>
+                </div>
+            </div>
+            <div t-if="props.message.recipient_bcc_ids?.length" class="mt-2 pt-2 border-top">
+                <div class="fw-bold small text-muted mb-1">Bcc</div>
+                <div t-foreach="props.message.recipient_bcc_ids" t-as="partner" t-key="partner.id" class="d-flex align-items-center">
+                    <i class="me-2 fa fa-fw fa-user-secret" title="Bcc"/>
+                    <span t-esc="props.message.getPersonaName(partner)"/>
+                    <span t-if="partner.email" class="text-muted ms-1">(<t t-esc="partner.email"/>)</span>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

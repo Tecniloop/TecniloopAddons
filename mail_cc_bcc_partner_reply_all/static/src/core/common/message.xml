@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail_cc_bcc_partner_reply_all.Message.notification"
+       t-inherit="mail.Message.notification"
+       t-inherit-mode="extension">
+        <xpath expr="//div[@t-elif=&quot;message.thread?.eq(props.thread) and (message.incoming_email_to?.length or message.incoming_email_cc?.length)&quot;]" position="attributes">
+            <attribute name="t-elif">message.thread?.eq(props.thread) and (message.incoming_email_to?.length or message.incoming_email_cc?.length or message.recipient_cc_ids?.length or message.recipient_bcc_ids?.length)</attribute>
+        </xpath>
+    </t>
+</templates>
