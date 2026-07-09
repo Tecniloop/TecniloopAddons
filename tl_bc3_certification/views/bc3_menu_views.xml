@@ -1,3 +1,0 @@
-<odoo>
-    <menuitem id="menu_bc3_certification" name="Certificaciones" parent="tl_bc3_base.menu_bc3_root" action="action_bc3_certification" sequence="60"/>
-</odoo>

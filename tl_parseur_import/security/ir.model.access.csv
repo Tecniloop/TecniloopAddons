@@ -1,5 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_parseur_order,access_parseur_order,model_parseur_order,,1,1,1,1
-access_parseur_order_line,access_parseur_order_line,model_parseur_order_line,,1,1,1,1
-access_assign_partner_wizard,access_assign_partner_wizard,model_assign_partner_wizard,,1,1,1,1
-access_assign_partner_wizard_line,access_assign_partner_wizard_line,model_assign_partner_wizard_line,,1,1,1,1

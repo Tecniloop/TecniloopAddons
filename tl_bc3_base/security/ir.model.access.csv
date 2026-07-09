@@ -1,9 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_bc3_file_user,bc3.file user,model_bc3_file,base.group_user,1,1,1,1
-access_bc3_raw_record_user,bc3.raw.record user,model_bc3_raw_record,base.group_user,1,1,1,1
-access_bc3_concept_user,bc3.concept user,model_bc3_concept,base.group_user,1,1,1,1
-access_bc3_concept_code_user,bc3.concept.code user,model_bc3_concept_code,base.group_user,1,1,1,1
-access_bc3_decomposition_line_user,bc3.decomposition.line user,model_bc3_decomposition_line,base.group_user,1,1,1,1
-access_bc3_measurement_line_user,bc3.measurement.line user,model_bc3_measurement_line,base.group_user,1,1,1,1
-access_bc3_import_wizard_user,bc3.import.wizard user,model_bc3_import_wizard,base.group_user,1,1,1,1
-access_bc3_concept_media_user,bc3.concept.media user,model_bc3_concept_media,base.group_user,1,1,1,1
