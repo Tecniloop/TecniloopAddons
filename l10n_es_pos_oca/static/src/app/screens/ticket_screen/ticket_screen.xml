@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+
+    <t
+        t-name="l10n_es_pos_oca.TicketScreen"
+        t-inherit="point_of_sale.TicketScreen"
+        t-inherit-mode="extension"
+    >
+        <xpath expr="//tr[hasclass('order-row')]/td[hasclass('order-name')]" position="after">
+            <td class="align-middle">
+                <div class="small text-muted">Simplified Invoice</div>
+                <div class="fw-bolder">
+                    <t t-if="order.l10n_es_unique_id" t-esc="order.l10n_es_unique_id" />
+                </div>
+            </td>
+        </xpath>
+        <xpath expr="//div[hasclass('mobileOrderList')]/div[hasclass('order-name')]" position="after">
+            <div class="p-2 d-flex flex-column flex-grow-1 justify-content-center align-items-start">
+                <div class="small text-muted">Simplified Invoice</div>
+                <div>
+                    <t t-if="order.l10n_es_unique_id" t-esc="order.l10n_es_unique_id" />
+                </div>
+            </div>
+        </xpath>
+    </t>
+
+</templates>
