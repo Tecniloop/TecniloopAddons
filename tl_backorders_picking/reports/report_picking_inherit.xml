@@ -1,0 +1,47 @@
+<odoo>
+  <template id="report_delivery_document2_inherit" inherit_id="stock_delivery.report_delivery_document2">
+    <xpath expr="//div[@t-if='o.carrier_id']" position="before">
+      <!-- Fecha Pedido -->
+      <div class="col col-3 mw-100 mb-2" t-if="o.sale_id.date_order">
+        <strong>Fecha Pedido</strong>
+        <div t-field="o.sale_id.date_order" t-options='{"widget": "date"}' class="m-0"/>
+      </div>
+
+      <!-- Núm. Albarán -->
+      <div class="col col-3 mw-100 mb-2">
+        <strong>Núm. Albarán</strong>
+        <div t-field="o.name" class="m-0"/>
+      </div>
+
+      <!-- Fecha de Albarán -->
+      <div class="col col-3 mw-100 mb-2">
+        <strong>Fecha de Albarán</strong>
+        <div t-if="o.state == 'done'" t-field="o.date_done"
+              t-options='{"widget": "date"}' class="m-0"/>
+        <div t-else="" t-field="o.scheduled_date"
+              t-options='{"widget": "date"}' class="m-0"/>
+      </div>
+    </xpath>
+  </template>
+  <template id="report_delivery_document_inherit" inherit_id="stock.report_delivery_document">
+    <xpath expr="//t[@t-set='backorders']" position="after">
+      <div class="col col-3 mw-100 mb-2" t-if="o.sale_id.payment_mode_id">
+        <strong>Modo de pago:</strong>
+        <div t-field="o.sale_id.payment_mode_id.name" class="m-0"/>
+      </div>
+    </xpath>
+    <!--Treure camps capçalera-->
+    <xpath expr="//div[@name='div_sched_date']" position="replace" />
+    <xpath expr="//div[@name='div_operator']" position="replace" />
+    
+    <!-- Incluir también los backorders de los pickings de origen (PICK) -->
+    <xpath expr="//t[@t-set='backorders']" position="replace">
+        <t t-set="backorders" t-value="(o.backorder_ids | o.move_ids.move_orig_ids.picking_id.backorder_ids).filtered(lambda x: x.state not in ('done', 'cancel'))"/>
+    </xpath>
+
+    <!-- Remplazamos el IF por el nuevo, solo dependa de la variable -->
+    <xpath expr="//div[@t-if=&quot;not (o.backorder_ids and backorders)&quot;]" position="replace">
+        <div t-if="not backorders" class="oe_structure"/>
+    </xpath>
+  </template>
+</odoo>
