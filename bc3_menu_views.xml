@@ -1,4 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_bc3_budget_user,bc3.budget user,model_bc3_budget,base.group_user,1,1,1,1
-access_bc3_budget_line_user,bc3.budget.line user,model_bc3_budget_line,base.group_user,1,1,1,1
-access_bc3_budget_measurement_line_user,bc3.budget.measurement.line user,model_bc3_budget_measurement_line,base.group_user,1,1,1,1
