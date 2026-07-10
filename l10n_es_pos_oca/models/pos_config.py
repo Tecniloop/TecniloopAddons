@@ -149,10 +149,8 @@ class PosConfig(models.Model):
         """HACK: This is done for getting the proper translation."""
         return _("Simplified Invoice %s")
 
-    @api.model
-    def _load_pos_data_fields(self, config):
-        fields_list = super()._load_pos_data_fields(config)
-        return fields_list + [
+    def _l10n_es_pos_oca_fields_to_load(self):
+        return [
             "iface_l10n_es_simplified_invoice",
             "is_simplified_config",
             "l10n_es_simplified_invoice_limit",
@@ -162,3 +160,40 @@ class PosConfig(models.Model):
             "simplified_partner_id",
             "prevent_offline_validation",
         ]
+
+    @api.model
+    def _load_pos_data_fields(self, config):
+        fields_list = super()._load_pos_data_fields(config)
+        # In POS 19, an empty list has a special meaning: load the default/full
+        # model schema. Do not replace it with only our fields, otherwise the
+        # frontend loses core properties such as currency_id, payment_method_ids,
+        # etc. If another addon already returned an explicit list, extend it.
+        if not fields_list:
+            return fields_list
+        return fields_list + [
+            field for field in self._l10n_es_pos_oca_fields_to_load() if field not in fields_list
+        ]
+
+    @api.model
+    def _load_pos_data_read(self, records, config):
+        data = super()._load_pos_data_read(records, config)
+        if not data:
+            return data
+        records_by_id = {record.id: record for record in records}
+        for values in data:
+            record = records_by_id.get(values.get("id"))
+            if not record:
+                continue
+            values.update(
+                {
+                    "iface_l10n_es_simplified_invoice": record.iface_l10n_es_simplified_invoice,
+                    "is_simplified_config": record.is_simplified_config,
+                    "l10n_es_simplified_invoice_limit": record.l10n_es_simplified_invoice_limit,
+                    "l10n_es_simplified_invoice_prefix": record.l10n_es_simplified_invoice_prefix,
+                    "l10n_es_simplified_invoice_padding": record.l10n_es_simplified_invoice_padding,
+                    "l10n_es_simplified_invoice_number": record.l10n_es_simplified_invoice_number,
+                    "simplified_partner_id": record.simplified_partner_id.id,
+                    "prevent_offline_validation": record.prevent_offline_validation,
+                }
+            )
+        return data
