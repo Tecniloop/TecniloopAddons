@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Custom Development
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.product.icecat</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='companies']" position="after">
+                <block title="Icecat" id="product_icecat_settings">
+                    <setting id="icecat_account_setting" string="Icecat Account"
+                             help="Credentials used to query the Icecat open catalog (data.icecat.biz).">
+                        <field name="icecat_username" placeholder="e.g. myshop_user"/>
+                        <div class="content-group">
+                            <field name="icecat_password" password="True" placeholder="Password"/>
+                        </div>
+                        <div class="content-group">
+                            <label for="icecat_language" string="Data language" class="o_light_label"/>
+                            <field name="icecat_language" class="o_light_label"/>
+                        </div>
+                        <div class="content-group mt8">
+                            <button name="action_icecat_test_connection" type="object"
+                                    string="Test Connection" class="btn-link"
+                                    icon="fa-arrow-right"/>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

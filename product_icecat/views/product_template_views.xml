@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Custom Development
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
+<odoo>
+
+    <record id="product_template_form_view_inherit_icecat" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.icecat</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" name="action_icecat_refresh" type="object"
+                        icon="fa-refresh" invisible="not icecat_prod_id"
+                        help="Refresh the eCommerce description and main image from Icecat">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Refresh</span>
+                        <span class="o_stat_text">from Icecat</span>
+                    </div>
+                </button>
+            </xpath>
+            <field name="categ_id" position="after">
+                <field name="icecat_category_id"/>
+                <field name="icecat_product_id" groups="base.group_no_one" readonly="1"/>
+                <field name="icecat_prod_id" groups="base.group_no_one"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="product_template_search_view_inherit_icecat" model="ir.ui.view">
+        <field name="name">product.template.search.inherit.icecat</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <field name="categ_id" position="after">
+                <field name="icecat_category_id"/>
+            </field>
+            <group position="inside">
+                <filter string="Icecat Category" name="group_by_icecat_category_id"
+                        context="{'group_by': 'icecat_category_id'}"/>
+            </group>
+        </field>
+    </record>
+
+</odoo>

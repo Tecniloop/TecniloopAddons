@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Custom Development
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
+<odoo>
+
+    <record id="view_product_brand_form_inherit_icecat" model="ir.ui.view">
+        <field name="name">product.brand.form.inherit.icecat</field>
+        <field name="model">product.brand</field>
+        <field name="inherit_id" ref="product_brand.view_product_brand_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button class="oe_stat_button" name="action_view_icecat_import_lines"
+                        type="object" icon="fa-list"
+                        invisible="icecat_bulk_state == 'none'">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Icecat</span>
+                        <span class="o_stat_text">Import Lines</span>
+                    </div>
+                </button>
+            </div>
+            <xpath expr="//page[@name='description']" position="after">
+                <page name="icecat" string="Icecat">
+                    <group>
+                        <field name="icecat_manufacturer_id"
+                               context="{'default_name': name}"
+                               placeholder="Link an Icecat manufacturer..."/>
+                    </group>
+                    <div class="text-muted" invisible="icecat_manufacturer_id">
+                        Link this brand to its matching Icecat manufacturer to
+                        import products by part number for it, and to reuse
+                        that manufacturer's default import settings (images,
+                        categories).
+                    </div>
+
+                    <group string="Import All Products" invisible="not icecat_manufacturer_id">
+                        <group>
+                            <field name="icecat_bulk_use_full_catalog"/>
+                            <field name="icecat_bulk_limit"/>
+                        </group>
+                        <group>
+                            <field name="icecat_bulk_state" widget="badge"
+                                   decoration-danger="icecat_bulk_state == 'error'"
+                                   decoration-success="icecat_bulk_state == 'done'"
+                                   decoration-info="icecat_bulk_state in ('scanning', 'importing')"/>
+                            <field name="icecat_bulk_total"
+                                   invisible="icecat_bulk_state in ('none', 'error')"/>
+                            <label for="icecat_bulk_pending_count" string="Progress"
+                                   invisible="icecat_bulk_state in ('none', 'error')"/>
+                            <div class="o_row" invisible="icecat_bulk_state in ('none', 'error')">
+                                <field name="icecat_bulk_done_count"/>
+                                <span>done,</span>
+                                <field name="icecat_bulk_pending_count"/>
+                                <span>pending,</span>
+                                <field name="icecat_bulk_error_count"/>
+                                <span>errors,</span>
+                                <field name="icecat_bulk_skipped_count"/>
+                                <span>skipped</span>
+                            </div>
+                        </group>
+                    </group>
+                    <div class="alert alert-danger" role="alert"
+                         invisible="icecat_bulk_state != 'error'">
+                        <field name="icecat_bulk_error_message" nolabel="1" readonly="1"/>
+                    </div>
+                    <div invisible="not icecat_manufacturer_id">
+                        <button name="action_icecat_bulk_import_start" type="object"
+                                string="Import All Products from Icecat"
+                                class="btn-primary"
+                                invisible="icecat_bulk_state in ('scanning', 'importing')"/>
+                        <button name="action_icecat_bulk_retry_errors" type="object"
+                                string="Retry Errors"
+                                invisible="icecat_bulk_error_count == 0"/>
+                        <button name="action_icecat_bulk_import_reset" type="object"
+                                string="Reset"
+                                invisible="icecat_bulk_state == 'none'"
+                                confirm="This will delete all queued Icecat import lines for this brand (already-imported products are not affected). Continue?"/>
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

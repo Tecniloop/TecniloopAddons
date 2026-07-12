@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Custom Development
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
+<odoo>
+
+    <menuitem id="menu_icecat_product_import"
+              name="Import from Icecat"
+              action="icecat_product_import_action"
+              parent="website_sale.menu_catalog"
+              sequence="2"/>
+
+    <menuitem id="menu_icecat_manufacturer"
+              name="Icecat Manufacturers"
+              action="icecat_manufacturer_action"
+              parent="website_sale.menu_catalog"
+              sequence="20"/>
+
+    <menuitem id="menu_icecat_category"
+              name="Icecat Categories"
+              action="icecat_category_action"
+              parent="website_sale.menu_catalog"
+              sequence="21"/>
+
+    <menuitem id="menu_icecat_category_sync"
+              name="Sync Categories from Icecat"
+              action="icecat_category_sync_server_action"
+              parent="website_sale.menu_catalog"
+              sequence="22"/>
+
+    <menuitem id="menu_icecat_import_line"
+              name="Icecat Import Lines"
+              action="icecat_import_line_action"
+              parent="website_sale.menu_catalog"
+              sequence="23"/>
+
+</odoo>

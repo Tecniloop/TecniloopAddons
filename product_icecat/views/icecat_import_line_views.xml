@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Custom Development
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
+<odoo>
+
+    <record id="icecat_import_line_view_list" model="ir.ui.view">
+        <field name="name">icecat.import.line.list</field>
+        <field name="model">icecat.import.line</field>
+        <field name="arch" type="xml">
+            <list string="Icecat Import Lines" default_order="id desc"
+                  decoration-danger="state == 'error'"
+                  decoration-success="state == 'done'"
+                  decoration-muted="state == 'skipped'">
+                <header>
+                    <button name="action_retry" type="object" string="Retry"/>
+                </header>
+                <field name="part_number"/>
+                <field name="product_brand_id"/>
+                <field name="icecat_manufacturer_id"/>
+                <field name="state" widget="badge"
+                       decoration-danger="state == 'error'"
+                       decoration-success="state == 'done'"
+                       decoration-info="state == 'pending'"
+                       decoration-muted="state == 'skipped'"/>
+                <field name="product_id"/>
+                <field name="error_message" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="icecat_import_line_view_form" model="ir.ui.view">
+        <field name="name">icecat.import.line.form</field>
+        <field name="model">icecat.import.line</field>
+        <field name="arch" type="xml">
+            <form string="Icecat Import Line">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="part_number"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="product_brand_id" options="{'no_create': True}"/>
+                            <field name="icecat_manufacturer_id" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="state"/>
+                            <field name="product_id"/>
+                        </group>
+                    </group>
+                    <group string="Error" invisible="not error_message">
+                        <field name="error_message" nolabel="1" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="icecat_import_line_view_search" model="ir.ui.view">
+        <field name="name">icecat.import.line.search</field>
+        <field name="model">icecat.import.line</field>
+        <field name="arch" type="xml">
+            <search string="Icecat Import Lines">
+                <field name="part_number"/>
+                <field name="product_brand_id"/>
+                <field name="icecat_manufacturer_id"/>
+                <filter name="pending" string="Pending" domain="[('state', '=', 'pending')]"/>
+                <filter name="done" string="Done" domain="[('state', '=', 'done')]"/>
+                <filter name="error" string="Error" domain="[('state', '=', 'error')]"/>
+                <filter name="skipped" string="Skipped" domain="[('state', '=', 'skipped')]"/>
+                <separator/>
+                <group>
+                    <filter name="group_by_brand" string="Brand" context="{'group_by': 'product_brand_id'}"/>
+                    <filter name="group_by_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="icecat_import_line_action" model="ir.actions.act_window">
+        <field name="name">Icecat Import Lines</field>
+        <field name="res_model">icecat.import.line</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="icecat_import_line_view_search"/>
+        <field name="context">{'search_default_error': 1}</field>
+    </record>
+
+</odoo>

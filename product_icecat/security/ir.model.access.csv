@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_icecat_manufacturer_user,icecat.manufacturer.user,model_icecat_manufacturer,base.group_user,1,0,0,0
+access_icecat_manufacturer_manager,icecat.manufacturer.manager,model_icecat_manufacturer,product.group_product_manager,1,1,1,1
+access_icecat_category_user,icecat.category.user,model_icecat_category,base.group_user,1,0,0,0
+access_icecat_category_manager,icecat.category.manager,model_icecat_category,product.group_product_manager,1,1,1,1
+access_icecat_product_import_user,icecat.product.import.user,model_icecat_product_import,base.group_user,1,1,1,1
+access_icecat_import_line_user,icecat.import.line.user,model_icecat_import_line,base.group_user,1,0,0,0
+access_icecat_import_line_manager,icecat.import.line.manager,model_icecat_import_line,product.group_product_manager,1,1,1,1

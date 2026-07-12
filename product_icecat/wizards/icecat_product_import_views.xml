@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Custom Development
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
+<odoo>
+
+    <record id="icecat_product_import_view_form" model="ir.ui.view">
+        <field name="name">icecat.product.import.form</field>
+        <field name="model">icecat.product.import</field>
+        <field name="arch" type="xml">
+            <form string="Import from Icecat">
+                <field name="state" invisible="1"/>
+                <field name="icecat_manufacturer_id" invisible="1"/>
+
+                <group invisible="state != 'search'">
+                    <field name="product_brand_id" options="{'no_create': True}"/>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not product_brand_id or icecat_manufacturer_id">
+                        This brand has no Icecat manufacturer configured yet.
+                        Open the brand's <b>Icecat</b> tab and link one
+                        before searching.
+                    </div>
+                    <field name="part_number"
+                           placeholder="e.g. RJ459AV"
+                           invisible="not icecat_manufacturer_id"/>
+                </group>
+
+                <group invisible="state != 'preview'">
+                    <group>
+                        <field name="fetched_image_preview" widget="image"
+                               class="oe_avatar" nolabel="1"/>
+                    </group>
+                    <group>
+                        <field name="fetched_name" readonly="1" string="Name"/>
+                        <field name="fetched_prod_id" readonly="1" string="Part Number"/>
+                        <field name="fetched_ean" readonly="1" string="EAN"/>
+                        <field name="fetched_category_name" readonly="1" string="Icecat Category"/>
+                    </group>
+                    <group colspan="2" string="Short Description">
+                        <field name="fetched_short_description" readonly="1" nolabel="1"/>
+                    </group>
+                    <group string="Import Options" colspan="2">
+                        <field name="import_main_image"/>
+                        <field name="import_gallery_images"/>
+                        <field name="create_product_category"/>
+                        <field name="create_ecommerce_category"/>
+                    </group>
+                </group>
+
+                <footer>
+                    <button name="action_search" type="object" string="Search"
+                            class="btn-primary" invisible="state != 'search'"/>
+                    <button name="action_import" type="object" string="Import Product"
+                            class="btn-primary" invisible="state != 'preview'"/>
+                    <button name="action_back" type="object" string="Back"
+                            invisible="state != 'preview'"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="icecat_product_import_action" model="ir.actions.act_window">
+        <field name="name">Import from Icecat</field>
+        <field name="res_model">icecat.product.import</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

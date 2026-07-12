@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Custom Development
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
+<odoo>
+
+    <record id="icecat_category_view_list" model="ir.ui.view">
+        <field name="name">icecat.category.list</field>
+        <field name="model">icecat.category</field>
+        <field name="arch" type="xml">
+            <list string="Icecat Categories">
+                <field name="complete_name" string="Category"/>
+                <field name="icecat_id"/>
+                <field name="product_categ_id"/>
+                <field name="ecommerce_categ_id"/>
+                <field name="product_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="icecat_category_view_form" model="ir.ui.view">
+        <field name="name">icecat.category.form</field>
+        <field name="model">icecat.category</field>
+        <field name="arch" type="xml">
+            <form string="Icecat Category">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="%(product.product_template_action_all)d"
+                                type="action" icon="fa-cubes"
+                                context="{'search_default_icecat_category_id': id}">
+                            <field string="Products" name="product_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="icecat_id"/>
+                            <field name="parent_id"/>
+                        </group>
+                        <group>
+                            <field name="product_categ_id" options="{'no_create': True}"/>
+                            <field name="ecommerce_categ_id" options="{'no_create': True}"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="icecat_category_view_search" model="ir.ui.view">
+        <field name="name">icecat.category.search</field>
+        <field name="model">icecat.category</field>
+        <field name="arch" type="xml">
+            <search string="Icecat Categories">
+                <field name="complete_name" string="Category"/>
+                <field name="icecat_id"/>
+                <filter name="no_parent" string="Top-Level (Not Synced)" domain="[('parent_id', '=', False)]"/>
+                <filter name="not_mapped_product" string="Without Product Category" domain="[('product_categ_id', '=', False)]"/>
+                <filter name="not_mapped_ecommerce" string="Without eCommerce Category" domain="[('ecommerce_categ_id', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="icecat_category_action" model="ir.actions.act_window">
+        <field name="name">Icecat Categories</field>
+        <field name="res_model">icecat.category</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="icecat_category_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Icecat categories yet
+            </p>
+            <p>
+                Categories are created automatically the first time a
+                product from that category is imported. Use
+                <b>Sync Categories from Icecat</b> to download the full
+                taxonomy (with parent/child relations) in one go.
+            </p>
+        </field>
+    </record>
+
+    <record id="icecat_category_sync_server_action" model="ir.actions.server">
+        <field name="name">Sync Categories from Icecat</field>
+        <field name="model_id" ref="model_icecat_category"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_sync_from_icecat()</field>
+    </record>
+
+</odoo>

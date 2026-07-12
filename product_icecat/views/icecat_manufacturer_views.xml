@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Custom Development
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
+<odoo>
+
+    <record id="icecat_manufacturer_view_list" model="ir.ui.view">
+        <field name="name">icecat.manufacturer.list</field>
+        <field name="model">icecat.manufacturer</field>
+        <field name="arch" type="xml">
+            <list string="Icecat Manufacturers">
+                <field name="name"/>
+                <field name="icecat_supplier_id"/>
+                <field name="brand_count"/>
+                <field name="import_main_image" widget="boolean_toggle"/>
+                <field name="import_gallery_images" widget="boolean_toggle"/>
+                <field name="create_product_category" widget="boolean_toggle"/>
+                <field name="create_ecommerce_category" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="icecat_manufacturer_view_form" model="ir.ui.view">
+        <field name="name">icecat.manufacturer.form</field>
+        <field name="model">icecat.manufacturer</field>
+        <field name="arch" type="xml">
+            <form string="Icecat Manufacturer">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="action_view_brands"
+                                type="object" icon="fa-tags">
+                            <field string="Brands" name="brand_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. HP"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="icecat_supplier_id"/>
+                        </group>
+                    </group>
+                    <group string="Import Settings"
+                           help="Applied by default when importing a product from this manufacturer. Can still be overridden per import.">
+                        <field name="import_main_image"/>
+                        <field name="import_gallery_images"/>
+                        <field name="create_product_category"/>
+                        <field name="create_ecommerce_category"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="icecat_manufacturer_view_search" model="ir.ui.view">
+        <field name="name">icecat.manufacturer.search</field>
+        <field name="model">icecat.manufacturer</field>
+        <field name="arch" type="xml">
+            <search string="Icecat Manufacturers">
+                <field name="name"/>
+                <field name="icecat_supplier_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="no_brand" string="Not Linked to a Brand" domain="[('product_brand_ids', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="icecat_manufacturer_action" model="ir.actions.act_window">
+        <field name="name">Icecat Manufacturers</field>
+        <field name="res_model">icecat.manufacturer</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="icecat_manufacturer_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Icecat manufacturer
+            </p>
+            <p>
+                Use the exact name Icecat knows this manufacturer by, then
+                link it from a Product Brand's Icecat tab, and configure
+                what should be imported for its products (images,
+                categories).
+            </p>
+        </field>
+    </record>
+
+</odoo>
