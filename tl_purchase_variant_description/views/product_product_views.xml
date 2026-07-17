@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_product_form_purchase_variant_description" model="ir.ui.view">
+        <field name="name">product.product.form.purchase.variant.description</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Compra: descripción adicional de esta variante">
+                    <field name="purchase_variant_description" nolabel="1"
+                           placeholder="Texto adicional que se añadirá, solo para esta variante, a la descripción de compra de la plantilla..."/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

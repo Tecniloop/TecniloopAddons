@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Fuentes de ejemplo ya configuradas con los valores comprobados durante el desarrollo
+         del módulo. Sirven de referencia para dar de alta un tercer sitio: hace falta un
+         conector nuevo en models/connector_*.py (ver README) además del registro de
+         fuente en sí. -->
+    <record id="sitemap_import_source_skechers_es" model="sitemap.import.source">
+        <field name="name">Skechers España</field>
+        <field name="connector_model">sitemap.connector.skechers_es</field>
+        <field name="sitemap_index_url">https://www.skechers.es/sitemap_index.xml</field>
+    </record>
+
+    <record id="sitemap_import_source_mtng_es" model="sitemap.import.source">
+        <field name="name">Mustang Shoes España</field>
+        <field name="connector_model">sitemap.connector.mtng_es</field>
+        <field name="sitemap_index_url">https://www.mtngshoes.com/sitemap_index.xml</field>
+    </record>
+
+    <record id="sitemap_import_source_pikolinos_es" model="sitemap.import.source">
+        <field name="name">Pikolinos España</field>
+        <field name="connector_model">sitemap.connector.pikolinos_es</field>
+        <field name="sitemap_index_url">https://www.pikolinos.com/sitemap_index.xml</field>
+    </record>
+
+    <record id="sitemap_import_source_panamajack_es" model="sitemap.import.source">
+        <field name="name">Panama Jack España</field>
+        <field name="connector_model">sitemap.connector.panamajack_es</field>
+        <field name="sitemap_index_url">https://www.panamajack.es/sitemap.xml</field>
+    </record>
+</odoo>

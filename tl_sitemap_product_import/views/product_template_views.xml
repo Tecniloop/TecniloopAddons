@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_template_form_sitemap_import" model="ir.ui.view">
+        <field name="name">product.template.form.sitemap.import</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Importación" invisible="not is_sitemap_import_product">
+                    <group>
+                        <group>
+                            <field name="is_sitemap_import_product"/>
+                            <field name="sitemap_source_id"/>
+                            <field name="sitemap_source_url" widget="url"/>
+                        </group>
+                        <group>
+                            <field name="sitemap_style_code"/>
+                            <field name="sitemap_color_code"/>
+                            <field name="sitemap_public_categ_id"/>
+                            <field name="sitemap_lastmod"/>
+                            <field name="sitemap_last_sync"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_template_action_sitemap_import" model="ir.actions.act_window">
+        <field name="name">Productos importados</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form,kanban</field>
+        <field name="domain">[('is_sitemap_import_product', '=', True)]</field>
+        <field name="context">{'default_is_sitemap_import_product': True}</field>
+    </record>
+</odoo>

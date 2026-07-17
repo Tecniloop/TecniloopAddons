@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sitemap_product_staging_list" model="ir.ui.view">
+        <field name="name">sitemap.product.staging.list</field>
+        <field name="model">sitemap.product.staging</field>
+        <field name="arch" type="xml">
+            <list string="Productos en vista previa"
+                  decoration-success="state == 'imported'"
+                  decoration-info="state == 'preview_ready'"
+                  decoration-muted="state in ('pending', 'skipped')"
+                  decoration-danger="state == 'error'">
+                <field name="source_id"/>
+                <field name="url"/>
+                <field name="name"/>
+                <field name="list_price" sum="Total"/>
+                <field name="currency_name" optional="hide"/>
+                <field name="category_path"/>
+                <field name="style_code" optional="hide"/>
+                <field name="color_code" optional="hide"/>
+                <field name="state"/>
+                <field name="product_tmpl_id"/>
+                <field name="sitemap_lastmod" optional="hide"/>
+                <field name="preview_date" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sitemap_product_staging_form" model="ir.ui.view">
+        <field name="name">sitemap.product.staging.form</field>
+        <field name="model">sitemap.product.staging</field>
+        <field name="arch" type="xml">
+            <form string="Producto en vista previa">
+                <header>
+                    <button name="action_import_selected" type="object" string="Importar este producto"
+                            class="btn-primary" invisible="state not in ('preview_ready', 'error')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,preview_ready,imported"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="(sin vista previa todavía)"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="source_id"/>
+                            <field name="url" widget="url"/>
+                            <field name="batch_id"/>
+                            <field name="list_price"/>
+                            <field name="currency_name"/>
+                        </group>
+                        <group>
+                            <field name="category_path"/>
+                            <field name="style_code"/>
+                            <field name="color_code"/>
+                            <field name="sitemap_lastmod"/>
+                            <field name="product_tmpl_id"/>
+                        </group>
+                    </group>
+                    <group string="Descripción">
+                        <field name="description_preview" nolabel="1"/>
+                    </group>
+                    <field name="error_message" invisible="not error_message"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sitemap_product_staging_search" model="ir.ui.view">
+        <field name="name">sitemap.product.staging.search</field>
+        <field name="model">sitemap.product.staging</field>
+        <field name="arch" type="xml">
+            <search string="Buscar productos">
+                <field name="url"/>
+                <field name="name"/>
+                <field name="category_path"/>
+                <field name="source_id"/>
+                <field name="batch_id"/>
+                <filter string="Con vista previa (sin importar)" name="filter_preview_ready"
+                        domain="[('state', '=', 'preview_ready')]"/>
+                <filter string="Importados" name="filter_imported" domain="[('state', '=', 'imported')]"/>
+                <filter string="Pendientes" name="filter_pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Errores" name="filter_error" domain="[('state', '=', 'error')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter string="Fuente" name="group_source" context="{'group_by': 'source_id'}"/>
+                    <filter string="Lote" name="group_batch" context="{'group_by': 'batch_id'}"/>
+                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Categoría" name="group_category" context="{'group_by': 'category_path'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_sitemap_product_staging" model="ir.actions.act_window">
+        <field name="name">Productos (vista previa)</field>
+        <field name="res_model">sitemap.product.staging</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_sitemap_product_staging_search"/>
+        <field name="context">{'search_default_filter_preview_ready': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aquí aparecen los productos leídos del sitemap de cada fuente con sus datos de
+                vista previa (nombre, precio, categoría) SIN descargar imágenes todavía.
+            </p>
+            <p>
+                Selecciona una o varias filas (o todas) y usa "Importar productos
+                seleccionados" en el menú de acciones (⚙) para crearlos/actualizarlos de
+                verdad en Odoo -solo entonces se descargan sus imágenes.
+            </p>
+        </field>
+    </record>
+
+    <!-- Acción en lote: aparece en el menú de acciones (⚙) de la vista lista al
+         seleccionar una o varias filas. -->
+    <record id="ir_actions_server_sitemap_import_selected" model="ir.actions.server">
+        <field name="name">Importar productos seleccionados</field>
+        <field name="model_id" ref="model_sitemap_product_staging"/>
+        <field name="binding_model_id" ref="model_sitemap_product_staging"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_import_selected()</field>
+    </record>
+</odoo>

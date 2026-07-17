@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sitemap_import_batch_form" model="ir.ui.view">
+        <field name="name">sitemap.import.batch.form</field>
+        <field name="model">sitemap.import.batch</field>
+        <field name="arch" type="xml">
+            <form string="Lote de importación">
+                <header>
+                    <button name="action_fetch_previews" type="object" string="Obtener siguientes vistas previas"
+                            class="btn-primary" invisible="state != 'previewing'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,collecting,previewing,ready"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_staging" icon="fa-list">
+                            <field name="staging_count" widget="statinfo" string="Productos"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="source_id"/>
+                            <field name="trigger"/>
+                            <field name="category_filter"/>
+                            <field name="url_limit"/>
+                            <field name="force_update"/>
+                        </group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                    </group>
+                    <group string="Resumen (vistas previas, sin imágenes)">
+                        <group>
+                            <field name="pending_count"/>
+                            <field name="preview_ready_count"/>
+                        </group>
+                        <group>
+                            <field name="imported_count"/>
+                            <field name="skipped_count"/>
+                        </group>
+                        <group>
+                            <field name="error_count"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="state != 'ready'">
+                        Vistas previas listas. Abre el botón "Productos" de arriba, selecciona
+                        los productos que quieras (todos o solo algunos) y usa "Importar
+                        productos seleccionados" en el menú de acciones (⚙) de la lista: solo
+                        entonces se crean/actualizan de verdad y se descargan sus imágenes.
+                    </div>
+                    <field name="error_message" invisible="not error_message"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_sitemap_import_batch_list" model="ir.ui.view">
+        <field name="name">sitemap.import.batch.list</field>
+        <field name="model">sitemap.import.batch</field>
+        <field name="arch" type="xml">
+            <list string="Lotes de importación" decoration-danger="state == 'error'"
+                  decoration-success="state == 'ready'">
+                <field name="name"/>
+                <field name="source_id"/>
+                <field name="trigger"/>
+                <field name="state"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="staging_count"/>
+                <field name="preview_ready_count"/>
+                <field name="imported_count"/>
+                <field name="error_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sitemap_import_batch" model="ir.actions.act_window">
+        <field name="name">Lotes de importación</field>
+        <field name="res_model">sitemap.import.batch</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
