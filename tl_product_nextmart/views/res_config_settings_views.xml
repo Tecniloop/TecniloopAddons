@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_nextmart" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.nextmart</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='companies_setting_container']" position="after">
+                <block title="Nextmart" name="nextmart_settings">
+                    <setting string="Nextmart connection" help="Connection data used to retrieve a DataView product by GTIN/EAN.">
+                        <div class="content-group">
+                            <div class="row mt16">
+                                <label for="nextmart_partner_key" class="col-lg-4 o_light_label"/>
+                                <field name="nextmart_partner_key" password="True" class="oe_inline"/>
+                            </div>
+                            <div class="row mt16">
+                                <label for="nextmart_language" class="col-lg-4 o_light_label"/>
+                                <field name="nextmart_language" class="oe_inline"/>
+                            </div>
+                            <div class="row mt16">
+                                <label for="nextmart_timeout" class="col-lg-4 o_light_label"/>
+                                <field name="nextmart_timeout" class="oe_inline"/>
+                            </div>
+                        </div>
+                    </setting>
+                    <setting string="Content update" help="Choose which existing Odoo content may be replaced.">
+                        <field name="nextmart_update_name"/>
+                        <div class="content-group mt16">
+                            <field name="nextmart_overwrite_content"/>
+                        </div>
+                    </setting>
+                    <setting string="Images" help="Download Nextmart images into the product and its Odoo eCommerce gallery.">
+                        <field name="nextmart_import_images"/>
+                        <div class="content-group mt16" invisible="not nextmart_import_images">
+                            <field name="nextmart_import_all_images"/>
+                        </div>
+                        <div class="content-group mt16" invisible="not nextmart_import_images or nextmart_import_all_images">
+                            <label for="nextmart_max_extra_images" class="o_light_label"/>
+                            <field name="nextmart_max_extra_images" class="oe_inline"/>
+                        </div>
+                    </setting>
+                    <setting string="eCommerce DataView" help="Display the live Nextmart DataView iframe at the bottom of the public product page.">
+                        <field name="nextmart_auto_show_iframe"/>
+                        <div class="content-group mt16">
+                            <label for="nextmart_iframe_height" class="o_light_label"/>
+                            <field name="nextmart_iframe_height" class="oe_inline"/>
+                        </div>
+                    </setting>
+                    <setting string="Technical specifications" help="Store variable Nextmart properties in a dedicated technical table.">
+                        <field name="nextmart_import_specifications"/>
+                        <div class="content-group mt16">
+                            <field name="nextmart_include_specs_ecommerce"/>
+                        </div>
+                    </setting>
+                    <setting string="Brand and manufacturer" help="Use OCA Product Brand and Product Manufacturer fields.">
+                        <field name="nextmart_create_brand_manufacturer"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

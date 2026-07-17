@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="product_nextmart_dataview" inherit_id="website_sale.product" name="Nextmart DataView on product page">
+        <xpath expr="//section[@id='product_detail']" position="after">
+            <section
+                t-if="product.show_nexmart_data and product.nextmart_iframe_url"
+                id="nextmart_dataview"
+                class="o_nextmart_dataview container my-5"
+            >
+                <h2 class="h3 mb-3">Información técnica del fabricante</h2>
+                <iframe
+                    class="o_nextmart_dataview_iframe"
+                    t-att-src="product.nextmart_iframe_url"
+                    t-att-style="'height: %spx;' % product.nextmart_iframe_height"
+                    t-att-title="'Nextmart - %s' % product.name"
+                    loading="lazy"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                ></iframe>
+                <p class="small text-muted mt-2">
+                    <a t-att-href="product.nextmart_iframe_url" target="_blank" rel="noopener noreferrer">
+                        Abrir la ficha de Nextmart en una ventana nueva
+                    </a>
+                </p>
+            </section>
+        </xpath>
+    </template>
+</odoo>

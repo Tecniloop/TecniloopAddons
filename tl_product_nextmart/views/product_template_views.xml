@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_form_view_nextmart" model="ir.ui.view">
+        <field name="name">product.template.form.nextmart</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/header" position="inside">
+                <button
+                    name="action_nextmart_enrich"
+                    type="object"
+                    string="Complete with Nextmart"
+                    class="btn-secondary"
+                    icon="fa-cloud-download"
+                    invisible="not barcode"
+                />
+            </xpath>
+            <xpath expr="//page[@name='general_information']" position="after">
+                <page name="nextmart" string="Nextmart">
+                    <group>
+                        <group>
+                            <field name="show_nexmart_data"/>
+                            <field name="nextmart_iframe_url" widget="url" readonly="1"/>
+                            <field name="nextmart_last_sync" readonly="1"/>
+                            <field name="nextmart_source_url" widget="url" readonly="1"/>
+                            <field name="nextmart_source_language" readonly="1"/>
+                            <field name="nextmart_segment" readonly="1"/>
+                            <field name="nextmart_marketing_claim" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="nextmart_catalog_id" readonly="1"/>
+                            <field name="nextmart_supplier_id" readonly="1"/>
+                            <field name="nextmart_partner_id" readonly="1"/>
+                            <field name="nextmart_content_hash" readonly="1"/>
+                            <field name="nextmart_main_image_url" widget="url" readonly="1"/>
+                        </group>
+                    </group>
+                    <separator string="Technical specifications"/>
+                    <field name="nextmart_specification_ids" readonly="1">
+                        <list create="0" delete="0" edit="0">
+                            <field name="sequence" column_invisible="True"/>
+                            <field name="product_id" optional="hide"/>
+                            <field name="name"/>
+                            <field name="value"/>
+                            <field name="numeric_value" optional="hide"/>
+                            <field name="unit" optional="hide"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_variant_form_view_nextmart" model="ir.ui.view">
+        <field name="name">product.product.form.nextmart</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Nextmart">
+                    <button
+                        name="action_nextmart_enrich"
+                        type="object"
+                        string="Complete with Nextmart"
+                        class="btn-secondary"
+                        icon="fa-cloud-download"
+                        invisible="not barcode"
+                    />
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

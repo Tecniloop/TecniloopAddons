@@ -1,0 +1,14 @@
+.o_nextmart_dataview_iframe {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    border: 0;
+    background: #fff;
+}
+
+@media (max-width: 767.98px) {
+    .o_nextmart_dataview {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}

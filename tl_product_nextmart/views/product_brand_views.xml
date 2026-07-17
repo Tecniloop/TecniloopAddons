@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_brand_form_nextmart" model="ir.ui.view">
+        <field name="name">product.brand.form.nextmart</field>
+        <field name="model">product.brand</field>
+        <field name="inherit_id" ref="product_brand.view_product_brand_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="nextmart_supplier_id"/>
+                <field name="nextmart_catalog_prefix"/>
+                <field name="nextmart_logo_url" widget="url"/>
+            </field>
+        </field>
+    </record>
+</odoo>

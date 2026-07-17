@@ -1,0 +1,114 @@
+# Translation of Odoo Server.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Language: es\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Product Nextmart Enrichment"
+msgstr "Enriquecimiento de productos con Nextmart"
+
+msgid "Complete with Nextmart"
+msgstr "Completar con Nextmart"
+
+msgid "Nextmart Partner Key"
+msgstr "Partner Key de Nextmart"
+
+msgid "Nextmart Language"
+msgstr "Idioma de Nextmart"
+
+msgid "Update Product Name"
+msgstr "Actualizar el nombre del producto"
+
+msgid "Overwrite Existing Content"
+msgstr "Sobrescribir contenido existente"
+
+msgid "Import Images"
+msgstr "Importar imágenes"
+
+msgid "Import Technical Specifications"
+msgstr "Importar especificaciones técnicas"
+
+msgid "Create Brand and Manufacturer"
+msgstr "Crear marca y fabricante"
+
+msgid "Include Specifications in eCommerce Description"
+msgstr "Incluir especificaciones en la descripción de comercio electrónico"
+
+msgid "Maximum Extra Images"
+msgstr "Máximo de imágenes adicionales"
+
+msgid "Connection Timeout (seconds)"
+msgstr "Tiempo máximo de conexión (segundos)"
+
+msgid "Last Nextmart Sync"
+msgstr "Última sincronización Nextmart"
+
+msgid "Nextmart URL"
+msgstr "URL de Nextmart"
+
+msgid "Nextmart Product Segment"
+msgstr "Segmento de producto Nextmart"
+
+msgid "Nextmart Marketing Claim"
+msgstr "Reclamo comercial Nextmart"
+
+msgid "Nextmart Technical Specifications"
+msgstr "Especificaciones técnicas Nextmart"
+
+msgid "Technical specifications"
+msgstr "Especificaciones técnicas"
+
+msgid "Technical details"
+msgstr "Detalles técnicos"
+
+msgid "Main features"
+msgstr "Características principales"
+
+msgid "Product strengths"
+msgstr "Puntos fuertes del producto"
+
+msgid "Brand and manufacturer"
+msgstr "Marca y fabricante"
+
+msgid "Content update"
+msgstr "Actualización de contenido"
+
+msgid "Nextmart connection"
+msgstr "Conexión Nextmart"
+
+msgid "Nextmart data imported: %(specs)s specifications and %(images)s images."
+msgstr "Datos de Nextmart importados: %(specs)s especificaciones y %(images)s imágenes."
+
+msgid "The product does not have an EAN/GTIN barcode."
+msgstr "El producto no tiene un código de barras EAN/GTIN."
+
+msgid "Configure the Nextmart Partner Key in Settings before completing products."
+msgstr "Configure el Partner Key de Nextmart en Ajustes antes de completar productos."
+
+msgid "Show Nextmart DataView on eCommerce"
+msgstr "Mostrar DataView de Nextmart en eCommerce"
+
+msgid "Nextmart DataView URL"
+msgstr "URL DataView de Nextmart"
+
+msgid "Nextmart DataView Height"
+msgstr "Altura del DataView de Nextmart"
+
+msgid "Import All Nextmart Images"
+msgstr "Importar todas las imágenes de Nextmart"
+
+msgid "Show DataView after Import"
+msgstr "Mostrar DataView después de importar"
+
+msgid "DataView Iframe Height (px)"
+msgstr "Altura del iframe DataView (px)"
+
+msgid "eCommerce DataView"
+msgstr "DataView en eCommerce"
+
+msgid "Información técnica del fabricante"
+msgstr "Información técnica del fabricante"
+
+msgid "Abrir la ficha de Nextmart en una ventana nueva"
+msgstr "Abrir la ficha de Nextmart en una ventana nueva"
