@@ -79,12 +79,6 @@
                 <filter string="Importados" name="filter_imported" domain="[('state', '=', 'imported')]"/>
                 <filter string="Pendientes" name="filter_pending" domain="[('state', '=', 'pending')]"/>
                 <filter string="Errores" name="filter_error" domain="[('state', '=', 'error')]"/>
-                <group expand="0" string="Agrupar por">
-                    <filter string="Fuente" name="group_source" context="{'group_by': 'source_id'}"/>
-                    <filter string="Lote" name="group_batch" context="{'group_by': 'batch_id'}"/>
-                    <filter string="Estado" name="group_state" context="{'group_by': 'state'}"/>
-                    <filter string="Categoría" name="group_category" context="{'group_by': 'category_path'}"/>
-                </group>
             </search>
         </field>
     </record>
