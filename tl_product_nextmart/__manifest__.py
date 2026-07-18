@@ -1,7 +1,7 @@
 {
     "name": "Product Nextmart Enrichment",
     "summary": "Complete product data from Nextmart using the product GTIN/EAN",
-    "version": "19.0.1.1.1",
+    "version": "19.0.1.1.2",
     "category": "Product",
     "author": "Tecniloop",
     "website": "https://www.tecniloop.com",

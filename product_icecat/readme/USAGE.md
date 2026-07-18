@@ -13,17 +13,24 @@
 2. Select the catalog index. *On-Market Products* is the recommended
    default because it is smaller than the global catalog and contains
    products known to be distributed in a market.
-3. Optionally set *Modified Since* to exclude products whose Icecat
-   `Updated` timestamp is older than that date, and set a maximum number
-   of products for a controlled first test.
-4. Click *Import All Products from Icecat*.
-5. This runs entirely in the background: Icecat's compressed catalog index is
+3. Select the allowed *Icecat Categories*. With *Include Child
+   Categories* enabled, choosing a parent category imports its complete
+   descendant branch. Leaving the field empty allows all categories.
+4. Optionally set *Modified Since* and/or *Added Since*. The first accepts
+   old products edited recently; the second only accepts products first
+   added to Icecat from that date.
+5. Choose the data quality and availability requirements: standardized
+   Icecat data only or supplier data too, on-market status, main image,
+   and exclusion of restricted products. Set a maximum number of products
+   for a controlled first test.
+6. Click *Import All Products from Icecat*.
+7. This runs entirely in the background: Icecat's compressed catalog index is
    scanned for matching part numbers, which are then imported a batch at
    a time by a scheduled action (*Icecat: process bulk product imports*,
    every 5 minutes by default). Progress (pending/done/error/skipped
    counts) is shown on the brand's Icecat tab; the queued lines themselves
    are available from there too, to inspect or retry failures.
-6. Re-running *Import All Products from Icecat* later only queues new
+8. Re-running *Import All Products from Icecat* later only queues new
    part numbers found since the last scan — it will not duplicate
    products already imported.
 

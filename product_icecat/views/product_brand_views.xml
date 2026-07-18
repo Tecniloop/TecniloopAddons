@@ -33,10 +33,22 @@
                     </div>
 
                     <group string="Import All Products" invisible="not icecat_manufacturer_id">
-                        <group>
+                        <group string="Catalog Scope">
                             <field name="icecat_bulk_index_type"/>
+                            <field name="icecat_bulk_category_ids" widget="many2many_tags"
+                                   options="{'no_create': True, 'no_create_edit': True}"
+                                   placeholder="All Icecat categories"/>
+                            <field name="icecat_bulk_include_child_categories"
+                                   invisible="not icecat_bulk_category_ids"/>
                             <field name="icecat_bulk_modified_since"/>
+                            <field name="icecat_bulk_added_since"/>
                             <field name="icecat_bulk_limit"/>
+                        </group>
+                        <group string="Content Requirements">
+                            <field name="icecat_bulk_quality"/>
+                            <field name="icecat_bulk_only_on_market"/>
+                            <field name="icecat_bulk_only_with_image"/>
+                            <field name="icecat_bulk_only_unrestricted"/>
                         </group>
                         <group>
                             <field name="icecat_bulk_state" widget="badge"
@@ -60,9 +72,11 @@
                         </group>
                     </group>
                     <div class="text-muted" invisible="not icecat_manufacturer_id">
-                        The On-Market index avoids downloading the complete
-                        Icecat catalog. Use Modified Since to ignore old
-                        products before they are added to the import queue.
+                        Filters are applied while streaming the Icecat
+                        index, before creating queue lines or downloading
+                        product data sheets. Select Icecat categories to keep
+                        the scan focused; enable child categories when a whole
+                        category branch should be imported.
                     </div>
                     <div class="alert alert-danger" role="alert"
                          invisible="icecat_bulk_state != 'error'">

@@ -880,3 +880,100 @@ msgstr ""
 #, python-format
 msgid "Scanning the selected Icecat index for %(brand)s's products in the background. The configured brand, modified-since date and product limit are applied before products are queued — check the Icecat tab for progress."
 msgstr ""
+
+#. module: product_icecat
+msgid "Added Since"
+msgstr ""
+
+#. module: product_icecat
+msgid "Only queue products whose Icecat Date_Added timestamp is on or after this date. Unlike Modified Since, this excludes old products that were merely edited recently."
+msgstr ""
+
+#. module: product_icecat
+msgid "Only import products assigned to these Icecat categories. Leave empty to allow every category for this brand."
+msgstr ""
+
+#. module: product_icecat
+msgid "Include Child Categories"
+msgstr ""
+
+#. module: product_icecat
+msgid "When categories are selected, also accept every descendant category in the Icecat taxonomy."
+msgstr ""
+
+#. module: product_icecat
+msgid "Data Quality"
+msgstr ""
+
+#. module: product_icecat
+msgid "Icecat or Supplier Described"
+msgstr ""
+
+#. module: product_icecat
+msgid "Icecat Standardized Only"
+msgstr ""
+
+#. module: product_icecat
+msgid "Supplier Data Only"
+msgstr ""
+
+#. module: product_icecat
+msgid "ICECAT records are standardized and reviewed by Icecat. SUPPLIER records are imported directly from the manufacturer's source and may not yet be standardized. Removed and undescribed records are never queued."
+msgstr ""
+
+#. module: product_icecat
+msgid "Only On-Market Products"
+msgstr ""
+
+#. module: product_icecat
+msgid "Require the index entry to be marked as currently on market. This is redundant for the On-Market index, but useful with Full Catalog and Daily Changes."
+msgstr ""
+
+#. module: product_icecat
+msgid "Only Products with Main Image"
+msgstr ""
+
+#. module: product_icecat
+msgid "Skip index entries that do not expose a HighPic main image."
+msgstr ""
+
+#. module: product_icecat
+msgid "Exclude Restricted Products"
+msgstr ""
+
+#. module: product_icecat
+msgid "Skip entries marked as Limited by Icecat, which normally require brand authorization and would otherwise fail during import."
+msgstr ""
+
+#. module: product_icecat
+msgid "Catalog Scope"
+msgstr ""
+
+#. module: product_icecat
+msgid "Content Requirements"
+msgstr ""
+
+#. module: product_icecat
+msgid "All Icecat categories"
+msgstr ""
+
+#. module: product_icecat
+msgid "Filters are applied while streaming the Icecat index, before creating queue lines or downloading product data sheets. Select Icecat categories to keep the scan focused; enable child categories when a whole category branch should be imported."
+msgstr ""
+
+#. module: product_icecat
+msgid "Scanning the selected Icecat index for %(brand)s's products in the background. Brand, categories, dates, quality and availability filters are applied before products are queued — check the Icecat tab for progress."
+msgstr ""
+
+#. module: product_icecat
+msgid "Unknown Icecat quality mode: %s"
+msgstr ""
+
+#. module: product_icecat
+msgid "Invalid Icecat %(label)s value '%(value)s'. Use a date or an Icecat timestamp in YYYYMMDDHHMMSS format."
+msgstr ""
+
+#. module: product_icecat
+msgid "Unsupported Icecat %(label)s value: %(value)s"
+msgstr ""
+

@@ -177,6 +177,25 @@ class TestIcecatCatalogIndexParsing(TestCase):
         rows, _mocked_get = self._iter_index(modified_since=date(2026, 1, 1))
         self.assertEqual(rows, ["ACME-NEW"])
 
+    def test_category_filter_is_applied_before_yielding(self):
+        rows, _mocked_get = self._iter_index(category_ids={"20"})
+        self.assertEqual(rows, ["ACME-NEW", "NO-DATE"])
+
+    def test_added_since_excludes_old_products_even_if_modified(self):
+        rows, _mocked_get = self._iter_index(added_since=date(2026, 1, 1))
+        self.assertEqual(rows, ["ACME-NEW", "NO-DATE"])
+
+    def test_quality_filter_can_require_icecat_standardization(self):
+        rows, _mocked_get = self._iter_index(quality_mode="icecat")
+        self.assertEqual(rows, ["ACME-OLD", "NO-DATE"])
+
+    def test_image_and_restriction_filters_use_index_attributes(self):
+        rows, _mocked_get = self._iter_index(only_with_image=True)
+        self.assertEqual(rows, ["ACME-OLD", "ACME-NEW"])
+
+        rows, _mocked_get = self._iter_index(only_unrestricted=False)
+        self.assertEqual(rows, ["ACME-OLD", "ACME-NEW", "NO-DATE", "RESTRICTED"])
+
     def test_full_and_daily_index_names(self):
         _rows, mocked_get = self._iter_index(index_type="full")
         self.assertTrue(mocked_get.call_args[0][0].endswith("/files.index.xml.gz"))

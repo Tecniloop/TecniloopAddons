@@ -233,22 +233,16 @@ class IcecatClient:
         )
 
     @staticmethod
-    def _updated_threshold(modified_since):
-        """Return an Icecat ``Updated`` timestamp suitable for comparison.
-
-        The index stores timestamps as ``YYYYMMDDHHMMSS``. Odoo normally
-        passes a :class:`datetime.date` for the brand filter, but accepting a
-        datetime or a string keeps this plain-Python client reusable and
-        backwards compatible with callers outside the ORM.
-        """
-        if not modified_since:
+    def _timestamp_threshold(value, label):
+        """Normalize a date/datetime/string to Icecat's timestamp format."""
+        if not value:
             return False
-        if isinstance(modified_since, datetime):
-            value = modified_since
-        elif isinstance(modified_since, date):
-            value = datetime.combine(modified_since, time.min)
-        elif isinstance(modified_since, str):
-            raw_value = modified_since.strip()
+        if isinstance(value, datetime):
+            normalized = value
+        elif isinstance(value, date):
+            normalized = datetime.combine(value, time.min)
+        elif isinstance(value, str):
+            raw_value = value.strip()
             digits = "".join(character for character in raw_value if character.isdigit())
             if len(digits) == 8:
                 return digits + "000000"
@@ -256,30 +250,50 @@ class IcecatClient:
                 return digits[:14]
             raise IcecatError(
                 _(
-                    "Invalid Icecat modified-since value '%s'. Use a date or "
+                    "Invalid Icecat %(label)s value '%(value)s'. Use a date or "
                     "an Icecat timestamp in YYYYMMDDHHMMSS format.",
-                    modified_since,
+                    label=label,
+                    value=value,
                 )
             )
         else:
             raise IcecatError(
-                _("Unsupported Icecat modified-since value: %s", modified_since)
+                _(
+                    "Unsupported Icecat %(label)s value: %(value)s",
+                    label=label,
+                    value=value,
+                )
             )
-        return value.strftime("%Y%m%d%H%M%S")
+        return normalized.strftime("%Y%m%d%H%M%S")
+
+    @classmethod
+    def _updated_threshold(cls, modified_since):
+        return cls._timestamp_threshold(modified_since, "modified-since")
+
+    @classmethod
+    def _added_threshold(cls, added_since):
+        return cls._timestamp_threshold(added_since, "added-since")
 
     def iter_catalog_index_by_supplier(
         self,
         supplier_id,
         index_type="on_market",
         modified_since=None,
+        added_since=None,
+        category_ids=None,
+        quality_mode="described",
+        only_on_market=True,
+        only_with_image=False,
+        only_unrestricted=True,
         full_catalog=None,
     ):
         """Yield matching product codes from an Icecat XML index.
 
         ``index_type`` can be ``on_market`` (the recommended, smaller index),
-        ``full`` or ``daily``. The optional ``modified_since`` filter is
-        applied against the index entry's ``Updated`` attribute before a
-        product code is yielded.
+        ``full`` or ``daily``. Filters are evaluated only against attributes
+        already present in each index entry (supplier, category, timestamps,
+        quality, market state, image and access restriction), before any
+        product data sheet is downloaded.
 
         ``full_catalog`` is retained as a compatibility alias for older code:
         ``True`` selects ``full`` and ``False`` selects ``daily``.
@@ -298,6 +312,12 @@ class IcecatClient:
 
         supplier_id = str(supplier_id)
         updated_threshold = self._updated_threshold(modified_since)
+        added_threshold = self._added_threshold(added_since)
+        category_ids = {str(category_id) for category_id in (category_ids or [])}
+        valid_quality_modes = {"described", "icecat", "supplier"}
+        if quality_mode not in valid_quality_modes:
+            raise IcecatError(_("Unknown Icecat quality mode: %s", quality_mode))
+        truthy_values = {"1", "yes", "true"}
         try:
             response = requests.get(
                 ICECAT_CATALOG_BASEURL.format(language=self.language) + filename,
@@ -335,14 +355,46 @@ class IcecatClient:
 
                     if elem.tag != "file":
                         continue
-                    if elem.attrib.get("Supplier_id") == supplier_id:
-                        updated = elem.attrib.get("Updated")
-                        if not updated_threshold or (
-                            updated and updated >= updated_threshold
-                        ):
-                            prod_id = elem.attrib.get("Prod_ID")
-                            if prod_id:
-                                yield prod_id
+
+                    attrs = elem.attrib
+                    accepted = attrs.get("Supplier_id") == supplier_id
+                    if accepted and category_ids:
+                        accepted = attrs.get("Catid") in category_ids
+
+                    quality = (attrs.get("Quality") or "").upper()
+                    if accepted:
+                        # Entries removed from the catalog or not yet described
+                        # cannot be imported as usable product data sheets.
+                        accepted = quality not in {"REMOVED", "NOEDITOR"}
+                    if accepted and quality_mode == "icecat":
+                        accepted = quality == "ICECAT"
+                    elif accepted and quality_mode == "supplier":
+                        accepted = quality == "SUPPLIER"
+                    elif accepted and quality_mode == "described" and quality:
+                        accepted = quality in {"ICECAT", "SUPPLIER"}
+
+                    if accepted and updated_threshold:
+                        updated = attrs.get("Updated")
+                        accepted = bool(updated and updated >= updated_threshold)
+                    if accepted and added_threshold:
+                        date_added = attrs.get("Date_Added")
+                        accepted = bool(date_added and date_added >= added_threshold)
+
+                    if accepted and only_on_market:
+                        on_market = attrs.get("On_Market")
+                        if on_market is not None:
+                            accepted = on_market.strip().lower() in truthy_values
+                    if accepted and only_with_image:
+                        accepted = bool((attrs.get("HighPic") or "").strip())
+                    if accepted and only_unrestricted:
+                        limited = attrs.get("Limited")
+                        if limited is not None:
+                            accepted = limited.strip().lower() not in truthy_values
+
+                    if accepted:
+                        prod_id = attrs.get("Prod_ID")
+                        if prod_id:
+                            yield prod_id
                     elem.clear()
 
                     seen_since_gc += 1

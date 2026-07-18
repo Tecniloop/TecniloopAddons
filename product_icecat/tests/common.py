@@ -73,13 +73,25 @@ SAMPLE_SUPPLIERS_XML = b"""<?xml version="1.0" encoding="UTF-8"?>
 SAMPLE_INDEX_XML = b"""<?xml version="1.0" encoding="UTF-8"?>
 <files.index Generated="20260718120000">
   <file Product_ID="1001" Supplier_id="99" Prod_ID="ACME-OLD"
-        Updated="20230102120000" On_Market="1"/>
+        Updated="20230102120000" Date_Added="20230101000000"
+        Catid="10" Quality="ICECAT" On_Market="1"
+        HighPic="https://images.example.com/old.jpg" Limited="No"/>
   <file Product_ID="1002" Supplier_id="99" Prod_ID="ACME-NEW"
-        Updated="20260710120000" On_Market="1"/>
+        Updated="20260710120000" Date_Added="20260701000000"
+        Catid="20" Quality="SUPPLIER" On_Market="1"
+        HighPic="https://images.example.com/new.jpg" Limited="No"/>
   <file Product_ID="1003" Supplier_id="1" Prod_ID="OTHER-BRAND"
-        Updated="20260711120000" On_Market="1"/>
+        Updated="20260711120000" Date_Added="20260701000000"
+        Catid="20" Quality="ICECAT" On_Market="1" Limited="No"/>
   <file Product_ID="1004" Supplier_id="99" Prod_ID="NO-DATE"
-        On_Market="1"/>
+        Date_Added="20260705000000" Catid="20" Quality="ICECAT"
+        On_Market="1" Limited="No"/>
+  <file Product_ID="1005" Supplier_id="99" Prod_ID="RESTRICTED"
+        Updated="20260712120000" Date_Added="20260701000000"
+        Catid="20" Quality="ICECAT" On_Market="1" Limited="Yes"/>
+  <file Product_ID="1006" Supplier_id="99" Prod_ID="REMOVED"
+        Updated="20260712120000" Date_Added="20260701000000"
+        Catid="20" Quality="REMOVED" On_Market="0" Limited="No"/>
 </files.index>
 """
 

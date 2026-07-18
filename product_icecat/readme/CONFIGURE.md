@@ -14,5 +14,10 @@
 4. On each Product Brand, open the *Icecat* tab and link it to the
    matching Icecat manufacturer.
 5. For bulk imports, keep *Catalog Index* set to *On-Market Products*
-   unless you explicitly need the complete global catalog. Set *Modified
-   Since* when you only want products updated from a particular date.
+   unless you explicitly need the complete global catalog. Select one or
+   more *Icecat Categories* on the brand to limit the scan; optionally
+   include all child categories in those taxonomy branches.
+6. Use *Modified Since* for recently edited data and *Added Since* when
+   old products must be excluded even if Icecat edited them recently.
+   Quality, market, image and access filters are evaluated directly from
+   the index before any product sheet is downloaded.

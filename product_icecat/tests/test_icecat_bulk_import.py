@@ -95,7 +95,31 @@ class TestIcecatBulkScan(BaseCommon):
             "99",
             index_type="on_market",
             modified_since=date(2026, 1, 1),
+            added_since=False,
+            category_ids=set(),
+            quality_mode="described",
+            only_on_market=True,
+            only_with_image=False,
+            only_unrestricted=True,
         )
+
+    @patch(
+        "odoo.addons.product_icecat.models.icecat_api.IcecatClient."
+        "iter_catalog_index_by_supplier"
+    )
+    def test_scan_expands_selected_category_to_children(self, mock_iter):
+        parent = self.env["icecat.category"].create(
+            {"name": "Parent", "icecat_id": "10"}
+        )
+        self.env["icecat.category"].create(
+            {"name": "Child", "icecat_id": "11", "parent_id": parent.id}
+        )
+        self.brand.icecat_bulk_category_ids = parent
+        mock_iter.return_value = iter([])
+
+        self.brand._icecat_bulk_scan()
+
+        self.assertEqual(mock_iter.call_args.kwargs["category_ids"], {"10", "11"})
 
 
 @tagged("post_install", "-at_install")

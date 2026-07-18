@@ -1,114 +1,201 @@
 # Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* tl_product_nextmart
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-18 00:00+0000\n"
+"PO-Revision-Date: 2026-07-18 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
 "Language: es\n"
+"MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#. module: tl_product_nextmart
+#: code:addons/tl_product_nextmart/__manifest__.py:0
 msgid "Product Nextmart Enrichment"
 msgstr "Enriquecimiento de productos con Nextmart"
 
+#. module: tl_product_nextmart
+#: model_terms:ir.ui.view,arch_db:tl_product_nextmart.product_template_form_view_nextmart
+#: model_terms:ir.ui.view,arch_db:tl_product_nextmart.product_variant_form_view_nextmart
 msgid "Complete with Nextmart"
 msgstr "Completar con Nextmart"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_partner_key
 msgid "Nextmart Partner Key"
 msgstr "Partner Key de Nextmart"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_product_template__nextmart_source_language
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_language
 msgid "Nextmart Language"
 msgstr "Idioma de Nextmart"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_update_name
 msgid "Update Product Name"
 msgstr "Actualizar el nombre del producto"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_overwrite_content
 msgid "Overwrite Existing Content"
 msgstr "Sobrescribir contenido existente"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_import_images
 msgid "Import Images"
 msgstr "Importar imágenes"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_import_specifications
 msgid "Import Technical Specifications"
 msgstr "Importar especificaciones técnicas"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_create_brand_manufacturer
 msgid "Create Brand and Manufacturer"
 msgstr "Crear marca y fabricante"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_include_specs_ecommerce
 msgid "Include Specifications in eCommerce Description"
 msgstr "Incluir especificaciones en la descripción de comercio electrónico"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_max_extra_images
 msgid "Maximum Extra Images"
 msgstr "Máximo de imágenes adicionales"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_timeout
 msgid "Connection Timeout (seconds)"
 msgstr "Tiempo máximo de conexión (segundos)"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_product_template__nextmart_last_sync
 msgid "Last Nextmart Sync"
 msgstr "Última sincronización Nextmart"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_product_template__nextmart_source_url
 msgid "Nextmart URL"
 msgstr "URL de Nextmart"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_product_template__nextmart_segment
 msgid "Nextmart Product Segment"
 msgstr "Segmento de producto Nextmart"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_product_template__nextmart_marketing_claim
 msgid "Nextmart Marketing Claim"
 msgstr "Reclamo comercial Nextmart"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_product_template__nextmart_specification_ids
 msgid "Nextmart Technical Specifications"
 msgstr "Especificaciones técnicas Nextmart"
 
+#. module: tl_product_nextmart
+#: model_terms:ir.ui.view,arch_db:tl_product_nextmart.product_template_form_view_nextmart
+#: model_terms:ir.ui.view,arch_db:tl_product_nextmart.res_config_settings_view_form_nextmart
 msgid "Technical specifications"
 msgstr "Especificaciones técnicas"
 
+#. module: tl_product_nextmart
+#: code:addons/tl_product_nextmart/models/product_template.py:288
 msgid "Technical details"
 msgstr "Detalles técnicos"
 
+#. module: tl_product_nextmart
+#: code:addons/tl_product_nextmart/models/product_template.py:265
 msgid "Main features"
 msgstr "Características principales"
 
+#. module: tl_product_nextmart
+#: code:addons/tl_product_nextmart/models/product_template.py:275
 msgid "Product strengths"
 msgstr "Puntos fuertes del producto"
 
+#. module: tl_product_nextmart
+#: model_terms:ir.ui.view,arch_db:tl_product_nextmart.res_config_settings_view_form_nextmart
 msgid "Brand and manufacturer"
 msgstr "Marca y fabricante"
 
+#. module: tl_product_nextmart
+#: model_terms:ir.ui.view,arch_db:tl_product_nextmart.res_config_settings_view_form_nextmart
 msgid "Content update"
 msgstr "Actualización de contenido"
 
+#. module: tl_product_nextmart
+#: model_terms:ir.ui.view,arch_db:tl_product_nextmart.res_config_settings_view_form_nextmart
 msgid "Nextmart connection"
 msgstr "Conexión Nextmart"
 
+#. module: tl_product_nextmart
+#: code:addons/tl_product_nextmart/models/product_template.py:564
+#, python-format
 msgid "Nextmart data imported: %(specs)s specifications and %(images)s images."
 msgstr "Datos de Nextmart importados: %(specs)s especificaciones y %(images)s imágenes."
 
+#. module: tl_product_nextmart
+#: code:addons/tl_product_nextmart/models/product_template.py:162
 msgid "The product does not have an EAN/GTIN barcode."
 msgstr "El producto no tiene un código de barras EAN/GTIN."
 
+#. module: tl_product_nextmart
+#: code:addons/tl_product_nextmart/models/product_template.py:465
 msgid "Configure the Nextmart Partner Key in Settings before completing products."
 msgstr "Configure el Partner Key de Nextmart en Ajustes antes de completar productos."
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_product_template__show_nexmart_data
 msgid "Show Nextmart DataView on eCommerce"
 msgstr "Mostrar DataView de Nextmart en eCommerce"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_product_template__nextmart_iframe_url
 msgid "Nextmart DataView URL"
 msgstr "URL DataView de Nextmart"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_product_template__nextmart_iframe_height
 msgid "Nextmart DataView Height"
 msgstr "Altura del DataView de Nextmart"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_import_all_images
 msgid "Import All Nextmart Images"
 msgstr "Importar todas las imágenes de Nextmart"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_auto_show_iframe
 msgid "Show DataView after Import"
 msgstr "Mostrar DataView después de importar"
 
+#. module: tl_product_nextmart
+#: model:ir.model.fields,field_description:tl_product_nextmart.field_res_config_settings__nextmart_iframe_height
 msgid "DataView Iframe Height (px)"
 msgstr "Altura del iframe DataView (px)"
 
+#. module: tl_product_nextmart
+#: model_terms:ir.ui.view,arch_db:tl_product_nextmart.res_config_settings_view_form_nextmart
 msgid "eCommerce DataView"
 msgstr "DataView en eCommerce"
 
+#. module: tl_product_nextmart
+#: model_terms:ir.ui.view,arch_db:tl_product_nextmart.product_nextmart_dataview
 msgid "Información técnica del fabricante"
 msgstr "Información técnica del fabricante"
 
+#. module: tl_product_nextmart
+#: model_terms:ir.ui.view,arch_db:tl_product_nextmart.product_nextmart_dataview
 msgid "Abrir la ficha de Nextmart en una ventana nueva"
 msgstr "Abrir la ficha de Nextmart en una ventana nueva"

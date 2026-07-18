@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Custom Development
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl). -->
+<odoo>
+    <!--
+        Keep website_sale_product_description unchanged on disk and preserve
+        its standard behaviour for products that do not come from Icecat.
+
+        Icecat public descriptions contain headings and specification tables.
+        For Icecat products only, replace the OCA carousel insertion with the
+        same standard block restricted to non-Icecat products, then render the
+        Icecat description below the complete image/details row.
+
+        Removing product_icecat restores the original OCA template without
+        requiring any change to the OCA module itself.
+    -->
+    <template
+        id="icecat_adapt_oca_public_description"
+        inherit_id="website_sale_product_description.shop_product_carousel"
+        name="Icecat: keep technical description outside product carousel"
+    >
+        <xpath
+            expr="//div[@id='o-carousel-product']/div[p[@id='product_public_description']]"
+            position="replace"
+        >
+            <div class="o_not_editable" t-if="not product.icecat_product_id">
+                <p
+                    t-field="product.public_description"
+                    id="product_public_description"
+                />
+            </div>
+        </xpath>
+    </template>
+
+    <template
+        id="icecat_public_description_below_product_main"
+        inherit_id="website_sale.product"
+        name="Icecat: technical description below product information"
+    >
+        <xpath expr="//div[@id='product_detail_main']" position="after">
+            <div
+                t-if="product.icecat_product_id and product.public_description"
+                id="product_public_description"
+                class="o_wsale_content_contained container mt-4 mb-4 o_not_editable"
+            >
+                <div
+                    class="o_product_public_description"
+                    t-field="product.public_description"
+                ></div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

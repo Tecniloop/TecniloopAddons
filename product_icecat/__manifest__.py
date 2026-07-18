@@ -3,7 +3,7 @@
 {
     "name": "Icecat Catalog Integration",
     "summary": "Import products, images and technical specifications from the Icecat open catalog",
-    "version": "19.0.1.2.0",
+    "version": "19.0.1.3.2",
     "category": "Sales/Sales",
     "development_status": "Beta",
     "author": "Custom Development",
@@ -25,6 +25,7 @@
         "views/icecat_import_line_views.xml",
         "views/product_brand_views.xml",
         "views/product_template_views.xml",
+        "views/website_sale_template.xml",
         "wizards/icecat_product_import_views.xml",
         "views/icecat_menus.xml",
         "data/ir_cron_data.xml",

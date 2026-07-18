@@ -26,9 +26,10 @@ result straight into Odoo:
 
 Only the Icecat real-time single-product lookup (``XML_s3`` interface) is
 used for one-off imports. Bulk "import all products of a brand" streams
-Icecat's compressed On-Market index by default, filters it by the linked
-Icecat Supplier ID and optionally by the ``Updated`` date, then imports each
-matching product in the background. The Full and Daily indexes remain
+Icecat's compressed On-Market index by default and filters each entry
+before queueing it by Supplier ID, selected category branches, ``Updated``
+and ``Date_Added`` timestamps, data quality, on-market state, main-image
+availability and access restriction. The Full and Daily indexes remain
 available for exceptional cases.
 
 **Table of contents**
@@ -52,8 +53,13 @@ Configuration
 #. On each Product Brand, open the *Icecat* tab and link it to the
    matching Icecat manufacturer.
 #. For bulk imports, keep *Catalog Index* set to *On-Market Products*
-   unless you explicitly need the complete global catalog. Set *Modified
-   Since* when you only want products updated from a particular date.
+   unless you explicitly need the complete global catalog. Select one or
+   more *Icecat Categories* on the brand to limit the scan; optionally
+   include all child categories in those taxonomy branches.
+#. Use *Modified Since* for recently edited data and *Added Since* when
+   old products must be excluded even if Icecat edited them recently.
+   Quality, market, image and access filters are evaluated directly from
+   the index before any product sheet is downloaded.
 
 Usage
 =====
@@ -75,9 +81,16 @@ Import all products of a brand
 #. Select the catalog index. *On-Market Products* is the recommended
    default because it is smaller than the global catalog and contains
    products known to be distributed in the configured language market.
-#. Optionally set *Modified Since* to exclude products whose Icecat
-   ``Updated`` timestamp is older than that date, and set a maximum number
-   of products for a controlled first test.
+#. Select the allowed *Icecat Categories*. With *Include Child
+   Categories* enabled, choosing a parent category imports its complete
+   descendant branch. Leaving the field empty allows all categories.
+#. Optionally set *Modified Since* and/or *Added Since*. The first accepts
+   old products edited recently; the second only accepts products first
+   added to Icecat from that date.
+#. Choose the data quality and availability requirements: standardized
+   Icecat data only or supplier data too, on-market status, main image,
+   and exclusion of restricted products. Set a maximum number of products
+   for a controlled first test.
 #. Click *Import All Products from Icecat*.
 #. This runs entirely in the background: Icecat's compressed catalog index
    is scanned for matching part numbers, which are then imported a batch at
@@ -111,9 +124,9 @@ Known issues / Roadmap
   priority channels; failures just sit in ``error`` state for manual or
   bulk retry.
 * Bulk-scanning Icecat's full catalog index can still take a while for a
-  brand with many products. Prefer the compressed On-Market index and a
-  *Modified Since* date whenever the business does not need historical
-  or no-longer-distributed products.
+  brand with many products. Prefer the compressed On-Market index,
+  category branches and the date/quality/availability filters whenever the
+  business does not need the whole historical assortment.
 
 Credits
 =======

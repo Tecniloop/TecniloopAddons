@@ -9,6 +9,7 @@ from .icecat_api import IcecatError, get_client_from_env
 class IcecatCategory(models.Model):
     _name = "icecat.category"
     _description = "Icecat Category"
+    _rec_name = "complete_name"
     _parent_name = "parent_id"
     _parent_store = True
     _order = "complete_name"

@@ -63,6 +63,59 @@ class ProductBrand(models.Model):
         "or after this date. Leave empty to include all dates available in "
         "the selected index.",
     )
+    icecat_bulk_added_since = fields.Date(
+        string="Added Since",
+        help="Only queue products whose Icecat Date_Added timestamp is on or "
+        "after this date. Unlike Modified Since, this excludes old products "
+        "that were merely edited recently.",
+    )
+    icecat_bulk_category_ids = fields.Many2many(
+        comodel_name="icecat.category",
+        relation="product_brand_icecat_bulk_category_rel",
+        column1="product_brand_id",
+        column2="icecat_category_id",
+        string="Icecat Categories",
+        help="Only import products assigned to these Icecat categories. "
+        "Leave empty to allow every category for this brand.",
+    )
+    icecat_bulk_include_child_categories = fields.Boolean(
+        string="Include Child Categories",
+        default=True,
+        help="When categories are selected, also accept every descendant "
+        "category in the Icecat taxonomy.",
+    )
+    icecat_bulk_quality = fields.Selection(
+        [
+            ("described", "Icecat or Supplier Described"),
+            ("icecat", "Icecat Standardized Only"),
+            ("supplier", "Supplier Data Only"),
+        ],
+        string="Data Quality",
+        default="described",
+        required=True,
+        help="ICECAT records are standardized and reviewed by Icecat. "
+        "SUPPLIER records are imported directly from the manufacturer's "
+        "source and may not yet be standardized. Removed and undescribed "
+        "records are never queued.",
+    )
+    icecat_bulk_only_on_market = fields.Boolean(
+        string="Only On-Market Products",
+        default=True,
+        help="Require the index entry to be marked as currently on market. "
+        "This is redundant for the On-Market index, but useful with Full "
+        "Catalog and Daily Changes.",
+    )
+    icecat_bulk_only_with_image = fields.Boolean(
+        string="Only Products with Main Image",
+        default=False,
+        help="Skip index entries that do not expose a HighPic main image.",
+    )
+    icecat_bulk_only_unrestricted = fields.Boolean(
+        string="Exclude Restricted Products",
+        default=True,
+        help="Skip entries marked as Limited by Icecat, which normally "
+        "require brand authorization and would otherwise fail during import.",
+    )
     icecat_bulk_limit = fields.Integer(
         string="Max Products to Import",
         default=0,
@@ -132,8 +185,8 @@ class ProductBrand(models.Model):
                 "title": self.env._("Import queued"),
                 "message": self.env._(
                     "Scanning the selected Icecat index for %(brand)s's "
-                    "products in the background. The configured brand, "
-                    "modified-since date and product limit are applied before "
+                    "products in the background. Brand, categories, dates, "
+                    "quality and availability filters are applied before "
                     "products are queued — check the Icecat tab for progress.",
                     brand=self.name,
                 ),
@@ -204,12 +257,27 @@ class ProductBrand(models.Model):
             .mapped("default_code")
         )
 
+        category_ids = set(self.icecat_bulk_category_ids.mapped("icecat_id"))
+        if category_ids and self.icecat_bulk_include_child_categories:
+            category_ids = set(
+                self.env["icecat.category"]
+                .sudo()
+                .search([("id", "child_of", self.icecat_bulk_category_ids.ids)])
+                .mapped("icecat_id")
+            )
+
         count = 0
         create_vals = []
         for part_number in client.iter_catalog_index_by_supplier(
             manufacturer.icecat_supplier_id,
             index_type=self.icecat_bulk_index_type,
             modified_since=self.icecat_bulk_modified_since,
+            added_since=self.icecat_bulk_added_since,
+            category_ids=category_ids,
+            quality_mode=self.icecat_bulk_quality,
+            only_on_market=self.icecat_bulk_only_on_market,
+            only_with_image=self.icecat_bulk_only_with_image,
+            only_unrestricted=self.icecat_bulk_only_unrestricted,
         ):
             if part_number in already_queued:
                 continue

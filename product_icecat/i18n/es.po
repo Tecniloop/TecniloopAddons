@@ -881,3 +881,100 @@ msgstr "El índice de productos en mercado evita descargar el catálogo completo
 #, python-format
 msgid "Scanning the selected Icecat index for %(brand)s's products in the background. The configured brand, modified-since date and product limit are applied before products are queued — check the Icecat tab for progress."
 msgstr "Escaneando en segundo plano el índice de Icecat seleccionado para los productos de %(brand)s. La marca configurada, la fecha de modificación y el límite de productos se aplican antes de encolarlos; consulte el progreso en la pestaña Icecat."
+
+#. module: product_icecat
+msgid "Added Since"
+msgstr "Añadidos desde"
+
+#. module: product_icecat
+msgid "Only queue products whose Icecat Date_Added timestamp is on or after this date. Unlike Modified Since, this excludes old products that were merely edited recently."
+msgstr "Poner en cola únicamente productos cuya fecha Date_Added de Icecat sea igual o posterior a esta fecha. A diferencia de Modificados desde, excluye productos antiguos que solo se hayan editado recientemente."
+
+#. module: product_icecat
+msgid "Only import products assigned to these Icecat categories. Leave empty to allow every category for this brand."
+msgstr "Importar únicamente productos asignados a estas categorías Icecat. Déjelo vacío para permitir todas las categorías de esta marca."
+
+#. module: product_icecat
+msgid "Include Child Categories"
+msgstr "Incluir categorías hijas"
+
+#. module: product_icecat
+msgid "When categories are selected, also accept every descendant category in the Icecat taxonomy."
+msgstr "Cuando se seleccionen categorías, aceptar también todas sus categorías descendientes en la taxonomía de Icecat."
+
+#. module: product_icecat
+msgid "Data Quality"
+msgstr "Calidad de datos"
+
+#. module: product_icecat
+msgid "Icecat or Supplier Described"
+msgstr "Descritos por Icecat o proveedor"
+
+#. module: product_icecat
+msgid "Icecat Standardized Only"
+msgstr "Solo estandarizados por Icecat"
+
+#. module: product_icecat
+msgid "Supplier Data Only"
+msgstr "Solo datos del proveedor"
+
+#. module: product_icecat
+msgid "ICECAT records are standardized and reviewed by Icecat. SUPPLIER records are imported directly from the manufacturer's source and may not yet be standardized. Removed and undescribed records are never queued."
+msgstr "Los registros ICECAT están estandarizados y revisados por Icecat. Los registros SUPPLIER se importan directamente desde la fuente del fabricante y pueden no estar todavía estandarizados. Los registros eliminados o no descritos nunca se ponen en cola."
+
+#. module: product_icecat
+msgid "Only On-Market Products"
+msgstr "Solo productos en el mercado"
+
+#. module: product_icecat
+msgid "Require the index entry to be marked as currently on market. This is redundant for the On-Market index, but useful with Full Catalog and Daily Changes."
+msgstr "Exigir que la entrada del índice esté marcada como disponible actualmente en el mercado. Es redundante con el índice de productos en el mercado, pero resulta útil con el catálogo completo y los cambios diarios."
+
+#. module: product_icecat
+msgid "Only Products with Main Image"
+msgstr "Solo productos con imagen principal"
+
+#. module: product_icecat
+msgid "Skip index entries that do not expose a HighPic main image."
+msgstr "Omitir las entradas del índice que no proporcionen una imagen principal HighPic."
+
+#. module: product_icecat
+msgid "Exclude Restricted Products"
+msgstr "Excluir productos restringidos"
+
+#. module: product_icecat
+msgid "Skip entries marked as Limited by Icecat, which normally require brand authorization and would otherwise fail during import."
+msgstr "Omitir las entradas marcadas como Limited por Icecat, que normalmente requieren autorización de la marca y, de lo contrario, fallarían durante la importación."
+
+#. module: product_icecat
+msgid "Catalog Scope"
+msgstr "Alcance del catálogo"
+
+#. module: product_icecat
+msgid "Content Requirements"
+msgstr "Requisitos del contenido"
+
+#. module: product_icecat
+msgid "All Icecat categories"
+msgstr "Todas las categorías Icecat"
+
+#. module: product_icecat
+msgid "Filters are applied while streaming the Icecat index, before creating queue lines or downloading product data sheets. Select Icecat categories to keep the scan focused; enable child categories when a whole category branch should be imported."
+msgstr "Los filtros se aplican mientras se procesa el índice Icecat, antes de crear líneas de cola o descargar fichas de producto. Seleccione categorías Icecat para acotar el escaneo y active las categorías hijas cuando deba importarse una rama completa."
+
+#. module: product_icecat
+msgid "Scanning the selected Icecat index for %(brand)s's products in the background. Brand, categories, dates, quality and availability filters are applied before products are queued — check the Icecat tab for progress."
+msgstr "Se está analizando en segundo plano el índice Icecat seleccionado para los productos de %(brand)s. Los filtros de marca, categorías, fechas, calidad y disponibilidad se aplican antes de poner los productos en cola; consulte el progreso en la pestaña Icecat."
+
+#. module: product_icecat
+msgid "Unknown Icecat quality mode: %s"
+msgstr "Modo de calidad Icecat desconocido: %s"
+
+#. module: product_icecat
+msgid "Invalid Icecat %(label)s value '%(value)s'. Use a date or an Icecat timestamp in YYYYMMDDHHMMSS format."
+msgstr "Valor %(label)s de Icecat no válido: '%(value)s'. Utilice una fecha o una marca de tiempo Icecat con formato YYYYMMDDHHMMSS."
+
+#. module: product_icecat
+msgid "Unsupported Icecat %(label)s value: %(value)s"
+msgstr "Valor %(label)s de Icecat no compatible: %(value)s"
+

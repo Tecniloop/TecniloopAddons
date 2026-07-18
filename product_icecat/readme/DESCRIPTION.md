@@ -14,7 +14,8 @@ result straight into Odoo:
 
 Only the Icecat real-time single-product lookup (`XML_s3` interface) is
 used for one-off imports. Bulk "import all products of a brand" streams
-Icecat's compressed On-Market index by default, filters it by the linked
-Icecat Supplier ID and optionally by the `Updated` date, then imports each
-matching product in the background. The Full and Daily indexes remain
+Icecat's compressed On-Market index by default and filters each entry
+before queueing it by Supplier ID, selected category branches, `Updated`
+and `Date_Added` timestamps, data quality, on-market state, main-image
+availability and access restriction. The Full and Daily indexes remain
 available for exceptional cases.
