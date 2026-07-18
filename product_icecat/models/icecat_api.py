@@ -36,6 +36,7 @@ _logger = logging.getLogger(__name__)
 
 ICECAT_XML_S3_URL = "https://data.icecat.biz/xml_s3/xml_server3.cgi"
 ICECAT_CATEGORIES_URL = "https://data.icecat.biz/export/freexml/refs/CategoriesList.xml.gz"
+ICECAT_SUPPLIERS_URL = "https://data.icecat.biz/export/freexml/refs/SuppliersList.xml.gz"
 ICECAT_CATALOG_BASEURL = "https://data.icecat.biz/export/freexml/EN/"
 ICECAT_FULL_INDEX_FILENAME = "files.index.xml"
 ICECAT_DAILY_INDEX_FILENAME = "daily.index.xml"
@@ -46,7 +47,10 @@ ICECAT_DAILY_INDEX_FILENAME = "daily.index.xml"
 ICECAT_TAXONOMY_LANGID_EN = "1"
 
 DEFAULT_TIMEOUT = 20
+# CategoriesList / SuppliersList reference exports share this timeout: both
+# are moderately sized gzipped XML files served from the same refs endpoint.
 CATEGORIES_TIMEOUT = 180
+SUPPLIERS_TIMEOUT = CATEGORIES_TIMEOUT
 CATALOG_INDEX_TIMEOUT = 300
 # How many already-processed <file> elements to let the streaming parser
 # accumulate under their <files.index> parent before dropping them, to keep
@@ -209,6 +213,59 @@ class IcecatClient:
         finally:
             response.close()
 
+    def _download_refs_gzip(self, url, what, timeout):
+        """Download one of Icecat's gzipped ``refs`` reference exports and
+        return a decompressing file object over its XML content.
+
+        ``what`` is a short human-readable description of the file (already
+        translated), used in error messages.
+        """
+        try:
+            response = requests.get(
+                url,
+                auth=(self.username, self.password),
+                timeout=timeout,
+            )
+        except requests.exceptions.RequestException as exc:
+            raise IcecatError(
+                _("Could not download the Icecat %(what)s: %(error)s", what=what, error=exc)
+            ) from exc
+        if response.status_code in (401, 403):
+            raise IcecatError(
+                _("Icecat rejected the account credentials (HTTP %s).", response.status_code)
+            )
+        if not 200 <= response.status_code < 300:
+            raise IcecatError(
+                _(
+                    "Icecat returned HTTP %(status)s while downloading the %(what)s.",
+                    status=response.status_code,
+                    what=what,
+                )
+            )
+        return gzip.GzipFile(fileobj=io.BytesIO(response.content))
+
+    def iter_suppliers(self):
+        """Stream Icecat's full suppliers (manufacturers) reference list.
+
+        Downloads ``SuppliersList.xml.gz`` and yields
+        ``{"icecat_id": ..., "name": ...}`` dicts, one per ``<Supplier>``
+        entry. ``icecat_id`` is Icecat's numeric Supplier ID (the value the
+        catalog index files key their ``Supplier_id`` attribute on), and
+        ``name`` is the exact spelling Icecat expects as the ``vendor``
+        parameter in product lookups.
+        """
+        with self._download_refs_gzip(
+            ICECAT_SUPPLIERS_URL, _("suppliers list"), SUPPLIERS_TIMEOUT
+        ) as gz_file:
+            for _event, elem in ET.iterparse(gz_file, events=("end",)):
+                if elem.tag != "Supplier":
+                    continue
+                icecat_id = elem.attrib.get("ID")
+                name = elem.attrib.get("Name")
+                if icecat_id and name:
+                    yield {"icecat_id": icecat_id, "name": name.strip()}
+                elem.clear()
+
     def iter_categories(self):
         """Stream the full Icecat category taxonomy.
 
@@ -218,29 +275,9 @@ class IcecatClient:
         entries are fixed and independent from the account's configured
         product data language.
         """
-        try:
-            response = requests.get(
-                ICECAT_CATEGORIES_URL,
-                auth=(self.username, self.password),
-                timeout=CATEGORIES_TIMEOUT,
-            )
-        except requests.exceptions.RequestException as exc:
-            raise IcecatError(
-                _("Could not download the Icecat categories list: %s", exc)
-            ) from exc
-        if response.status_code in (401, 403):
-            raise IcecatError(
-                _("Icecat rejected the account credentials (HTTP %s).", response.status_code)
-            )
-        if not 200 <= response.status_code < 300:
-            raise IcecatError(
-                _(
-                    "Icecat returned HTTP %s while downloading the categories list.",
-                    response.status_code,
-                )
-            )
-
-        with gzip.GzipFile(fileobj=io.BytesIO(response.content)) as gz_file:
+        with self._download_refs_gzip(
+            ICECAT_CATEGORIES_URL, _("categories list"), CATEGORIES_TIMEOUT
+        ) as gz_file:
             for _event, elem in ET.iterparse(gz_file, events=("end",)):
                 if elem.tag != "Category":
                     continue

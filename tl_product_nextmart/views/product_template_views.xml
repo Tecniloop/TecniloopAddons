@@ -5,15 +5,18 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//form/header" position="inside">
-                <button
-                    name="action_nextmart_enrich"
-                    type="object"
-                    string="Complete with Nextmart"
-                    class="btn-secondary"
-                    icon="fa-cloud-download"
-                    invisible="not barcode"
-                />
+            <!-- Odoo 19: la vista base ya no tiene <header>, lo creamos aquí -->
+            <xpath expr="//sheet[@name='product_form']" position="before">
+                <header>
+                    <button
+                        name="action_nextmart_enrich"
+                        type="object"
+                        string="Complete with Nextmart"
+                        class="btn-secondary"
+                        icon="fa-cloud-download"
+                        invisible="not barcode"
+                    />
+                </header>
             </xpath>
             <xpath expr="//page[@name='general_information']" position="after">
                 <page name="nextmart" string="Nextmart">

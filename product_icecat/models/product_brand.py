@@ -85,15 +85,24 @@ class ProductBrand(models.Model):
                 self.env._("Link this brand to an Icecat manufacturer on its Icecat tab first.")
             )
         if not self.icecat_manufacturer_id.icecat_supplier_id:
-            raise UserError(
-                self.env._(
-                    "%(manufacturer)s has no Icecat Supplier ID set. Open "
-                    "it under Icecat Manufacturers and fill it in — it's "
-                    "required to find this manufacturer's products in "
-                    "Icecat's catalog index.",
-                    manufacturer=self.icecat_manufacturer_id.name,
+            # No Supplier ID yet: resolve it automatically from Icecat's
+            # suppliers list instead of asking the user for it.
+            try:
+                unmatched = self.icecat_manufacturer_id._icecat_resolve_supplier_ids()
+            except IcecatError as exc:
+                raise UserError(str(exc)) from exc
+            if unmatched:
+                raise UserError(
+                    self.env._(
+                        "Icecat's suppliers list has no supplier named "
+                        "%(manufacturer)s, so its Supplier ID could not be "
+                        "determined automatically. Check the manufacturer's "
+                        "name against Icecat's spelling (run 'Sync "
+                        "Manufacturers from Icecat' to browse the list), or "
+                        "fill in its Supplier ID by hand.",
+                        manufacturer=self.icecat_manufacturer_id.name,
+                    )
                 )
-            )
         self.write(
             {
                 "icecat_bulk_state": "scanning",

@@ -53,6 +53,35 @@ SAMPLE_PRODUCT_XML_ERROR = b"""<?xml version="1.0" encoding="UTF-8"?>
 </ICECAT-interface>
 """
 
+# Minimal-but-representative ``SuppliersList.xml.gz`` content, mirroring the
+# real refs export schema: ``<Supplier>`` entries with numeric ``ID`` and
+# ``Name`` attributes, wrapped in Icecat's usual interface/response envelope.
+SAMPLE_SUPPLIERS_XML = b"""<?xml version="1.0" encoding="UTF-8"?>
+<ICECAT-interface>
+  <Response Date="2026-07-18" Status="1">
+    <SuppliersList Code="1">
+      <Supplier ID="1" Name="HP" LogoPic="https://images.example.com/hp.png"/>
+      <Supplier ID="99" Name="Acme "/>
+      <Supplier ID="734" Name="Lenovo"/>
+      <Supplier Name="No ID, skipped"/>
+      <Supplier ID="800"/>
+    </SuppliersList>
+  </Response>
+</ICECAT-interface>
+"""
+
+
+def gzip_bytes(data):
+    """Gzip-compress ``data``, the way Icecat serves its refs exports."""
+    import gzip
+    import io
+
+    buf = io.BytesIO()
+    with gzip.GzipFile(fileobj=buf, mode="wb") as gz_file:
+        gz_file.write(data)
+    return buf.getvalue()
+
+
 # A tiny 1x1 transparent PNG, used wherever a test needs to stand in for a
 # downloaded product image without making a real HTTP call.
 TINY_PNG_BYTES = (

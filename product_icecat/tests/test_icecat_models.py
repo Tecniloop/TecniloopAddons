@@ -83,10 +83,70 @@ class TestProductBrandIcecat(BaseCommon):
         with self.assertRaises(UserError):
             brand.action_icecat_bulk_import_start()
 
-    def test_bulk_import_start_requires_supplier_id(self):
-        manufacturer = self.env["icecat.manufacturer"].create({"name": "Acme"})
+    def _patch_suppliers_list(self, rows):
+        """Patch the Icecat client used by icecat.manufacturer so that
+        ``iter_suppliers`` yields ``rows`` without any HTTP call."""
+        from unittest.mock import MagicMock, patch
+
+        client = MagicMock()
+        client.iter_suppliers.side_effect = lambda: iter(rows)
+        return patch(
+            "odoo.addons.product_icecat.models.icecat_manufacturer.get_client_from_env",
+            return_value=client,
+        )
+
+    def test_bulk_import_start_resolves_missing_supplier_id(self):
+        manufacturer = self.env["icecat.manufacturer"].create({"name": "acme"})
         brand = self.env["product.brand"].create(
             {"name": "Acme Brand", "icecat_manufacturer_id": manufacturer.id}
         )
-        with self.assertRaises(UserError):
+        # name match is case-insensitive against Icecat's spelling
+        with self._patch_suppliers_list(
+            [{"icecat_id": "1", "name": "HP"}, {"icecat_id": "99", "name": "Acme"}]
+        ):
             brand.action_icecat_bulk_import_start()
+        self.assertEqual(manufacturer.icecat_supplier_id, "99")
+        self.assertEqual(brand.icecat_bulk_state, "scanning")
+
+    def test_bulk_import_start_errors_when_name_not_in_suppliers_list(self):
+        manufacturer = self.env["icecat.manufacturer"].create({"name": "Nonexistent Vendor"})
+        brand = self.env["product.brand"].create(
+            {"name": "Ghost Brand", "icecat_manufacturer_id": manufacturer.id}
+        )
+        with self._patch_suppliers_list([{"icecat_id": "1", "name": "HP"}]):
+            with self.assertRaises(UserError):
+                brand.action_icecat_bulk_import_start()
+        self.assertFalse(manufacturer.icecat_supplier_id)
+
+    def test_action_fetch_supplier_id(self):
+        manufacturer = self.env["icecat.manufacturer"].create({"name": "Lenovo"})
+        with self._patch_suppliers_list([{"icecat_id": "734", "name": "Lenovo"}]):
+            manufacturer.action_fetch_supplier_id()
+        self.assertEqual(manufacturer.icecat_supplier_id, "734")
+
+    def test_sync_from_icecat_creates_and_updates(self):
+        manufacturer_model = self.env["icecat.manufacturer"]
+        # existing record without ID (matched by name, case-insensitively)
+        no_id = manufacturer_model.create({"name": "acme"})
+        # existing record matched by ID whose name drifted from Icecat's
+        renamed = manufacturer_model.create({"name": "Lenovo Group", "icecat_supplier_id": "734"})
+        rows = [
+            {"icecat_id": "1", "name": "HP"},
+            {"icecat_id": "99", "name": "Acme"},
+            {"icecat_id": "734", "name": "Lenovo"},
+        ]
+        with self._patch_suppliers_list(rows):
+            manufacturer_model.action_sync_from_icecat()
+        self.assertEqual(no_id.icecat_supplier_id, "99")
+        self.assertEqual(renamed.name, "Lenovo")
+        created = manufacturer_model.search([("name", "=", "HP")])
+        self.assertEqual(created.icecat_supplier_id, "1")
+
+    def test_sync_from_icecat_is_idempotent(self):
+        manufacturer_model = self.env["icecat.manufacturer"]
+        rows = [{"icecat_id": "1", "name": "HP"}, {"icecat_id": "99", "name": "Acme"}]
+        with self._patch_suppliers_list(rows):
+            manufacturer_model.action_sync_from_icecat()
+            count_after_first = manufacturer_model.search_count([])
+            manufacturer_model.action_sync_from_icecat()
+        self.assertEqual(manufacturer_model.search_count([]), count_after_first)

@@ -24,6 +24,12 @@
         <field name="model">icecat.manufacturer</field>
         <field name="arch" type="xml">
             <form string="Icecat Manufacturer">
+                <header>
+                    <button name="action_fetch_supplier_id" type="object"
+                            string="Fetch Supplier ID from Icecat"
+                            invisible="icecat_supplier_id"
+                            help="Look this manufacturer's name up in Icecat's suppliers list and fill in its Supplier ID."/>
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" name="action_view_brands"
@@ -79,12 +85,22 @@
                 Create your first Icecat manufacturer
             </p>
             <p>
-                Use the exact name Icecat knows this manufacturer by, then
-                link it from a Product Brand's Icecat tab, and configure
-                what should be imported for its products (images,
-                categories).
+                Use <b>Sync Manufacturers from Icecat</b> to import the
+                full suppliers list (names and Supplier IDs) in one go,
+                or create one by hand using the exact name Icecat knows
+                it by — its Supplier ID is then looked up automatically
+                when first needed. Link manufacturers from a Product
+                Brand's Icecat tab and configure what should be imported
+                for their products (images, categories).
             </p>
         </field>
+    </record>
+
+    <record id="icecat_manufacturer_sync_server_action" model="ir.actions.server">
+        <field name="name">Sync Manufacturers from Icecat</field>
+        <field name="model_id" ref="model_icecat_manufacturer"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_sync_from_icecat()</field>
     </record>
 
 </odoo>

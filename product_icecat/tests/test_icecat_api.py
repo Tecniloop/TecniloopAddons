@@ -73,3 +73,50 @@ class TestIcecatProductParsing(TestCase):
         root = ET.fromstring(SAMPLE_PRODUCT_XML_ERROR)
         product_el = root.find("Product")
         self.assertTrue(product_el.attrib.get("ErrorMessage"))
+
+
+class TestIcecatSuppliersParsing(TestCase):
+    """``iter_suppliers`` with the HTTP layer mocked out: only download +
+    gzip + XML handling is exercised, mirroring how Icecat actually serves
+    ``SuppliersList.xml.gz``."""
+
+    def _iter_suppliers(self, status_code=200, content=None):
+        from unittest.mock import MagicMock, patch
+
+        from odoo.addons.product_icecat.models.icecat_api import IcecatClient
+
+        from .common import SAMPLE_SUPPLIERS_XML, gzip_bytes
+
+        response = MagicMock()
+        response.status_code = status_code
+        response.content = gzip_bytes(content if content is not None else SAMPLE_SUPPLIERS_XML)
+        client = IcecatClient(username="user", password="secret")
+        with patch(
+            "odoo.addons.product_icecat.models.icecat_api.requests.get",
+            return_value=response,
+        ) as mocked_get:
+            rows = list(client.iter_suppliers())
+        return rows, mocked_get
+
+    def test_iter_suppliers_yields_id_and_stripped_name(self):
+        rows, mocked_get = self._iter_suppliers()
+        self.assertEqual(
+            rows,
+            [
+                {"icecat_id": "1", "name": "HP"},
+                {"icecat_id": "99", "name": "Acme"},
+                {"icecat_id": "734", "name": "Lenovo"},
+            ],
+        )
+        # entries missing an ID or a Name are skipped, not crashed on
+        self.assertNotIn("No ID, skipped", [row["name"] for row in rows])
+        called_url = mocked_get.call_args[0][0]
+        self.assertEqual(
+            called_url, "https://data.icecat.biz/export/freexml/refs/SuppliersList.xml.gz"
+        )
+
+    def test_iter_suppliers_raises_on_bad_credentials(self):
+        from odoo.addons.product_icecat.models.icecat_api import IcecatError
+
+        with self.assertRaises(IcecatError):
+            self._iter_suppliers(status_code=401)

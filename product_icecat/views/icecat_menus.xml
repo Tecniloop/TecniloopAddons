@@ -15,22 +15,28 @@
               parent="website_sale.menu_catalog"
               sequence="20"/>
 
+    <menuitem id="menu_icecat_manufacturer_sync"
+              name="Sync Manufacturers from Icecat"
+              action="icecat_manufacturer_sync_server_action"
+              parent="website_sale.menu_catalog"
+              sequence="21"/>
+
     <menuitem id="menu_icecat_category"
               name="Icecat Categories"
               action="icecat_category_action"
               parent="website_sale.menu_catalog"
-              sequence="21"/>
+              sequence="22"/>
 
     <menuitem id="menu_icecat_category_sync"
               name="Sync Categories from Icecat"
               action="icecat_category_sync_server_action"
               parent="website_sale.menu_catalog"
-              sequence="22"/>
+              sequence="23"/>
 
     <menuitem id="menu_icecat_import_line"
               name="Icecat Import Lines"
               action="icecat_import_line_action"
               parent="website_sale.menu_catalog"
-              sequence="23"/>
+              sequence="24"/>
 
 </odoo>
