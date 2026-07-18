@@ -34,7 +34,8 @@
 
                     <group string="Import All Products" invisible="not icecat_manufacturer_id">
                         <group>
-                            <field name="icecat_bulk_use_full_catalog"/>
+                            <field name="icecat_bulk_index_type"/>
+                            <field name="icecat_bulk_modified_since"/>
                             <field name="icecat_bulk_limit"/>
                         </group>
                         <group>
@@ -58,6 +59,11 @@
                             </div>
                         </group>
                     </group>
+                    <div class="text-muted" invisible="not icecat_manufacturer_id">
+                        The On-Market index avoids downloading the complete
+                        Icecat catalog. Use Modified Since to ignore old
+                        products before they are added to the import queue.
+                    </div>
                     <div class="alert alert-danger" role="alert"
                          invisible="icecat_bulk_state != 'error'">
                         <field name="icecat_bulk_error_message" nolabel="1" readonly="1"/>

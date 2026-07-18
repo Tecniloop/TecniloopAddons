@@ -1,5 +1,6 @@
 # Copyright 2026 Custom Development
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl).
+from datetime import date
 from unittest.mock import patch
 
 from odoo.addons.base.tests.common import BaseCommon
@@ -76,6 +77,25 @@ class TestIcecatBulkScan(BaseCommon):
         self.brand._icecat_bulk_scan()
         self.assertEqual(self.brand.icecat_bulk_total, 2)
         self.assertEqual(len(self.brand.icecat_import_line_ids), 2)
+
+    @patch(
+        "odoo.addons.product_icecat.models.icecat_api.IcecatClient."
+        "iter_catalog_index_by_supplier"
+    )
+    def test_scan_passes_index_and_modified_since_filters(self, mock_iter):
+        mock_iter.return_value = iter([])
+        self.brand.write(
+            {
+                "icecat_bulk_index_type": "on_market",
+                "icecat_bulk_modified_since": date(2026, 1, 1),
+            }
+        )
+        self.brand._icecat_bulk_scan()
+        mock_iter.assert_called_once_with(
+            "99",
+            index_type="on_market",
+            modified_since=date(2026, 1, 1),
+        )
 
 
 @tagged("post_install", "-at_install")

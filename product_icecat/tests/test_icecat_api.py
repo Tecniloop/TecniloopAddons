@@ -6,6 +6,8 @@ These only exercise XML parsing (no HTTP, no database), so a plain
 ``unittest.TestCase`` is enough — Odoo's test runner discovers and runs it
 like any other test class found under ``tests/``.
 """
+from datetime import date
+from io import BytesIO
 from unittest import TestCase
 from xml.etree import ElementTree as ET
 
@@ -120,3 +122,64 @@ class TestIcecatSuppliersParsing(TestCase):
 
         with self.assertRaises(IcecatError):
             self._iter_suppliers(status_code=401)
+
+
+class TestIcecatCatalogIndexParsing(TestCase):
+    def _iter_index(self, **kwargs):
+        from unittest.mock import MagicMock, patch
+
+        from odoo.addons.product_icecat.models.icecat_api import IcecatClient
+
+        from .common import SAMPLE_INDEX_XML, gzip_bytes
+
+        response = MagicMock()
+        response.status_code = 200
+        response.raw = BytesIO(gzip_bytes(SAMPLE_INDEX_XML))
+        client = IcecatClient(username="user", password="secret")
+        with patch(
+            "odoo.addons.product_icecat.models.icecat_api.requests.get",
+            return_value=response,
+        ) as mocked_get:
+            rows = list(client.iter_catalog_index_by_supplier("99", **kwargs))
+        return rows, mocked_get
+
+    def test_on_market_index_is_default_and_filtered_by_supplier(self):
+        rows, mocked_get = self._iter_index()
+        self.assertEqual(rows, ["ACME-OLD", "ACME-NEW", "NO-DATE"])
+        called_url = mocked_get.call_args[0][0]
+        self.assertEqual(
+            called_url,
+            "https://data.icecat.biz/export/freexml/EN/on_market.index.xml.gz",
+        )
+
+    def test_on_market_index_uses_configured_language_market(self):
+        from unittest.mock import MagicMock, patch
+
+        from odoo.addons.product_icecat.models.icecat_api import IcecatClient
+
+        from .common import SAMPLE_INDEX_XML, gzip_bytes
+
+        response = MagicMock()
+        response.status_code = 200
+        response.raw = BytesIO(gzip_bytes(SAMPLE_INDEX_XML))
+        client = IcecatClient(username="user", password="secret", language="ES")
+        with patch(
+            "odoo.addons.product_icecat.models.icecat_api.requests.get",
+            return_value=response,
+        ) as mocked_get:
+            list(client.iter_catalog_index_by_supplier("99"))
+        self.assertEqual(
+            mocked_get.call_args[0][0],
+            "https://data.icecat.biz/export/freexml/ES/on_market.index.xml.gz",
+        )
+
+    def test_modified_since_filters_old_and_undated_entries(self):
+        rows, _mocked_get = self._iter_index(modified_since=date(2026, 1, 1))
+        self.assertEqual(rows, ["ACME-NEW"])
+
+    def test_full_and_daily_index_names(self):
+        _rows, mocked_get = self._iter_index(index_type="full")
+        self.assertTrue(mocked_get.call_args[0][0].endswith("/files.index.xml.gz"))
+
+        _rows, mocked_get = self._iter_index(index_type="daily")
+        self.assertTrue(mocked_get.call_args[0][0].endswith("/daily.index.xml.gz"))

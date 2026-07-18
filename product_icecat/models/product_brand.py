@@ -41,13 +41,27 @@ class ProductBrand(models.Model):
         "this brand.",
     )
     icecat_bulk_error_message = fields.Text(copy=False)
-    icecat_bulk_use_full_catalog = fields.Boolean(
-        string="Scan Full Catalog",
-        default=True,
-        help="On: scan Icecat's full catalog index (all known products for "
-        "this manufacturer). Off: only scan the daily index (products "
-        "added/changed recently), which is much faster to download but "
-        "will miss older, unchanged products on a first run.",
+    icecat_bulk_index_type = fields.Selection(
+        [
+            ("on_market", "On-Market Products"),
+            ("full", "Full Catalog"),
+            ("daily", "Daily Changes"),
+        ],
+        string="Catalog Index",
+        default="on_market",
+        required=True,
+        help="On-Market Products is the recommended option: it scans only "
+        "products that Icecat has identified as distributed in the market "
+        "associated with the configured Icecat data language. "
+        "Full Catalog scans every available product and is much larger. "
+        "Daily Changes only contains products updated during the previous "
+        "day.",
+    )
+    icecat_bulk_modified_since = fields.Date(
+        string="Modified Since",
+        help="Only queue index entries whose Icecat Updated timestamp is on "
+        "or after this date. Leave empty to include all dates available in "
+        "the selected index.",
     )
     icecat_bulk_limit = fields.Integer(
         string="Max Products to Import",
@@ -117,9 +131,10 @@ class ProductBrand(models.Model):
             "params": {
                 "title": self.env._("Import queued"),
                 "message": self.env._(
-                    "Scanning the Icecat catalog for %(brand)s's products in "
-                    "the background. This can take a while for large "
-                    "manufacturers — check the Icecat tab for progress.",
+                    "Scanning the selected Icecat index for %(brand)s's "
+                    "products in the background. The configured brand, "
+                    "modified-since date and product limit are applied before "
+                    "products are queued — check the Icecat tab for progress.",
                     brand=self.name,
                 ),
                 "type": "success",
@@ -192,7 +207,9 @@ class ProductBrand(models.Model):
         count = 0
         create_vals = []
         for part_number in client.iter_catalog_index_by_supplier(
-            manufacturer.icecat_supplier_id, full_catalog=self.icecat_bulk_use_full_catalog
+            manufacturer.icecat_supplier_id,
+            index_type=self.icecat_bulk_index_type,
+            modified_since=self.icecat_bulk_modified_since,
         ):
             if part_number in already_queued:
                 continue

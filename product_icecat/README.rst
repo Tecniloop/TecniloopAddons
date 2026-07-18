@@ -26,8 +26,10 @@ result straight into Odoo:
 
 Only the Icecat real-time single-product lookup (``XML_s3`` interface) is
 used for one-off imports. Bulk "import all products of a brand" streams
-Icecat's catalog index file to find matches, then imports each one the
-same way, in the background.
+Icecat's compressed On-Market index by default, filters it by the linked
+Icecat Supplier ID and optionally by the ``Updated`` date, then imports each
+matching product in the background. The Full and Daily indexes remain
+available for exceptional cases.
 
 **Table of contents**
 
@@ -49,6 +51,9 @@ Configuration
    Category creation.
 #. On each Product Brand, open the *Icecat* tab and link it to the
    matching Icecat manufacturer.
+#. For bulk imports, keep *Catalog Index* set to *On-Market Products*
+   unless you explicitly need the complete global catalog. Set *Modified
+   Since* when you only want products updated from a particular date.
 
 Usage
 =====
@@ -67,9 +72,15 @@ Import all products of a brand
 -------------------------------
 
 #. Open the Product Brand and go to its *Icecat* tab.
+#. Select the catalog index. *On-Market Products* is the recommended
+   default because it is smaller than the global catalog and contains
+   products known to be distributed in the configured language market.
+#. Optionally set *Modified Since* to exclude products whose Icecat
+   ``Updated`` timestamp is older than that date, and set a maximum number
+   of products for a controlled first test.
 #. Click *Import All Products from Icecat*.
-#. This runs entirely in the background: Icecat's catalog index is
-   scanned for matching part numbers, which are then imported a batch at
+#. This runs entirely in the background: Icecat's compressed catalog index
+   is scanned for matching part numbers, which are then imported a batch at
    a time by a scheduled action (*Icecat: process bulk product imports*,
    every 5 minutes by default). Progress (pending/done/error/skipped
    counts) is shown on the brand's Icecat tab; the queued lines themselves
@@ -99,11 +110,10 @@ Known issues / Roadmap
   OCA ``queue_job`` integration. It has no per-line retry backoff or
   priority channels; failures just sit in ``error`` state for manual or
   bulk retry.
-* Bulk-scanning Icecat's full catalog index can take a while for the
-  first run on a brand with many products: the index itself can be a
-  large, non-gzipped XML file covering every supplier, streamed and
-  filtered locally since Icecat does not offer a per-supplier index
-  endpoint.
+* Bulk-scanning Icecat's full catalog index can still take a while for a
+  brand with many products. Prefer the compressed On-Market index and a
+  *Modified Since* date whenever the business does not need historical
+  or no-longer-distributed products.
 
 Credits
 =======

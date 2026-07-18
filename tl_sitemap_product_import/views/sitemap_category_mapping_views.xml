@@ -42,7 +42,7 @@
             <search string="Buscar mapeos">
                 <field name="category_path"/>
                 <field name="source_id"/>
-                <group expand="0" string="Agrupar por">
+                <group>
                     <filter string="Fuente" name="group_source" context="{'group_by': 'source_id'}"/>
                 </group>
             </search>

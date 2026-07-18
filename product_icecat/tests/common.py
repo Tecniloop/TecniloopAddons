@@ -70,6 +70,19 @@ SAMPLE_SUPPLIERS_XML = b"""<?xml version="1.0" encoding="UTF-8"?>
 </ICECAT-interface>
 """
 
+SAMPLE_INDEX_XML = b"""<?xml version="1.0" encoding="UTF-8"?>
+<files.index Generated="20260718120000">
+  <file Product_ID="1001" Supplier_id="99" Prod_ID="ACME-OLD"
+        Updated="20230102120000" On_Market="1"/>
+  <file Product_ID="1002" Supplier_id="99" Prod_ID="ACME-NEW"
+        Updated="20260710120000" On_Market="1"/>
+  <file Product_ID="1003" Supplier_id="1" Prod_ID="OTHER-BRAND"
+        Updated="20260711120000" On_Market="1"/>
+  <file Product_ID="1004" Supplier_id="99" Prod_ID="NO-DATE"
+        On_Market="1"/>
+</files.index>
+"""
+
 
 def gzip_bytes(data):
     """Gzip-compress ``data``, the way Icecat serves its refs exports."""

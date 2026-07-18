@@ -13,3 +13,6 @@
    Category creation.
 4. On each Product Brand, open the *Icecat* tab and link it to the
    matching Icecat manufacturer.
+5. For bulk imports, keep *Catalog Index* set to *On-Market Products*
+   unless you explicitly need the complete global catalog. Set *Modified
+   Since* when you only want products updated from a particular date.

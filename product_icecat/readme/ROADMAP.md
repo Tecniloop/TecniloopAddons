@@ -8,8 +8,7 @@
   OCA `queue_job` integration. It has no per-line retry backoff or
   priority channels; failures just sit in `error` state for manual or
   bulk retry.
-- Bulk-scanning Icecat's full catalog index can take a while for the
-  first run on a brand with many products: the index itself can be a
-  large, non-gzipped XML file covering every supplier, streamed and
-  filtered locally since Icecat does not offer a per-supplier index
-  endpoint.
+- Bulk-scanning Icecat's full catalog index can still take a while for a
+  brand with many products. Prefer the compressed On-Market index and a
+  *Modified Since* date whenever the business does not need historical
+  or no-longer-distributed products.

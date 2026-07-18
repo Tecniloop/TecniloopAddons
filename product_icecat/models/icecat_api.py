@@ -1,23 +1,18 @@
 # Copyright 2026 Custom Development
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl).
-"""Minimal client for the Icecat "XML_s3" real-time product interface.
+"""Small Icecat client for real-time product data and catalog indexes.
 
-This intentionally only covers what this module needs: looking up a single
-product by manufacturer part number + vendor name, and (optionally)
-downloading the full category taxonomy so that locally created Product /
-eCommerce categories can keep Icecat's parent/child hierarchy.
-
-It does not attempt to reproduce the bulk daily/full catalog index workflow
-(``files.index.xml`` / ``daily.index.xml``) used by tools such as pyIceCat:
-that workflow is designed for periodically mirroring the entire catalog,
-while this module only ever fetches one product at a time, on demand, so a
-much smaller and dependency-free client is enough (only ``requests`` and the
-standard library XML parser are used).
+The client looks up individual products through Icecat's ``XML_s3``
+interface, streams the gzipped on-market/full/daily XML indexes for brand
+imports, and downloads the supplier/category reference exports. It remains
+dependency-light: only ``requests`` and Python's standard XML/gzip libraries
+are used.
 """
 import gzip
 import io
 import logging
 from collections import defaultdict
+from datetime import date, datetime, time
 from xml.etree import ElementTree as ET
 from xml.sax.saxutils import escape
 
@@ -37,9 +32,12 @@ _logger = logging.getLogger(__name__)
 ICECAT_XML_S3_URL = "https://data.icecat.biz/xml_s3/xml_server3.cgi"
 ICECAT_CATEGORIES_URL = "https://data.icecat.biz/export/freexml/refs/CategoriesList.xml.gz"
 ICECAT_SUPPLIERS_URL = "https://data.icecat.biz/export/freexml/refs/SuppliersList.xml.gz"
-ICECAT_CATALOG_BASEURL = "https://data.icecat.biz/export/freexml/EN/"
-ICECAT_FULL_INDEX_FILENAME = "files.index.xml"
-ICECAT_DAILY_INDEX_FILENAME = "daily.index.xml"
+ICECAT_CATALOG_BASEURL = "https://data.icecat.biz/export/freexml/{language}/"
+ICECAT_INDEX_FILENAMES = {
+    "on_market": "on_market.index.xml.gz",
+    "full": "files.index.xml.gz",
+    "daily": "daily.index.xml.gz",
+}
 
 # Icecat's fixed language ID for English in reference/taxonomy files
 # (product-detail responses are not affected: they only ever contain the
@@ -69,7 +67,7 @@ class IcecatError(Exception):
 
 
 class IcecatClient:
-    """Thin wrapper around the Icecat XML_s3 real-time interface."""
+    """Thin wrapper around Icecat's real-time and export interfaces."""
 
     def __init__(self, username, password, language="EN", timeout=DEFAULT_TIMEOUT):
         self.username = username
@@ -234,27 +232,75 @@ class IcecatClient:
             )
         )
 
-    def iter_catalog_index_by_supplier(self, supplier_id, full_catalog=True):
-        """Stream Icecat's catalog index and yield the ``Prod_ID`` of every
-        entry belonging to ``supplier_id``.
+    @staticmethod
+    def _updated_threshold(modified_since):
+        """Return an Icecat ``Updated`` timestamp suitable for comparison.
 
-        Uses the same ``files.index.xml`` (full catalog) / ``daily.index.xml``
-        (recently added/changed only) files as the reference ``pyIceCat``
-        client. Unlike the categories reference file, these are served as
-        plain (non-gzipped) XML, so no decompression is attempted.
+        The index stores timestamps as ``YYYYMMDDHHMMSS``. Odoo normally
+        passes a :class:`datetime.date` for the brand filter, but accepting a
+        datetime or a string keeps this plain-Python client reusable and
+        backwards compatible with callers outside the ORM.
+        """
+        if not modified_since:
+            return False
+        if isinstance(modified_since, datetime):
+            value = modified_since
+        elif isinstance(modified_since, date):
+            value = datetime.combine(modified_since, time.min)
+        elif isinstance(modified_since, str):
+            raw_value = modified_since.strip()
+            digits = "".join(character for character in raw_value if character.isdigit())
+            if len(digits) == 8:
+                return digits + "000000"
+            if len(digits) >= 14:
+                return digits[:14]
+            raise IcecatError(
+                _(
+                    "Invalid Icecat modified-since value '%s'. Use a date or "
+                    "an Icecat timestamp in YYYYMMDDHHMMSS format.",
+                    modified_since,
+                )
+            )
+        else:
+            raise IcecatError(
+                _("Unsupported Icecat modified-since value: %s", modified_since)
+            )
+        return value.strftime("%Y%m%d%H%M%S")
+
+    def iter_catalog_index_by_supplier(
+        self,
+        supplier_id,
+        index_type="on_market",
+        modified_since=None,
+        full_catalog=None,
+    ):
+        """Yield matching product codes from an Icecat XML index.
+
+        ``index_type`` can be ``on_market`` (the recommended, smaller index),
+        ``full`` or ``daily``. The optional ``modified_since`` filter is
+        applied against the index entry's ``Updated`` attribute before a
+        product code is yielded.
+
+        ``full_catalog`` is retained as a compatibility alias for older code:
+        ``True`` selects ``full`` and ``False`` selects ``daily``.
 
         The whole HTTP response is streamed straight into
         :func:`xml.etree.ElementTree.iterparse` (never buffered fully in
-        memory), and already-visited ``<file>`` elements are periodically
-        dropped from their ``<files.index>`` parent, since this index can
-        hold anywhere from tens of thousands to several million entries for
-        the full catalog.
+        memory) through a streaming gzip decoder. Already-visited ``<file>``
+        elements are periodically dropped from their ``<files.index>``
+        parent, since these indexes can contain millions of entries.
         """
-        filename = ICECAT_FULL_INDEX_FILENAME if full_catalog else ICECAT_DAILY_INDEX_FILENAME
+        if full_catalog is not None:
+            index_type = "full" if full_catalog else "daily"
+        filename = ICECAT_INDEX_FILENAMES.get(index_type)
+        if not filename:
+            raise IcecatError(_("Unknown Icecat catalog index type: %s", index_type))
+
         supplier_id = str(supplier_id)
+        updated_threshold = self._updated_threshold(modified_since)
         try:
             response = requests.get(
-                ICECAT_CATALOG_BASEURL + filename,
+                ICECAT_CATALOG_BASEURL.format(language=self.language) + filename,
                 auth=(self.username, self.password),
                 stream=True,
                 timeout=CATALOG_INDEX_TIMEOUT,
@@ -263,38 +309,50 @@ class IcecatClient:
             raise IcecatError(
                 _("Could not download the Icecat catalog index: %s", exc)
             ) from exc
-        if response.status_code in (401, 403):
-            self._raise_export_auth_error(response.status_code)
-        if not 200 <= response.status_code < 300:
-            raise IcecatError(
-                _(
-                    "Icecat returned HTTP %s while downloading the catalog index.",
-                    response.status_code,
-                )
-            )
-
-        response.raw.decode_content = True
-        files_index_el = None
-        seen_since_gc = 0
         try:
-            for event, elem in ET.iterparse(response.raw, events=("start", "end")):
-                if event == "start":
-                    if elem.tag == "files.index" and files_index_el is None:
-                        files_index_el = elem
-                    continue
+            if response.status_code in (401, 403):
+                self._raise_export_auth_error(response.status_code)
+            if not 200 <= response.status_code < 300:
+                raise IcecatError(
+                    _(
+                        "Icecat returned HTTP %s while downloading the catalog index.",
+                        response.status_code,
+                    )
+                )
 
-                if elem.tag != "file":
-                    continue
-                if elem.attrib.get("Supplier_id") == supplier_id:
-                    prod_id = elem.attrib.get("Prod_ID")
-                    if prod_id:
-                        yield prod_id
-                elem.clear()
+            # These URLs are actual .gz files. Keep urllib3 from decoding the
+            # body as HTTP content encoding and let GzipFile consume the file
+            # stream incrementally instead.
+            response.raw.decode_content = False
+            files_index_el = None
+            seen_since_gc = 0
+            with gzip.GzipFile(fileobj=response.raw) as index_file:
+                for event, elem in ET.iterparse(index_file, events=("start", "end")):
+                    if event == "start":
+                        if elem.tag == "files.index" and files_index_el is None:
+                            files_index_el = elem
+                        continue
 
-                seen_since_gc += 1
-                if files_index_el is not None and seen_since_gc >= CATALOG_INDEX_GC_EVERY:
-                    del files_index_el[:]
-                    seen_since_gc = 0
+                    if elem.tag != "file":
+                        continue
+                    if elem.attrib.get("Supplier_id") == supplier_id:
+                        updated = elem.attrib.get("Updated")
+                        if not updated_threshold or (
+                            updated and updated >= updated_threshold
+                        ):
+                            prod_id = elem.attrib.get("Prod_ID")
+                            if prod_id:
+                                yield prod_id
+                    elem.clear()
+
+                    seen_since_gc += 1
+                    if files_index_el is not None and seen_since_gc >= CATALOG_INDEX_GC_EVERY:
+                        del files_index_el[:]
+                        seen_since_gc = 0
+        except (OSError, EOFError, ET.ParseError) as exc:
+            raise IcecatError(
+                _("Icecat returned an invalid compressed catalog index: %s", exc)
+            ) from exc
         finally:
             response.close()
 

@@ -196,16 +196,6 @@ msgid "Error"
 msgstr ""
 
 #. module: product_icecat
-#: model:ir.model.fields,field_description:product_icecat.field_product_brand__icecat_bulk_use_full_catalog
-msgid "Scan Full Catalog"
-msgstr ""
-
-#. module: product_icecat
-#: model:ir.model.fields,help:product_icecat.field_product_brand__icecat_bulk_use_full_catalog
-msgid "On: scan Icecat's full catalog index (all known products for this manufacturer). Off: only scan the daily index (products added/changed recently), which is much faster to download but will miss older, unchanged products on a first run."
-msgstr ""
-
-#. module: product_icecat
 #: model:ir.model.fields,field_description:product_icecat.field_product_brand__icecat_bulk_limit
 msgid "Max Products to Import"
 msgstr ""
@@ -798,12 +788,6 @@ msgid "Import queued"
 msgstr ""
 
 #. module: product_icecat
-#: code:addons/product_icecat/models/product_brand.py:0
-#, python-format
-msgid "Scanning the Icecat catalog for %(brand)s's products in the background. This can take a while for large manufacturers — check the Icecat tab for progress."
-msgstr ""
-
-#. module: product_icecat
 #: code:addons/product_icecat/models/icecat_import_line.py:0
 msgid "Only lines in Error state can be retried."
 msgstr ""
@@ -848,4 +832,51 @@ msgstr ""
 #. module: product_icecat
 #: code:addons/product_icecat/wizards/icecat_product_import.py:0
 msgid "Please search a product before importing it."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_product_brand__icecat_bulk_index_type
+msgid "Catalog Index"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__product_brand__icecat_bulk_index_type__on_market
+msgid "On-Market Products"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__product_brand__icecat_bulk_index_type__full
+msgid "Full Catalog"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__product_brand__icecat_bulk_index_type__daily
+msgid "Daily Changes"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_product_brand__icecat_bulk_index_type
+msgid "On-Market Products is the recommended option: it scans only products that Icecat has identified as distributed in the market associated with the configured Icecat data language. Full Catalog scans every available product and is much larger. Daily Changes only contains products updated during the previous day."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_product_brand__icecat_bulk_modified_since
+msgid "Modified Since"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_product_brand__icecat_bulk_modified_since
+msgid "Only queue index entries whose Icecat Updated timestamp is on or after this date. Leave empty to include all dates available in the selected index."
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "The On-Market index avoids downloading the complete Icecat catalog. Use Modified Since to ignore old products before they are added to the import queue."
+msgstr ""
+
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/product_brand.py:0
+#, python-format
+msgid "Scanning the selected Icecat index for %(brand)s's products in the background. The configured brand, modified-since date and product limit are applied before products are queued — check the Icecat tab for progress."
 msgstr ""
