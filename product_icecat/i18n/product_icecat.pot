@@ -1,0 +1,851 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* product_icecat
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-07-18 14:00+0000\n"
+"PO-Revision-Date: 2026-07-18 14:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+
+#. module: product_icecat
+#: model:ir.model,name:product_icecat.model_icecat_manufacturer
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_import_line__icecat_manufacturer_id
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_product_import__icecat_manufacturer_id
+#: model:ir.model.fields,field_description:product_icecat.field_product_brand__icecat_manufacturer_id
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_form
+msgid "Icecat Manufacturer"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model,name:product_icecat.model_icecat_category
+#: model:ir.model.fields,field_description:product_icecat.field_product_template__icecat_category_id
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_category_view_form
+#: model_terms:ir.ui.view,arch_db:product_icecat.product_template_search_view_inherit_icecat
+msgid "Icecat Category"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model,name:product_icecat.model_icecat_import_line
+msgid "Icecat Bulk Import Line"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model,name:product_icecat.model_icecat_product_import
+msgid "Import a Product from Icecat"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_icecat_manufacturer__name
+msgid "Exact manufacturer/vendor name as known by Icecat. This is sent as the 'vendor' parameter when querying the Icecat API, so it must match Icecat's own spelling (e.g. as seen in their supplier mapping export)."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_manufacturer__icecat_supplier_id
+msgid "Icecat Supplier ID"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_icecat_manufacturer__icecat_supplier_id
+msgid "Icecat's internal numeric Supplier ID, used to find this manufacturer's products in Icecat's catalog index during bulk imports. Filled in automatically from Icecat's suppliers list (by 'Sync Manufacturers from Icecat', or on demand the first time it is needed) — only fill it by hand if the automatic lookup cannot match this manufacturer's name."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_manufacturer__product_brand_ids
+msgid "Linked Brands"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_icecat_manufacturer__import_main_image
+msgid "When importing a product from this manufacturer, set Icecat's main picture as the product image."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_manufacturer__import_gallery_images
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_product_import__import_gallery_images
+msgid "Import Additional Images"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_icecat_manufacturer__import_gallery_images
+msgid "When importing a product from this manufacturer, import Icecat's additional pictures as extra website media (product gallery images shown on the eCommerce product page)."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_icecat_manufacturer__create_product_category
+msgid "When importing a product from this manufacturer, get or create a Product Category matching its Icecat category, and set it on the product."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_manufacturer__create_ecommerce_category
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_product_import__create_ecommerce_category
+msgid "Create eCommerce Category"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_icecat_manufacturer__create_ecommerce_category
+msgid "When importing a product from this manufacturer, get or create a Website/eCommerce Category matching its Icecat category, and add it to the product."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_category__icecat_id
+msgid "Icecat Category ID"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_category__parent_id
+msgid "Parent Category"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_category__child_ids
+msgid "Child Categories"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_category__product_categ_id
+msgid "Mapped Product Category"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_icecat_category__product_categ_id
+msgid "Product Category created/linked from this Icecat category. Only populated for manufacturers with 'Create Product Category' enabled."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_category__ecommerce_categ_id
+msgid "Mapped eCommerce Category"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_icecat_category__ecommerce_categ_id
+msgid "Website/eCommerce Category created/linked from this Icecat category. Only populated for manufacturers with 'Create eCommerce Category' enabled."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_product_template__icecat_category_id
+msgid "Icecat catalog category this product was classified under."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_product_template__icecat_product_id
+msgid "Icecat Product ID"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_product_template__icecat_product_id
+msgid "Icecat's internal numeric product ID (Product/@ID). Kept to identify this exact Icecat record when refreshing."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_product_template__icecat_prod_id
+msgid "Icecat Part Number"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_product_template__icecat_prod_id
+msgid "Manufacturer part number as known by Icecat (Product/@Prod_id), used together with the brand's Icecat manufacturer to refresh this product's data."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_product_brand__icecat_manufacturer_id
+msgid "Icecat manufacturer linked to this brand. Used to look up products by part number on the Icecat catalog, and to resolve the default import settings (images, categories) applied when importing products for this brand."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_product_brand__icecat_bulk_state
+msgid "Status of the last 'Import All Products from Icecat' run for this brand."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__product_brand__icecat_bulk_state__none
+msgid "Not Started"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__product_brand__icecat_bulk_state__scanning
+msgid "Scanning Catalog..."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__product_brand__icecat_bulk_state__importing
+msgid "Importing Products..."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__icecat_import_line__state__done
+#: model:ir.model.fields.selection,name:product_icecat.selection__product_brand__icecat_bulk_state__done
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_import_line_view_search
+msgid "Done"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__icecat_import_line__state__error
+#: model:ir.model.fields.selection,name:product_icecat.selection__product_brand__icecat_bulk_state__error
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_import_line_view_form
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_import_line_view_search
+msgid "Error"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_product_brand__icecat_bulk_use_full_catalog
+msgid "Scan Full Catalog"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_product_brand__icecat_bulk_use_full_catalog
+msgid "On: scan Icecat's full catalog index (all known products for this manufacturer). Off: only scan the daily index (products added/changed recently), which is much faster to download but will miss older, unchanged products on a first run."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_product_brand__icecat_bulk_limit
+msgid "Max Products to Import"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_product_brand__icecat_bulk_limit
+msgid "Stop queuing new products once this many matches have been found in a single scan. 0 means no limit."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_import_line__product_brand_id
+#: model:ir.model.fields,field_description:product_icecat.field_icecat_product_import__product_brand_id
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_import_line_view_search
+msgid "Brand"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__icecat_import_line__state__pending
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_import_line_view_search
+msgid "Pending"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__icecat_import_line__state__skipped
+msgid "Skipped (already imported)"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_import_line_view_search
+msgid "Skipped"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_import_line_view_search
+msgid "Status"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,field_description:product_icecat.field_res_config_settings__icecat_language
+msgid "Icecat Data Language"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_res_config_settings__icecat_language
+msgid "Language requested from Icecat for product titles, descriptions and technical features. The category taxonomy sync is always kept in English regardless of this setting."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__res_config_settings__icecat_language__EN
+msgid "English"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__res_config_settings__icecat_language__ES
+msgid "Spanish"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__res_config_settings__icecat_language__FR
+msgid "French"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__res_config_settings__icecat_language__DE
+msgid "German"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__res_config_settings__icecat_language__IT
+msgid "Italian"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__res_config_settings__icecat_language__NL
+msgid "Dutch"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__res_config_settings__icecat_language__PT
+msgid "Portuguese"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__icecat_product_import__state__search
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "Search"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields.selection,name:product_icecat.selection__icecat_product_import__state__preview
+msgid "Preview"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_icecat_product_import__part_number
+msgid "Manufacturer part number (Icecat Prod_ID) to look up."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.fields,help:product_icecat.field_icecat_product_import__product_brand_id
+msgid "Brand of the product. Its Icecat tab must be linked to an Icecat manufacturer."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.constraint,message:product_icecat.constraint_icecat_manufacturer_name_uniq
+msgid "This Icecat manufacturer name already exists."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.constraint,message:product_icecat.constraint_icecat_category_icecat_id_uniq
+msgid "This Icecat category ID already exists."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.model.constraint,message:product_icecat.constraint_icecat_import_line_brand_part_number_uniq
+msgid "This part number is already queued for this brand."
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.actions.act_window,name:product_icecat.icecat_product_import_action
+#: model:ir.ui.menu,name:product_icecat.menu_icecat_product_import
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "Import from Icecat"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.actions.act_window,name:product_icecat.icecat_manufacturer_action
+#: model:ir.ui.menu,name:product_icecat.menu_icecat_manufacturer
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_list
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_search
+msgid "Icecat Manufacturers"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.actions.server,name:product_icecat.icecat_manufacturer_sync_server_action
+#: model:ir.ui.menu,name:product_icecat.menu_icecat_manufacturer_sync
+msgid "Sync Manufacturers from Icecat"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.actions.act_window,name:product_icecat.icecat_category_action
+#: model:ir.ui.menu,name:product_icecat.menu_icecat_category
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_category_view_list
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_category_view_search
+msgid "Icecat Categories"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.actions.server,name:product_icecat.icecat_category_sync_server_action
+#: model:ir.ui.menu,name:product_icecat.menu_icecat_category_sync
+msgid "Sync Categories from Icecat"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/product_brand.py:0
+#: model:ir.actions.act_window,name:product_icecat.icecat_import_line_action
+#: model:ir.ui.menu,name:product_icecat.menu_icecat_import_line
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_import_line_view_list
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_import_line_view_search
+msgid "Icecat Import Lines"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.cron,cron_name:product_icecat.ir_cron_icecat_category_sync
+msgid "Icecat: sync category taxonomy"
+msgstr ""
+
+#. module: product_icecat
+#: model:ir.cron,cron_name:product_icecat.ir_cron_icecat_bulk_import
+msgid "Icecat: process bulk product imports"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.actions.act_window,help:product_icecat.icecat_manufacturer_action
+msgid "Create your first Icecat manufacturer"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.actions.act_window,help:product_icecat.icecat_manufacturer_action
+msgid "Use <b>Sync Manufacturers from Icecat</b> to import the full suppliers list (names and Supplier IDs) in one go, or create one by hand using the exact name Icecat knows it by — its Supplier ID is then looked up automatically when first needed. Link manufacturers from a Product Brand's Icecat tab and configure what should be imported for their products (images, categories)."
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.actions.act_window,help:product_icecat.icecat_category_action
+msgid "No Icecat categories yet"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.actions.act_window,help:product_icecat.icecat_category_action
+msgid "Categories are created automatically the first time a product from that category is imported. Use <b>Sync Categories from Icecat</b> to download the full taxonomy (with parent/child relations) in one go."
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_form
+msgid "Fetch Supplier ID from Icecat"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_form
+msgid "Look this manufacturer's name up in Icecat's suppliers list and fill in its Supplier ID."
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_form
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_search
+msgid "Archived"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_form
+msgid "e.g. HP"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_manufacturer.py:0
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_form
+msgid "Brands"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_form
+msgid "Import Settings"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_form
+msgid "Applied by default when importing a product from this manufacturer. Can still be overridden per import."
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_manufacturer_view_search
+msgid "Not Linked to a Brand"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_category_view_list
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_category_view_search
+msgid "Category"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_category_view_form
+msgid "Products"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_category_view_search
+msgid "Top-Level (Not Synced)"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_category_view_search
+msgid "Without Product Category"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_category_view_search
+msgid "Without eCommerce Category"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_import_line_view_list
+msgid "Retry"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_import_line_view_form
+msgid "Icecat Import Line"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "Icecat"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "Import Lines"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "Link an Icecat manufacturer..."
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "Link this brand to its matching Icecat manufacturer to import products by part number for it, and to reuse that manufacturer's default import settings (images, categories)."
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "Import All Products"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "Progress"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "done,"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "pending,"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "errors,"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "skipped"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "Import All Products from Icecat"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "Retry Errors"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "Reset"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.view_product_brand_form_inherit_icecat
+msgid "This will delete all queued Icecat import lines for this brand (already-imported products are not affected). Continue?"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.product_template_form_view_inherit_icecat
+msgid "Refresh"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.product_template_form_view_inherit_icecat
+msgid "from Icecat"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.product_template_form_view_inherit_icecat
+msgid "Refresh the eCommerce description and main image from Icecat"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.res_config_settings_view_form
+msgid "Icecat Account"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.res_config_settings_view_form
+msgid "Credentials used to query the Icecat open catalog (data.icecat.biz)."
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.res_config_settings_view_form
+msgid "e.g. myshop_user"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.res_config_settings_view_form
+msgid "Password"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.res_config_settings_view_form
+msgid "Data language"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.res_config_settings_view_form
+msgid "Test Connection"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "This brand has no Icecat manufacturer configured yet. Open the brand's <b>Icecat</b> tab and link one before searching."
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "e.g. RJ459AV"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "Name"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "Part Number"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "EAN"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "Short Description"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "Import Options"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "Import Product"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "Back"
+msgstr ""
+
+#. module: product_icecat
+#: model_terms:ir.ui.view,arch_db:product_icecat.icecat_product_import_view_form
+msgid "Cancel"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+#, python-format
+msgid "Could not reach Icecat: %s"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+#, python-format
+msgid "Icecat rejected the account credentials (HTTP %s). Check the username/password in Settings > General Settings > Icecat."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+msgid "Product not found on Icecat (HTTP 404)."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+#, python-format
+msgid "Icecat returned an unexpected error (HTTP %s)."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+msgid "Icecat answered HTTP 404 to the connection test. Per Icecat's documentation this can mean the credentials are incorrect or your server's IP is not whitelisted for the account — double-check the username (not the e-mail address) and password."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+#, python-format
+msgid "Icecat returned an invalid XML response: %s"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+#, python-format
+msgid "Icecat refused the request: %s"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+#, python-format
+msgid "Icecat refused access to this export file (HTTP %(status)s). Export/reference files (SuppliersList, CategoriesList, catalog indexes) are only available to Open Icecat accounts with the 'Data (XML)' subscription — accounts registered for the 'URL' version can look up single products (so 'Test Connection' succeeds) but are denied these files. Check your subscription type in your Icecat account, and verify the username/password in Settings > General Settings > Icecat."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+#, python-format
+msgid "Could not download the Icecat catalog index: %s"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+#, python-format
+msgid "Icecat returned HTTP %s while downloading the catalog index."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+#, python-format
+msgid "Could not download the Icecat %(what)s: %(error)s"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+#, python-format
+msgid "Icecat returned HTTP %(status)s while downloading the %(what)s."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+msgid "suppliers list"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+msgid "categories list"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+#, python-format
+msgid "Icecat returned HTTP %s while checking export file access."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+msgid "Unexpected Icecat response: no <Product> element found."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+msgid "The Icecat account is not configured. Go to Settings > General Settings > Icecat and enter your credentials first."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+msgid "Other"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_api.py:0
+msgid "Technical specifications"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_manufacturer.py:0
+msgid "Icecat manufacturers synced"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_manufacturer.py:0
+#, python-format
+msgid "%(total)d suppliers processed: %(created)d created, %(updated)d updated."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_manufacturer.py:0
+#, python-format
+msgid "No Icecat supplier is named %(names)s. Check the spelling against Icecat's suppliers list (or run 'Sync Manufacturers from Icecat' to import it), or fill in the Supplier ID by hand."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_category.py:0
+msgid "Unknown"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_category.py:0
+msgid "Icecat categories synced"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_category.py:0
+#, python-format
+msgid "%d categories processed."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/product_brand.py:0
+msgid "Link this brand to an Icecat manufacturer on its Icecat tab first."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/product_brand.py:0
+#, python-format
+msgid "Icecat's suppliers list has no supplier named %(manufacturer)s, so its Supplier ID could not be determined automatically. Check the manufacturer's name against Icecat's spelling (run 'Sync Manufacturers from Icecat' to browse the list), or fill in its Supplier ID by hand."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/product_brand.py:0
+msgid "Import queued"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/product_brand.py:0
+#, python-format
+msgid "Scanning the Icecat catalog for %(brand)s's products in the background. This can take a while for large manufacturers — check the Icecat tab for progress."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/icecat_import_line.py:0
+msgid "Only lines in Error state can be retried."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/product_template.py:0
+#, python-format
+msgid "%(name)s cannot be refreshed from Icecat: it needs both an Icecat part number and a brand with an Icecat manufacturer configured on its Icecat tab."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/res_config_settings.py:0
+msgid "Please enter both the Icecat username and password first."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/res_config_settings.py:0
+msgid "Success"
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/models/res_config_settings.py:0
+msgid "The Icecat account credentials are valid."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/wizards/icecat_product_import.py:0
+msgid "Please enter a part number."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/wizards/icecat_product_import.py:0
+msgid "Please select a brand."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/wizards/icecat_product_import.py:0
+#, python-format
+msgid "The brand %(brand)s has no Icecat manufacturer configured. Open the brand and set one on its Icecat tab first."
+msgstr ""
+
+#. module: product_icecat
+#: code:addons/product_icecat/wizards/icecat_product_import.py:0
+msgid "Please search a product before importing it."
+msgstr ""

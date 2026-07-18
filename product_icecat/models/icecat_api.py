@@ -112,14 +112,78 @@ class IcecatClient:
     # public API
     # ------------------------------------------------------------------
     def test_connection(self):
-        """Lightweight credential check.
+        """Credential check against the real-time product interface.
 
-        Icecat's own auth is enforced at HTTP level (401/403) independently
-        of whether the requested product exists, so a deliberately dummy
-        ``prod_id``/``vendor`` is enough to tell "bad credentials" apart
-        from "credentials fine, product not found".
+        Icecat's HTTP status codes alone are not trustworthy here: per
+        Icecat's own manual, xml_s3 can answer 200 (with the problem
+        reported inside the XML body) or 404 both for "product not found"
+        AND for "credentials incorrect / IP not whitelisted". So besides
+        the HTTP-level 401/403 handling in :meth:`_get`, the response body
+        is parsed and any ErrorMessage other than the expected
+        "data-sheet is not present" (normal for the dummy product used
+        here) is treated as a failure.
         """
-        self._get({"lang": self.language, "prod_id": "0", "vendor": "0", "output": "productxml"})
+        try:
+            response = self._get(
+                {"lang": self.language, "prod_id": "0", "vendor": "0", "output": "productxml"}
+            )
+        except IcecatError as exc:
+            if "404" in str(exc):
+                # for xml_s3, 404 can also mean bad credentials
+                raise IcecatError(
+                    _(
+                        "Icecat answered HTTP 404 to the connection test. "
+                        "Per Icecat's documentation this can mean the "
+                        "credentials are incorrect or your server's IP is "
+                        "not whitelisted for the account — double-check the "
+                        "username (not the e-mail address) and password."
+                    )
+                ) from exc
+            raise
+        try:
+            root = ET.fromstring(response.content)
+        except ET.ParseError as exc:
+            raise IcecatError(_("Icecat returned an invalid XML response: %s", exc)) from exc
+        product_el = root.find("Product")
+        error_message = product_el.attrib.get("ErrorMessage") if product_el is not None else None
+        if error_message and "not present" not in error_message.lower():
+            # anything else ("incorrect security data", restricted account,
+            # etc.) means the credentials/account are NOT actually usable
+            raise IcecatError(
+                _("Icecat refused the request: %s", error_message)
+            )
+        # Real-time access is fine — now also verify the export/reference
+        # file access this module's syncs and bulk imports depend on, since
+        # Icecat can grant one without the other (see
+        # :meth:`_raise_export_auth_error`). Streamed and closed right after
+        # the status check, so only headers travel, not the whole file.
+        self._check_export_access()
+        return True
+
+    def _check_export_access(self):
+        """Verify the account can download Icecat's export/reference files
+        (checked against ``SuppliersList.xml.gz``), without downloading one."""
+        try:
+            response = requests.get(
+                ICECAT_SUPPLIERS_URL,
+                auth=(self.username, self.password),
+                stream=True,
+                timeout=self.timeout,
+            )
+        except requests.exceptions.RequestException as exc:
+            raise IcecatError(_("Could not reach Icecat: %s", exc)) from exc
+        try:
+            if response.status_code in (401, 403):
+                self._raise_export_auth_error(response.status_code)
+            if not 200 <= response.status_code < 300:
+                raise IcecatError(
+                    _(
+                        "Icecat returned HTTP %s while checking export file access.",
+                        response.status_code,
+                    )
+                )
+        finally:
+            response.close()
         return True
 
     def get_product_by_part_number(self, part_number, vendor):
@@ -146,6 +210,29 @@ class IcecatClient:
             raise IcecatError(error_message)
 
         return IcecatProduct(product_el)
+
+    def _raise_export_auth_error(self, status_code):
+        """Shared 401/403 error for export/index/reference file downloads.
+
+        These files use the same Basic auth as the real-time interface, but
+        Icecat only enables them for Open Icecat accounts registered with
+        the 'Data (XML)' subscription — 'URL'-type accounts can look up
+        single products (so Test Connection may succeed) yet get 401 here.
+        """
+        raise IcecatError(
+            _(
+                "Icecat refused access to this export file (HTTP "
+                "%(status)s). Export/reference files (SuppliersList, "
+                "CategoriesList, catalog indexes) are only available to "
+                "Open Icecat accounts with the 'Data (XML)' subscription "
+                "— accounts registered for the 'URL' version can look up "
+                "single products (so 'Test Connection' succeeds) but are "
+                "denied these files. Check your subscription type in your "
+                "Icecat account, and verify the username/password in "
+                "Settings > General Settings > Icecat.",
+                status=status_code,
+            )
+        )
 
     def iter_catalog_index_by_supplier(self, supplier_id, full_catalog=True):
         """Stream Icecat's catalog index and yield the ``Prod_ID`` of every
@@ -177,9 +264,7 @@ class IcecatClient:
                 _("Could not download the Icecat catalog index: %s", exc)
             ) from exc
         if response.status_code in (401, 403):
-            raise IcecatError(
-                _("Icecat rejected the account credentials (HTTP %s).", response.status_code)
-            )
+            self._raise_export_auth_error(response.status_code)
         if not 200 <= response.status_code < 300:
             raise IcecatError(
                 _(
@@ -231,9 +316,7 @@ class IcecatClient:
                 _("Could not download the Icecat %(what)s: %(error)s", what=what, error=exc)
             ) from exc
         if response.status_code in (401, 403):
-            raise IcecatError(
-                _("Icecat rejected the account credentials (HTTP %s).", response.status_code)
-            )
+            self._raise_export_auth_error(response.status_code)
         if not 200 <= response.status_code < 300:
             raise IcecatError(
                 _(
@@ -455,8 +538,10 @@ class IcecatProduct:
 def get_client_from_env(env):
     """Build an :class:`IcecatClient` from the ``product_icecat.*`` system parameters."""
     icp = env["ir.config_parameter"].sudo()
-    username = icp.get_param("product_icecat.username")
-    password = icp.get_param("product_icecat.password")
+    # .strip() guards against a stray space/newline pasted into Settings —
+    # a silent way to get "Login or password are invalid" from Icecat.
+    username = (icp.get_param("product_icecat.username") or "").strip()
+    password = (icp.get_param("product_icecat.password") or "").strip()
     language = icp.get_param("product_icecat.language", default="EN")
     if not username or not password:
         raise IcecatError(
