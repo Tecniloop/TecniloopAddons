@@ -1,4 +1,4 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
 
@@ -20,13 +20,10 @@ class ProductTemplate(models.Model):
     package_dimensional_uom_id = fields.Many2one(
         'uom.uom',
         string='Unidad de dimensiones del embalaje',
-        domain="[('category_id', '=', package_dimensional_uom_category_id)]",
-        default=lambda self: self.env.ref('uom.product_uom_millimeter', raise_if_not_found=False),
+        default=lambda self: self.env.ref(
+            'uom.product_uom_millimeter', raise_if_not_found=False
+        ),
         help='Unidad común para longitud, anchura y altura del embalaje.',
-    )
-    package_dimensional_uom_category_id = fields.Many2one(
-        'uom.category',
-        compute='_compute_package_uom_categories',
     )
     package_weight = fields.Float(
         string='Peso del embalaje',
@@ -35,12 +32,9 @@ class ProductTemplate(models.Model):
     package_weight_uom_id = fields.Many2one(
         'uom.uom',
         string='Unidad de peso del embalaje',
-        domain="[('category_id', '=', package_weight_uom_category_id)]",
-        default=lambda self: self.env.ref('uom.product_uom_kgm', raise_if_not_found=False),
-    )
-    package_weight_uom_category_id = fields.Many2one(
-        'uom.category',
-        compute='_compute_package_uom_categories',
+        default=lambda self: self.env.ref(
+            'uom.product_uom_kgm', raise_if_not_found=False
+        ),
     )
     package_volume_m3 = fields.Float(
         string='Volumen del embalaje (m³)',
@@ -49,14 +43,6 @@ class ProductTemplate(models.Model):
         digits=(16, 9),
         help='Volumen exterior calculado a partir de las tres dimensiones del embalaje.',
     )
-
-    @api.depends_context('lang')
-    def _compute_package_uom_categories(self):
-        length_uom = self.env.ref('uom.product_uom_meter', raise_if_not_found=False)
-        weight_uom = self.env.ref('uom.product_uom_kgm', raise_if_not_found=False)
-        for product in self:
-            product.package_dimensional_uom_category_id = length_uom.category_id if length_uom else False
-            product.package_weight_uom_category_id = weight_uom.category_id if weight_uom else False
 
     @api.depends(
         'package_length',
@@ -75,6 +61,9 @@ class ProductTemplate(models.Model):
                 product.package_volume_m3 = 0.0
                 continue
             uom = product.package_dimensional_uom_id
+            if not uom._has_common_reference(meter):
+                product.package_volume_m3 = 0.0
+                continue
             length_m = uom._compute_quantity(product.package_length, meter, round=False)
             width_m = uom._compute_quantity(product.package_width, meter, round=False)
             height_m = uom._compute_quantity(product.package_height, meter, round=False)
@@ -95,4 +84,28 @@ class ProductTemplate(models.Model):
                 product.package_weight,
             )
             if any(value < 0 for value in values):
-                raise ValidationError('Las dimensiones y el peso del embalaje no pueden ser negativos.')
+                raise ValidationError(
+                    _('Las dimensiones y el peso del embalaje no pueden ser negativos.')
+                )
+
+    @api.constrains('package_dimensional_uom_id')
+    def _check_package_dimensional_uom(self):
+        meter = self.env.ref('uom.product_uom_meter', raise_if_not_found=False)
+        if not meter:
+            return
+        for product in self.filtered('package_dimensional_uom_id'):
+            if not product.package_dimensional_uom_id._has_common_reference(meter):
+                raise ValidationError(
+                    _('La unidad de dimensiones del embalaje debe ser una unidad de longitud.')
+                )
+
+    @api.constrains('package_weight_uom_id')
+    def _check_package_weight_uom(self):
+        kilogram = self.env.ref('uom.product_uom_kgm', raise_if_not_found=False)
+        if not kilogram:
+            return
+        for product in self.filtered('package_weight_uom_id'):
+            if not product.package_weight_uom_id._has_common_reference(kilogram):
+                raise ValidationError(
+                    _('La unidad de peso del embalaje debe ser una unidad de peso.')
+                )

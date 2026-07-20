@@ -853,3 +853,8 @@ Las plataformas multimarca se dividen en fuentes independientes, compartiendo pa
 - Viessmann Modelltechnik: Viessmann, Kibri y Vollmer.
 
 El descubrimiento valida la marca antes de crear staging para impedir que una URL se importe desde dos fuentes.
+
+
+## 19.0.1.54.0 - Compatibilidad UoM de Odoo 19
+
+Odoo 19 eliminó el modelo `uom.category` y el campo `category_id` de `uom.uom`. El módulo específico de dimensiones de embalaje ya no declara campos Many2one hacia ese modelo ni dominios basados en categorías. La compatibilidad de unidades se valida mediante la jerarquía de unidades de Odoo 19 (`relative_uom_id` y `_has_common_reference`), usando metro como referencia para dimensiones y kilogramo para peso.
