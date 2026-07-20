@@ -1,6 +1,6 @@
 {
     'name': 'Importación de productos por sitemap',
-    'version': '19.0.1.0.1',
+    'version': '19.0.1.53.0',
     'category': 'Sales/Sales',
     'summary': 'Importa y actualiza productos desde el sitemap público de una o varias tiendas online',
     'description': """
@@ -29,12 +29,16 @@ un conector nuevo, no ampliar una configuración genérica.
 
 Funcionalidad principal
 ------------------------
+* Recupera EAN/GTIN válidos (GTIN-8, UPC/GTIN-12, EAN-13 y GTIN-14),
+  conserva todos los códigos por talla/variante y solo asigna el barcode de Odoo
+  cuando la ficha publica exactamente un código inequívoco.
 * Da de alta tantas fuentes (sitios web) como necesites en "Fuentes", cada
-  una con su conector; incluye cuatro fuentes de ejemplo ya configuradas
-  (Skechers España, Mustang Shoes España, Pikolinos España y Panama Jack
-  España -esta última sobre Shopify, no Salesforce Commerce Cloud como las
-  otras tres, prueba de que el diseño por conectores realmente aísla las
-  diferencias de plataforma-).
+  una con su conector; incluye cuarenta y ocho fuentes de ejemplo ya configuradas
+  (Skechers España, Mustang Shoes España, Pikolinos España, Panama Jack,
+  Miguel Bellido España, Levi's España, Fruit of the Loom Europa, Blend Europa, SELECTED España, Geox España, Callaghan España, Fluchos España, Pitillos España, Gioseppo España, BH Bikes España, Lapierre Bikes España, WeThePeople BMX, Mondraker España, Cervélo España, Colnago España, Bicicletas Quer B2B España, Ridley Bikes España, GT Bicycles, Conor Bikes España, MERIDA BIKES España, Orbea España, Scalextric España, NINCO España, Electrotren España, Jouef Europa, Arnold Europa, Rivarossi Europa, Lima Europa,
+  Pocher Europa, Hornby Europa, Airfix Europa, Corgi/Corgi Premiums Europa,
+  Humbrol Europa, Bassett-Lowke Europa (precio EUR) y Märklin Europa; los conectores de la plataforma Hornby leen siempre el precio oficial del mercado EUR, sin convertir divisas; cada fuente usa un conector adaptado a
+  la estructura real de su sitemap y sus fichas).
 * Guarda cada URL de producto encontrada en un modelo intermedio de vista
   previa ("staging", compartido por todas las fuentes), con nombre, precio,
   categoría y descripción -pero SIN descargar imágenes ni otro contenido
@@ -99,9 +103,170 @@ Limitaciones conocidas
   categoría en vez de mostrar un producto (posibles artículos
   descatalogados) -se detectan y se marcan como error en la cola en vez de
   importarse vacías.
-* El precio se importa tal cual figura en la web. Si la moneda de la
-  compañía en Odoo no coincide con la del sitio, deberás adaptar la
-  conversión.
+* **Conector de Miguel Bellido**: identifica únicamente los sub-sitemaps
+  de productos de Shopify, consulta primero el endpoint Ajax público
+  `/products/<handle>.js`, usa el tipo de producto como categoría y conserva la
+  galería de imágenes en staging para descargarla al importar. Si el endpoint
+  Ajax falla, utiliza JSON-LD, Open Graph y HTML como respaldo.
+* **Conector de Levi's España**: acepta tanto un sitemap de URLs como un
+  índice de sitemaps (también anidado o comprimido), conserva únicamente las
+  fichas españolas cuyo patrón termina en `/p/<código>`, deriva la categoría de
+  la ruta y extrae de la ficha el precio vigente, color, descripción y galería
+  Scene7. Las tallas publicadas en la ficha no se crean todavía como variantes.
+
+* **Conector de Fruit of the Loom Europa**: procesa el sitemap de Salesforce
+  Experience Cloud `sitemap-view-1.xml`, conserva únicamente las fichas actuales
+  `/shop/p/<slug>/<referencia>`, elimina parámetros de color para no duplicar la
+  misma referencia y extrae JSON-LD, Open Graph, migas de pan e imágenes públicas.
+  El catálogo está orientado a distribuidores y normalmente no publica precios;
+  en ese caso el producto entra con precio 0 para que se complete en Odoo y las
+  sincronizaciones posteriores conservan el precio manual. Los colores y tallas
+  todavía no se crean como variantes.
+
+* **Conector de Blend Europa**: procesa el sitemap del mercado `en-eu`,
+  identifica las fichas por el sufijo estable `--<estilo>-<color>` y deduplica
+  los alias que Blend publica para una misma combinación. Extrae nombre, precio
+  vigente, color comercial, descripción, migas de pan e imágenes desde JSON-LD,
+  Open Graph y HTML. Las tallas y longitudes todavía no crean variantes.
+
+* **Conector de SELECTED España**: recorre el endpoint `sitemap/root` aunque
+  publique un índice anidado, un `urlset` o contenido gzip, conserva únicamente
+  fichas `/es-es/p/<slug>/<estilo>_<color>[_<variante>]` y deduplica por la
+  referencia completa. Extrae el precio vigente (incluidos descuentos), color,
+  descripción, migas de pan y galería de Salesforce Commerce Cloud. Si el
+  sitemap deja temporalmente de responder como XML, usa el catálogo paginado
+  español como mecanismo de respaldo. Las tallas aún no crean variantes.
+
+* **Conector de Pikolinos España**: recorre `sitemap_index.xml`, combina mapas
+  de producto e imágenes y conserva únicamente fichas `/es-es/<modelo>-<referencia>.html`.
+  Consulta el endpoint JSON público de vista rápida de Salesforce Commerce Cloud para
+  obtener precio vigente, moneda, color e imágenes sin confundir importes del pie de
+  página. Usa JSON-LD y HTML como respaldo y obtiene las categorías de las migas de pan.
+  Si el sitemap no enumera todos los colores, se importa el color predeterminado de la
+  ficha como producto simple.
+
+* **Conector de Geox España**: recorre `sitemap_index.xml`, incluidos índices
+  anidados y XML gzip, y conserva solo fichas `/es-ES/<slug>-<código>.html` cuyo
+  código final tiene 16 caracteres. Divide la referencia en artículo/material y
+  color, extrae el precio vigente (también rangos y rebajas), color comercial,
+  descripción, migas de pan y galería de Geox Thron CDN. Las tallas se mantienen
+  como información de la web y no crean variantes.
+
+
+* **Conector de Gioseppo España**: usa ``robots.txt`` como índice dinámico,
+  selecciona únicamente las directivas ``/es-es/sitemap_products_*.xml`` y
+  consulta el endpoint Ajax de Shopify para precio, descripción, variantes e
+  imágenes. Completa la referencia ``REF: <estilo>-<color>`` y las categorías
+  con las migas de pan de la ficha. Las tallas todavía no crean variantes.
+
+* **Conector de Fluchos España**: procesa el índice Shopify `sitemap.xml`, sigue
+  únicamente los mapas `sitemap_products_*.xml` y conserva las fichas españolas
+  `/products/<handle>`. Consulta el endpoint Ajax `.js` para precio, descripción,
+  tallas e imágenes y enriquece el resultado con el HTML para guardar el código de
+  estilo, la referencia comercial de la combinación/color y el color visible. Cada
+  ficha/color se importa como producto simple; las tallas aún no generan variantes.
+
+
+* **Conector de BH Bikes España**: recorre el índice distribuido en mapas
+  ``/cache/sitemap_<hex>.xml``, conserva únicamente fichas españolas bajo
+  ``/es_ES/bicicletas/`` y ``/es_ES/equipamiento/`` terminadas en una referencia
+  comercial, y deduplica por esa referencia. Extrae nombre, precio vigente,
+  categorías, colores, galería del CDN de BH y GTIN/EAN publicados en JSON,
+  atributos HTML o endpoints de color/talla. Cada modelo se mantiene como producto
+  simple y los códigos múltiples se conservan en la tabla de variantes externas.
+
+* **Conector de Lapierre Bikes España**: procesa el índice Shopify, conserva
+  únicamente fichas localizadas ``/es-es/products/<handle>`` y consulta el
+  endpoint Ajax ``.js`` para recuperar precio, SKU, opciones, galería y EAN/GTIN
+  por tamaño de cuadro y color. El código de estilo se deriva del sufijo estable
+  del handle, por ejemplo ``LPRTA`` en ``pulsium-80-lprta``.
+
+* **Conector de WeThePeople BMX**: procesa el sitemap Webflow y conserva solo
+  fichas de bicicletas, cuadros y componentes bajo carpetas de producto como
+  ``/bikes/``, ``/frames/``, ``/forks/`` o ``/handlebars/``. Extrae nombre,
+  descripción, colores, especificaciones y galería. El sitio oficial es un
+  catálogo de fabricante y normalmente no publica precio ni EAN; en ese caso
+  no sobrescribe precios manuales y solo guarda GTIN que superen la validación
+  GS1 desde JSON-LD, JSON incrustado o atributos de la ficha.
+
+
+* **Conector de Mondraker España**: procesa ``sitemapindex.xml`` y conserva
+  únicamente fichas del mercado ``/es/es/``. Distingue productos de páginas
+  editoriales y familias mediante filtros de URL y validación de marcadores de
+  ficha, extrae precio, tallas, colores, categorías, descripción y galería, y
+  recupera GTIN válidos desde JSON-LD, JSON incrustado o endpoints públicos.
+
+* **Conector de Cervélo España**: procesa ``sitemap.xml`` e índices anidados,
+  prioriza enlaces alternativos ``hreflang=es-ES`` y conserva únicamente fichas
+  de modelo bajo ``/es-ES/bikes/<modelo>``. La ficha reúne varias configuraciones,
+  colores y tallas; el conector guarda esas opciones en la descripción, usa el
+  precio mínimo publicado como referencia del producto simple y recupera GTIN
+  válidos desde JSON-LD, ``__NEXT_DATA__`` y objetos de configuraciones.
+
+* **Conector de Colnago España**: procesa ``sitemap.xml`` e índices anidados,
+  prioriza enlaces alternativos ``hreflang=es-ES`` y conserva fichas Shopify
+  estándar bajo ``/es-es/products/`` y páginas de modelos premium bajo
+  ``/es-es/premium-bikes/``. En productos Shopify consulta el endpoint Ajax
+  ``.js`` para recuperar precio, SKU, opciones, imágenes y EAN por variante;
+  en páginas premium usa JSON-LD, HTML y JSON incrustado como respaldo.
+
+* **Conector de Bicicletas Quer B2B España**: usa ``robots.txt`` como índice
+  dinámico de los sitemaps PrestaShop y, si el WAF bloquea ese recurso, prueba
+  los nombres XML habituales y el mapa HTML español como respaldo. Conserva
+  únicamente fichas ``/es/<categoría>/<id>-<slug>.html``, extrae precio,
+  referencia, categorías, colores, tallas e imágenes, y recupera EAN/GTIN desde
+  JSON-LD y los objetos de combinaciones de PrestaShop.
+
+* **Conector de Ridley Bikes España**: lee ``robots.txt`` y sigue el
+  ``sitemap_index.xml`` relativo, prioriza el mercado ``/es_ES/`` y conserva
+  únicamente configuraciones de bicicleta bajo ``/es_ES/bikes/<referencia>``.
+  Extrae nombre, montaje, diseño/talla, precio, categorías, descripción e
+  imágenes, y recupera GTIN válidos desde JSON-LD, estado JavaScript, atributos
+  HTML y endpoints públicos de variación.
+
+* **Conector de GT Bicycles**: lee ``robots.txt`` para localizar el índice
+  Shopify, sigue únicamente los mapas de productos y conserva fichas
+  ``/products/<handle>``. Consulta el endpoint Ajax ``.js`` para recuperar
+  opciones de talla/color, SKU, galería y EAN por variante. Cuando el catálogo
+  solo muestra “Find a dealer” y no publica precio positivo, conserva cualquier
+  precio introducido manualmente en Odoo.
+
+* **Conector de Conor Bikes España**: procesa los sitemaps PrestaShop cuando
+  están disponibles y usa como respaldo la paginación completa de
+  ``/es/2-inicio``. Conserva fichas ``/es/<categoría>/<producto>-<combinación>-
+  <slug>-<ean>.html``, extrae precio, referencia, color, talla, especificaciones
+  e imágenes, y recupera el EAN tanto desde la URL como desde JSON-LD y los
+  objetos de combinaciones de PrestaShop.
+
+
+* **Conector de Electrotren España**: lee ``robots.txt`` para localizar
+  ``sitemap.xml`` y conserva únicamente fichas ``/products/<slug>-<referencia>``.
+  Separa la descripción comercial, la información ampliada y el contenido del
+  paquete; recupera precio, referencia, galería y EAN/GTIN publicados, y crea
+  atributos informativos para escala, escala ferroviaria, época, DCC, motor,
+  operador, color, radio mínimo, luces, pantógrafo y restantes especificaciones.
+
+
+* **Conector de Jouef Europa (precio EUR)**: lee ``robots.txt`` para localizar ``sitemap.xml``
+  y conserva fichas ``/products/<slug>-<referencia>`` de la plataforma Hornby
+  Hobbies. Importa el precio oficial en EUR, referencia, descripción, contenido
+  del paquete, galería y GTIN publicados. Convierte las especificaciones ``Tech
+  Specs`` en atributos informativos para escala, H0/HO, época, DCC, motor,
+  operador, color, curva mínima, luces, pantógrafo y estado del producto.
+
+* **Resto de marcas Hornby Hobbies**: añade Arnold, Rivarossi, Lima, Hornby,
+  Airfix, Corgi/Corgi Premiums, Humbrol, Pocher y Bassett-Lowke mediante una base
+  común. Los mercados continentales leen directamente EUR; las tiendas UK usan
+  el selector oficial EUR y nunca convierten importes GBP. Cada marca mantiene
+  categorías y atributos específicos sin generar variantes de Odoo.
+
+* **Conector de Märklin Europa**: procesa el sitemap inglés y conserva fichas
+  ``/en/products/details/article/<número>``. Deduplica los sufijos de navegación
+  por número de artículo, importa el precio recomendado en EUR, prototipo,
+  descripción del modelo, funciones digitales, imágenes, escala, época, tipo de
+  producto y estado de fabricación. Los artículos históricos sin precio público
+  no sobrescriben precios manuales de Odoo.
+
 * **Conector de Panama Jack**: primer conector sobre Shopify (los otros
   tres son Salesforce Commerce Cloud), verificado con una ficha real. Sí
   tiene metaetiqueta de precio (`og:price:amount`), a diferencia de Joma y
@@ -130,7 +295,7 @@ Limitaciones conocidas
     # sale, sale_management...). Si no quieres esto, puedes quitar 'website_sale'
     # de esta lista y desactivar "Importar categorías de comercio electrónico" en
     # cada fuente; el resto del módulo funciona igual sin esa parte.
-    'depends': ['product', 'website_sale'],
+    'depends': ['product', 'website_sale', 'product_dimension', 'tl_product_package_dimensions'],
     'external_dependencies': {
         'python': ['lxml', 'requests'],
     },

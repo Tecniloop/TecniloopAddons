@@ -5,3 +5,4 @@ access_sitemap_product_staging_admin,sitemap.product.staging.admin,model_sitemap
 access_sitemap_import_wizard_admin,sitemap.import.wizard.admin,model_sitemap_import_wizard,base.group_system,1,1,1,1
 access_sitemap_category_mapping_admin,sitemap.category.mapping.admin,model_sitemap_category_mapping,base.group_system,1,1,1,1
 access_sitemap_category_explorer_wizard_admin,sitemap.category.explorer.wizard.admin,model_sitemap_category_explorer_wizard,base.group_system,1,1,1,1
+access_sitemap_product_ean_admin,sitemap.product.ean.admin,model_sitemap_product_ean,base.group_system,1,1,1,1

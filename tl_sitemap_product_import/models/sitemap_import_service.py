@@ -1,14 +1,18 @@
 import base64
+import json
 import logging
+import re
 import time
 from datetime import datetime
-from urllib.parse import urlparse
+from urllib.parse import unquote, urljoin, urlparse
 
 import requests
 from lxml import etree
 from lxml import html as lxml_html
 
 from odoo import fields, models
+
+from .hornby_price_utils import eur_hosts_for_url, eur_product_urls, normalise_host
 
 _logger = logging.getLogger(__name__)
 
@@ -58,6 +62,105 @@ class SitemapImportService(models.AbstractModel):
         if source.request_delay:
             time.sleep(source.request_delay)
         return response
+
+    def _hornby_official_eur_price(
+        self, source, session, product_url, expected_code, price_parser,
+        code_getter=None, eur_hosts=None, existing_response=None, brand_name='Hornby',
+    ):
+        """Lee el precio comercial oficial en EUR de una ficha Hornby.
+
+        No convierte divisas. Si la ficha de origen ya pertenece a un mercado
+        EUR, puede reutilizarse mediante ``existing_response``. En otro caso se
+        consulta la misma ruta en el escaparate europeo oficial de la marca.
+
+        ``price_parser`` recibe ``(tree, lines, product_node, product_name)`` y
+        debe devolver ``(precio, moneda, disponible)``. ``code_getter`` valida
+        que una redirección siga apuntando exactamente a la misma referencia.
+        """
+        target_hosts = eur_hosts_for_url(product_url, explicit_hosts=eur_hosts)
+        if not target_hosts:
+            _logger.info(
+                '%s: no hay un escaparate oficial EUR configurado para %s',
+                brand_name, product_url,
+            )
+            return 0.0, 'EUR', False
+
+        responses = []
+        if existing_response is not None:
+            response_host = normalise_host(urlparse(existing_response.url).netloc)
+            if response_host in target_hosts:
+                responses.append(existing_response)
+
+        used_urls = {getattr(item, 'url', '') for item in responses}
+        for candidate in eur_product_urls(product_url, explicit_hosts=target_hosts):
+            if candidate in used_urls:
+                continue
+            try:
+                responses.append(self._http_get(session, candidate, source))
+                used_urls.add(candidate)
+            except Exception as exc:
+                _logger.info(
+                    '%s: no se pudo consultar el precio oficial EUR en %s: %s',
+                    brand_name, candidate, exc,
+                )
+
+        for response in responses:
+            response_host = normalise_host(urlparse(response.url).netloc)
+            if response_host not in target_hosts:
+                _logger.info(
+                    '%s: la ficha EUR redirigió a un dominio no autorizado: %s',
+                    brand_name, response.url,
+                )
+                continue
+
+            if code_getter:
+                response_code = code_getter(response.url)
+                if not response_code:
+                    _logger.info(
+                        '%s: no se pudo validar la referencia de %s',
+                        brand_name, response.url,
+                    )
+                    continue
+                if expected_code and str(response_code).upper() != str(expected_code).upper():
+                    _logger.info(
+                        '%s: la ficha EUR %s corresponde a %s, no a %s',
+                        brand_name, response.url, response_code, expected_code,
+                    )
+                    continue
+
+            try:
+                page_markup = getattr(response, 'text', None) or response.content
+                tree = lxml_html.fromstring(page_markup)
+                lines = self._visible_lines(tree)
+                payloads = self._json_payloads(tree)
+                product_node = self._product_json_node(payloads)
+                product_name = (
+                    self._normalise_text(product_node.get('name'))
+                    if isinstance(product_node, dict) else ''
+                )
+                if not product_name:
+                    product_name = self._normalise_text(' '.join(tree.xpath('//h1//text()')))
+                price, currency, available = price_parser(
+                    tree, lines, product_node, product_name,
+                )
+            except Exception as exc:
+                _logger.info(
+                    '%s: no se pudo interpretar el precio EUR de %s: %s',
+                    brand_name, response.url, exc,
+                )
+                continue
+
+            currency_code = self._normalise_text(currency).upper()
+            if currency_code not in {'EUR', '€'}:
+                _logger.info(
+                    '%s: la ficha oficial %s devolvió moneda %s, no EUR',
+                    brand_name, response.url, currency,
+                )
+                continue
+            if available and price and price > 0:
+                return price, 'EUR', True
+
+        return 0.0, 'EUR', False
 
     # ------------------------------------------------------------------
     # robots.txt (parser propio: la librería estándar de Python no
@@ -252,6 +355,455 @@ class SitemapImportService(models.AbstractModel):
             'canonical_url': canonical_url,
         }
 
+
+    # ------------------------------------------------------------------
+    # EAN / GTIN (común a todos los conectores)
+    # ------------------------------------------------------------------
+    _GTIN_FIELDS = {
+        'gtin', 'gtin8', 'gtin12', 'gtin13', 'gtin14',
+        'ean', 'ean8', 'ean12', 'ean13', 'ean14', 'barcode', 'upc', 'upca',
+    }
+
+    @staticmethod
+    def _gtin_type(value):
+        return {
+            8: 'gtin8',
+            12: 'gtin12',
+            13: 'gtin13',
+            14: 'gtin14',
+        }.get(len(value))
+
+    @classmethod
+    def _normalise_gtin(cls, value):
+        """Devuelve un GTIN numérico válido o False.
+
+        Se aceptan GTIN-8, UPC-A/GTIN-12, EAN-13 y GTIN-14. Se valida el
+        dígito de control para no confundir SKU, referencias internas o IDs
+        de variante con un EAN.
+        """
+        if value is None or isinstance(value, bool):
+            return False
+        text = str(value).strip()
+        if not text:
+            return False
+
+        # GS1 Digital Link y notación humana (01)0950...
+        digital = re.search(r'(?:/01/|\(01\)|\b01)(\d{14})(?:\D|$)', text)
+        if digital:
+            text = digital.group(1)
+        else:
+            text = re.sub(r'[\s.-]', '', text)
+            if not text.isdigit():
+                match = re.fullmatch(r'[^0-9]*(\d{8}|\d{12}|\d{13}|\d{14})[^0-9]*', text)
+                if not match:
+                    return False
+                text = match.group(1)
+
+        if len(text) not in (8, 12, 13, 14):
+            return False
+        digits = [int(char) for char in text]
+        check = digits[-1]
+        body = digits[:-1]
+        total = 0
+        # GS1: desde la derecha del cuerpo, peso 3,1,3,1...
+        for index, digit in enumerate(reversed(body)):
+            total += digit * (3 if index % 2 == 0 else 1)
+        expected = (10 - (total % 10)) % 10
+        return text if check == expected else False
+
+    @classmethod
+    def _ean_variant(cls, ean, sku=False, label=False, source_variant_id=False, available=True):
+        ean = cls._normalise_gtin(ean)
+        if not ean:
+            return False
+        return {
+            'ean': ean,
+            'gtin_type': cls._gtin_type(ean),
+            'sku': str(sku or '').strip() or False,
+            'variant_label': str(label or '').strip() or False,
+            'source_variant_id': str(source_variant_id or '').strip() or False,
+            'available': bool(available),
+        }
+
+    @classmethod
+    def _normalise_ean_variants(cls, variants):
+        # Un GTIN identifica un único artículo comercial. Si aparece varias
+        # veces (JSON-LD + endpoint de variante), se conserva una sola línea y
+        # se completa con la metadata más rica disponible.
+        by_ean = {}
+        order = []
+        for item in variants or []:
+            if isinstance(item, str):
+                item = {'ean': item}
+            if not isinstance(item, dict):
+                continue
+            normalised = cls._ean_variant(
+                item.get('ean') or item.get('gtin') or item.get('barcode'),
+                sku=item.get('sku'),
+                label=item.get('variant_label') or item.get('label') or item.get('title'),
+                source_variant_id=item.get('source_variant_id') or item.get('id'),
+                available=item.get('available', True),
+            )
+            if not normalised:
+                continue
+            ean = normalised['ean']
+            if ean not in by_ean:
+                by_ean[ean] = normalised
+                order.append(ean)
+                continue
+            current = by_ean[ean]
+            for field in ('sku', 'variant_label', 'source_variant_id'):
+                if not current.get(field) and normalised.get(field):
+                    current[field] = normalised[field]
+        return [by_ean[ean] for ean in order]
+
+    @classmethod
+    def _ean_variants_from_shopify_product(cls, product_data):
+        """Extrae barcode/SKU/opciones de la respuesta Ajax de Shopify."""
+        if not isinstance(product_data, dict):
+            return []
+        option_names = []
+        for option in product_data.get('options') or []:
+            if isinstance(option, dict):
+                option_names.append(str(option.get('name') or '').strip())
+            else:
+                option_names.append(str(option or '').strip())
+
+        result = []
+        for variant in product_data.get('variants') or []:
+            if not isinstance(variant, dict):
+                continue
+            values = variant.get('options') or []
+            labels = []
+            if isinstance(values, list):
+                for index, value in enumerate(values):
+                    value = str(value or '').strip()
+                    if not value or value.casefold() == 'default title':
+                        continue
+                    name = option_names[index] if index < len(option_names) else ''
+                    labels.append(f'{name}: {value}' if name else value)
+            label = ' / '.join(labels)
+            if not label:
+                title = str(variant.get('title') or '').strip()
+                label = False if title.casefold() == 'default title' else title
+            item = cls._ean_variant(
+                variant.get('barcode'),
+                sku=variant.get('sku'),
+                label=label,
+                source_variant_id=variant.get('id'),
+                available=variant.get('available', True),
+            )
+            if item:
+                result.append(item)
+
+        # Algunas tiendas publican el GTIN a nivel de producto simple.
+        direct = cls._ean_variant(
+            product_data.get('barcode') or product_data.get('gtin'),
+            sku=product_data.get('sku'),
+            label=product_data.get('title'),
+            source_variant_id=product_data.get('id'),
+        )
+        if direct:
+            result.append(direct)
+        return cls._normalise_ean_variants(result)
+
+    @classmethod
+    def _payload_available(cls, node):
+        value = node.get('available')
+        if value is None:
+            value = node.get('inStock')
+        if value is None:
+            value = node.get('availability')
+        if isinstance(value, str):
+            lowered = value.casefold()
+            if any(token in lowered for token in ('outofstock', 'out_of_stock', 'agotado', 'soldout')):
+                return False
+            if any(token in lowered for token in ('instock', 'in_stock', 'disponible')):
+                return True
+        return True if value is None else bool(value)
+
+    @classmethod
+    def _selected_variant_label(cls, node):
+        parts = []
+        selected_options = node.get('selectedOptions') or node.get('selected_options') or []
+        if isinstance(selected_options, dict):
+            selected_options = list(selected_options.values())
+        for option in selected_options if isinstance(selected_options, list) else []:
+            if not isinstance(option, dict):
+                continue
+            name = option.get('name') or option.get('id') or option.get('attributeId')
+            value = option.get('value') or option.get('displayValue')
+            if value:
+                parts.append(f'{name}: {value}' if name else str(value))
+
+        attributes = node.get('variationAttributes') or node.get('variationAttrs') or []
+        if isinstance(attributes, dict):
+            attributes = list(attributes.values())
+        for attribute in attributes if isinstance(attributes, list) else []:
+            if not isinstance(attribute, dict):
+                continue
+            name = (
+                attribute.get('displayName') or attribute.get('name')
+                or attribute.get('id') or attribute.get('attributeId')
+            )
+            selected = attribute.get('selectedValue') or attribute.get('selected')
+            value = False
+            if isinstance(selected, dict):
+                value = selected.get('displayValue') or selected.get('name') or selected.get('value')
+            elif isinstance(selected, str):
+                value = selected
+            if not value:
+                for option in attribute.get('values') or []:
+                    if isinstance(option, dict) and option.get('selected'):
+                        value = option.get('displayValue') or option.get('name') or option.get('value')
+                        break
+            if value:
+                part = f'{name}: {value}' if name else str(value)
+                if part not in parts:
+                    parts.append(part)
+        return ' / '.join(str(part).strip() for part in parts if str(part).strip()) or False
+
+    @classmethod
+    def _ean_variants_from_payload(cls, payload):
+        """Recorre JSON-LD/JSON de cualquier plataforma y recupera GTIN publicados."""
+        result = []
+        visited = set()
+
+        def walk(value, inherited_label=False, inherited_sku=False):
+            if id(value) in visited:
+                return
+            if isinstance(value, (dict, list)):
+                visited.add(id(value))
+            if isinstance(value, list):
+                for child in value:
+                    walk(child, inherited_label, inherited_sku)
+                return
+            if not isinstance(value, dict):
+                return
+
+            lower = {str(key).casefold(): val for key, val in value.items()}
+            label = (
+                cls._selected_variant_label(value)
+                or value.get('variant_label') or value.get('title') or value.get('name')
+                or value.get('displayValue') or value.get('size') or inherited_label
+            )
+            sku = (
+                value.get('sku') or value.get('manufacturerSKU') or value.get('mpn')
+                or value.get('productID') or inherited_sku
+            )
+            source_id = value.get('variantId') or value.get('productId') or value.get('id') or value.get('@id')
+
+            for field in cls._GTIN_FIELDS:
+                raw = lower.get(field)
+                if isinstance(raw, (str, int)):
+                    item = cls._ean_variant(
+                        raw, sku=sku, label=label, source_variant_id=source_id,
+                        available=cls._payload_available(value),
+                    )
+                    if item:
+                        result.append(item)
+
+            # Schema.org PropertyValue: {propertyID: "GTIN", value: "..."}
+            property_name = str(
+                value.get('propertyID') or value.get('propertyId') or value.get('name') or ''
+            ).casefold()
+            if any(token in property_name for token in ('gtin', 'ean', 'barcode')):
+                item = cls._ean_variant(
+                    value.get('value'), sku=sku, label=label, source_variant_id=source_id,
+                    available=cls._payload_available(value),
+                )
+                if item:
+                    result.append(item)
+
+            for child in value.values():
+                walk(child, label, sku)
+
+        walk(payload)
+        return cls._normalise_ean_variants(result)
+
+    def _ean_variants_from_html_content(self, content):
+        result = []
+        try:
+            tree = lxml_html.fromstring(content)
+        except (ValueError, etree.ParserError):
+            tree = None
+        if tree is not None:
+            for raw in tree.xpath('//script[@type="application/ld+json" or @type="application/json"]/text()'):
+                if not raw or len(raw) > 8_000_000:
+                    continue
+                try:
+                    result.extend(self._ean_variants_from_payload(json.loads(raw)))
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    continue
+
+        text = content.decode('utf-8', errors='ignore') if isinstance(content, bytes) else str(content)
+        # Respaldo para objetos JavaScript no estrictamente JSON.
+        pattern = re.compile(
+            r'["\'](?:gtin(?:8|12|13|14)?|ean(?:8|12|13|14)?|EAN(?:8|12|13|14)?|barcode|upc|upca)["\']\s*:\s*["\'](\d{8}|\d{12}|\d{13}|\d{14})["\']'
+        )
+        existing_eans = {item.get('ean') for item in result if isinstance(item, dict)}
+        for match in pattern.finditer(text):
+            item = self._ean_variant(match.group(1))
+            if item and item['ean'] not in existing_eans:
+                result.append(item)
+                existing_eans.add(item['ean'])
+        return self._normalise_ean_variants(result)
+
+    def _shopify_ajax_product_url(self, product_url):
+        parsed = urlparse(product_url)
+        path = parsed.path.rstrip('/')
+        if not path.endswith('.js'):
+            path += '.js'
+        return parsed._replace(path=path, query='', fragment='').geturl()
+
+    def _fetch_shopify_ean_variants(self, source, product_url):
+        if '/products/' not in urlparse(product_url).path.casefold():
+            return []
+        session = self._get_session(source)
+        response = self._http_get(session, self._shopify_ajax_product_url(product_url), source)
+        return self._ean_variants_from_shopify_product(response.json())
+
+    def _fetch_generic_ean_variants(self, source, product_url):
+        session = self._get_session(source)
+        response = self._http_get(session, product_url, source)
+        return self._ean_variants_from_html_content(response.content)
+
+    def _fetch_site_ean_variants(self, source, product_url, preview_data):
+        """Busca GTIN en la página y en endpoints públicos de variación.
+
+        Es el respaldo común para Salesforce Commerce Cloud y otras tiendas que
+        cargan el EAN al seleccionar talla/color. Los conectores pueden
+        sobrescribirlo si conocen un endpoint más preciso.
+        """
+        session = self._get_session(source)
+        response = self._http_get(session, product_url, source)
+        variants = self._ean_variants_from_html_content(response.content)
+        limit = max(int(source.max_ean_requests_per_product or 0), 0)
+        if not limit:
+            return variants
+
+        text = response.text
+        candidates = []
+        # URLs en atributos HTML y objetos JS. Se restringen a términos de
+        # variación para no seguir recomendaciones, carrito o analítica.
+        patterns = (
+            r"[\"']([^\"']*(?:Product-Variation|product/variation|product-variation|variation\?)[^\"']*)[\"']",
+            r"[\"']([^\"']*dwvar_[^\"']*(?:size|talla|color)[^\"']*)[\"']",
+        )
+        for pattern in patterns:
+            for raw in re.findall(pattern, text, flags=re.IGNORECASE):
+                value = unquote(
+                    raw.replace('\\/', '/').replace('&amp;', '&')
+                    .replace('\\u0026', '&').replace('\\x26', '&')
+                )
+                endpoint = urljoin(product_url, value)
+                if endpoint not in candidates:
+                    candidates.append(endpoint)
+                if len(candidates) >= limit:
+                    break
+            if len(candidates) >= limit:
+                break
+
+        for endpoint in candidates[:limit]:
+            try:
+                variant_response = self._http_get(session, endpoint, source)
+                try:
+                    payload = variant_response.json()
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    payload = None
+                if payload is not None:
+                    variants.extend(self._ean_variants_from_payload(payload))
+                else:
+                    variants.extend(self._ean_variants_from_html_content(variant_response.content))
+            except Exception as exc:
+                _logger.debug('EAN: endpoint de variación no accesible %s: %s', endpoint, exc)
+        return self._normalise_ean_variants(variants)
+
+    def enrich_preview_eans(self, source, product_url, preview_data):
+        data = dict(preview_data or {})
+        if not source.import_eans:
+            data.update({'ean_variants': [], 'ean': False, 'ean_count': 0, 'ean_checked': False})
+            return data
+
+        variants = self._normalise_ean_variants(data.get('ean_variants') or [])
+        complete = bool(data.get('ean_complete'))
+        checked = complete
+
+        # Los conectores Shopify normalmente incorporan ya todos los códigos
+        # desde la respuesta Ajax usada para la ficha. Si no, se consulta aquí.
+        if not complete and not variants and '/products/' in urlparse(product_url).path.casefold():
+            try:
+                shopify_variants = self._fetch_shopify_ean_variants(source, product_url)
+                variants.extend(shopify_variants)
+                complete = True  # el endpoint devuelve la lista completa de variantes
+                checked = True
+            except Exception as exc:
+                _logger.info('EAN: Shopify Ajax no disponible para %s: %s', product_url, exc)
+
+        # JSON-LD puede contener solo el producto principal. Mientras el conector
+        # no declare la lista completa, se buscan además endpoints de talla/color.
+        if not complete:
+            try:
+                variants.extend(self._fetch_site_ean_variants(source, product_url, data))
+                checked = True
+            except Exception as exc:
+                _logger.info('EAN: el endpoint específico falló para %s: %s', product_url, exc)
+
+        variants = self._normalise_ean_variants(variants)
+        unique_eans = list(dict.fromkeys(item['ean'] for item in variants))
+        data['ean_variants'] = variants
+        data['ean_count'] = len(unique_eans)
+        data['ean'] = unique_eans[0] if len(unique_eans) == 1 else False
+        data['ean_checked'] = checked
+        return data
+
+    def _sync_product_eans(self, product_tmpl, source, variants):
+        if not source.import_eans:
+            return
+        variants = self._normalise_ean_variants(variants)
+        unique_eans = list(dict.fromkeys(item['ean'] for item in variants))
+        old_single = product_tmpl.sitemap_single_ean
+
+        product_tmpl.sitemap_ean_ids.unlink()
+        for item in variants:
+            self.env['sitemap.product.ean'].create({
+                'product_tmpl_id': product_tmpl.id,
+                'ean': item['ean'],
+                'gtin_type': item['gtin_type'],
+                'sku': item.get('sku'),
+                'variant_label': item.get('variant_label'),
+                'source_variant_id': item.get('source_variant_id'),
+                'available': item.get('available', True),
+            })
+
+        single = unique_eans[0] if len(unique_eans) == 1 else False
+        product_tmpl.write({
+            'sitemap_single_ean': single,
+            'sitemap_ean_count': len(unique_eans),
+        })
+
+        # El producto importado es simple. Solo se escribe barcode si hay un
+        # único GTIN inequívoco y no pertenece ya a otra variante de Odoo.
+        variants_odoo = product_tmpl.product_variant_ids
+        if len(variants_odoo) != 1:
+            return
+        product_variant = variants_odoo[0]
+        if single:
+            conflict = self.env['product.product'].with_context(active_test=False).search([
+                ('barcode', '=', single),
+                ('id', '!=', product_variant.id),
+            ], limit=1)
+            if conflict:
+                _logger.warning(
+                    'EAN %s no asignado a %s: ya pertenece a %s.',
+                    single, product_tmpl.display_name, conflict.display_name,
+                )
+                return
+            if not product_variant.barcode or product_variant.barcode == old_single:
+                product_variant.barcode = single
+        elif old_single and product_variant.barcode == old_single:
+            product_variant.barcode = False
+
     # ------------------------------------------------------------------
     # Ganchos que CADA CONECTOR debe implementar (aquí solo hay una
     # implementación de respaldo que no rompe la importación, pero deja
@@ -265,6 +817,11 @@ class SitemapImportService(models.AbstractModel):
     def get_image_map(self, source):
         _logger.warning('Sitemap import: get_image_map no implementado por el conector de "%s"', source.name)
         return {}
+
+    def parse_category_path(self, url):
+        # Respaldo para conectores con URL plana (p. ej. Shopify). Los conectores
+        # cuya categoría sí está codificada en la URL pueden sobrescribirlo.
+        return []
 
     def fetch_preview(self, source, url):
         _logger.warning('Sitemap import: fetch_preview no implementado por el conector de "%s"', source.name)
@@ -316,6 +873,309 @@ class SitemapImportService(models.AbstractModel):
             existing = Model.search([('name', '=', segment), ('parent_id', '=', parent.id)], limit=1)
             parent = existing or Model.create({'name': segment, 'parent_id': parent.id})
         return parent
+
+    # ------------------------------------------------------------------
+    # Atributos técnicos informativos (genérico)
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _normalise_product_attributes(attributes):
+        """Normaliza atributos como ``{nombre: [valores...]}``.
+
+        Los conectores pueden devolver un diccionario, una lista de pares o una
+        lista de objetos ``{'name': ..., 'value': ...}``. Se eliminan vacíos y
+        duplicados preservando el orden.
+        """
+        result = {}
+        if isinstance(attributes, dict):
+            items = attributes.items()
+        elif isinstance(attributes, list):
+            items = []
+            for item in attributes:
+                if isinstance(item, dict):
+                    items.append((item.get('name'), item.get('values') or item.get('value')))
+                elif isinstance(item, (list, tuple)) and len(item) >= 2:
+                    items.append((item[0], item[1]))
+        else:
+            items = []
+
+        for raw_name, raw_values in items:
+            name = re.sub(r'\s+', ' ', str(raw_name or '')).strip(' :')
+            if not name:
+                continue
+            values = raw_values if isinstance(raw_values, (list, tuple, set)) else [raw_values]
+            clean_values = []
+            for raw_value in values:
+                value = re.sub(r'\s+', ' ', str(raw_value or '')).strip(' :')
+                if value and value not in clean_values:
+                    clean_values.append(value)
+            if clean_values:
+                result[name] = clean_values
+        return result
+
+    @staticmethod
+    def _dimension_number(value):
+        match = re.search(r'(?<!\d)(\d+(?:[.,]\d+)?)', str(value or ''))
+        return float(match.group(1).replace(',', '.')) if match else 0.0
+
+    @staticmethod
+    def _dimension_unit(value, label=''):
+        text = f'{label} {value}'.casefold()
+        if re.search(r'\bmm\b|millimet', text):
+            return 'mm'
+        if re.search(r'\bcm\b|centimet', text):
+            return 'cm'
+        if re.search(r'(?<![a-z])m(?![a-z])|meter|metre', text):
+            return 'm'
+        return False
+
+    @classmethod
+    def _normalise_dimensions(cls, data):
+        """Devuelve dimensiones de producto compatibles con OCA product_dimension.
+
+        Se ignoran expresamente dimensiones de caja/embalaje. Todas las medidas se
+        convierten a milímetros para poder usar una única UdM dimensional.
+        """
+        direct = {key: data.get(key) for key in ('product_length', 'product_height', 'product_width')}
+        direct_unit = data.get('dimensional_uom_name') or data.get('dimensional_uom')
+        if any(direct.values()):
+            unit = str(direct_unit or 'mm').strip().casefold()
+            factor = {'m': 1000.0, 'cm': 10.0, 'mm': 1.0}.get(unit, 1.0)
+            return {
+                key: (float(value) * factor if value not in (False, None, '') else 0.0)
+                for key, value in direct.items()
+            } | {'dimensional_uom_name': 'mm'}
+
+        attrs = cls._normalise_product_attributes(data.get('attributes') or {})
+        result = {'product_length': 0.0, 'product_height': 0.0, 'product_width': 0.0}
+        explicit = {
+            'product_length': ('longitud entre topes', 'longitud sin embalaje', 'longitud', 'länge', 'length'),
+            'product_height': ('altura sin embalaje', 'altura', 'höhe', 'height'),
+            'product_width': ('anchura sin embalaje', 'anchura', 'ancho', 'breite', 'width'),
+        }
+        def to_mm(number, unit):
+            return number * {'m': 1000.0, 'cm': 10.0, 'mm': 1.0}.get(unit or 'mm', 1.0)
+        for field, labels in explicit.items():
+            for name, values in attrs.items():
+                folded = name.casefold()
+                is_without_packaging = ('sin embalaje' in folded or 'without packaging' in folded)
+                if not is_without_packaging and (
+                        'embalaj' in folded or 'packag' in folded or 'box' in folded):
+                    continue
+                if folded in labels or any(folded.startswith(label + ' ') for label in labels):
+                    value = values[0] if values else ''
+                    number = cls._dimension_number(value)
+                    if number:
+                        result[field] = to_mm(number, cls._dimension_unit(value, name))
+                        break
+
+        if not any(result.values()):
+            for name, values in attrs.items():
+                folded = name.casefold()
+                if folded not in {'dimensiones', 'dimensiones del producto', 'dimensions', 'product size'}:
+                    continue
+                value = values[0] if values else ''
+                numbers = [float(v.replace(',', '.')) for v in re.findall(r'\d+(?:[.,]\d+)?', str(value))]
+                if len(numbers) >= 2:
+                    unit = cls._dimension_unit(value, name) or 'mm'
+                    result['product_length'] = to_mm(numbers[0], unit)
+                    result['product_width'] = to_mm(numbers[1], unit)
+                    if len(numbers) >= 3:
+                        result['product_height'] = to_mm(numbers[2], unit)
+                    break
+        if not any(result.values()):
+            return {}
+        result['dimensional_uom_name'] = 'mm'
+        return result
+
+    @classmethod
+    def _normalise_packaging_dimensions(cls, data):
+        """Normaliza medidas de caja a mm y peso de caja a kg."""
+        attrs = cls._normalise_product_attributes(data.get('attributes') or {})
+        result = {}
+
+        def to_mm(number, unit):
+            return number * {'m': 1000.0, 'cm': 10.0, 'mm': 1.0}.get(unit or 'mm', 1.0)
+
+        labels = {
+            'packaging_length': ('longitud del embalaje', 'largo del embalaje', 'package length', 'packaging length', 'box length'),
+            'packaging_height': ('altura del embalaje', 'package height', 'packaging height', 'box height'),
+            'packaging_width': ('anchura del embalaje', 'ancho del embalaje', 'package width', 'packaging width', 'box width'),
+        }
+        for field, accepted in labels.items():
+            for name, values in attrs.items():
+                folded = name.casefold().strip()
+                if 'sin embalaje' in folded or 'without packaging' in folded:
+                    continue
+                if folded in accepted or any(folded.startswith(label + ' ') for label in accepted):
+                    value = values[0] if values else ''
+                    number = cls._dimension_number(value)
+                    if number:
+                        result[field] = to_mm(number, cls._dimension_unit(value, name))
+                        break
+
+        if not any(result.get(k) for k in ('packaging_length', 'packaging_height', 'packaging_width')):
+            accepted = {
+                'dimensiones del embalaje', 'medidas del embalaje', 'package dimensions',
+                'packaging dimensions', 'box dimensions', 'package size', 'packaging size',
+            }
+            for name, values in attrs.items():
+                folded = name.casefold().strip()
+                if folded not in accepted:
+                    continue
+                value = values[0] if values else ''
+                numbers = [float(v.replace(',', '.')) for v in re.findall(r'\d+(?:[.,]\d+)?', str(value))]
+                if len(numbers) >= 2:
+                    unit = cls._dimension_unit(value, name) or 'mm'
+                    result['packaging_length'] = to_mm(numbers[0], unit)
+                    result['packaging_width'] = to_mm(numbers[1], unit)
+                    if len(numbers) >= 3:
+                        result['packaging_height'] = to_mm(numbers[2], unit)
+                    break
+
+        for name, values in attrs.items():
+            folded = name.casefold().strip()
+            if 'sin embalaje' in folded or 'without packaging' in folded:
+                continue
+            if folded in {'peso del embalaje', 'peso embalaje', 'package weight', 'packaging weight', 'box weight'}:
+                value = values[0] if values else ''
+                number = cls._dimension_number(value)
+                if number:
+                    text = f'{name} {value}'.casefold()
+                    if re.search(r'\bmg\b', text):
+                        number /= 1000000.0
+                    elif re.search(r'\bg\b', text) and not re.search(r'\bkg\b', text):
+                        number /= 1000.0
+                    result['packaging_weight'] = number
+                break
+
+        if not any(result.values()):
+            return {}
+        result['packaging_dimensional_uom_name'] = 'mm'
+        result['packaging_weight_uom_name'] = 'kg'
+        return result
+
+    def _weight_uom(self, name):
+        Uom = self.env['uom.uom']
+        for candidate in ('kg', 'Kilograms', 'Kilogram'):
+            uom = Uom.search([('name', '=ilike', candidate)], limit=1)
+            if uom:
+                return uom
+        return self.env.ref('uom.product_uom_kgm')
+
+    def _sync_manufacturer_package_dimensions(self, product_tmpl, staging_row):
+        """Update physical packaging data on the product template.
+
+        These values describe the manufacturer's outer package and are not a
+        commercial ``product.packaging`` format. Missing source values never
+        erase dimensions maintained manually in Odoo.
+        """
+        vals = {}
+        if staging_row.packaging_length:
+            vals['package_length'] = staging_row.packaging_length
+        if staging_row.packaging_width:
+            vals['package_width'] = staging_row.packaging_width
+        if staging_row.packaging_height:
+            vals['package_height'] = staging_row.packaging_height
+        if any((
+            staging_row.packaging_length,
+            staging_row.packaging_width,
+            staging_row.packaging_height,
+        )):
+            vals['package_dimensional_uom_id'] = self._dimension_uom(
+                staging_row.packaging_dimensional_uom_name or 'mm'
+            ).id
+        if staging_row.packaging_weight:
+            vals.update({
+                'package_weight': staging_row.packaging_weight,
+                'package_weight_uom_id': self._weight_uom(
+                    staging_row.packaging_weight_uom_name or 'kg'
+                ).id,
+            })
+        if vals:
+            product_tmpl.write(vals)
+
+    def _dimension_uom(self, name):
+        name = (name or 'mm').strip().casefold()
+        aliases = {'mm': ('mm', 'Millimeters', 'Millimetres'), 'cm': ('cm', 'Centimeters', 'Centimetres'), 'm': ('m', 'Meters', 'Metres')}
+        Uom = self.env['uom.uom']
+        for candidate in aliases.get(name, (name,)):
+            uom = Uom.search([('name', '=ilike', candidate)], limit=1)
+            if uom:
+                return uom
+        return self.env.ref('uom.product_uom_meter')
+
+    def _informational_attribute(self, name):
+        Attribute = self.env['product.attribute']
+        attribute = Attribute.search([('name', '=ilike', name)], limit=1)
+        if attribute and attribute.create_variant != 'no_variant':
+            safe_name = f'{name} (informativo)'
+            attribute = Attribute.search([('name', '=ilike', safe_name)], limit=1)
+            if not attribute:
+                attribute = Attribute.create({
+                    'name': safe_name,
+                    'create_variant': 'no_variant',
+                })
+        elif not attribute:
+            attribute = Attribute.create({
+                'name': name,
+                'create_variant': 'no_variant',
+            })
+        return attribute
+
+    def _sync_product_attributes(self, product_tmpl, attributes):
+        """Crea/actualiza líneas de atributo sin generar variantes.
+
+        Solo se sustituyen los valores de atributos que el propio importador ya
+        gestionaba. Si el usuario tenía previamente una línea manual con el mismo
+        atributo, los valores recuperados se añaden sin borrar los existentes.
+        """
+        attributes = self._normalise_product_attributes(attributes)
+        if not attributes:
+            return
+        try:
+            previous = json.loads(product_tmpl.sitemap_attributes_json or '{}')
+            previous = self._normalise_product_attributes(previous)
+        except (TypeError, ValueError, json.JSONDecodeError):
+            previous = {}
+
+        Value = self.env['product.attribute.value']
+        Line = self.env['product.template.attribute.line']
+        stored = {}
+        for requested_name, values in attributes.items():
+            attribute = self._informational_attribute(requested_name)
+            value_records = Value.browse([])
+            for value_name in values:
+                value = Value.search([
+                    ('attribute_id', '=', attribute.id),
+                    ('name', '=ilike', value_name),
+                ], limit=1)
+                if not value:
+                    value = Value.create({
+                        'attribute_id': attribute.id,
+                        'name': value_name,
+                    })
+                value_records |= value
+
+            line = Line.search([
+                ('product_tmpl_id', '=', product_tmpl.id),
+                ('attribute_id', '=', attribute.id),
+            ], limit=1)
+            was_managed = requested_name in previous or attribute.name in previous
+            if line:
+                if was_managed:
+                    line.write({'value_ids': [(6, 0, value_records.ids)]})
+                else:
+                    line.write({'value_ids': [(4, value.id) for value in value_records]})
+            else:
+                Line.create({
+                    'product_tmpl_id': product_tmpl.id,
+                    'attribute_id': attribute.id,
+                    'value_ids': [(6, 0, value_records.ids)],
+                })
+            stored[attribute.name] = values
+
+        product_tmpl.sitemap_attributes_json = json.dumps(
+            stored, ensure_ascii=False, sort_keys=True)
 
     # ------------------------------------------------------------------
     # Imágenes (genérico)
@@ -382,6 +1242,7 @@ class SitemapImportService(models.AbstractModel):
 
         try:
             data = self.fetch_preview(source, staging_row.url)
+            data = self.enrich_preview_eans(source, staging_row.url, data)
         except Exception as exc:
             _logger.exception('Sitemap import: error obteniendo vista previa de %s', staging_row.url)
             staging_row.write({
@@ -389,15 +1250,42 @@ class SitemapImportService(models.AbstractModel):
             })
             return
 
+        dimensions = self._normalise_dimensions(data)
+        packaging_dimensions = self._normalise_packaging_dimensions(data)
         staging_row.write({
             'name': data['name'],
             'list_price': data['price'],
+            'price_available': data.get('price_available', True),
             'currency_name': data['currency'],
             'category_path': data.get('category_path') or '',
             'style_code': data.get('style_code') or False,
             'color_code': data.get('color_code') or False,
-            'description_preview': data['description'],
+            'description_preview': data.get('full_description') or data.get('description') or '',
+            'short_description_preview': data.get('short_description') or data.get('description') or '',
+            'full_description_preview': data.get('full_description') or data.get('description') or '',
+            'product_length': dimensions.get('product_length', 0.0),
+            'product_height': dimensions.get('product_height', 0.0),
+            'product_width': dimensions.get('product_width', 0.0),
+            'dimensional_uom_name': dimensions.get('dimensional_uom_name') or False,
+            'packaging_length': packaging_dimensions.get('packaging_length', 0.0),
+            'packaging_height': packaging_dimensions.get('packaging_height', 0.0),
+            'packaging_width': packaging_dimensions.get('packaging_width', 0.0),
+            'packaging_weight': packaging_dimensions.get('packaging_weight', 0.0),
+            'packaging_dimensional_uom_name': packaging_dimensions.get('packaging_dimensional_uom_name') or False,
+            'packaging_weight_uom_name': packaging_dimensions.get('packaging_weight_uom_name') or False,
+            'attributes_json': (
+                json.dumps(
+                    self._normalise_product_attributes(data.get('attributes') or {}),
+                    ensure_ascii=False, indent=2,
+                ) if self._normalise_product_attributes(data.get('attributes') or {}) else False
+            ),
             'main_image_url': data['main_image_url'] or False,
+            'image_urls_json': json.dumps(data.get('image_urls') or [], ensure_ascii=False),
+            'ean': data.get('ean') or False,
+            'ean_count': data.get('ean_count', 0),
+            'ean_checked': data.get('ean_checked', False),
+            'ean_variants_json': json.dumps(
+                data.get('ean_variants') or [], ensure_ascii=False, indent=2),
             'preview_date': fields.Datetime.now(),
             'error_message': False,
         })
@@ -422,8 +1310,16 @@ class SitemapImportService(models.AbstractModel):
 
             vals = {
                 'name': staging_row.name or staging_row.url,
-                'description_sale': staging_row.description_preview or '',
-                'list_price': staging_row.list_price,
+                'description_sale': (
+                    staging_row.short_description_preview
+                    or staging_row.description_preview
+                    or ''
+                ),
+                'description_ecommerce': (
+                    staging_row.full_description_preview
+                    or staging_row.description_preview
+                    or ''
+                ),
                 'categ_id': category.id,
                 'sitemap_source_id': source.id,
                 'sitemap_source_url': staging_row.url,
@@ -436,6 +1332,20 @@ class SitemapImportService(models.AbstractModel):
                 'purchase_ok': source.purchase_ok,
                 'active': True,
             }
+            if staging_row.dimensional_uom_name and (
+                    staging_row.product_length or staging_row.product_height or staging_row.product_width):
+                vals.update({
+                    'product_length': staging_row.product_length,
+                    'product_height': staging_row.product_height,
+                    'product_width': staging_row.product_width,
+                    'dimensional_uom_id': self._dimension_uom(staging_row.dimensional_uom_name).id,
+                })
+
+            # Algunas fuentes son catálogos sin precio público. En una creación
+            # se mantiene 0,00, pero una sincronización posterior no debe borrar
+            # un precio introducido manualmente o calculado mediante tarifas.
+            if not existing or staging_row.price_available:
+                vals['list_price'] = staging_row.list_price
             if source.product_tag_ids:
                 vals['product_tag_ids'] = [(6, 0, source.product_tag_ids.ids)]
 
@@ -456,9 +1366,53 @@ class SitemapImportService(models.AbstractModel):
                 product_tmpl = Product.create(vals)
                 result = 'created'
 
+            staged_eans = []
+            if staging_row.ean_variants_json:
+                try:
+                    loaded_eans = json.loads(staging_row.ean_variants_json)
+                    if isinstance(loaded_eans, list):
+                        staged_eans = loaded_eans
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    _logger.warning(
+                        'Sitemap import: JSON de EAN inválido para la fila %s',
+                        staging_row.id,
+                    )
+            if staging_row.ean_checked:
+                self._sync_product_eans(product_tmpl, source, staged_eans)
+
+            self._sync_manufacturer_package_dimensions(product_tmpl, staging_row)
+
+            staged_attributes = {}
+            if staging_row.attributes_json:
+                try:
+                    loaded_attributes = json.loads(staging_row.attributes_json)
+                    staged_attributes = self._normalise_product_attributes(loaded_attributes)
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    _logger.warning(
+                        'Sitemap import: JSON de atributos inválido para la fila %s',
+                        staging_row.id,
+                    )
+            if staged_attributes:
+                self._sync_product_attributes(product_tmpl, staged_attributes)
+
             if source.import_images:
+                staged_image_urls = []
+                if staging_row.image_urls_json:
+                    try:
+                        loaded_urls = json.loads(staging_row.image_urls_json)
+                        if isinstance(loaded_urls, list):
+                            staged_image_urls = loaded_urls
+                    except (TypeError, ValueError):
+                        _logger.warning(
+                            'Sitemap import: JSON de imagenes invalido para la fila %s',
+                            staging_row.id,
+                        )
+                merged_image_urls = []
+                for image_url in list(image_urls or []) + staged_image_urls:
+                    if image_url and image_url not in merged_image_urls:
+                        merged_image_urls.append(image_url)
                 image_data = {'main_image_url': staging_row.main_image_url}
-                self._import_images(product_tmpl, image_data, image_urls, source)
+                self._import_images(product_tmpl, image_data, merged_image_urls, source)
 
             staging_row.write({
                 'state': 'imported',

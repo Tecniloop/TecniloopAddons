@@ -8,23 +8,1140 @@
         <field name="name">Skechers España</field>
         <field name="connector_model">sitemap.connector.skechers_es</field>
         <field name="sitemap_index_url">https://www.skechers.es/sitemap_index.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
     </record>
 
     <record id="sitemap_import_source_mtng_es" model="sitemap.import.source">
         <field name="name">Mustang Shoes España</field>
         <field name="connector_model">sitemap.connector.mtng_es</field>
         <field name="sitemap_index_url">https://www.mtngshoes.com/sitemap_index.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
     </record>
 
     <record id="sitemap_import_source_pikolinos_es" model="sitemap.import.source">
         <field name="name">Pikolinos España</field>
         <field name="connector_model">sitemap.connector.pikolinos_es</field>
         <field name="sitemap_index_url">https://www.pikolinos.com/sitemap_index.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
     </record>
 
     <record id="sitemap_import_source_panamajack_es" model="sitemap.import.source">
         <field name="name">Panama Jack España</field>
         <field name="connector_model">sitemap.connector.panamajack_es</field>
         <field name="sitemap_index_url">https://www.panamajack.es/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
     </record>
+
+    <record id="sitemap_import_source_miguelbellido_es" model="sitemap.import.source">
+        <field name="name">Miguel Bellido España</field>
+        <field name="connector_model">sitemap.connector.miguelbellido_es</field>
+        <field name="sitemap_index_url">https://www.miguelbellido.es/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">6</field>
+    </record>
+    <record id="sitemap_import_source_levis_es" model="sitemap.import.source">
+        <field name="name">Levi's España</field>
+        <field name="connector_model">sitemap.connector.levis_es</field>
+        <field name="sitemap_index_url">https://www.levi.com/ES/es_ES/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.5</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+    <record id="sitemap_import_source_fruitoftheloom_eu" model="sitemap.import.source">
+        <field name="name">Fruit of the Loom Europa</field>
+        <field name="connector_model">sitemap.connector.fruitoftheloom_eu</field>
+        <field name="sitemap_index_url">https://www.fruitoftheloom.eu/s/sitemap-view-1.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_blendcompany_eu" model="sitemap.import.source">
+        <field name="name">Blend Europa</field>
+        <field name="connector_model">sitemap.connector.blendcompany_eu</field>
+        <field name="sitemap_index_url">https://www.blendcompany.com/en-eu/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_selected_es" model="sitemap.import.source">
+        <field name="name">SELECTED España</field>
+        <field name="connector_model">sitemap.connector.selected_es</field>
+        <field name="sitemap_index_url">https://www.selected.com/es-es/sitemap/root</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_geox_es" model="sitemap.import.source">
+        <field name="name">Geox España</field>
+        <field name="connector_model">sitemap.connector.geox_es</field>
+        <field name="sitemap_index_url">https://www.geox.com/es-ES/sitemap_index.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_callaghan_es" model="sitemap.import.source">
+        <field name="name">Callaghan España</field>
+        <field name="connector_model">sitemap.connector.callaghan_es</field>
+        <field name="sitemap_index_url">https://callaghan.es/sitemap_products_1.xml?from=8661866217740&amp;to=8790897033484</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">0.8</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_fluchos_es" model="sitemap.import.source">
+        <field name="name">Fluchos España</field>
+        <field name="connector_model">sitemap.connector.fluchos_es</field>
+        <field name="sitemap_index_url">https://fluchos.es/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">0.8</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_pitillos_es" model="sitemap.import.source">
+        <field name="name">Pitillos Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.pitillos_es</field>
+        <field name="sitemap_index_url">https://calzadospitillos.com/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">0.8</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_gioseppo_es" model="sitemap.import.source">
+        <field name="name">Gioseppo Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.gioseppo_es</field>
+        <field name="sitemap_index_url">https://gioseppo.com/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">0.8</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_bhbikes_es" model="sitemap.import.source">
+        <field name="name">BH Bikes Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.bhbikes_es</field>
+        <field name="sitemap_index_url">https://www.bhbikes.com/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_lapierre_es" model="sitemap.import.source">
+        <field name="name">Lapierre Bikes Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.lapierre_es</field>
+        <field name="sitemap_index_url">https://lapierrebikes.com/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">0.8</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_wethepeoplebmx" model="sitemap.import.source">
+        <field name="name">WeThePeople BMX</field>
+        <field name="connector_model">sitemap.connector.wethepeoplebmx</field>
+        <field name="sitemap_index_url">https://wethepeoplebmx.de/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">20</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">0.8</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_mondraker_es" model="sitemap.import.source">
+        <field name="name">Mondraker Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.mondraker_es</field>
+        <field name="sitemap_index_url">https://mondraker.com/sitemapindex.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_cervelo_es" model="sitemap.import.source">
+        <field name="name">Cerv&#233;lo Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.cervelo_es</field>
+        <field name="sitemap_index_url">https://www.cervelo.com/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_colnago_es" model="sitemap.import.source">
+        <field name="name">Colnago Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.colnago_es</field>
+        <field name="sitemap_index_url">https://www.colnago.com/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+    </record>
+
+    <record id="sitemap_import_source_bicicletasquer_es" model="sitemap.import.source">
+        <field name="name">Bicicletas Quer B2B Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.bicicletasquer_es</field>
+        <field name="sitemap_index_url">https://b2b.bicicletasquer.com/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_ridley_es" model="sitemap.import.source">
+        <field name="name">Ridley Bikes Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.ridley_es</field>
+        <field name="sitemap_index_url">https://www.ridley-bikes.com/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_gtbicycles" model="sitemap.import.source">
+        <field name="name">GT Bicycles</field>
+        <field name="connector_model">sitemap.connector.gtbicycles</field>
+        <field name="sitemap_index_url">https://gtbicycles.com/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_conor_es" model="sitemap.import.source">
+        <field name="name">Conor Bikes Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.conor_es</field>
+        <field name="sitemap_index_url">https://conorbikes.com/es/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">40</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_merida_es" model="sitemap.import.source">
+        <field name="name">MERIDA BIKES Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.merida_es</field>
+        <field name="sitemap_index_url">https://www.merida-bikes.com/es-es</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_orbea_es" model="sitemap.import.source">
+        <field name="name">Orbea Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.orbea_es</field>
+        <field name="sitemap_index_url">https://www.orbea.com/es-es/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">40</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_scalextric_es" model="sitemap.import.source">
+        <field name="name">Scalextric Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.scalextric_es</field>
+        <field name="sitemap_index_url">https://scalextric.es/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">20</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">0.8</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_ninco_es" model="sitemap.import.source">
+        <field name="name">NINCO Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.ninco_es</field>
+        <field name="sitemap_index_url">https://www.ninco.com/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">0.8</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_electrotren_es" model="sitemap.import.source">
+        <field name="name">Electrotren Espa&#241;a</field>
+        <field name="connector_model">sitemap.connector.electrotren_es</field>
+        <field name="sitemap_index_url">https://es.electrotren.com/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">0.8</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_jouef_uk" model="sitemap.import.source">
+        <field name="name">Jouef Europa (precio EUR)</field>
+        <field name="connector_model">sitemap.connector.jouef_uk</field>
+        <field name="sitemap_index_url">https://uk.jouef.com/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">0.8</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+
+    <!-- Resto de marcas oficiales Hornby Hobbies. Las tiendas continentales
+         publican directamente EUR; las británicas usan el selector oficial EUR. -->
+    <record id="sitemap_import_source_arnold_de" model="sitemap.import.source">
+        <field name="name">Arnold Europa (precio EUR)</field>
+        <field name="connector_model">sitemap.connector.arnold_de</field>
+        <field name="sitemap_index_url">https://de.arnoldmodel.com/robots.txt</field>
+        <field name="import_eans">1</field><field name="max_ean_requests_per_product">30</field>
+        <field name="request_delay">0.8</field><field name="request_timeout">30</field>
+        <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
+    </record>
+    <record id="sitemap_import_source_rivarossi_it" model="sitemap.import.source">
+        <field name="name">Rivarossi Europa (precio EUR)</field>
+        <field name="connector_model">sitemap.connector.rivarossi_it</field>
+        <field name="sitemap_index_url">https://it.rivarossi.com/robots.txt</field>
+        <field name="import_eans">1</field><field name="max_ean_requests_per_product">30</field>
+        <field name="request_delay">0.8</field><field name="request_timeout">30</field>
+        <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
+    </record>
+    <record id="sitemap_import_source_lima_it" model="sitemap.import.source">
+        <field name="name">Lima Europa (precio EUR)</field>
+        <field name="connector_model">sitemap.connector.lima_it</field>
+        <field name="sitemap_index_url">https://it.limamodel.it/robots.txt</field>
+        <field name="import_eans">1</field><field name="max_ean_requests_per_product">30</field>
+        <field name="request_delay">0.8</field><field name="request_timeout">30</field>
+        <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
+    </record>
+    <record id="sitemap_import_source_pocher_uk" model="sitemap.import.source">
+        <field name="name">Pocher Europa (precio EUR)</field>
+        <field name="connector_model">sitemap.connector.pocher_uk</field>
+        <field name="sitemap_index_url">https://uk.pocher.com/robots.txt</field>
+        <field name="import_eans">1</field><field name="max_ean_requests_per_product">30</field>
+        <field name="request_delay">0.8</field><field name="request_timeout">30</field>
+        <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
+    </record>
+    <record id="sitemap_import_source_hornby_uk" model="sitemap.import.source">
+        <field name="name">Hornby Europa (precio EUR)</field>
+        <field name="connector_model">sitemap.connector.hornby_uk</field>
+        <field name="sitemap_index_url">https://uk.hornby.com/robots.txt</field>
+        <field name="import_eans">1</field><field name="max_ean_requests_per_product">30</field>
+        <field name="request_delay">0.8</field><field name="request_timeout">30</field>
+        <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
+    </record>
+    <record id="sitemap_import_source_airfix_uk" model="sitemap.import.source">
+        <field name="name">Airfix Europa (precio EUR)</field>
+        <field name="connector_model">sitemap.connector.airfix_uk</field>
+        <field name="sitemap_index_url">https://uk.airfix.com/robots.txt</field>
+        <field name="import_eans">1</field><field name="max_ean_requests_per_product">30</field>
+        <field name="request_delay">0.8</field><field name="request_timeout">30</field>
+        <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
+    </record>
+    <record id="sitemap_import_source_corgi_uk" model="sitemap.import.source">
+        <field name="name">Corgi y Corgi Premiums Europa (precio EUR)</field>
+        <field name="connector_model">sitemap.connector.corgi_uk</field>
+        <field name="sitemap_index_url">https://uk.corgi.co.uk/robots.txt</field>
+        <field name="import_eans">1</field><field name="max_ean_requests_per_product">30</field>
+        <field name="request_delay">0.8</field><field name="request_timeout">30</field>
+        <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
+    </record>
+    <record id="sitemap_import_source_humbrol_uk" model="sitemap.import.source">
+        <field name="name">Humbrol Europa (precio EUR)</field>
+        <field name="connector_model">sitemap.connector.humbrol_uk</field>
+        <field name="sitemap_index_url">https://uk.humbrol.com/robots.txt</field>
+        <field name="import_eans">1</field><field name="max_ean_requests_per_product">30</field>
+        <field name="request_delay">0.8</field><field name="request_timeout">30</field>
+        <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
+    </record>
+    <record id="sitemap_import_source_bassett_lowke_uk" model="sitemap.import.source">
+        <field name="name">Bassett-Lowke Europa (precio EUR)</field>
+        <field name="connector_model">sitemap.connector.bassett_lowke_uk</field>
+        <field name="sitemap_index_url">https://uk.bassettlowke.co.uk/robots.txt</field>
+        <field name="import_eans">1</field><field name="max_ean_requests_per_product">30</field>
+        <field name="request_delay">0.8</field><field name="request_timeout">30</field>
+        <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
+    </record>
+
+    <record id="sitemap_import_source_maerklin_en" model="sitemap.import.source">
+        <field name="name">Märklin Europa</field>
+        <field name="connector_model">sitemap.connector.maerklin_en</field>
+        <field name="sitemap_index_url">https://www.maerklin.de/en/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_trix_en" model="sitemap.import.source">
+        <field name="name">Trix Europa</field>
+        <field name="connector_model">sitemap.connector.trix_en</field>
+        <field name="sitemap_index_url">https://www.trix.de/en/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_minitrix_en" model="sitemap.import.source">
+        <field name="name">Minitrix Europa</field>
+        <field name="connector_model">sitemap.connector.minitrix_en</field>
+        <field name="sitemap_index_url">https://www.trix.de/en/products/minitrix/all-items</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_lgb_en" model="sitemap.import.source">
+        <field name="name">LGB Europa</field>
+        <field name="connector_model">sitemap.connector.lgb_en</field>
+        <field name="sitemap_index_url">https://www.lgb.de/en/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">30</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_preiser_de" model="sitemap.import.source">
+        <field name="name">Preiser Figuren Europa</field>
+        <field name="connector_model">sitemap.connector.preiser_de</field>
+        <field name="sitemap_index_url">https://www.preiserfiguren.de/sitemap.php</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">8</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_roco_es" model="sitemap.import.source">
+        <field name="name">ROCO España</field>
+        <field name="connector_model">sitemap.connector.roco_es</field>
+        <field name="sitemap_index_url">https://www.roco.cc/res/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_fleischmann_es" model="sitemap.import.source">
+        <field name="name">Fleischmann España</field>
+        <field name="connector_model">sitemap.connector.fleischmann_es</field>
+        <field name="sitemap_index_url">https://www.fleischmann.de/fes/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_piko_en" model="sitemap.import.source">
+        <field name="name">PIKO Europa</field>
+        <field name="connector_model">sitemap.connector.piko_en</field>
+        <field name="sitemap_index_url">https://www.piko-shop.de/sitemap_en.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_brawa_en" model="sitemap.import.source">
+        <field name="name">BRAWA Europa</field>
+        <field name="connector_model">sitemap.connector.brawa_en</field>
+        <field name="sitemap_index_url">https://www.brawa.de/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_hape_es" model="sitemap.import.source">
+        <field name="name">Hape España</field>
+        <field name="connector_model">sitemap.connector.hape_es</field>
+        <field name="sitemap_index_url">https://es.hape.com/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">25</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+    <record id="sitemap_import_source_viessmann_viessmann" model="sitemap.import.source">
+        <field name="name">Viessmann Europa</field>
+        <field name="connector_model">sitemap.connector.viessmann_viessmann</field>
+        <field name="sitemap_index_url">https://viessmann-modell.com/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_viessmann_kibri" model="sitemap.import.source">
+        <field name="name">Kibri Europa</field>
+        <field name="connector_model">sitemap.connector.viessmann_kibri</field>
+        <field name="sitemap_index_url">https://viessmann-modell.com/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_viessmann_vollmer" model="sitemap.import.source">
+        <field name="name">Vollmer Europa</field>
+        <field name="connector_model">sitemap.connector.viessmann_vollmer</field>
+        <field name="sitemap_index_url">https://viessmann-modell.com/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+<record id="sitemap_import_source_ree_modeles_fr" model="sitemap.import.source">
+        <field name="name">REE Modèles Francia</field>
+        <field name="connector_model">sitemap.connector.ree_modeles_fr</field>
+        <field name="sitemap_index_url">https://ree-modeles.com/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bemo_de" model="sitemap.import.source">
+        <field name="name">BEMO Modelleisenbahnen Europa</field>
+        <field name="connector_model">sitemap.connector.bemo_de</field>
+        <field name="sitemap_index_url">https://www.bemo-modellbahn.de/wp-sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+    <record id="sitemap_import_source_bachmann_bachmann_branchline" model="sitemap.import.source">
+        <field name="name">Bachmann Branchline — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_bachmann_branchline</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_graham_farish" model="sitemap.import.source">
+        <field name="name">Graham Farish — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_graham_farish</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_liliput" model="sitemap.import.source">
+        <field name="name">Liliput — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_liliput</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_efe_rail" model="sitemap.import.source">
+        <field name="name">EFE Rail — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_efe_rail</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_scenecraft" model="sitemap.import.source">
+        <field name="name">Scenecraft — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_scenecraft</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_bachmann_narrow_gauge" model="sitemap.import.source">
+        <field name="name">Bachmann Narrow Gauge — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_bachmann_narrow_gauge</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_thomas_friends" model="sitemap.import.source">
+        <field name="name">Thomas &amp; Friends — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_thomas_friends</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_woodland_scenics" model="sitemap.import.source">
+        <field name="name">Woodland Scenics — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_woodland_scenics</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_proses" model="sitemap.import.source">
+        <field name="name">Proses — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_proses</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_bachmann_trains_usa" model="sitemap.import.source">
+        <field name="name">Bachmann Trains USA — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_bachmann_trains_usa</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_bachmann_china" model="sitemap.import.source">
+        <field name="name">Bachmann China — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_bachmann_china</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_efe_road" model="sitemap.import.source">
+        <field name="name">EFE Road — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_efe_road</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_exclusive_first_editions" model="sitemap.import.source">
+        <field name="name">Exclusive First Editions — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_exclusive_first_editions</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_greenlight" model="sitemap.import.source">
+        <field name="name">GreenLight — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_greenlight</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_mini_gt" model="sitemap.import.source">
+        <field name="name">Mini GT — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_mini_gt</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_academy" model="sitemap.import.source">
+        <field name="name">Academy — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_academy</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_trumpeter" model="sitemap.import.source">
+        <field name="name">Trumpeter — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_trumpeter</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_airfix_bachmann" model="sitemap.import.source">
+        <field name="name">Airfix — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_airfix_bachmann</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_accurate_figures" model="sitemap.import.source">
+        <field name="name">Accurate Figures — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_accurate_figures</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_afv_club" model="sitemap.import.source">
+        <field name="name">AFV Club — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_afv_club</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_amt" model="sitemap.import.source">
+        <field name="name">AMT — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_amt</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_emhar" model="sitemap.import.source">
+        <field name="name">Emhar — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_emhar</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_hk_models" model="sitemap.import.source">
+        <field name="name">HK Models — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_hk_models</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_i_love_kit" model="sitemap.import.source">
+        <field name="name">I Love Kit — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_i_love_kit</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_mpc" model="sitemap.import.source">
+        <field name="name">MPC — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_mpc</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_polar_lights" model="sitemap.import.source">
+        <field name="name">Polar Lights — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_polar_lights</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_roden" model="sitemap.import.source">
+        <field name="name">Roden — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_roden</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_takom" model="sitemap.import.source">
+        <field name="name">Takom — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_takom</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_bachmann_toyway" model="sitemap.import.source">
+        <field name="name">Toyway — catálogo Bachmann UK</field>
+        <field name="connector_model">sitemap.connector.bachmann_toyway</field>
+        <field name="sitemap_index_url">https://www.bachmann.co.uk/</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+    <record id="sitemap_import_source_faller_faller" model="sitemap.import.source">
+        <field name="name">FALLER Europa</field>
+        <field name="connector_model">sitemap.connector.faller_faller</field>
+        <field name="sitemap_index_url">https://www.faller.de/en/sitemap_index.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">12</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_faller_pola_g" model="sitemap.import.source">
+        <field name="name">POLA G Europa</field>
+        <field name="connector_model">sitemap.connector.faller_pola_g</field>
+        <field name="sitemap_index_url">https://www.faller.de/en/sitemap_index.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">12</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+<record id="sitemap_import_source_aneste_datank_es" model="sitemap.import.source">
+        <field name="name">Aneste Datank España</field>
+        <field name="connector_model">sitemap.connector.aneste_datank_es</field>
+        <field name="sitemap_index_url">https://www.anestedatank.com/wp-sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">60</field>
+        <field name="max_images_per_product">8</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+    <record id="sitemap_import_source_noch_noch" model="sitemap.import.source">
+        <field name="name">NOCH — catálogo NOCH Alemania</field>
+        <field name="connector_model">sitemap.connector.noch_noch</field>
+        <field name="sitemap_index_url">https://www.noch.de/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_noch_rokuhan" model="sitemap.import.source">
+        <field name="name">Rokuhan — catálogo NOCH Alemania</field>
+        <field name="connector_model">sitemap.connector.noch_rokuhan</field>
+        <field name="sitemap_index_url">https://www.noch.de/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_noch_athearn" model="sitemap.import.source">
+        <field name="name">Athearn — catálogo NOCH Alemania</field>
+        <field name="connector_model">sitemap.connector.noch_athearn</field>
+        <field name="sitemap_index_url">https://www.noch.de/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_noch_ammo" model="sitemap.import.source">
+        <field name="name">AMMO — catálogo NOCH Alemania</field>
+        <field name="connector_model">sitemap.connector.noch_ammo</field>
+        <field name="sitemap_index_url">https://www.noch.de/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
+    <record id="sitemap_import_source_noch_proxxon" model="sitemap.import.source">
+        <field name="name">PROXXON — catálogo NOCH Alemania</field>
+        <field name="connector_model">sitemap.connector.noch_proxxon</field>
+        <field name="sitemap_index_url">https://www.noch.de/sitemap.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
+    </record>
+
 </odoo>

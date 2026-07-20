@@ -27,9 +27,11 @@
                             <field name="auto_sync_enabled"/>
                             <field name="auto_archive_discontinued"/>
                         </group>
-                        <group string="Imágenes">
+                        <group string="Imágenes y códigos">
                             <field name="import_images"/>
                             <field name="max_images_per_product"/>
+                            <field name="import_eans"/>
+                            <field name="max_ean_requests_per_product" invisible="not import_eans"/>
                         </group>
                     </group>
                     <group>

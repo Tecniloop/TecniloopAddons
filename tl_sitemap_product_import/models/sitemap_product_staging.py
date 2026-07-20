@@ -30,12 +30,44 @@ class SitemapProductStaging(models.Model):
     # contenido NO se descarga hasta que el producto se importa de verdad.
     name = fields.Char(string='Nombre')
     list_price = fields.Float(string='Precio')
+    price_available = fields.Boolean(
+        string='Precio publicado', default=True, required=True,
+        help='Indica si la fuente publicó un precio fiable. Si no lo publicó, '
+             'las actualizaciones conservan el precio que ya tenga el producto en Odoo.')
     currency_name = fields.Char(string='Moneda')
     category_path = fields.Char(string='Categoría (ruta)')
     style_code = fields.Char(string='Código de estilo')
     color_code = fields.Char(string='Código de color')
     description_preview = fields.Text(string='Descripción')
+    short_description_preview = fields.Text(string='Descripción breve')
+    full_description_preview = fields.Html(string='Descripción ampliada')
+    attributes_json = fields.Text(
+        string='Atributos técnicos (JSON)', readonly=True,
+        help='Atributos informativos recuperados de la ficha, por ejemplo Escala 1:32.')
+    product_length = fields.Float(string='Longitud del producto', readonly=True)
+    product_height = fields.Float(string='Altura del producto', readonly=True)
+    product_width = fields.Float(string='Anchura del producto', readonly=True)
+    dimensional_uom_name = fields.Char(
+        string='Unidad dimensional', readonly=True,
+        help='Unidad común de longitud, altura y anchura que se aplicará mediante product_dimension.')
+    packaging_length = fields.Float(string='Longitud del embalaje', readonly=True)
+    packaging_height = fields.Float(string='Altura del embalaje', readonly=True)
+    packaging_width = fields.Float(string='Anchura del embalaje', readonly=True)
+    packaging_weight = fields.Float(string='Peso del embalaje', readonly=True)
+    packaging_dimensional_uom_name = fields.Char(
+        string='Unidad dimensional del embalaje', readonly=True)
+    packaging_weight_uom_name = fields.Char(
+        string='Unidad de peso del embalaje', readonly=True)
     main_image_url = fields.Char(string='URL imagen principal (no descargada)')
+    image_urls_json = fields.Text(string='URLs de imágenes (JSON)', readonly=True)
+    ean = fields.Char(
+        string='EAN único', readonly=True,
+        help='Solo se informa cuando la ficha publica exactamente un GTIN válido.')
+    ean_count = fields.Integer(string='Número de EAN', readonly=True)
+    ean_checked = fields.Boolean(
+        string='EAN comprobado', readonly=True,
+        help='La fuente fue consultada correctamente, aunque no publicara ningún EAN.')
+    ean_variants_json = fields.Text(string='EAN por variante (JSON)', readonly=True)
 
     product_tmpl_id = fields.Many2one('product.template', string='Producto Odoo enlazado', readonly=True)
     error_message = fields.Text(string='Mensaje de error')
