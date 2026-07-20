@@ -774,11 +774,62 @@ class SitemapImportService(models.AbstractModel):
             endpoint_path = path if path.endswith(suffix) else path + suffix
             yield parsed._replace(path=endpoint_path, query='', fragment='').geturl()
 
+    @staticmethod
+    def _shopify_product_handle(product_url):
+        """Return the stable Shopify handle from a localized product URL."""
+        path = urlparse(product_url).path.rstrip('/')
+        match = re.search(r'/products/([^/]+?)(?:\.js|\.json)?$', path, flags=re.IGNORECASE)
+        return match.group(1) if match else False
+
+    @staticmethod
+    def _normalise_shopify_product_payload(payload):
+        """Normalize direct, wrapped and catalogue Shopify product payloads."""
+        if not isinstance(payload, dict):
+            return {}
+        product = payload.get('product')
+        if isinstance(product, dict):
+            return product
+        if any(payload.get(field) for field in ('title', 'name', 'handle')):
+            return payload
+        return {}
+
+    def _fetch_shopify_catalog_product(self, source, product_url, max_pages=100):
+        """Find one product by handle in Shopify's paginated public catalogue.
+
+        Some shops allow ``products.json`` while blocking or customising the
+        per-product ``.js``/``.json`` endpoints.  The catalogue contains the
+        same core data needed by the import: title, variants, price and images.
+        """
+        handle = self._shopify_product_handle(product_url)
+        if not handle:
+            return {}
+        parsed = urlparse(product_url)
+        base_url = f'{parsed.scheme}://{parsed.netloc}'
+        session = self._get_session(source)
+        for page in range(1, max_pages + 1):
+            endpoint = f'{base_url}/products.json?limit=250&page={page}'
+            try:
+                response = self._http_get(session, endpoint, source)
+                payload = response.json()
+            except Exception:  # catalogue may be disabled; caller has other fallbacks
+                return {}
+            products = payload.get('products') if isinstance(payload, dict) else None
+            if not isinstance(products, list) or not products:
+                return {}
+            for product in products:
+                if not isinstance(product, dict):
+                    continue
+                if str(product.get('handle') or '').casefold() == handle.casefold():
+                    return product
+            if len(products) < 250:
+                return {}
+        return {}
+
     def _fetch_shopify_product_payload(self, source, product_url):
         """Fetch and normalize a Shopify product independently of the theme.
 
-        Supports the public ``.js`` response, the ``.json`` response wrapped in
-        ``product``, and stores returning the product object directly.
+        Priority: localized ``.js``, localized ``.json`` and finally the
+        paginated public catalogue matched by the stable product handle.
         """
         session = self._get_session(source)
         errors = []
@@ -789,15 +840,18 @@ class SitemapImportService(models.AbstractModel):
             except Exception as exc:  # endpoint may be disabled by the shop
                 errors.append(str(exc))
                 continue
-            product = payload.get('product') if isinstance(payload, dict) else None
-            if not isinstance(product, dict) and isinstance(payload, dict):
-                product = payload
-            if isinstance(product, dict) and (
-                product.get('title') or product.get('name') or product.get('handle')
-            ):
+            product = self._normalise_shopify_product_payload(payload)
+            if product:
                 return product
+
+        product = self._fetch_shopify_catalog_product(source, product_url)
+        if product:
+            return product
+
+        detail = '; '.join(errors[-2:]) if errors else 'sin detalle HTTP'
         raise ValueError(
-            'Los endpoints públicos .js/.json de Shopify no devolvieron un producto válido.'
+            'Shopify no devolvió un producto válido mediante .js, .json ni products.json '
+            f'para {product_url} ({detail}).'
         )
 
     def _shopify_ajax_product_url(self, product_url):
@@ -1394,6 +1448,14 @@ class SitemapImportService(models.AbstractModel):
         try:
             data = self.fetch_preview(source, staging_row.url)
             data = self.enrich_preview_eans(source, staging_row.url, data)
+            extracted_name = str((data or {}).get('name') or '').strip()
+            normalized_name = extracted_name.rstrip('/').casefold()
+            normalized_url = staging_row.url.strip().rstrip('/').casefold()
+            if not extracted_name or normalized_name == normalized_url or normalized_name.startswith(('http://', 'https://')):
+                raise ValueError(
+                    'La ficha no devolvió un nombre de producto válido; se cancela la importación '
+                    'para evitar crear un producto cuyo nombre sea únicamente la URL.'
+                )
         except Exception as exc:
             _logger.exception('Sitemap import: error obteniendo vista previa de %s', staging_row.url)
             staging_row.write({
@@ -1470,8 +1532,15 @@ class SitemapImportService(models.AbstractModel):
                 or self._html_to_plain_text(full_description)
                 or ''
             )
+            valid_name = str(staging_row.name or '').strip()
+            if not valid_name or valid_name.rstrip('/').casefold() == staging_row.url.rstrip('/').casefold() \
+                    or valid_name.casefold().startswith(('http://', 'https://')):
+                raise ValueError(
+                    'No se puede importar el producto porque el nombre extraído está vacío o es una URL.'
+                )
+
             vals = {
-                'name': staging_row.name or staging_row.url,
+                'name': valid_name,
                 # Campo estándar usado en presupuestos: siempre texto plano.
                 'description_sale': self._html_to_plain_text(short_description),
                 # Campos OCA de website_sale_product_description.

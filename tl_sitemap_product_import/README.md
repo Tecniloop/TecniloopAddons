@@ -937,3 +937,10 @@ Los conectores Shopify comparten ahora un único lector de producto que prueba
 acepta respuestas directas o envueltas en ``product`` y evita depender del tema.
 Se aplica a Panama Jack, Callaghan, Fluchos, Gioseppo, Pitillos, Colnago, Lapierre,
 GT Bicycles y Miguel Bellido.
+
+
+## 19.0.1.70.0
+
+- Refuerza el lector común Shopify con búsqueda por `handle` en el catálogo paginado `products.json` cuando los endpoints individuales `.js` y `.json` no devuelven una ficha válida.
+- Impide que una vista previa o importación cree productos con la URL como nombre. La fila queda en error con un mensaje explícito.
+- Corrige el caso de Panama Jack `bambina-b82` y protege el resto de conectores frente a la misma contingencia.
