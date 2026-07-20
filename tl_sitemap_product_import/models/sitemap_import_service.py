@@ -69,12 +69,66 @@ class SitemapImportService(models.AbstractModel):
         return session
 
     def _http_get(self, session, url, source):
-        _logger.debug('Sitemap import: GET %s', url)
-        response = session.get(url, timeout=source.request_timeout or 20)
-        response.raise_for_status()
-        if source.request_delay:
-            time.sleep(source.request_delay)
-        return response
+        """GET resiliente compartido por Shopify, PrestaShop y el resto de conectores.
+
+        Reintenta únicamente errores transitorios: límites 429, respuestas 5xx y
+        fallos de red/timeout. Los 4xx funcionales se propagan inmediatamente para
+        no ocultar URLs inválidas. Respeta ``Retry-After`` cuando el servidor lo
+        publica y aplica espera exponencial configurable entre intentos.
+        """
+        max_retries = max(int(getattr(source, 'http_retry_count', 3) or 0), 0)
+        backoff = max(float(getattr(source, 'http_retry_backoff', 1.5) or 0.0), 0.0)
+        retry_statuses = {429, 500, 502, 503, 504}
+        last_exc = None
+
+        for attempt in range(max_retries + 1):
+            try:
+                _logger.debug(
+                    'Sitemap import: GET %s (intento %s/%s)',
+                    url, attempt + 1, max_retries + 1,
+                )
+                response = session.get(url, timeout=source.request_timeout or 20)
+                if response.status_code not in retry_statuses:
+                    response.raise_for_status()
+                    if source.request_delay:
+                        time.sleep(source.request_delay)
+                    return response
+
+                last_exc = requests.HTTPError(
+                    'HTTP %s al consultar %s' % (response.status_code, url),
+                    response=response,
+                )
+                if attempt >= max_retries:
+                    response.raise_for_status()
+
+                retry_after = response.headers.get('Retry-After', '').strip()
+                try:
+                    wait_seconds = float(retry_after) if retry_after else backoff * (2 ** attempt)
+                except ValueError:
+                    wait_seconds = backoff * (2 ** attempt)
+                wait_seconds = min(max(wait_seconds, 0.0), 120.0)
+                _logger.warning(
+                    'Sitemap import: HTTP %s temporal en %s; reintento %s/%s en %.2f s',
+                    response.status_code, url, attempt + 1, max_retries, wait_seconds,
+                )
+                if wait_seconds:
+                    time.sleep(wait_seconds)
+            except (requests.Timeout, requests.ConnectionError) as exc:
+                last_exc = exc
+                if attempt >= max_retries:
+                    raise
+                wait_seconds = min(backoff * (2 ** attempt), 120.0)
+                _logger.warning(
+                    'Sitemap import: error de red temporal en %s (%s); '
+                    'reintento %s/%s en %.2f s',
+                    url, exc, attempt + 1, max_retries, wait_seconds,
+                )
+                if wait_seconds:
+                    time.sleep(wait_seconds)
+
+        if last_exc:
+            raise last_exc
+        raise requests.RequestException('No se pudo consultar %s' % url)
 
     def _hornby_official_eur_price(
         self, source, session, product_url, expected_code, price_parser,
@@ -1445,6 +1499,10 @@ class SitemapImportService(models.AbstractModel):
             staging_row.write({'state': 'skipped', 'preview_date': fields.Datetime.now()})
             return
 
+        staging_row.write({
+            'preview_attempt_count': staging_row.preview_attempt_count + 1,
+            'last_attempt_date': fields.Datetime.now(),
+        })
         try:
             data = self.fetch_preview(source, staging_row.url)
             data = self.enrich_preview_eans(source, staging_row.url, data)
@@ -1457,9 +1515,21 @@ class SitemapImportService(models.AbstractModel):
                     'para evitar crear un producto cuyo nombre sea únicamente la URL.'
                 )
         except Exception as exc:
-            _logger.exception('Sitemap import: error obteniendo vista previa de %s', staging_row.url)
+            connector_name = source.connector_model or self._name
+            response = getattr(exc, 'response', None)
+            status_code = getattr(response, 'status_code', None)
+            diagnostic = '%s: %s' % (exc.__class__.__name__, exc)
+            if status_code:
+                diagnostic = 'HTTP %s | %s' % (status_code, diagnostic)
+            diagnostic = '[%s] %s' % (connector_name, diagnostic)
+            _logger.exception(
+                'Sitemap import: error aislado obteniendo vista previa de %s con %s',
+                staging_row.url, connector_name,
+            )
             staging_row.write({
-                'state': 'error', 'error_message': str(exc), 'preview_date': fields.Datetime.now(),
+                'state': 'error',
+                'error_message': diagnostic[:4000],
+                'preview_date': fields.Datetime.now(),
             })
             return
 

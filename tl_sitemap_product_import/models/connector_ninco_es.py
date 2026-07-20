@@ -231,12 +231,9 @@ class SitemapConnectorNincoEs(models.AbstractModel):
         html_entries = self._fallback_html_entries(
             source, category_filter=None, limit=0,
         )
-        result = self._merge_discovery_entries(
-            'NINCO España',
-            [('sitemap', list(entries.values())), ('catalogo_html', html_entries)],
-            key_getter=self._product_key,
-            category_filter=category_filter,
-            limit=limit,
+        result = self._prestashop_merge_discovery(
+            'NINCO España', sitemap_entries=list(entries.values()),
+            category_entries=html_entries, category_filter=category_filter, limit=limit,
         )
         if result:
             return result
@@ -348,80 +345,26 @@ class SitemapConnectorNincoEs(models.AbstractModel):
         return has_detail and has_reference
 
     def fetch_preview(self, source, url):
-        session = self._get_session(source)
-        response = self._http_get(session, url, source)
-        tree = lxml_html.fromstring(response.content)
-
-        canonical_values = tree.xpath('//link[@rel="canonical"]/@href')
-        canonical = self._canonical_url(canonical_values[0] if canonical_values else response.url or url)
-        if not self._product_match(canonical):
-            fallback = self._canonical_url(url)
-            if self._product_match(fallback):
-                canonical = fallback
-            else:
-                raise ValueError(
-                    'La URL ya no apunta a una ficha española de NINCO; '
-                    'puede tratarse de una categoría, una redirección o un artículo retirado.'
-                )
-
-        product_json = False
-        for payload in self._json_ld_payloads(tree):
-            product_json = self._find_product_json(payload)
-            if product_json:
-                break
-        if not self._is_product_page(tree, product_json):
-            raise ValueError(
-                'La URL coincide con el formato histórico de NINCO, pero la página no '
-                'contiene marcadores de ficha de producto. Se descarta para no importar '
-                'una categoría o página editorial.'
-            )
-
-        name = self._normalize_text((product_json or {}).get('name'))
-        if not name:
-            values = tree.xpath('//h1[1]//text()')
-            name = self._normalize_text(' '.join(values)) if values else self._meta(tree, 'og:title')
-        if not name:
-            raise ValueError('La ficha de NINCO no publica un nombre reconocible.')
-
-        lines = self._page_lines(tree)
-        price, currency = self._extract_price(tree, product_json, lines)
-        reference = self._reference(tree, product_json, lines, canonical)
-        breadcrumbs = self._breadcrumbs(tree, canonical, name)
-        short_description = self._short_description(tree, product_json)
+        common = self._prestashop_extract_common(source, url, product_page_validator=self._is_product_page)
+        tree = common['tree']
+        short_description = self._short_description(tree, common['product_json'])
         full_description = self._full_description(tree, short_description)
-        images = self._images(tree, product_json, canonical)
-
         focused_text = self._normalize_text(' '.join(tree.xpath(
-            '//*[contains(@class,"product-information") or '
-            'contains(@class,"product-features") or @id="description" or '
-            'starts-with(@id,"product-description-short")]//text()'
+            '//*[contains(@class,"product-information") or contains(@class,"product-features") or '
+            '@id="description" or starts-with(@id,"product-description-short")]//text()'
         )))
         if not focused_text:
-            focused_text = self._normalize_text(
-                re.sub(r'<[^>]+>', ' ', (short_description or '') + ' ' + (full_description or ''))
-            )
-        attributes = self._feature_attributes(tree, focused_text, breadcrumbs)
-
-        ean_variants = self._prestashop_ean_variants(response.content)
-        ean_variants = self._normalise_ean_variants(ean_variants)
-
+            focused_text = self._normalize_text(re.sub(r'<[^>]+>', ' ', (short_description or '') + ' ' + (full_description or '')))
+        attributes = self._feature_attributes(tree, focused_text, common['breadcrumbs'])
+        ean_variants = self._normalise_ean_variants(self._prestashop_ean_variants(common['response'].content))
         return {
-            'name': name,
-            'description': full_description or short_description,
-            'short_description': short_description,
-            'full_description': full_description,
-            'attributes': attributes,
-            'price': price,
-            'price_available': bool(price),
-            'currency': currency or 'EUR',
-            'main_image_url': images[0] if images else False,
-            'image_urls': images,
-            'canonical_url': canonical,
-            'style_code': reference,
-            'color_code': False,
-            'category_path': ' / '.join(breadcrumbs),
-            'ean_variants': ean_variants,
-            # PrestaShop puede exponer combinaciones por AJAX; el enriquecedor
-            # común hará las consultas adicionales configuradas en la fuente.
-            'ean_complete': False,
+            'name': common['name'], 'description': full_description or short_description,
+            'short_description': short_description, 'full_description': full_description,
+            'attributes': attributes, 'price': common['price'], 'price_available': True,
+            'currency': common['currency'], 'main_image_url': common['images'][0],
+            'image_urls': common['images'], 'canonical_url': common['canonical'],
+            'style_code': common['reference'], 'color_code': False,
+            'category_path': ' / '.join(common['breadcrumbs']),
+            'ean_variants': ean_variants, 'ean_complete': False,
+            'extraction_sources': common['extraction_sources'],
         }

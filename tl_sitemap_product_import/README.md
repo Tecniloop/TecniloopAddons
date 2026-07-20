@@ -1,3 +1,13 @@
+
+# Versión 19.0.1.73.0 — procesamiento resiliente Shopify y PrestaShop
+
+* Cliente HTTP común con reintentos para 429, 500, 502, 503, 504, timeouts y errores de conexión.
+* Respeto de la cabecera `Retry-After` y espera exponencial configurable por fuente.
+* Savepoint por URL y commit tras cada ficha: un fallo ORM/SQL no bloquea las siguientes.
+* Contador y fecha del último intento en staging.
+* Mensajes de error con conector, clase de excepción y código HTTP cuando existe.
+* Los fallos agotados pasan a estado Error; nunca permanecen silenciosamente pendientes.
+
 # Versión 19.0.1.66.0 — descubrimiento multifuente refactorizado
 
 Esta versión evita considerar completo un catálogo solo porque un sitemap haya
@@ -954,3 +964,13 @@ GT Bicycles y Miguel Bellido.
 - Añade el botón **Obtener todas las pendientes** en el lote.
 - Muestra el número de filas pendientes en la lista de lotes.
 - Corrige el caso observado en el Excel de Panama Jack: 20 filas procesadas y 380 sin intentar.
+
+
+## 19.0.1.72.0 - Parser comun PrestaShop
+
+- Nueva base `sitemap.connector.prestashop_base`.
+- Extraccion escalonada JSON-LD, OpenGraph, microdatos y HTML.
+- Validacion obligatoria de nombre, precio e imagen antes de crear la vista previa.
+- Registro en log del origen efectivo de nombre, precio, imagen y descripcion.
+- Bicicletas Quer, Conor, Scalextric y NINCO heredan directa o indirectamente del parser comun.
+- Deduplicacion por ID estable y fusion multifuente disponibles en `_prestashop_merge_discovery`.

@@ -71,6 +71,10 @@ class SitemapProductStaging(models.Model):
 
     product_tmpl_id = fields.Many2one('product.template', string='Producto Odoo enlazado', readonly=True)
     error_message = fields.Text(string='Mensaje de error')
+    preview_attempt_count = fields.Integer(
+        string='Intentos de vista previa', readonly=True, default=0,
+        help='Número de veces que se ha intentado procesar esta URL.')
+    last_attempt_date = fields.Datetime(string='Último intento', readonly=True)
     preview_date = fields.Datetime(string='Fecha de vista previa')
     imported_date = fields.Datetime(string='Fecha de importación')
 

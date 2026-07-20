@@ -30,6 +30,8 @@
                 <field name="ean" optional="show"/>
                 <field name="ean_count" optional="show"/>
                 <field name="ean_checked" optional="hide"/>
+                <field name="preview_attempt_count" optional="hide"/>
+                <field name="last_attempt_date" optional="hide"/>
                 <field name="state"/>
                 <field name="product_tmpl_id"/>
                 <field name="sitemap_lastmod" optional="hide"/>
@@ -100,7 +102,9 @@
                     <group string="EAN/GTIN por variante" invisible="not ean_count">
                         <field name="ean_variants_json" nolabel="1" readonly="1"/>
                     </group>
-                    <field name="error_message" invisible="not error_message"/>
+                    <field name="preview_attempt_count"/>
+                            <field name="last_attempt_date"/>
+                            <field name="error_message" invisible="not error_message"/>
                 </sheet>
             </form>
         </field>

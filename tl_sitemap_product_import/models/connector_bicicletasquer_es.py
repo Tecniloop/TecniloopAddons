@@ -34,7 +34,7 @@ class SitemapConnectorBicicletasQuerEs(models.AbstractModel):
     """
 
     _name = 'sitemap.connector.bicicletasquer_es'
-    _inherit = 'sitemap.import.service'
+    _inherit = 'sitemap.connector.prestashop_base'
     _description = 'Conector Bicicletas Quer B2B España'
 
     _HOSTS = {'b2b.bicicletasquer.com', 'www.b2b.bicicletasquer.com'}
@@ -340,12 +340,9 @@ class SitemapConnectorBicicletasQuerEs(models.AbstractModel):
         html_entries = self._fallback_html_entries(
             source, category_filter=None, limit=0,
         )
-        result = self._merge_discovery_entries(
-            'Bicicletas Quer',
-            [('sitemap', list(entries.values())), ('catalogo_html', html_entries)],
-            key_getter=self._product_key,
-            category_filter=category_filter,
-            limit=limit,
+        result = self._prestashop_merge_discovery(
+            'Bicicletas Quer', sitemap_entries=list(entries.values()),
+            category_entries=html_entries, category_filter=category_filter, limit=limit,
         )
         if result:
             return result
@@ -755,39 +752,11 @@ class SitemapConnectorBicicletasQuerEs(models.AbstractModel):
         return self._normalise_ean_variants(variants)
 
     def fetch_preview(self, source, url):
-        session = self._get_session(source)
-        response = self._http_get(session, url, source)
-        tree = lxml_html.fromstring(response.content)
-
-        canonical_values = tree.xpath('//link[@rel="canonical"]/@href')
-        canonical = self._canonical_url(canonical_values[0] if canonical_values else response.url or url)
-        if not self._product_match(canonical):
-            fallback = self._canonical_url(url)
-            if self._product_match(fallback):
-                canonical = fallback
-            else:
-                raise ValueError(
-                    'La URL ya no apunta a una ficha española de Bicicletas Quer; '
-                    'posible redirección, autenticación o producto retirado.'
-                )
-
-        product_json = False
-        for payload in self._json_ld_payloads(tree):
-            product_json = self._find_product_json(payload)
-            if product_json:
-                break
-
-        name = self._normalize_text((product_json or {}).get('name'))
-        if not name:
-            values = tree.xpath('//h1[1]//text()')
-            name = self._normalize_text(' '.join(values)) if values else self._meta(tree, 'og:title')
-        if not name:
-            raise ValueError('La ficha no publica un nombre de producto reconocible.')
-
-        lines = self._page_lines(tree)
-        price, currency = self._extract_price(tree, product_json, lines)
+        common = self._prestashop_extract_common(source, url)
+        tree = common['tree']
+        lines = common['lines']
         colors, sizes = self._colors_and_sizes(tree, lines)
-        description = self._extract_description(tree, product_json)
+        description = common['description']
         details = []
         if colors:
             details.append('<p><strong>Colores:</strong> %s</p>' % html.escape(' / '.join(colors)))
@@ -795,26 +764,15 @@ class SitemapConnectorBicicletasQuerEs(models.AbstractModel):
             details.append('<p><strong>Tallas/variantes:</strong> %s</p>' % html.escape(' / '.join(sizes)))
         if details:
             description = (description or '') + ''.join(details)
-
-        images = self._images(tree, product_json, canonical)
-        reference = self._reference(tree, product_json, lines, canonical)
-        categories = self._breadcrumbs(tree, canonical, name)
-        ean_variants = self._prestashop_ean_variants(response.content)
-
+        ean_variants = self._prestashop_ean_variants(common['response'].content)
         return {
-            'name': name,
-            'description': description,
-            'price': price,
-            'price_available': bool(price),
-            'currency': currency or 'EUR',
-            'main_image_url': images[0] if images else False,
-            'image_urls': images,
-            'canonical_url': canonical,
-            'style_code': reference,
+            'name': common['name'], 'description': description,
+            'price': common['price'], 'price_available': True,
+            'currency': common['currency'],
+            'main_image_url': common['images'][0], 'image_urls': common['images'],
+            'canonical_url': common['canonical'], 'style_code': common['reference'],
             'color_code': ' / '.join(colors) if colors else False,
-            'category_path': ' / '.join(categories),
-            'ean_variants': ean_variants,
-            # PrestaShop puede cargar combinaciones adicionales por AJAX; el
-            # enriquecedor común invocará _fetch_site_ean_variants.
-            'ean_complete': False,
+            'category_path': ' / '.join(common['breadcrumbs']),
+            'ean_variants': ean_variants, 'ean_complete': False,
+            'extraction_sources': common['extraction_sources'],
         }

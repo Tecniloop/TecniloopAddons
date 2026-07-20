@@ -127,7 +127,30 @@ class SitemapImportBatch(models.Model):
         if run_limit and run_limit > 0:
             pending = pending[:run_limit]
         for row in pending:
-            service.refresh_staging_row(row, source, image_map, force=self.force_update)
+            try:
+                # Un savepoint por URL evita que una excepción ORM/SQL deje abortada
+                # la transacción y bloquee todas las fichas posteriores del lote.
+                with self.env.cr.savepoint():
+                    service.refresh_staging_row(
+                        row, source, image_map, force=self.force_update,
+                    )
+            except Exception as exc:
+                connector_name = source.connector_model or service._name
+                _logger.exception(
+                    'Sitemap import: fallo no controlado y aislado en %s (%s)',
+                    row.url, connector_name,
+                )
+                # El savepoint ya revirtió la operación defectuosa. Se registra el
+                # error en una operación nueva y se continúa con la siguiente URL.
+                row.write({
+                    'state': 'error',
+                    'error_message': '[%s] %s: %s' % (
+                        connector_name, exc.__class__.__name__, exc,
+                    ),
+                    'preview_date': fields.Datetime.now(),
+                    'last_attempt_date': fields.Datetime.now(),
+                    'preview_attempt_count': row.preview_attempt_count + 1,
+                })
             self.env.cr.commit()
 
         if not self.staging_ids.filtered(lambda r: r.state == 'pending'):

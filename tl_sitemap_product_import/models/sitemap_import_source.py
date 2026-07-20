@@ -127,6 +127,12 @@ class SitemapImportSource(models.Model):
         string='Retraso entre peticiones (segundos)', default=1.0,
         help='Tiempo de espera entre cada petición HTTP para no sobrecargar el servidor de origen.')
     request_timeout = fields.Integer(string='Timeout de petición (segundos)', default=20)
+    http_retry_count = fields.Integer(
+        string='Reintentos HTTP', default=3,
+        help='Número de reintentos ante HTTP 429/5xx, timeout o fallo temporal de red.')
+    http_retry_backoff = fields.Float(
+        string='Espera exponencial inicial (segundos)', default=1.5,
+        help='Espera inicial entre reintentos. Se duplica en cada intento y respeta Retry-After.')
     respect_robots_txt = fields.Boolean(
         string='Respetar robots.txt', default=True,
         help='Si está activo, la importación se detiene si robots.txt no permite el acceso '

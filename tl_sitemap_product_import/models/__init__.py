@@ -26,6 +26,7 @@ from . import connector_wethepeoplebmx
 from . import connector_mondraker_es
 from . import connector_cervelo_es
 from . import connector_colnago_es
+from . import connector_prestashop_base
 from . import connector_bicicletasquer_es
 from . import connector_ridley_es
 from . import connector_gtbicycles
