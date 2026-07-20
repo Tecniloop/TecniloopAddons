@@ -914,3 +914,17 @@ sitemap publico.
 - Panama Jack: combina los sitemaps Shopify con `/products.json` paginado.
 - Deduplicación por `handle` para incorporar productos activos ausentes de un sitemap parcial, incluido `felia-igloo-trav-b2`.
 - Admite tanto índices de sitemap como `urlset` directos.
+
+
+## 19.0.1.67.0
+
+- Panama Jack: el límite se aplica después de fusionar sitemap y catálogo Shopify.
+- Evita omitir productos activos antiguos como `bota-panama-c3`.
+
+
+## 19.0.1.68.0
+- Auditoría global de regresiones por descubrimiento multifuente.
+- Mondraker fusiona siempre sitemap y catálogo HTML.
+- Electrotren y Jouef fusionan siempre sitemap y catálogo HTML.
+- El límite se aplica únicamente tras la fusión y deduplicación.
+- Revisados Conor, Ridley, Panama Jack, Mustang, Bicicletas Quer, Cervélo, WeThePeople, Scalextric y NINCO: mantienen fusión multifuente correcta.

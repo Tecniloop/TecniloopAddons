@@ -390,27 +390,26 @@ class SitemapConnectorJouefUk(models.AbstractModel):
         return entries, image_map, errors
 
     def get_product_entries(self, source, category_filter=None, limit=0):
-        entries, image_map, errors = self._collect_products(source)
-        if not entries:
-            for entry in self._fallback_catalog_entries(source, limit=limit):
-                key = self._product_key(entry['url'])
-                if key:
-                    entries[key] = entry
-        if not entries:
+        sitemap_entries, _image_map, errors = self._collect_products(source)
+        try:
+            catalog_entries = self._fallback_catalog_entries(source, limit=0)
+        except Exception as exc:
+            _logger.warning('Jouef: no se pudo recorrer el catálogo alternativo: %s', exc)
+            catalog_entries = []
+
+        result = self._merge_discovery_entries(
+            'Jouef',
+            [('sitemap', list(sitemap_entries.values())),
+             ('catalogo_html', catalog_entries)],
+            key_getter=self._product_key,
+            category_filter=category_filter,
+            limit=limit,
+        )
+        if not result:
             raise ValueError(
                 'No se localizaron fichas de Jouef en el sitemap ni en el catálogo.'
                 + (f' Intentos: {" | ".join(errors[:4])}' if errors else '')
             )
-
-        needle = str(category_filter or '').strip().casefold()
-        result = []
-        for key, entry in sorted(entries.items()):
-            haystack = f'{key} {entry["url"]}'.casefold()
-            if needle and needle not in haystack:
-                continue
-            result.append(entry)
-            if limit and len(result) >= limit:
-                break
         return result
 
     def get_image_map(self, source):

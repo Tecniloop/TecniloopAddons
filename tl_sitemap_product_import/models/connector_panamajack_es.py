@@ -65,26 +65,21 @@ class SitemapConnectorPanamajackEs(models.AbstractModel):
         return entries
 
     def get_product_entries(self, source, category_filter=None, limit=0):
-        entries, seen = [], set()
+        """Merge every Shopify inventory before applying the configured limit.
 
-        def add_entry(entry):
-            url = (entry.get('url') or '').strip()
-            handle = self._product_handle(url)
-            if not handle or handle in seen:
-                return False
-            if not self._is_default_locale(url):
-                return False
-            if category_filter and category_filter.lower() not in url.lower():
-                return False
-            seen.add(handle)
-            entries.append(entry)
-            return bool(limit and len(entries) >= limit)
+        A product sitemap may be valid but incomplete or sorted in a way that
+        leaves older active products outside the first ``limit`` entries.  The
+        catalogue fallback must therefore always be collected before slicing.
+        """
+        sitemap_entries = []
 
-        # Shopify normally exposes an index, but tolerate a direct product urlset
-        # as well so a theme/platform change does not empty the connector.
+        # Shopify normally exposes an index, but tolerate a direct product
+        # urlset as well so a theme/platform change does not empty the connector.
         try:
-            sub_sitemaps = self._fetch_sitemap_index_locs(source, source.sitemap_index_url)
-        except Exception:  # noqa: BLE001 - direct urlset/fallback handled below
+            sub_sitemaps = self._fetch_sitemap_index_locs(
+                source, source.sitemap_index_url,
+            )
+        except Exception:  # noqa: BLE001 - direct urlset handled below
             sub_sitemaps = []
         product_sitemaps = [
             sitemap_url
@@ -96,19 +91,40 @@ class SitemapConnectorPanamajackEs(models.AbstractModel):
 
         for sitemap_url in product_sitemaps:
             try:
-                sitemap_entries = self._fetch_urlset(source, sitemap_url)
+                sitemap_entries.extend(self._fetch_urlset(source, sitemap_url))
             except Exception:  # noqa: BLE001 - continue with other sources
                 continue
-            for entry in sitemap_entries:
-                if add_entry(entry):
-                    return entries
 
-        # Always merge the live Shopify catalogue. This specifically covers active
-        # products missing from a partial/stale sitemap shard.
-        for entry in self._shopify_catalog_entries(source, limit=0):
-            if add_entry(entry):
-                return entries
-        return entries
+        # Never pass the import limit to the fallback.  It would truncate the
+        # catalogue before deduplication and can omit older active handles such
+        # as ``bota-panama-c3``.
+        catalog_entries = self._shopify_catalog_entries(source, limit=0)
+
+        def valid_handle(url):
+            if not self._is_default_locale(url):
+                return False
+            return self._product_handle(url)
+
+        filtered_groups = []
+        for group_name, raw_entries in (
+            ('sitemap', sitemap_entries),
+            ('shopify_catalog', catalog_entries),
+        ):
+            filtered_groups.append((
+                group_name,
+                [
+                    entry for entry in raw_entries
+                    if valid_handle((entry or {}).get('url'))
+                ],
+            ))
+
+        return self._merge_discovery_entries(
+            'Panama Jack',
+            filtered_groups,
+            key_getter=self._product_handle,
+            category_filter=category_filter,
+            limit=limit,
+        )
 
     def get_image_map(self, source):
         return {}
