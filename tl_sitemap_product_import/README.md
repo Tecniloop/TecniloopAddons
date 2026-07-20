@@ -1006,3 +1006,46 @@ GT Bicycles y Miguel Bellido.
 - Aísla la importación de cada producto con un savepoint para poder registrar el
   error aunque falle una sentencia SQL.
 - Aísla la escritura de cada variante y continúa con las siguientes variantes.
+
+
+## Procesamiento asíncrono con OCA queue_job (19.0.1.78.0)
+
+Desde esta versión, el descubrimiento de URLs, las vistas previas y la importación
+real se ejecutan mediante `queue_job`:
+
+- un trabajo de descubrimiento por lote;
+- un trabajo de vista previa por URL;
+- un trabajo de importación por producto seleccionado;
+- reintentos automáticos para HTTP 429, 500, 502, 503, 504, timeouts y errores de conexión;
+- claves de identidad para evitar trabajos duplicados activos;
+- canales separados: `root.sitemap.discovery`, `root.sitemap.preview` y
+  `root.sitemap.import`.
+
+No se realizan `commit()` manuales. Cada trabajo de `queue_job` dispone de su
+propia transacción y las operaciones internas delicadas conservan sus savepoints.
+
+### Configuración requerida en Odoo
+
+```ini
+[options]
+workers = 4
+server_wide_modules = web,queue_job
+
+[queue_job]
+channels = root:4,root.sitemap:3,root.sitemap.discovery:1,root.sitemap.preview:2,root.sitemap.import:1
+```
+
+También puede configurarse mediante la variable:
+
+```bash
+ODOO_QUEUE_JOB_CHANNELS="root:4,root.sitemap:3,root.sitemap.discovery:1,root.sitemap.preview:2,root.sitemap.import:1"
+```
+
+Tras reiniciar debe aparecer en el log:
+
+```text
+queue job runner ready for db <base_de_datos>
+```
+
+Si el runner no está activo, los trabajos permanecerán en estado `pending` o
+`enqueued` y no se procesarán.

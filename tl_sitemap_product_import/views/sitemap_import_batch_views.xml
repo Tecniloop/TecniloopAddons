@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <odoo>
     <record id="view_sitemap_import_batch_form" model="ir.ui.view">
         <field name="name">sitemap.import.batch.form</field>
@@ -6,14 +6,10 @@
         <field name="arch" type="xml">
             <form string="Lote de importación">
                 <header>
-                    <button name="action_fetch_previews" type="object" string="Obtener siguientes vistas previas"
-                            class="btn-primary" invisible="state != 'previewing'"/>
-                    <button name="action_fetch_all_previews" type="object" string="Obtener todas las pendientes"
-                            class="btn-secondary" invisible="state != 'previewing'"
-                            confirm="Se procesarán todas las fichas pendientes. En catálogos grandes puede tardar varios minutos. ¿Continuar?"/>
-                    <field name="state" widget="statusbar"
-                           statusbar_visible="draft,collecting,previewing,ready"/>
-                </header>
+                    <button name="action_fetch_previews" type="object" string="Obtener siguientes vistas previas" class="btn-primary" invisible="state != 'previewing'"/>
+                    <button name="action_fetch_all_previews" type="object" string="Obtener todas las pendientes" class="btn-secondary" invisible="state != 'previewing'" confirm="Se procesarán todas las fichas pendientes. En catálogos grandes puede tardar varios minutos. ¿Continuar?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,queued_collect,collecting,previewing,ready,error"/>
+                <button name="action_requeue_errors" type="object" string="Reencolar errores" class="btn-secondary" invisible="error_count == 0"/><button name="action_view_jobs" type="object" string="Ver trabajos" class="btn-secondary"/></header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" type="object" name="action_view_staging" icon="fa-list">
@@ -48,7 +44,7 @@
                         <group>
                             <field name="error_count"/>
                         </group>
-                    </group>
+                    <group><field name="queued_count"/><field name="processing_count"/></group></group>
                     <div class="alert alert-info" role="alert" invisible="state != 'ready'">
                         Vistas previas listas. Abre el botón "Productos" de arriba, selecciona
                         los productos que quieras (todos o solo algunos) y usa "Importar
@@ -65,8 +61,7 @@
         <field name="name">sitemap.import.batch.list</field>
         <field name="model">sitemap.import.batch</field>
         <field name="arch" type="xml">
-            <list string="Lotes de importación" decoration-danger="state == 'error'"
-                  decoration-success="state == 'ready'">
+            <list string="Lotes de importación" decoration-danger="state == 'error'" decoration-success="state == 'ready'">
                 <field name="name"/>
                 <field name="source_id"/>
                 <field name="trigger"/>
@@ -78,7 +73,7 @@
                 <field name="preview_ready_count"/>
                 <field name="imported_count"/>
                 <field name="error_count"/>
-            </list>
+            <field name="queued_count"/><field name="processing_count"/></list>
         </field>
     </record>
 

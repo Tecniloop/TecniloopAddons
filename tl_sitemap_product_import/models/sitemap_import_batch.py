@@ -1,6 +1,9 @@
 import logging
 
-from odoo import api, fields, models
+import requests
+
+from odoo import _, api, fields, models
+from odoo.addons.queue_job.exception import RetryableJobError
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -22,6 +25,7 @@ class SitemapImportBatch(models.Model):
     ], string='Origen', default='manual', required=True)
     state = fields.Selection([
         ('draft', 'Borrador'),
+        ('queued_collect', 'Recopilación en cola'),
         ('collecting', 'Recopilando URLs'),
         ('previewing', 'Obteniendo vistas previas'),
         ('ready', 'Listo para revisar'),
@@ -46,6 +50,9 @@ class SitemapImportBatch(models.Model):
     imported_count = fields.Integer(compute='_compute_staging_stats', string='Importados')
     skipped_count = fields.Integer(compute='_compute_staging_stats', string='Sin cambios')
     error_count = fields.Integer(compute='_compute_staging_stats', string='Errores')
+    queued_count = fields.Integer(compute='_compute_staging_stats', string='En cola')
+    processing_count = fields.Integer(compute='_compute_staging_stats', string='Procesando')
+    collect_job_uuid = fields.Char(string='Trabajo de recopilación', readonly=True, copy=False)
 
     @api.depends('staging_ids.state')
     def _compute_staging_stats(self):
@@ -57,6 +64,8 @@ class SitemapImportBatch(models.Model):
             batch.imported_count = len(lines.filtered(lambda l: l.state == 'imported'))
             batch.skipped_count = len(lines.filtered(lambda l: l.state == 'skipped'))
             batch.error_count = len(lines.filtered(lambda l: l.state == 'error'))
+            batch.queued_count = len(lines.filtered(lambda l: l.state in ('queued_preview', 'queued_import')))
+            batch.processing_count = len(lines.filtered(lambda l: l.state in ('previewing', 'importing')))
 
     def _get_service(self):
         """Devuelve el conector Python correspondiente a la fuente de este lote."""
@@ -64,6 +73,31 @@ class SitemapImportBatch(models.Model):
         return self.env[self.source_id.connector_model]
 
     def action_collect_urls(self):
+        self.ensure_one()
+        self.write({
+            'state': 'queued_collect',
+            'date_start': fields.Datetime.now(),
+            'error_message': False,
+        })
+        job = self.with_delay(
+            priority=10,
+            max_retries=max(self.source_id.http_retry_count or 3, 1),
+            identity_key=f"sitemap_collect_{self.id}",
+            description=_("Recopilar URLs sitemap: %s") % self.source_id.name,
+        )._job_collect_urls()
+        self.collect_job_uuid = job.uuid
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Recopilación en cola'),
+                'message': _('El lote se procesará en segundo plano.'),
+                'type': 'success',
+                'sticky': False,
+            },
+        }
+
+    def _job_collect_urls(self):
         """Pide al conector de la fuente la lista de URLs de producto y crea una fila de
         staging (sin vista previa todavía, sin crear ningún producto) por cada una."""
         self.ensure_one()
@@ -94,78 +128,74 @@ class SitemapImportBatch(models.Model):
                 self.env['sitemap.product.staging'].create(vals_list)
 
             self.write({'state': 'previewing'})
+            self.action_fetch_all_previews()
         except UserError:
             self.write({'state': 'error'})
             raise
         except Exception as exc:
             _logger.exception('Error recopilando URLs (fuente %s)', self.source_id.name)
-            self.write({'state': 'error', 'error_message': str(exc)})
+            response = getattr(exc, 'response', None)
+            transient = isinstance(exc, (requests.Timeout, requests.ConnectionError)) or getattr(
+                response, 'status_code', None
+            ) in {429, 500, 502, 503, 504}
+            if transient:
+                self.write({'state': 'queued_collect', 'error_message': str(exc)[:4000]})
+                raise RetryableJobError(str(exc)) from exc
+            self.write({'state': 'error', 'error_message': str(exc)[:4000]})
             raise UserError(f'Error al recopilar las URLs del sitemap: {exc}') from exc
 
     def action_fetch_previews(self, limit=None):
-        """Obtiene datos ligeros de vista previa (nombre, precio, categoría; SIN imágenes)
-        para un lote acotado de filas pendientes. Las filas ya enlazadas a un producto de
-        Odoo de una sincronización anterior se actualizan de inmediato (incluidas imágenes,
-        porque ya fueron aprobadas); las filas nuevas solo muestran la vista previa a la
-        espera de que el usuario las seleccione en la lista para importarlas."""
         self.ensure_one()
-        service = self._get_service()
         source = self.source_id
-        # ``None`` usa el tamaño de lote configurado. ``0`` significa procesar
-        # todas las filas pendientes; antes ``0`` acababa convertido de nuevo en
-        # ``products_per_run`` por el operador ``or``.
         run_limit = source.products_per_run if limit is None else limit
-
-        image_map = {}
-        if source.import_images:
-            try:
-                image_map = service.get_image_map(source)
-            except Exception as exc:
-                _logger.warning('No se pudo obtener el mapa de imágenes (fuente %s): %s', source.name, exc)
-
-        pending = self.staging_ids.filtered(lambda r: r.state == 'pending')
+        pending = self.staging_ids.filtered(lambda r: r.state in ('pending', 'error'))
         if run_limit and run_limit > 0:
             pending = pending[:run_limit]
-        for row in pending:
-            try:
-                # Un savepoint por URL evita que una excepción ORM/SQL deje abortada
-                # la transacción y bloquee todas las fichas posteriores del lote.
-                with self.env.cr.savepoint():
-                    service.refresh_staging_row(
-                        row, source, image_map, force=self.force_update,
-                    )
-            except Exception as exc:
-                connector_name = source.connector_model or service._name
-                _logger.exception(
-                    'Sitemap import: fallo no controlado y aislado en %s (%s)',
-                    row.url, connector_name,
-                )
-                # El savepoint ya revirtió la operación defectuosa. Se registra el
-                # error en una operación nueva y se continúa con la siguiente URL.
-                row.write({
-                    'state': 'error',
-                    'error_message': '[%s] %s: %s' % (
-                        connector_name, exc.__class__.__name__, exc,
-                    ),
-                    'preview_date': fields.Datetime.now(),
-                    'last_attempt_date': fields.Datetime.now(),
-                    'preview_attempt_count': row.preview_attempt_count + 1,
-                })
-
-        if not self.staging_ids.filtered(lambda r: r.state == 'pending'):
-            self.write({'state': 'ready', 'date_end': fields.Datetime.now()})
-            if source.auto_archive_discontinued:
-                self._archive_discontinued()
+        if pending:
+            pending.action_queue_preview()
+        self._update_queue_completion()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Vistas previas en cola'),
+                'message': _('%s fichas se han enviado a la cola.') % len(pending),
+                'type': 'success',
+                'sticky': False,
+            },
+        }
 
     def action_fetch_all_previews(self):
-        """Procesa todas las filas pendientes del lote en una sola ejecución manual.
-
-        Es una acción explícita para instalaciones donde el cron está desactivado o
-        para catálogos pequeños. En catálogos muy grandes sigue siendo preferible el
-        cron por lotes para evitar agotar el tiempo de una petición HTTP de Odoo.
-        """
         self.ensure_one()
         return self.action_fetch_previews(limit=0)
+
+    def _update_queue_completion(self):
+        for batch in self:
+            active = batch.staging_ids.filtered(
+                lambda r: r.state in ('pending', 'queued_preview', 'previewing')
+            )
+            if not active and batch.state not in ('draft', 'queued_collect', 'collecting', 'error'):
+                batch.write({'state': 'ready', 'date_end': fields.Datetime.now()})
+                if batch.source_id.auto_archive_discontinued:
+                    batch._archive_discontinued()
+
+    def action_requeue_errors(self):
+        self.ensure_one()
+        errors = self.staging_ids.filtered(lambda r: r.state == 'error')
+        if errors:
+            errors.action_requeue_failed()
+        return True
+
+    def action_view_jobs(self):
+        self.ensure_one()
+        uuids = list(filter(None, [self.collect_job_uuid] + self.staging_ids.mapped('preview_job_uuid') + self.staging_ids.mapped('import_job_uuid')))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Trabajos del lote'),
+            'res_model': 'queue.job',
+            'view_mode': 'list,form',
+            'domain': [('uuid', 'in', uuids)] if uuids else [('id', '=', 0)],
+        }
 
     def action_view_staging(self):
         self.ensure_one()
@@ -198,10 +228,10 @@ class SitemapImportBatch(models.Model):
         batches = self.search([('state', 'in', ['previewing', 'collecting'])], order='create_date asc')
         for batch in batches:
             try:
-                if batch.state == 'collecting':
-                    # Un lote atascado en "collecting" probablemente falló a medias; se reintenta.
+                if batch.state in ('draft', 'queued_collect'):
                     batch.action_collect_urls()
-                batch.action_fetch_previews()
+                elif batch.state == 'previewing':
+                    batch.action_fetch_previews()
             except Exception:
                 _logger.exception('Error obteniendo vistas previas del lote %s', batch.id)
 

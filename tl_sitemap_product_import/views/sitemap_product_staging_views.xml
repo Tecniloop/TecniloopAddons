@@ -1,14 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <odoo>
     <record id="view_sitemap_product_staging_list" model="ir.ui.view">
         <field name="name">sitemap.product.staging.list</field>
         <field name="model">sitemap.product.staging</field>
         <field name="arch" type="xml">
-            <list string="Productos en vista previa"
-                  decoration-success="state == 'imported'"
-                  decoration-info="state == 'preview_ready'"
-                  decoration-muted="state in ('pending', 'skipped')"
-                  decoration-danger="state == 'error'">
+            <list string="Productos en vista previa" decoration-success="state == 'imported'" decoration-info="state == 'preview_ready'" decoration-muted="state in ('pending', 'skipped')" decoration-danger="state == 'error'" decoration-warning="state in ('queued_preview','previewing','queued_import','importing')">
                 <field name="source_id"/>
                 <field name="url"/>
                 <field name="name"/>
@@ -33,7 +29,7 @@
                 <field name="preview_attempt_count" optional="hide"/>
                 <field name="last_attempt_date" optional="hide"/>
                 <field name="state"/>
-                <field name="product_tmpl_id"/>
+                <field name="last_job_date" optional="hide"/><field name="product_tmpl_id"/>
                 <field name="sitemap_lastmod" optional="hide"/>
                 <field name="preview_date" optional="hide"/>
             </list>
@@ -46,9 +42,8 @@
         <field name="arch" type="xml">
             <form string="Producto en vista previa">
                 <header>
-                    <button name="action_import_selected" type="object" string="Importar este producto"
-                            class="btn-primary" invisible="state not in ('preview_ready', 'error')"/>
-                    <field name="state" widget="statusbar" statusbar_visible="pending,preview_ready,imported"/>
+                    <button name="action_view_jobs" type="object" string="Ver trabajos" class="btn-secondary" invisible="not preview_job_uuid and not import_job_uuid"/><button name="action_requeue_failed" type="object" string="Reencolar" class="btn-secondary" invisible="state != 'error'"/><button name="action_queue_preview" type="object" string="Obtener vista previa" class="btn-primary" invisible="state not in ('pending','error')"/><button name="action_import_selected" type="object" string="Importar este producto" class="btn-primary" invisible="state not in ('preview_ready', 'error')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,queued_preview,previewing,preview_ready,queued_import,importing,imported,error"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -105,7 +100,7 @@
                     <field name="preview_attempt_count"/>
                             <field name="last_attempt_date"/>
                             <field name="error_message" invisible="not error_message"/>
-                </sheet>
+                <group string="Cola de trabajos"><field name="preview_job_uuid" readonly="1"/><field name="import_job_uuid" readonly="1"/><field name="last_job_date" readonly="1"/></group></sheet>
             </form>
         </field>
     </record>
@@ -120,12 +115,11 @@
                 <field name="category_path"/>
                 <field name="source_id"/>
                 <field name="batch_id"/>
-                <filter string="Con vista previa (sin importar)" name="filter_preview_ready"
-                        domain="[('state', '=', 'preview_ready')]"/>
+                <filter string="Con vista previa (sin importar)" name="filter_preview_ready" domain="[('state', '=', 'preview_ready')]"/>
                 <filter string="Importados" name="filter_imported" domain="[('state', '=', 'imported')]"/>
                 <filter string="Pendientes" name="filter_pending" domain="[('state', '=', 'pending')]"/>
                 <filter string="Errores" name="filter_error" domain="[('state', '=', 'error')]"/>
-            </search>
+            <filter string="En cola" name="filter_queued" domain="[('state', 'in', ['queued_preview','queued_import'])]"/><filter string="Procesando" name="filter_processing" domain="[('state', 'in', ['previewing','importing'])]"/></search>
         </field>
     </record>
 

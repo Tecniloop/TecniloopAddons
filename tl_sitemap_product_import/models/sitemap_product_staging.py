@@ -1,4 +1,11 @@
-from odoo import fields, models
+import logging
+
+import requests
+
+from odoo import _, fields, models
+from odoo.addons.queue_job.exception import RetryableJobError
+
+_logger = logging.getLogger(__name__)
 
 
 class SitemapProductStaging(models.Model):
@@ -15,7 +22,11 @@ class SitemapProductStaging(models.Model):
 
     state = fields.Selection([
         ('pending', 'Pendiente de vista previa'),
+        ('queued_preview', 'Vista previa en cola'),
+        ('previewing', 'Obteniendo vista previa'),
         ('preview_ready', 'Vista previa lista'),
+        ('queued_import', 'Importación en cola'),
+        ('importing', 'Importando'),
         ('imported', 'Importado'),
         ('skipped', 'Sin cambios'),
         ('error', 'Error'),
@@ -78,50 +89,171 @@ class SitemapProductStaging(models.Model):
     preview_date = fields.Datetime(string='Fecha de vista previa')
     imported_date = fields.Datetime(string='Fecha de importación')
 
+    preview_job_uuid = fields.Char(string='Trabajo de vista previa', readonly=True, copy=False)
+    import_job_uuid = fields.Char(string='Trabajo de importación', readonly=True, copy=False)
+    last_job_date = fields.Datetime(string='Último trabajo', readonly=True, copy=False)
+
     _batch_url_uniq = models.Constraint(
         'unique(batch_id, url)',
         message='Esta URL ya está en este lote.',
     )
 
+    def _queue_identity(self, phase):
+        self.ensure_one()
+        return f"sitemap_product_{phase}_{self.id}"
+
+    @staticmethod
+    def _retryable_exception(exc):
+        if isinstance(exc, (requests.Timeout, requests.ConnectionError)):
+            return True
+        response = getattr(exc, 'response', None)
+        return getattr(response, 'status_code', None) in {429, 500, 502, 503, 504}
+
+    def action_queue_preview(self):
+        jobs = 0
+        for row in self:
+            if row.state not in ('pending', 'error'):
+                continue
+            row.write({
+                'state': 'queued_preview',
+                'error_message': False,
+                'last_job_date': fields.Datetime.now(),
+            })
+            job = row.with_delay(
+                priority=20,
+                max_retries=max(row.source_id.http_retry_count or 3, 1),
+                identity_key=row._queue_identity('preview'),
+                description=_('Vista previa sitemap: %s') % row.url,
+            )._job_fetch_preview()
+            row.preview_job_uuid = job.uuid
+            jobs += 1
+        return self._notification(
+            _('Vistas previas en cola'),
+            _('%s productos se han enviado a la cola.') % jobs,
+        )
+
+    def _job_fetch_preview(self):
+        self.ensure_one()
+        row = self.exists()
+        if not row:
+            return False
+        row.write({
+            'state': 'previewing',
+            'last_job_date': fields.Datetime.now(),
+            'error_message': False,
+        })
+        service = row.env[row.source_id.connector_model]
+        try:
+            service.refresh_staging_row(
+                row,
+                row.source_id,
+                image_map={},
+                force=row.batch_id.force_update,
+            )
+            if row.state == 'error' and any(
+                token in (row.error_message or '')
+                for token in ('HTTP 429', 'HTTP 500', 'HTTP 502', 'HTTP 503', 'HTTP 504', 'Timeout', 'ConnectionError')
+            ):
+                row.write({'state': 'queued_preview'})
+                raise RetryableJobError(row.error_message or _('Error HTTP temporal.'))
+        except RetryableJobError:
+            raise
+        except Exception as exc:
+            if row._retryable_exception(exc):
+                row.write({'state': 'queued_preview', 'error_message': str(exc)[:4000]})
+                raise RetryableJobError(str(exc)) from exc
+            row.write({
+                'state': 'error',
+                'error_message': ('%s: %s' % (exc.__class__.__name__, exc))[:4000],
+                'last_attempt_date': fields.Datetime.now(),
+            })
+            raise
+        row.batch_id._update_queue_completion()
+        return True
+
     def action_import_selected(self):
-        """Acción en lote: aparece en el menú de Acciones (⚙) de la vista lista al
-        seleccionar una o varias filas ('todas' o 'solo algunas', según pida el usuario;
-        pueden pertenecer a lotes -e incluso fuentes- distintas). Crea o actualiza el
-        producto de Odoo de cada fila seleccionada reutilizando los datos ya obtenidos en
-        la vista previa -no se vuelve a descargar la ficha del producto-. Las imágenes solo
-        se descargan aquí, y solo de lo seleccionado."""
-        image_map_cache = {}
+        jobs = 0
+        for row in self:
+            if row.state not in ('preview_ready', 'error', 'imported'):
+                continue
+            if not row.name:
+                continue
+            row.write({
+                'state': 'queued_import',
+                'error_message': False,
+                'last_job_date': fields.Datetime.now(),
+            })
+            job = row.with_delay(
+                priority=30,
+                max_retries=max(row.source_id.http_retry_count or 3, 1),
+                identity_key=row._queue_identity('import'),
+                description=_('Importar producto sitemap: %s') % (row.name or row.url),
+            )._job_import_product()
+            row.import_job_uuid = job.uuid
+            jobs += 1
+        return self._notification(
+            _('Importación en cola'),
+            _('%s productos se han enviado a la cola de importación.') % jobs,
+        )
 
-        created = updated = failed = 0
-        for batch in self.mapped('batch_id'):
-            rows = self.filtered(lambda r: r.batch_id == batch)
-            source = batch.source_id
-            connector = self.env[source.connector_model]
-            if source.import_images and source.id not in image_map_cache:
-                try:
-                    image_map_cache[source.id] = connector.get_image_map(source)
-                except Exception:
-                    image_map_cache[source.id] = {}
-            image_map = image_map_cache.get(source.id, {})
-            for row in rows:
-                result = connector.import_staging_row(row, source, image_map.get(row.url, []))
-                if result == 'created':
-                    created += 1
-                elif result == 'updated':
-                    updated += 1
-                else:
-                    failed += 1
+    def _job_import_product(self):
+        self.ensure_one()
+        row = self.exists()
+        if not row:
+            return False
+        row.write({
+            'state': 'importing',
+            'last_job_date': fields.Datetime.now(),
+            'error_message': False,
+        })
+        connector = row.env[row.source_id.connector_model]
+        try:
+            result = connector.import_staging_row(row, row.source_id, [])
+            if result == 'error':
+                raise ValueError(row.error_message or _('Error importando el producto.'))
+        except Exception as exc:
+            if row._retryable_exception(exc):
+                row.write({'state': 'queued_import', 'error_message': str(exc)[:4000]})
+                raise RetryableJobError(str(exc)) from exc
+            row.write({
+                'state': 'error',
+                'error_message': ('%s: %s' % (exc.__class__.__name__, exc))[:4000],
+            })
+            raise
+        row.batch_id._update_queue_completion()
+        return result
 
-        message = f'{created} creados, {updated} actualizados'
-        if failed:
-            message += f', {failed} con error'
+    def action_requeue_failed(self):
+        preview_rows = self.filtered(lambda r: r.state == 'error' and not r.name)
+        import_rows = self.filtered(lambda r: r.state == 'error' and r.name)
+        if preview_rows:
+            preview_rows.action_queue_preview()
+        if import_rows:
+            import_rows.action_import_selected()
+        return self._notification(
+            _('Trabajos reencolados'),
+            _('%s registros se han vuelto a enviar a la cola.') % len(self),
+        )
+
+    def action_view_jobs(self):
+        uuids = list(filter(None, self.mapped('preview_job_uuid') + self.mapped('import_job_uuid')))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Trabajos de importación'),
+            'res_model': 'queue.job',
+            'view_mode': 'list,form',
+            'domain': [('uuid', 'in', uuids)] if uuids else [('id', '=', 0)],
+        }
+
+    @staticmethod
+    def _notification(title, message, notification_type='success'):
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': 'Importación de productos',
+                'title': title,
                 'message': message,
-                'type': 'warning' if failed else 'success',
+                'type': notification_type,
                 'sticky': False,
             },
         }

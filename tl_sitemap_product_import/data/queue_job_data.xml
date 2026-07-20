@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="queue_channel_sitemap" model="queue.job.channel">
+        <field name="name">sitemap</field>
+        <field name="parent_id" ref="queue_job.channel_root"/>
+    </record>
+    <record id="queue_channel_sitemap_discovery" model="queue.job.channel">
+        <field name="name">discovery</field>
+        <field name="parent_id" ref="queue_channel_sitemap"/>
+    </record>
+    <record id="queue_channel_sitemap_preview" model="queue.job.channel">
+        <field name="name">preview</field>
+        <field name="parent_id" ref="queue_channel_sitemap"/>
+    </record>
+    <record id="queue_channel_sitemap_import" model="queue.job.channel">
+        <field name="name">import</field>
+        <field name="parent_id" ref="queue_channel_sitemap"/>
+    </record>
+
+    <record id="queue_job_function_sitemap_collect" model="queue.job.function">
+        <field name="model_id" ref="model_sitemap_import_batch"/>
+        <field name="method">_job_collect_urls</field>
+        <field name="channel_id" ref="queue_channel_sitemap_discovery"/>
+        <field name="retry_pattern" eval="{1: 30, 2: 60, 3: 180, 4: 600, 5: 1800}"/>
+    </record>
+    <record id="queue_job_function_sitemap_preview" model="queue.job.function">
+        <field name="model_id" ref="model_sitemap_product_staging"/>
+        <field name="method">_job_fetch_preview</field>
+        <field name="channel_id" ref="queue_channel_sitemap_preview"/>
+        <field name="retry_pattern" eval="{1: 30, 2: 60, 3: 180, 4: 600, 5: 1800}"/>
+    </record>
+    <record id="queue_job_function_sitemap_import" model="queue.job.function">
+        <field name="model_id" ref="model_sitemap_product_staging"/>
+        <field name="method">_job_import_product</field>
+        <field name="channel_id" ref="queue_channel_sitemap_import"/>
+        <field name="retry_pattern" eval="{1: 30, 2: 120, 3: 600}"/>
+    </record>
+</odoo>
