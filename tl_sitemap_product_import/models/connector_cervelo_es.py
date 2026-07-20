@@ -374,7 +374,7 @@ class SitemapConnectorCerveloEs(models.AbstractModel):
         return result
 
     @classmethod
-    def _name(cls, tree, product_json, canonical):
+    def _extract_product_name(cls, tree, product_json, canonical):
         values = tree.xpath('//main//h1[1]//text()') or tree.xpath('//h1[1]//text()')
         name = cls._normalize_text(' '.join(values)) if values else False
         name = name or cls._normalize_text(product_json.get('name'))
@@ -676,7 +676,7 @@ class SitemapConnectorCerveloEs(models.AbstractModel):
 
         payloads = self._json_payloads(tree)
         product_json = self._find_product_json_ld(tree)
-        name = self._name(tree, product_json, canonical)
+        name = self._extract_product_name(tree, product_json, canonical)
         description = self._description(tree, product_json)
         builds = self._builds(tree, lines)
         sizes = self._sizes(lines)

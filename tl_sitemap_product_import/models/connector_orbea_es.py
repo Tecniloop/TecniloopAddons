@@ -495,7 +495,7 @@ class SitemapConnectorOrbeaEs(models.AbstractModel):
         return result
 
     @classmethod
-    def _name(cls, tree, product_json, canonical):
+    def _extract_product_name(cls, tree, product_json, canonical):
         values = tree.xpath('//main//h1[1]//text()') or tree.xpath('//h1[1]//text()')
         name = cls._normalize_text(' '.join(values)) if values else False
         name = name or cls._normalize_text(product_json.get('name'))
@@ -836,7 +836,7 @@ class SitemapConnectorOrbeaEs(models.AbstractModel):
     def _is_product_page(cls, tree, product_json, lines, canonical):
         if not cls._is_product_candidate(canonical):
             return False
-        name = cls._name(tree, product_json, canonical)
+        name = cls._extract_product_name(tree, product_json, canonical)
         if not name or name.casefold() in cls._GENERIC_TITLES:
             return False
         text = ' '.join(lines[:1000]).casefold()
@@ -869,7 +869,7 @@ class SitemapConnectorOrbeaEs(models.AbstractModel):
                     'puede ser una familia, una categoría o una redirección.'
                 )
 
-        name = self._name(tree, product_json, canonical)
+        name = self._extract_product_name(tree, product_json, canonical)
         sizes, colors = self._extract_sizes_colors(lines)
         specs = self._label_values(lines)
         description = self._description_with_details(

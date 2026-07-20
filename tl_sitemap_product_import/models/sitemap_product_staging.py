@@ -74,9 +74,10 @@ class SitemapProductStaging(models.Model):
     preview_date = fields.Datetime(string='Fecha de vista previa')
     imported_date = fields.Datetime(string='Fecha de importación')
 
-    _sql_constraints = [
-        ('batch_url_uniq', 'unique(batch_id, url)', 'Esta URL ya está en este lote.'),
-    ]
+    _batch_url_uniq = models.Constraint(
+        'unique(batch_id, url)',
+        message='Esta URL ya está en este lote.',
+    )
 
     def action_import_selected(self):
         """Acción en lote: aparece en el menú de Acciones (⚙) de la vista lista al

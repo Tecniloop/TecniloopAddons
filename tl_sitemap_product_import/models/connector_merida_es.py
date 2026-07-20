@@ -443,7 +443,7 @@ class SitemapConnectorMeridaEs(models.AbstractModel):
         return result
 
     @classmethod
-    def _name(cls, tree, product_json, product_url):
+    def _extract_product_name(cls, tree, product_json, product_url):
         values = tree.xpath('//main//h1[1]//text()') or tree.xpath('//h1[1]//text()')
         name = cls._normalize_text(' '.join(values)) if values else False
         name = name or cls._normalize_text(product_json.get('name'))
@@ -670,7 +670,7 @@ class SitemapConnectorMeridaEs(models.AbstractModel):
 
         product_json = self._product_json(tree)
         lines = self._page_lines(tree)
-        name = self._name(tree, product_json, canonical)
+        name = self._extract_product_name(tree, product_json, canonical)
         specs = self._label_values(lines)
         description = self._description_with_specs(
             self._description(tree, product_json), specs

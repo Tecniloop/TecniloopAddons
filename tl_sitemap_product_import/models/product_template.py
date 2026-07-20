@@ -30,10 +30,10 @@ class ProductTemplate(models.Model):
              'Se guarda aparte para poder actualizarla en sincronizaciones posteriores sin tocar '
              'otras categorías de comercio electrónico que hayas añadido manualmente.')
 
-    _sql_constraints = [
-        ('sitemap_source_url_uniq', 'unique(sitemap_source_url)',
-         'Ya existe un producto importado con esta URL de origen.'),
-    ]
+    _sitemap_source_url_uniq = models.Constraint(
+        'unique(sitemap_source_url)',
+        message='Ya existe un producto importado con esta URL de origen.',
+    )
 
     def action_refresh_sitemap_eans(self):
         """Vuelve a consultar los EAN sin modificar precio, descripción o imágenes."""

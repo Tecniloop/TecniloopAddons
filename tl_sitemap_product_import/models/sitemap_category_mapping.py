@@ -32,7 +32,7 @@ class SitemapCategoryMapping(models.Model):
              'raíz de la fuente.')
     note = fields.Char(string='Nota')
 
-    _sql_constraints = [
-        ('source_path_uniq', 'unique(source_id, category_path)',
-         'Ya existe un mapeo para esta ruta de categoría en esta fuente.'),
-    ]
+    _source_path_uniq = models.Constraint(
+        'unique(source_id, category_path)',
+        message='Ya existe un mapeo para esta ruta de categoría en esta fuente.',
+    )

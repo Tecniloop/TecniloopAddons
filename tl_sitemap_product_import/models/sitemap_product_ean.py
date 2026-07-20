@@ -23,8 +23,7 @@ class SitemapProductEan(models.Model):
     source_variant_id = fields.Char(string='ID variante externa')
     available = fields.Boolean(string='Disponible', default=True)
 
-    _sql_constraints = [
-        ('product_ean_variant_uniq',
-         'unique(product_tmpl_id, ean)',
-         'Este EAN ya está registrado para el producto.'),
-    ]
+    _product_ean_variant_uniq = models.Constraint(
+        'unique(product_tmpl_id, ean)',
+        message='Este EAN ya está registrado para el producto.',
+    )

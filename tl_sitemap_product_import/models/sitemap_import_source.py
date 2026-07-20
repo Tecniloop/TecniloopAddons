@@ -174,6 +174,7 @@ class SitemapImportSource(models.Model):
         string='Activar sincronización periódica automática', default=False,
         help='Activa el cron que crea automáticamente nuevos lotes de sincronización para esta fuente.')
 
-    _sql_constraints = [
-        ('name_uniq', 'unique(name)', 'Ya existe una fuente de importación con este nombre.'),
-    ]
+    _name_uniq = models.Constraint(
+        'unique(name)',
+        message='Ya existe una fuente de importación con este nombre.',
+    )
