@@ -864,3 +864,28 @@ Odoo 19 eliminó el modelo `uom.category` y el campo `category_id` de `uom.uom`.
 
 - Migra las restricciones SQL al API `models.Constraint` de Odoo 19.
 - Incluye una utilidad de diagnóstico para detectar clases Odoo cuyo `_name` no sea texto.
+
+
+## 19.0.1.60.0
+
+- Las descripciones importadas se guardan en los campos OCA de
+  `product_sale_description`: `description_sale_short` y
+  `description_sale_long`.
+- El campo core `description_ecommerce` se limpia y deja de utilizarse para
+  evitar que algunas plantillas lo rendericen superpuesto a la imagen.
+- `description_sale`, usado en presupuestos, recibe únicamente texto plano y
+  nunca etiquetas HTML de la ficha de origen.
+
+
+## 19.0.1.61.0 - Catalogo completo de Conor
+
+El conector de Conor ya no considera exhaustivo el sitemap XML. Combina sus
+entradas con los productos visibles en las categorias generales de PrestaShop,
+consultadas con `resultsPerPage=99999`, y deduplica por ID de producto. Esto
+evita omitir bicicletas nuevas o combinaciones que todavía no aparecen en el
+sitemap publico.
+
+## 19.0.1.62.0
+
+- Conor Bikes: se añaden como fuentes permanentes del catálogo completo las categorías de e-bikes y accesorios con `resultsPerPage=99999`.
+- El descubrimiento combina bicicletas, bicicletas eléctricas, accesorios, categoría general y sitemaps, deduplicando por ID maestro de producto PrestaShop.

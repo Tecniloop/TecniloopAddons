@@ -44,6 +44,19 @@ class SitemapImportService(models.AbstractModel):
     _name = 'sitemap.import.service'
     _description = 'Mecánica compartida de importación por sitemap (base para los conectores)'
 
+    @staticmethod
+    def _html_to_plain_text(value):
+        """Convierte HTML importado en texto seguro para documentos de venta."""
+        if not value:
+            return ''
+        raw = str(value)
+        try:
+            root = lxml_html.fragment_fromstring(raw, create_parent='div')
+            text = ' '.join(root.itertext())
+        except (etree.ParserError, TypeError, ValueError):
+            text = re.sub(r'<[^>]+>', ' ', raw)
+        return re.sub(r'\s+', ' ', text).strip()
+
     # ------------------------------------------------------------------
     # HTTP
     # ------------------------------------------------------------------
@@ -1308,18 +1321,27 @@ class SitemapImportService(models.AbstractModel):
             segments = staging_row.category_path.split('/') if staging_row.category_path else []
             category = self._resolve_category_chain(segments, source, 'internal')
 
+            full_description = (
+                staging_row.full_description_preview
+                or staging_row.description_preview
+                or ''
+            )
+            short_description = (
+                staging_row.short_description_preview
+                or self._html_to_plain_text(staging_row.description_preview)
+                or self._html_to_plain_text(full_description)
+                or ''
+            )
             vals = {
                 'name': staging_row.name or staging_row.url,
-                'description_sale': (
-                    staging_row.short_description_preview
-                    or staging_row.description_preview
-                    or ''
-                ),
-                'description_ecommerce': (
-                    staging_row.full_description_preview
-                    or staging_row.description_preview
-                    or ''
-                ),
+                # Campo estándar usado en presupuestos: siempre texto plano.
+                'description_sale': self._html_to_plain_text(short_description),
+                # Campos OCA de product_sale_description.
+                'description_sale_short': self._html_to_plain_text(short_description),
+                'description_sale_long': full_description,
+                # No usar el campo core de website_sale: en ciertas plantillas se
+                # renderiza junto a la galería y puede superponerse a la imagen.
+                'description_ecommerce': False,
                 'categ_id': category.id,
                 'sitemap_source_id': source.id,
                 'sitemap_source_url': staging_row.url,

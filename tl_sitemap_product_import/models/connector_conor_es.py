@@ -125,7 +125,10 @@ class SitemapConnectorConorEs(models.AbstractModel):
         start_urls = [
             'https://conorbikes.com/es/2-inicio',
             'https://conorbikes.com/es/mapa%20del%20sitio',
-            'https://conorbikes.com/es/4-bicicletas-conor-wrcline',
+            'https://conorbikes.com/es/4-bicicletas-conor-wrcline?resultsPerPage=99999',
+            'https://conorbikes.com/es/5-bicicletas-electricas-ebikes?resultsPerPage=99999',
+            'https://conorbikes.com/es/50-accesorio?resultsPerPage=99999',
+            'https://conorbikes.com/es/2-inicio?resultsPerPage=99999',
         ]
 
         for start_url in start_urls:
@@ -180,25 +183,55 @@ class SitemapConnectorConorEs(models.AbstractModel):
         return entries[:limit] if limit else entries
 
     def get_product_entries(self, source, category_filter=None, limit=0):
-        entries, image_map, errors = self._collect_products(source)
-        if entries:
-            result = list(entries.values())
-            if category_filter:
-                needle = str(category_filter).casefold()
-                result = [item for item in result if needle in item['url'].casefold()]
-            result.sort(key=lambda item: item['url'])
-            return result[:limit] if limit else result
+        """Combina sitemap y catalogo HTML.
 
+        El sitemap publico de Conor no contiene necesariamente todas las
+        bicicletas visibles en la categoria general. Por eso no se considera
+        una fuente exhaustiva: siempre se completa con el listado PrestaShop
+        solicitado con ``resultsPerPage=99999`` y se deduplica por el ID del
+        producto maestro.
+        """
+        entries, _image_map, errors = self._collect_products(source)
+        products = {}
+
+        for item in entries.values():
+            key = self._product_key(item.get('url'))
+            if key:
+                products[key] = item
+
+        # No aplicar limit al rastreo HTML antes de fusionar: el sitemap puede
+        # contener productos antiguos y provocar que no lleguemos a bicicletas
+        # nuevas que solo aparecen en el catalogo publico.
         fallback = self._fallback_html_entries(
             source,
-            category_filter=category_filter,
-            limit=limit,
+            category_filter=None,
+            limit=0,
         )
-        if fallback:
-            return fallback
+        for item in fallback:
+            key = self._product_key(item.get('url'))
+            if key:
+                # La URL del catalogo suele incluir la combinacion/EAN actual y
+                # es preferible a una URL antigua conservada en el sitemap.
+                products[key] = item
+
+        result = list(products.values())
+        if category_filter:
+            needle = str(category_filter).casefold()
+            result = [item for item in result if needle in item['url'].casefold()]
+        result.sort(key=lambda item: item['url'])
+
+        _logger.info(
+            'Conor: %s productos unicos descubiertos (%s sitemap, %s catalogo HTML)',
+            len(result),
+            len(entries),
+            len(fallback),
+        )
+        if result:
+            return result[:limit] if limit else result
+
         raise ValueError(
             'No se pudieron descubrir productos de Conor Bikes. '
-            'No se obtuvo un sitemap XML util y la paginacion publica no devolvio fichas.'
+            'Ni el sitemap ni el catalogo publico devolvieron fichas.'
             + (' Intentos: ' + ' | '.join(errors[:4]) if errors else '')
         )
 
