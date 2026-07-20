@@ -508,7 +508,7 @@ class SitemapConnectorOrbeaEs(models.AbstractModel):
         return name
 
     @classmethod
-    def _description(cls, tree, product_json):
+    def _extract_description(cls, tree, product_json):
         candidates = []
         for value in (
             product_json.get('description'),
@@ -873,7 +873,7 @@ class SitemapConnectorOrbeaEs(models.AbstractModel):
         sizes, colors = self._extract_sizes_colors(lines)
         specs = self._label_values(lines)
         description = self._description_with_details(
-            self._description(tree, product_json), sizes, colors, specs
+            self._extract_description(tree, product_json), sizes, colors, specs
         )
         price, currency = self._structured_price(tree, product_json, lines)
 

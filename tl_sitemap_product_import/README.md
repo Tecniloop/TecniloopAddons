@@ -860,7 +860,7 @@ El descubrimiento valida la marca antes de crear staging para impedir que una UR
 Odoo 19 eliminó el modelo `uom.category` y el campo `category_id` de `uom.uom`. El módulo específico de dimensiones de embalaje ya no declara campos Many2one hacia ese modelo ni dominios basados en categorías. La compatibilidad de unidades se valida mediante la jerarquía de unidades de Odoo 19 (`relative_uom_id` y `_has_common_reference`), usando metro como referencia para dimensiones y kilogramo para peso.
 
 
-## 19.0.1.56.0
+## 19.0.1.57.0
 
 - Migra las restricciones SQL al API `models.Constraint` de Odoo 19.
 - Incluye una utilidad de diagnóstico para detectar clases Odoo cuyo `_name` no sea texto.

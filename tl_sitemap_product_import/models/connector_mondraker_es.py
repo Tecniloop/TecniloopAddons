@@ -481,7 +481,7 @@ class SitemapConnectorMondrakerEs(models.AbstractModel):
         return (min(candidates), 'EUR') if candidates else (0.0, 'EUR')
 
     @classmethod
-    def _description(cls, tree, product_json):
+    def _extract_description(cls, tree, product_json):
         candidates = []
         for value in (
             product_json.get('description') if isinstance(product_json, dict) else False,
@@ -720,7 +720,7 @@ class SitemapConnectorMondrakerEs(models.AbstractModel):
                 )
 
         name = self._extract_product_name(tree, product_json, canonical)
-        description = self._description(tree, product_json)
+        description = self._extract_description(tree, product_json)
         sizes = self._extract_sizes(lines)
         colors = self._extract_colors(tree, lines)
         price, currency = self._structured_price(tree, product_json, lines)

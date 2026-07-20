@@ -490,7 +490,7 @@ class SitemapConnectorBicicletasQuerEs(models.AbstractModel):
         )
 
     @classmethod
-    def _description(cls, tree, product_json):
+    def _extract_description(cls, tree, product_json):
         value = (product_json or {}).get('description')
         if value:
             return str(value)
@@ -789,7 +789,7 @@ class SitemapConnectorBicicletasQuerEs(models.AbstractModel):
         lines = self._page_lines(tree)
         price, currency = self._extract_price(tree, product_json, lines)
         colors, sizes = self._colors_and_sizes(tree, lines)
-        description = self._description(tree, product_json)
+        description = self._extract_description(tree, product_json)
         details = []
         if colors:
             details.append('<p><strong>Colores:</strong> %s</p>' % html.escape(' / '.join(colors)))

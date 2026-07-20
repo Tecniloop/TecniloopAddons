@@ -457,7 +457,7 @@ class SitemapConnectorMeridaEs(models.AbstractModel):
         return name
 
     @classmethod
-    def _description(cls, tree, product_json):
+    def _extract_description(cls, tree, product_json):
         candidates = []
         for value in (
             product_json.get('description'),
@@ -673,7 +673,7 @@ class SitemapConnectorMeridaEs(models.AbstractModel):
         name = self._extract_product_name(tree, product_json, canonical)
         specs = self._label_values(lines)
         description = self._description_with_specs(
-            self._description(tree, product_json), specs
+            self._extract_description(tree, product_json), specs
         )
         price, currency = self._structured_price(tree, product_json)
 

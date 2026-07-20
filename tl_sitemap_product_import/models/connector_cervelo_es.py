@@ -440,7 +440,7 @@ class SitemapConnectorCerveloEs(models.AbstractModel):
         return (min(prices), currency) if prices else (0.0, currency)
 
     @classmethod
-    def _description(cls, tree, product_json):
+    def _extract_description(cls, tree, product_json):
         for value in (
             product_json.get('description') if isinstance(product_json, dict) else False,
             cls._meta(tree, 'og:description'),
@@ -677,7 +677,7 @@ class SitemapConnectorCerveloEs(models.AbstractModel):
         payloads = self._json_payloads(tree)
         product_json = self._find_product_json_ld(tree)
         name = self._extract_product_name(tree, product_json, canonical)
-        description = self._description(tree, product_json)
+        description = self._extract_description(tree, product_json)
         builds = self._builds(tree, lines)
         sizes = self._sizes(lines)
         price, currency = self._price(tree, product_json, lines)

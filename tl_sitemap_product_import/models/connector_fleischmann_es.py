@@ -196,7 +196,7 @@ class SitemapConnectorFleischmannEs(models.AbstractModel):
         return result
 
     @classmethod
-    def _description(cls, tree, product):
+    def _extract_description(cls, tree, product):
         short = cls._clean(product.get('description')) if product else ''
         blocks = []
         for xpath in (
@@ -291,7 +291,7 @@ class SitemapConnectorFleischmannEs(models.AbstractModel):
             raise ValueError('La ficha Fleischmann no publica un nombre reconocible.')
         code = self._clean(product.get('sku')) or self._product_key(canonical)
         price, currency = self._price(tree, product)
-        short_description, full_description = self._description(tree, product)
+        short_description, full_description = self._extract_description(tree, product)
         images = self._images(tree, product, canonical)
         attributes = self._attributes(tree, name)
         breadcrumbs = self._breadcrumbs(tree)
