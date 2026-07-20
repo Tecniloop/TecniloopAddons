@@ -974,3 +974,12 @@ GT Bicycles y Miguel Bellido.
 - Registro en log del origen efectivo de nombre, precio, imagen y descripcion.
 - Bicicletas Quer, Conor, Scalextric y NINCO heredan directa o indirectamente del parser comun.
 - Deduplicacion por ID estable y fusion multifuente disponibles en `_prestashop_merge_discovery`.
+
+
+## 19.0.1.74.0
+
+- Corrige la importación en instalaciones donde `product.template` no dispone de
+  `description_sale_short` u otros campos opcionales de descripción.
+- Los campos de descripción se asignan dinámicamente según `Product._fields`.
+- Añade un filtrado defensivo de valores antes de `create`/`write` para evitar
+  errores `Invalid field` por diferencias entre ediciones o versiones de módulos.

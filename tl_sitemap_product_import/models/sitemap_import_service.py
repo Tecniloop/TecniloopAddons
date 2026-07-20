@@ -1611,14 +1611,6 @@ class SitemapImportService(models.AbstractModel):
 
             vals = {
                 'name': valid_name,
-                # Campo estándar usado en presupuestos: siempre texto plano.
-                'description_sale': self._html_to_plain_text(short_description),
-                # Campos OCA de website_sale_product_description.
-                'description_sale_short': self._html_to_plain_text(short_description),
-                'description_sale_long': full_description,
-                # No usar el campo core de website_sale: en ciertas plantillas se
-                # renderiza junto a la galería y puede superponerse a la imagen.
-                'description_ecommerce': False,
                 'categ_id': category.id,
                 'sitemap_source_id': source.id,
                 'sitemap_source_url': staging_row.url,
@@ -1631,6 +1623,26 @@ class SitemapImportService(models.AbstractModel):
                 'purchase_ok': source.purchase_ok,
                 'active': True,
             }
+
+            # Las extensiones de descripción cambian entre versiones y ediciones
+            # de Odoo/OCA. Solo se escriben los campos realmente presentes en la
+            # base de datos para evitar errores como ``Invalid field``.
+            plain_short_description = self._html_to_plain_text(short_description)
+            optional_description_vals = {
+                # Campo estándar de product.template.
+                'description_sale': plain_short_description,
+                # website_sale_product_description (según versión).
+                'description_sale_short': plain_short_description,
+                'description_sale_long': full_description,
+                # Personalizaciones/ediciones que usan un campo e-commerce propio.
+                'description_ecommerce': False,
+                # Campo estándar de website_sale en instalaciones que lo exponen.
+                'website_description': full_description,
+            }
+            for field_name, field_value in optional_description_vals.items():
+                if field_name in Product._fields:
+                    vals[field_name] = field_value
+
             if staging_row.dimensional_uom_name and (
                     staging_row.product_length or staging_row.product_height or staging_row.product_width):
                 vals.update({
@@ -1656,6 +1668,17 @@ class SitemapImportService(models.AbstractModel):
                     commands.insert(0, (3, previous_public.id, 0))
                 vals['public_categ_ids'] = commands
                 vals['sitemap_public_categ_id'] = public_category.id
+
+            # Defensa adicional frente a dependencias opcionales o campos
+            # renombrados: nunca enviar al ORM claves que no existan en el modelo
+            # product.template de la instalación actual.
+            unknown_fields = sorted(set(vals) - set(Product._fields))
+            if unknown_fields:
+                _logger.warning(
+                    'Sitemap import: se omiten campos no disponibles en product.template: %s',
+                    ', '.join(unknown_fields),
+                )
+                vals = {key: value for key, value in vals.items() if key in Product._fields}
 
             if existing:
                 existing.write(vals)
