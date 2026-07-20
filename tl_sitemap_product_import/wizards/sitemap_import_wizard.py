@@ -42,10 +42,10 @@ class SitemapImportWizard(models.TransientModel):
         })
         batch.action_collect_urls()
         # Se obtiene de inmediato la vista previa (SIN imágenes, SIN crear productos) de un
-        # primer grupo pequeño para que el usuario vea resultados nada más abrir la lista; el
+        # primer grupo configurado para que el usuario vea resultados nada más abrir la lista; el
         # resto lo completa el cron "Obtener vistas previas pendientes" (o el botón del propio
         # lote). La creación real de productos requiere selección explícita.
-        batch.action_fetch_previews(limit=20)
+        batch.action_fetch_previews(limit=self.source_id.products_per_run)
         return {
             'type': 'ir.actions.act_window',
             'name': f'Productos {self.source_id.name} (vista previa)',

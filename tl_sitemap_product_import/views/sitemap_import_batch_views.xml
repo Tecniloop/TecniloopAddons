@@ -8,6 +8,9 @@
                 <header>
                     <button name="action_fetch_previews" type="object" string="Obtener siguientes vistas previas"
                             class="btn-primary" invisible="state != 'previewing'"/>
+                    <button name="action_fetch_all_previews" type="object" string="Obtener todas las pendientes"
+                            class="btn-secondary" invisible="state != 'previewing'"
+                            confirm="Se procesarán todas las fichas pendientes. En catálogos grandes puede tardar varios minutos. ¿Continuar?"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="draft,collecting,previewing,ready"/>
                 </header>
@@ -71,6 +74,7 @@
                 <field name="date_start"/>
                 <field name="date_end"/>
                 <field name="staging_count"/>
+                <field name="pending_count"/>
                 <field name="preview_ready_count"/>
                 <field name="imported_count"/>
                 <field name="error_count"/>

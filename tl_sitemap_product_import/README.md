@@ -944,3 +944,13 @@ GT Bicycles y Miguel Bellido.
 - Refuerza el lector común Shopify con búsqueda por `handle` en el catálogo paginado `products.json` cuando los endpoints individuales `.js` y `.json` no devuelven una ficha válida.
 - Impide que una vista previa o importación cree productos con la URL como nombre. La fila queda en error con un mensaje explícito.
 - Corrige el caso de Panama Jack `bambina-b82` y protege el resto de conectores frente a la misma contingencia.
+
+
+## 19.0.1.71.0 — continuación completa de vistas previas
+
+- Corrige la interpretación de `limit=0`: ahora significa realmente todas las filas pendientes.
+- El asistente usa `products_per_run` en vez de un límite fijo de 20.
+- Activa el cron de vistas previas pendientes cada minuto para continuar automáticamente los lotes.
+- Añade el botón **Obtener todas las pendientes** en el lote.
+- Muestra el número de filas pendientes en la lista de lotes.
+- Corrige el caso observado en el Excel de Panama Jack: 20 filas procesadas y 380 sin intentar.

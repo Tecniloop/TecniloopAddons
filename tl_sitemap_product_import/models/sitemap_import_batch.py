@@ -111,7 +111,10 @@ class SitemapImportBatch(models.Model):
         self.ensure_one()
         service = self._get_service()
         source = self.source_id
-        run_limit = limit or source.products_per_run
+        # ``None`` usa el tamaño de lote configurado. ``0`` significa procesar
+        # todas las filas pendientes; antes ``0`` acababa convertido de nuevo en
+        # ``products_per_run`` por el operador ``or``.
+        run_limit = source.products_per_run if limit is None else limit
 
         image_map = {}
         if source.import_images:
@@ -120,7 +123,9 @@ class SitemapImportBatch(models.Model):
             except Exception as exc:
                 _logger.warning('No se pudo obtener el mapa de imágenes (fuente %s): %s', source.name, exc)
 
-        pending = self.staging_ids.filtered(lambda r: r.state == 'pending')[:run_limit]
+        pending = self.staging_ids.filtered(lambda r: r.state == 'pending')
+        if run_limit and run_limit > 0:
+            pending = pending[:run_limit]
         for row in pending:
             service.refresh_staging_row(row, source, image_map, force=self.force_update)
             self.env.cr.commit()
@@ -129,6 +134,16 @@ class SitemapImportBatch(models.Model):
             self.write({'state': 'ready', 'date_end': fields.Datetime.now()})
             if source.auto_archive_discontinued:
                 self._archive_discontinued()
+
+    def action_fetch_all_previews(self):
+        """Procesa todas las filas pendientes del lote en una sola ejecución manual.
+
+        Es una acción explícita para instalaciones donde el cron está desactivado o
+        para catálogos pequeños. En catálogos muy grandes sigue siendo preferible el
+        cron por lotes para evitar agotar el tiempo de una petición HTTP de Odoo.
+        """
+        self.ensure_one()
+        return self.action_fetch_previews(limit=0)
 
     def action_view_staging(self):
         self.ensure_one()
