@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sitemap_import_source_admin,sitemap.import.source.admin,model_sitemap_import_source,base.group_system,1,1,1,1
+access_sitemap_import_batch_admin,sitemap.import.batch.admin,model_sitemap_import_batch,base.group_system,1,1,1,1
+access_sitemap_product_staging_admin,sitemap.product.staging.admin,model_sitemap_product_staging,base.group_system,1,1,1,1
+access_sitemap_import_wizard_admin,sitemap.import.wizard.admin,model_sitemap_import_wizard,base.group_system,1,1,1,1
+access_sitemap_category_mapping_admin,sitemap.category.mapping.admin,model_sitemap_category_mapping,base.group_system,1,1,1,1
+access_sitemap_category_explorer_wizard_admin,sitemap.category.explorer.wizard.admin,model_sitemap_category_explorer_wizard,base.group_system,1,1,1,1
+access_sitemap_product_ean_admin,sitemap.product.ean.admin,model_sitemap_product_ean,base.group_system,1,1,1,1

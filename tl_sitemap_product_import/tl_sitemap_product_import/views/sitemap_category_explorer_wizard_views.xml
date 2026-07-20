@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sitemap_category_explorer_wizard_form" model="ir.ui.view">
+        <field name="name">sitemap.category.explorer.wizard.form</field>
+        <field name="model">sitemap.category.explorer.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Explorar categorías">
+                <group>
+                    <field name="source_id"/>
+                    <p invisible="category_summary">
+                        Lee el sitemap de productos de la fuente elegida (sin descargar cada
+                        ficha) y agrupa las URLs por la ruta de categoría que se derivaría de
+                        cada una. Útil para decidir qué mapeos crear antes de lanzar una
+                        importación completa.
+                    </p>
+                    <group invisible="not category_summary" col="2">
+                        <field name="total_products"/>
+                        <field name="total_categories"/>
+                    </group>
+                    <field name="category_summary" widget="text" nolabel="1"
+                           invisible="not category_summary"
+                           style="font-family: monospace; white-space: pre;"/>
+                </group>
+                <footer>
+                    <button name="action_explore" type="object" string="Explorar" class="btn-primary"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sitemap_category_explorer_wizard" model="ir.actions.act_window">
+        <field name="name">Explorar categorías</field>
+        <field name="res_model">sitemap.category.explorer.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

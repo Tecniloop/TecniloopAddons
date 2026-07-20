@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_sitemap_import_root" name="Importación por sitemap" sequence="90"/>
+
+    <menuitem id="menu_sitemap_import_source" name="Fuentes" parent="menu_sitemap_import_root"
+              action="action_sitemap_import_source" sequence="5" groups="base.group_system"/>
+    <menuitem id="menu_sitemap_import_products" name="Productos" parent="menu_sitemap_import_root"
+              action="product_template_action_sitemap_import" sequence="10"/>
+    <menuitem id="menu_sitemap_import_wizard" name="Importar productos" parent="menu_sitemap_import_root"
+              action="action_sitemap_import_wizard" sequence="20"/>
+    <menuitem id="menu_sitemap_import_batches" name="Lotes de importación" parent="menu_sitemap_import_root"
+              action="action_sitemap_import_batch" sequence="30"/>
+    <menuitem id="menu_sitemap_import_staging" name="Productos (vista previa)" parent="menu_sitemap_import_root"
+              action="action_sitemap_product_staging" sequence="40"/>
+    <menuitem id="menu_sitemap_category_explorer" name="Explorar categorías" parent="menu_sitemap_import_root"
+              action="action_sitemap_category_explorer_wizard" sequence="45"/>
+    <menuitem id="menu_sitemap_category_mapping" name="Mapeo de categorías" parent="menu_sitemap_import_root"
+              action="action_sitemap_category_mapping" sequence="46" groups="base.group_system"/>
+</odoo>
