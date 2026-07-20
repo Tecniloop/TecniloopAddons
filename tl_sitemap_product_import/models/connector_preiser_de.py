@@ -246,7 +246,6 @@ class SitemapConnectorPreiserDe(models.AbstractModel):
 
     def get_product_entries(self, source, category_filter=None, limit=0):
         entries, image_map = self._discover(source, limit=limit)
-        self._preiser_image_map_cache = image_map
         if category_filter:
             needle = str(category_filter).casefold()
             entries = [entry for entry in entries if needle in entry['url'].casefold()]
@@ -258,10 +257,7 @@ class SitemapConnectorPreiserDe(models.AbstractModel):
         return entries[:limit] if limit else entries
 
     def get_image_map(self, source):
-        image_map = getattr(self, '_preiser_image_map_cache', None)
-        if image_map is None:
-            _entries, image_map = self._discover(source)
-            self._preiser_image_map_cache = image_map
+        _entries, image_map = self._discover(source)
         return image_map
 
     @classmethod

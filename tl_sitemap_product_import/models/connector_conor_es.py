@@ -181,8 +181,6 @@ class SitemapConnectorConorEs(models.AbstractModel):
 
     def get_product_entries(self, source, category_filter=None, limit=0):
         entries, image_map, errors = self._collect_products(source)
-        self._conor_entries_cache = entries
-        self._conor_image_map_cache = image_map
         if entries:
             result = list(entries.values())
             if category_filter:
@@ -205,12 +203,8 @@ class SitemapConnectorConorEs(models.AbstractModel):
         )
 
     def get_image_map(self, source):
-        entries = getattr(self, '_conor_entries_cache', None)
-        image_map = getattr(self, '_conor_image_map_cache', None)
-        if entries is None or image_map is None:
-            entries, image_map, _errors = self._collect_products(source)
-            self._conor_entries_cache = entries
-            self._conor_image_map_cache = image_map
+        # Do not store runtime attributes on Odoo model recordsets.
+        entries, image_map, _errors = self._collect_products(source)
         result = {}
         for key, entry in entries.items():
             if image_map.get(key):

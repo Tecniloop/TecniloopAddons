@@ -335,8 +335,6 @@ class SitemapConnectorBicicletasQuerEs(models.AbstractModel):
 
     def get_product_entries(self, source, category_filter=None, limit=0):
         entries, image_map, errors = self._collect_products(source)
-        self._quer_entries_cache = entries
-        self._quer_image_map_cache = image_map
         if entries:
             result = list(entries.values())
             if category_filter:
@@ -355,12 +353,9 @@ class SitemapConnectorBicicletasQuerEs(models.AbstractModel):
         )
 
     def get_image_map(self, source):
-        entries = getattr(self, '_quer_entries_cache', None)
-        image_map = getattr(self, '_quer_image_map_cache', None)
-        if entries is None or image_map is None:
-            entries, image_map, _ = self._collect_products(source)
-            self._quer_entries_cache = entries
-            self._quer_image_map_cache = image_map
+        # Odoo 19 model recordsets do not allow arbitrary instance attributes.
+        # Rebuild the lightweight sitemap map instead of attaching a cache to self.
+        entries, image_map, _ = self._collect_products(source)
         result = {}
         # El servicio espera mapa por URL; reconstruimos a partir de las
         # entradas para no depender de URLs con parámetros o alias.

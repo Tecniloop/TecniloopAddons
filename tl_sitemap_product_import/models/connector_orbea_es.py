@@ -400,8 +400,6 @@ class SitemapConnectorOrbeaEs(models.AbstractModel):
 
     def get_product_entries(self, source, category_filter=None, limit=0):
         entries, image_map, errors = self._collect_products(source)
-        self._orbea_entries_cache = entries
-        self._orbea_images_cache = image_map
         if not entries:
             detail = ' | '.join(errors[:4])
             raise ValueError(
@@ -422,10 +420,7 @@ class SitemapConnectorOrbeaEs(models.AbstractModel):
         return result
 
     def get_image_map(self, source):
-        entries = getattr(self, '_orbea_entries_cache', None)
-        images = getattr(self, '_orbea_images_cache', None)
-        if entries is None or images is None:
-            entries, images, _errors = self._collect_products(source)
+        entries, images, _errors = self._collect_products(source)
         return {
             entry['url']: images.get(key, [])
             for key, entry in entries.items()

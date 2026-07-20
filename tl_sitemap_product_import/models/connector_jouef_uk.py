@@ -391,8 +391,6 @@ class SitemapConnectorJouefUk(models.AbstractModel):
 
     def get_product_entries(self, source, category_filter=None, limit=0):
         entries, image_map, errors = self._collect_products(source)
-        self._jouef_entries_cache = entries
-        self._jouef_images_cache = image_map
         if not entries:
             for entry in self._fallback_catalog_entries(source, limit=limit):
                 key = self._product_key(entry['url'])
@@ -416,12 +414,7 @@ class SitemapConnectorJouefUk(models.AbstractModel):
         return result
 
     def get_image_map(self, source):
-        entries = getattr(self, '_jouef_entries_cache', None)
-        image_map = getattr(self, '_jouef_images_cache', None)
-        if entries is None or image_map is None:
-            entries, image_map, _errors = self._collect_products(source)
-            self._jouef_entries_cache = entries
-            self._jouef_images_cache = image_map
+        entries, image_map, _errors = self._collect_products(source)
         return {
             entry['url']: image_map.get(key, [])
             for key, entry in entries.items()
