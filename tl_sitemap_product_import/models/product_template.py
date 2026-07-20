@@ -82,3 +82,21 @@ class ProductTemplate(models.Model):
             },
         }
 
+
+
+class ProductProduct(models.Model):
+    _inherit = 'product.product'
+
+    sitemap_source_variant_id = fields.Char(
+        string='ID de variante de origen', copy=False, index=True, readonly=True)
+    sitemap_variant_available = fields.Boolean(
+        string='Disponible en origen', copy=False, default=True, readonly=True)
+
+
+class ProductImage(models.Model):
+    _inherit = 'product.image'
+
+    is_sitemap_import_image = fields.Boolean(
+        string='Imagen importada por sitemap', default=False, copy=False, index=True)
+    sitemap_source_url = fields.Char(
+        string='URL de imagen de origen', copy=False, index=True)

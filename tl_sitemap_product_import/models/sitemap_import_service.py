@@ -1016,6 +1016,134 @@ class SitemapImportService(models.AbstractModel):
         data['ean_checked'] = checked
         return data
 
+    @staticmethod
+    def _variant_label_parts(label):
+        """Convierte etiquetas como ``Talla: 36 / Color: Negro`` en pares.
+
+        Se admiten separadores habituales de Shopify y PrestaShop. Si una
+        etiqueta no declara el nombre del atributo, se conserva bajo
+        ``Variante`` para no perder el valor ni impedir la generación.
+        """
+        text = str(label or '').strip()
+        if not text:
+            return []
+        import re
+        chunks = [part.strip() for part in re.split(r'\s*(?:/|\||;)\s*', text) if part.strip()]
+        result = []
+        for chunk in chunks:
+            if ':' in chunk:
+                name, value = chunk.split(':', 1)
+            elif '=' in chunk:
+                name, value = chunk.split('=', 1)
+            else:
+                name, value = 'Variante', chunk
+            name, value = name.strip(), value.strip()
+            if name and value:
+                result.append((name, value))
+        return result
+
+    def _variant_attribute(self, name):
+        Attribute = self.env['product.attribute']
+        attribute = Attribute.search([('name', '=ilike', name)], limit=1)
+        if not attribute:
+            attribute = Attribute.create({'name': name, 'create_variant': 'always'})
+        elif attribute.create_variant == 'no_variant':
+            # Un atributo detectado en variantes debe generar product.product.
+            # La conversión es deliberada: mantenerlo como informativo impediría
+            # crear las tallas/colores publicadas por la fuente.
+            attribute.write({'create_variant': 'always'})
+        return attribute
+
+    def _sync_product_variants(self, product_tmpl, variants):
+        variants = self._normalise_ean_variants(variants)
+        parsed = []
+        attribute_values = {}
+        for item in variants:
+            parts = self._variant_label_parts(item.get('variant_label'))
+            if not parts:
+                continue
+            parsed.append((item, parts))
+            for attribute_name, value_name in parts:
+                attribute_values.setdefault(attribute_name, [])
+                if value_name not in attribute_values[attribute_name]:
+                    attribute_values[attribute_name].append(value_name)
+        if not parsed:
+            return
+
+        Value = self.env['product.attribute.value']
+        Line = self.env['product.template.attribute.line']
+        value_by_key = {}
+        for attribute_name, names in attribute_values.items():
+            attribute = self._variant_attribute(attribute_name)
+            values = Value.browse([])
+            for value_name in names:
+                value = Value.search([
+                    ('attribute_id', '=', attribute.id),
+                    ('name', '=ilike', value_name),
+                ], limit=1)
+                if not value:
+                    value = Value.create({'attribute_id': attribute.id, 'name': value_name})
+                values |= value
+                value_by_key[(attribute_name.casefold(), value_name.casefold())] = value
+            line = Line.search([
+                ('product_tmpl_id', '=', product_tmpl.id),
+                ('attribute_id', '=', attribute.id),
+            ], limit=1)
+            if line:
+                missing = values - line.value_ids
+                if missing:
+                    line.write({'value_ids': [(4, value.id) for value in missing]})
+            else:
+                Line.create({
+                    'product_tmpl_id': product_tmpl.id,
+                    'attribute_id': attribute.id,
+                    'value_ids': [(6, 0, values.ids)],
+                })
+
+        # Odoo suele generar las variantes al escribir las líneas. La llamada
+        # explícita cubre importaciones, contextos y versiones donde se difiere.
+        if hasattr(product_tmpl, '_create_variant_ids'):
+            product_tmpl._create_variant_ids()
+        product_tmpl.invalidate_recordset(['product_variant_ids'])
+
+        Product = self.env['product.product'].with_context(active_test=False)
+        for item, parts in parsed:
+            expected_ids = {
+                value_by_key[(name.casefold(), value.casefold())].id
+                for name, value in parts
+                if (name.casefold(), value.casefold()) in value_by_key
+            }
+            matched = Product.browse([])
+            for candidate in product_tmpl.product_variant_ids.with_context(active_test=False):
+                candidate_ids = set(candidate.product_template_attribute_value_ids.product_attribute_value_id.ids)
+                if expected_ids and expected_ids.issubset(candidate_ids):
+                    matched = candidate
+                    break
+            if not matched:
+                _logger.warning(
+                    'Sitemap import: no se encontró la variante Odoo para %s (%s).',
+                    product_tmpl.display_name, item.get('variant_label'),
+                )
+                continue
+            vals = {
+                'sitemap_source_variant_id': item.get('source_variant_id') or False,
+                'sitemap_variant_available': item.get('available', True),
+            }
+            sku = str(item.get('sku') or '').strip()
+            if sku:
+                vals['default_code'] = sku
+            ean = str(item.get('ean') or '').strip()
+            if ean:
+                conflict = Product.search([('barcode', '=', ean), ('id', '!=', matched.id)], limit=1)
+                if conflict:
+                    _logger.warning(
+                        'EAN %s no asignado a %s: ya pertenece a %s.',
+                        ean, matched.display_name, conflict.display_name,
+                    )
+                else:
+                    vals['barcode'] = ean
+            matched.write(vals)
+
     def _sync_product_eans(self, product_tmpl, source, variants):
         if not source.import_eans:
             return
@@ -1041,8 +1169,11 @@ class SitemapImportService(models.AbstractModel):
             'sitemap_ean_count': len(unique_eans),
         })
 
-        # El producto importado es simple. Solo se escribe barcode si hay un
-        # único GTIN inequívoco y no pertenece ya a otra variante de Odoo.
+        labelled = [item for item in variants if self._variant_label_parts(item.get('variant_label'))]
+        if labelled:
+            self._sync_product_variants(product_tmpl, labelled)
+            return
+
         variants_odoo = product_tmpl.product_variant_ids
         if len(variants_odoo) != 1:
             return
@@ -1459,8 +1590,11 @@ class SitemapImportService(models.AbstractModel):
         except Exception as exc:
             _logger.warning('Sitemap import: no se pudo descargar la imagen principal %s: %s', urls[0], exc)
 
-        old_images = self.env['product.image'].search([
+        Image = self.env['product.image']
+        old_images = Image.search([
             ('product_tmpl_id', '=', product_tmpl.id),
+            '|',
+            ('is_sitemap_import_image', '=', True),
             ('name', 'like', IMAGE_MARKER),
         ])
         old_images.unlink()
@@ -1468,10 +1602,14 @@ class SitemapImportService(models.AbstractModel):
         for index, extra_url in enumerate(urls[1:], start=1):
             try:
                 img_bytes = self._download_image(source, extra_url)
-                self.env['product.image'].create({
+                Image.create({
                     'product_tmpl_id': product_tmpl.id,
-                    'name': f'{IMAGE_MARKER} {product_tmpl.name} ({index})',
+                    # Se crean todos los medios, pero sin mostrar el marcador
+                    # técnico ``[Sitemap Import]`` en el comercio electrónico.
+                    'name': f'{product_tmpl.name} ({index})',
                     'image_1920': base64.b64encode(img_bytes),
+                    'is_sitemap_import_image': True,
+                    'sitemap_source_url': extra_url,
                 })
             except Exception as exc:
                 _logger.warning('Sitemap import: no se pudo descargar la imagen %s: %s', extra_url, exc)

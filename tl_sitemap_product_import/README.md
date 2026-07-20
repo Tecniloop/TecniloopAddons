@@ -983,3 +983,11 @@ GT Bicycles y Miguel Bellido.
 - Los campos de descripción se asignan dinámicamente según `Product._fields`.
 - Añade un filtrado defensivo de valores antes de `create`/`write` para evitar
   errores `Invalid field` por diferencias entre ediciones o versiones de módulos.
+
+## 19.0.1.75.0
+
+- Motor común de variantes para Shopify y PrestaShop a partir de `variant_label`.
+- Crea atributos y valores generadores de variantes y fuerza la generación de `product.product`.
+- Asigna a cada variante su EAN, SKU, identificador externo y disponibilidad de origen.
+- Las imágenes adicionales continúan importándose todas, pero ya no muestran el prefijo `[Sitemap Import]`.
+- Las imágenes gestionadas por el importador se identifican mediante campos técnicos internos para poder reemplazarlas en sincronizaciones posteriores sin borrar medios manuales.
