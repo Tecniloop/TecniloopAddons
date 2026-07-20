@@ -1,3 +1,10 @@
+## 19.0.1.77.0
+
+- Eliminados commits manuales del procesamiento masivo.
+- Savepoint integral por producto para evitar InFailedSqlTransaction.
+- Conservación de variantes sin GTIN para generar atributos.
+- BH Bikes detecta tallas/medidas aunque exista una única opción.
+
 
 # Versión 19.0.1.73.0 — procesamiento resiliente Shopify y PrestaShop
 
@@ -991,3 +998,11 @@ GT Bicycles y Miguel Bellido.
 - Asigna a cada variante su EAN, SKU, identificador externo y disponibilidad de origen.
 - Las imágenes adicionales continúan importándose todas, pero ya no muestran el prefijo `[Sitemap Import]`.
 - Las imágenes gestionadas por el importador se identifican mediante campos técnicos internos para poder reemplazarlas en sincronizaciones posteriores sin borrar medios manuales.
+
+## 19.0.1.76.0
+
+- Añade migración explícita para crear `product_product.sitemap_source_variant_id` y
+  `product_product.sitemap_variant_available` durante la actualización del módulo.
+- Aísla la importación de cada producto con un savepoint para poder registrar el
+  error aunque falle una sentencia SQL.
+- Aísla la escritura de cada variante y continúa con las siguientes variantes.

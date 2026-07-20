@@ -111,7 +111,6 @@ class SitemapProductStaging(models.Model):
                     updated += 1
                 else:
                     failed += 1
-                self.env.cr.commit()
 
         message = f'{created} creados, {updated} actualizados'
         if failed:

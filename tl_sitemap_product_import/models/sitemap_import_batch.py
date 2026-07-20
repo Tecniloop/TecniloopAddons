@@ -151,7 +151,6 @@ class SitemapImportBatch(models.Model):
                     'last_attempt_date': fields.Datetime.now(),
                     'preview_attempt_count': row.preview_attempt_count + 1,
                 })
-            self.env.cr.commit()
 
         if not self.staging_ids.filtered(lambda r: r.state == 'pending'):
             self.write({'state': 'ready', 'date_end': fields.Datetime.now()})

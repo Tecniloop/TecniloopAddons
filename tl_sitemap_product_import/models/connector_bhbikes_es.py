@@ -507,6 +507,57 @@ class SitemapConnectorBhBikesEs(models.AbstractModel):
         return result
 
     @classmethod
+    def _option_variants_from_bh_html(cls, tree):
+        """Extrae tallas/medidas seleccionables aunque solo haya una opción."""
+        result = []
+        placeholder_re = re.compile(
+            r'^(?:seleccione|seleccionar|elige|escoge|choose|select)(?:\s+la)?\s*'
+            r'(?:talla|medida|tamaño|size)?$', re.IGNORECASE,
+        )
+        size_hint_re = re.compile(r'(?:talla|medida|tamaño|size|diametro|diámetro)', re.IGNORECASE)
+        for select in tree.xpath('//select'):
+            select_id = select.get('id') or ''
+            labels = tree.xpath('//label[@for=$target]//text()', target=select_id) if select_id else []
+            hint = cls._normalize_text(' '.join(labels)) or select.get('aria-label') or select.get('name') or ''
+            option_text = ' '.join(select.xpath('.//option//text()'))
+            if hint and not size_hint_re.search(hint) and not re.search(
+                    r'\d+\s*(?:x|×|/|\")\s*\d+|\b(?:XS|S|M|L|XL|XXL)\b', option_text, re.I):
+                continue
+            for option in select.xpath('.//option'):
+                value = cls._normalize_text(' '.join(option.xpath('.//text()')))
+                raw_value = (option.get('value') or '').strip()
+                if not value or placeholder_re.match(value) or raw_value in {'', '0', '-1'}:
+                    continue
+                result.append({
+                    'ean': False,
+                    'gtin_type': False,
+                    'sku': option.get('data-sku') or option.get('data-reference') or False,
+                    'variant_label': f'Talla: {value}',
+                    'source_variant_id': raw_value or option.get('data-id') or False,
+                    'available': option.get('disabled') is None,
+                })
+        xpath = ('//*[@data-size or @data-talla or @data-dimension or '
+                 '(self::input and @type="radio") or contains(@class,"size")]')
+        for node in tree.xpath(xpath):
+            value = cls._normalize_text(
+                node.get('data-size') or node.get('data-talla') or node.get('data-dimension')
+                or node.get('value') or node.get('title') or ' '.join(node.xpath('.//text()'))
+            )
+            if not value or placeholder_re.match(value):
+                continue
+            if not re.search(r'\d|\b(?:XXS|XS|S|M|L|XL|XXL|XXXL)\b', value, re.I):
+                continue
+            result.append({
+                'ean': False,
+                'gtin_type': False,
+                'sku': node.get('data-sku') or node.get('data-reference') or False,
+                'variant_label': f'Talla: {value}',
+                'source_variant_id': node.get('data-id') or node.get('data-variant-id') or False,
+                'available': node.get('disabled') is None and 'disabled' not in (node.get('class') or '').casefold(),
+            })
+        return cls._normalise_ean_variants(result)
+
+    @classmethod
     def _ean_variants_from_bh_html(cls, tree, content):
         result = []
         marker_re = re.compile(r'(?:gtin|ean|barcode|upc)', re.IGNORECASE)
@@ -601,6 +652,7 @@ class SitemapConnectorBhBikesEs(models.AbstractModel):
                 color_tree = self._html_document(color_response.content)
                 variants.extend(self._ean_variants_from_html_content(color_response.content))
                 variants.extend(self._ean_variants_from_bh_html(color_tree, color_response.content))
+                variants.extend(self._option_variants_from_bh_html(color_tree))
             except Exception as exc:
                 _logger.debug('BH Bikes: variante de color no accesible %s: %s', color_url, exc)
             requests_done += 1
@@ -660,6 +712,7 @@ class SitemapConnectorBhBikesEs(models.AbstractModel):
             ean_variants.extend(self._ean_variants_from_payload(product_json))
         ean_variants.extend(self._ean_variants_from_html_content(content))
         ean_variants.extend(self._ean_variants_from_bh_html(tree, content))
+        ean_variants.extend(self._option_variants_from_bh_html(tree))
 
         return {
             'name': name or canonical_url,

@@ -583,25 +583,25 @@ class SitemapImportService(models.AbstractModel):
         return text if check == expected else False
 
     @classmethod
-    def _ean_variant(cls, ean, sku=False, label=False, source_variant_id=False, available=True):
-        ean = cls._normalise_gtin(ean)
-        if not ean:
+    def _ean_variant(cls, ean=False, sku=False, label=False, source_variant_id=False, available=True):
+        """Normaliza una variante, incluso si la tienda todavía no publica GTIN."""
+        label = str(label or '').strip() or False
+        ean = cls._normalise_gtin(ean) if ean else False
+        if not ean and not label:
             return False
         return {
             'ean': ean,
-            'gtin_type': cls._gtin_type(ean),
+            'gtin_type': cls._gtin_type(ean) if ean else False,
             'sku': str(sku or '').strip() or False,
-            'variant_label': str(label or '').strip() or False,
+            'variant_label': label,
             'source_variant_id': str(source_variant_id or '').strip() or False,
             'available': bool(available),
         }
 
     @classmethod
     def _normalise_ean_variants(cls, variants):
-        # Un GTIN identifica un único artículo comercial. Si aparece varias
-        # veces (JSON-LD + endpoint de variante), se conserva una sola línea y
-        # se completa con la metadata más rica disponible.
-        by_ean = {}
+        """Deduplica por GTIN y conserva opciones sin GTIN por ID o etiqueta."""
+        by_key = {}
         order = []
         for item in variants or []:
             if isinstance(item, str):
@@ -617,16 +617,22 @@ class SitemapImportService(models.AbstractModel):
             )
             if not normalised:
                 continue
-            ean = normalised['ean']
-            if ean not in by_ean:
-                by_ean[ean] = normalised
-                order.append(ean)
+            if normalised.get('ean'):
+                key = ('ean', normalised['ean'])
+            elif normalised.get('source_variant_id'):
+                key = ('id', normalised['source_variant_id'])
+            else:
+                key = ('label', normalised['variant_label'].casefold())
+            if key not in by_key:
+                by_key[key] = normalised
+                order.append(key)
                 continue
-            current = by_ean[ean]
-            for field in ('sku', 'variant_label', 'source_variant_id'):
+            current = by_key[key]
+            for field in ('ean', 'gtin_type', 'sku', 'variant_label', 'source_variant_id'):
                 if not current.get(field) and normalised.get(field):
                     current[field] = normalised[field]
-        return [by_ean[ean] for ean in order]
+            current['available'] = current.get('available', True) or normalised.get('available', True)
+        return [by_key[key] for key in order]
 
     @classmethod
     def _ean_variants_from_shopify_product(cls, product_data):
@@ -1009,7 +1015,7 @@ class SitemapImportService(models.AbstractModel):
                 _logger.info('EAN: el endpoint específico falló para %s: %s', product_url, exc)
 
         variants = self._normalise_ean_variants(variants)
-        unique_eans = list(dict.fromkeys(item['ean'] for item in variants))
+        unique_eans = list(dict.fromkeys(item.get('ean') for item in variants if item.get('ean')))
         data['ean_variants'] = variants
         data['ean_count'] = len(unique_eans)
         data['ean'] = unique_eans[0] if len(unique_eans) == 1 else False
@@ -1142,17 +1148,27 @@ class SitemapImportService(models.AbstractModel):
                     )
                 else:
                     vals['barcode'] = ean
-            matched.write(vals)
+            vals = {key: value for key, value in vals.items() if key in Product._fields}
+            try:
+                with self.env.cr.savepoint():
+                    matched.write(vals)
+            except Exception as exc:
+                _logger.exception(
+                    'Sitemap import: error actualizando la variante %s de %s: %s',
+                    item.get('variant_label'), product_tmpl.display_name, exc,
+                )
 
     def _sync_product_eans(self, product_tmpl, source, variants):
         if not source.import_eans:
             return
         variants = self._normalise_ean_variants(variants)
-        unique_eans = list(dict.fromkeys(item['ean'] for item in variants))
+        unique_eans = list(dict.fromkeys(item.get('ean') for item in variants if item.get('ean')))
         old_single = product_tmpl.sitemap_single_ean
 
         product_tmpl.sitemap_ean_ids.unlink()
         for item in variants:
+            if not item.get('ean'):
+                continue
             self.env['sitemap.product.ean'].create({
                 'product_tmpl_id': product_tmpl.id,
                 'ean': item['ean'],
@@ -1716,7 +1732,7 @@ class SitemapImportService(models.AbstractModel):
         else:
             staging_row.write({'state': 'preview_ready'})
 
-    def import_staging_row(self, staging_row, source, image_urls):
+    def _import_staging_row_inner(self, staging_row, source, image_urls):
         """Crea o actualiza el product.template a partir de los datos YA guardados en la fila
         de staging -no vuelve a descargar la ficha-. Es genérico: por este punto, todo lo que
         necesita ya es un simple diccionario de datos, sin decisiones específicas del sitio.
@@ -1818,13 +1834,17 @@ class SitemapImportService(models.AbstractModel):
                 )
                 vals = {key: value for key, value in vals.items() if key in Product._fields}
 
-            if existing:
-                existing.write(vals)
-                product_tmpl = existing
-                result = 'updated'
-            else:
-                product_tmpl = Product.create(vals)
-                result = 'created'
+            # La creación/actualización queda dentro de un savepoint. Si una
+            # columna o restricción SQL falla, PostgreSQL revierte esta operación
+            # antes de que el bloque exterior intente registrar el error.
+            with self.env.cr.savepoint():
+                if existing:
+                    existing.write(vals)
+                    product_tmpl = existing
+                    result = 'updated'
+                else:
+                    product_tmpl = Product.create(vals)
+                    result = 'created'
 
             staged_eans = []
             if staging_row.ean_variants_json:
@@ -1882,7 +1902,18 @@ class SitemapImportService(models.AbstractModel):
                 'error_message': False,
             })
             return result
+        except Exception:
+            raise
+
+    def import_staging_row(self, staging_row, source, image_urls):
+        """Importa una fila dentro de un savepoint integral."""
+        try:
+            with self.env.cr.savepoint():
+                return self._import_staging_row_inner(staging_row, source, image_urls)
         except Exception as exc:
-            _logger.exception('Sitemap import: error importando %s', staging_row.url)
-            staging_row.write({'state': 'error', 'error_message': str(exc)})
+            _logger.exception('Sitemap import: error aislado importando %s', staging_row.url)
+            staging_row.write({
+                'state': 'error',
+                'error_message': ('%s: %s' % (exc.__class__.__name__, exc))[:4000],
+            })
             return 'error'
