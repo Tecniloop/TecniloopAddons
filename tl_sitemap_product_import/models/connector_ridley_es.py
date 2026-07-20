@@ -291,16 +291,16 @@ class SitemapConnectorRidleyEs(models.AbstractModel):
                         cleaned = self._clean_image_url(image_url, item['url'])
                         if cleaned and cleaned not in target:
                             target.append(cleaned)
-                if found and entries:
-                    break
             except Exception as exc:
                 errors.append(f'{candidate}: {exc}')
                 _logger.info('Ridley: sitemap no utilizable %s: %s', candidate, exc)
 
-        if not entries:
-            fallback = self._discover_from_catalog(source)
-            for url in fallback:
-                key = self._product_key(url)
+        # El sitemap de Ridley puede ser parcial. Se combina siempre con el
+        # catálogo y con las referencias incluidas en el HTML/estado JavaScript.
+        fallback = self._discover_from_catalog(source)
+        for url in fallback:
+            key = self._product_key(url)
+            if key and key not in entries:
                 entries[key] = {'url': url, 'lastmod': False}
 
         if not entries:
@@ -336,7 +336,17 @@ class SitemapConnectorRidleyEs(models.AbstractModel):
             except Exception as exc:
                 _logger.debug('Ridley: página de catálogo no accesible %s: %s', page_url, exc)
                 continue
-            for href in tree.xpath('//a[@href]/@href'):
+            hrefs = list(tree.xpath('//a[@href]/@href'))
+            # Ridley carga parte del catálogo mediante JavaScript. Las fichas
+            # pueden estar en JSON embebido sin existir todavía como enlaces.
+            page_text = response.text or ''
+            hrefs.extend(re.findall(
+                r'(?:https?://(?:www\.)?ridley-bikes\.com)?/'
+                r'(?:es|en)[_-]ES/bikes/[A-Z0-9]{8,24}',
+                page_text,
+                flags=re.IGNORECASE,
+            ))
+            for href in hrefs:
                 absolute = self._canonical_url(urljoin(response.url or page_url, href))
                 if self._product_match(absolute):
                     if absolute not in products:
@@ -349,6 +359,8 @@ class SitemapConnectorRidleyEs(models.AbstractModel):
                 if (
                     path.startswith('/es_es/bikes/categories/')
                     or path.startswith('/es_es/bikes/platform/')
+                    or path.startswith('/es_es/ebikes/categories/')
+                    or path.startswith('/es_es/ebikes/platform/')
                 ) and absolute not in visited and absolute not in queue:
                     queue.append(absolute)
         return products

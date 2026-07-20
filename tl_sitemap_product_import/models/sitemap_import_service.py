@@ -326,6 +326,110 @@ class SitemapImportService(models.AbstractModel):
             return False
 
     # ------------------------------------------------------------------
+    # Descubrimiento multifuente
+    # ------------------------------------------------------------------
+    def _merge_discovery_entries(
+        self, source_name, entry_groups, key_getter=None,
+        category_filter=None, limit=0,
+    ):
+        """Fusiona inventarios parciales sin considerar completa una sola fuente.
+
+        ``entry_groups`` es una secuencia ``[(nombre, entradas), ...]``. La
+        deduplicación se realiza por ``key_getter(url)`` o, por defecto, por URL
+        canónica sin query ni fragmento. Una entrada posterior puede aportar un
+        ``lastmod`` más reciente, pero no elimina productos hallados por otra vía.
+        El límite se aplica únicamente después de fusionar todas las fuentes.
+        """
+        def default_key(url):
+            parts = urlparse(str(url or '').strip())
+            path = re.sub(r'/+', '/', parts.path or '/').rstrip('/') or '/'
+            return f'{parts.scheme.lower()}://{parts.netloc.lower()}{path}'
+
+        key_getter = key_getter or default_key
+        merged = {}
+        counts = {}
+        needle = str(category_filter or '').strip().casefold()
+        for group_name, raw_entries in entry_groups:
+            local_keys = set()
+            for raw in raw_entries or []:
+                if not isinstance(raw, dict):
+                    continue
+                url = str(raw.get('url') or '').strip()
+                if not url or (needle and needle not in url.casefold()):
+                    continue
+                key = key_getter(url)
+                if not key:
+                    continue
+                local_keys.add(key)
+                candidate = {
+                    'url': url,
+                    'lastmod': raw.get('lastmod') or False,
+                }
+                current = merged.get(key)
+                if not current:
+                    merged[key] = candidate
+                elif candidate['lastmod'] and (
+                    not current.get('lastmod') or candidate['lastmod'] > current['lastmod']
+                ):
+                    merged[key] = candidate
+            counts[group_name] = len(local_keys)
+
+        result = sorted(merged.values(), key=lambda item: item['url'])
+        _logger.info(
+            '%s: descubrimiento multifuente %s; %s productos únicos',
+            source_name,
+            ', '.join(f'{name}={count}' for name, count in counts.items()),
+            len(result),
+        )
+        non_empty = [count for count in counts.values() if count]
+        if len(non_empty) > 1 and max(non_empty) >= (min(non_empty) * 1.25):
+            _logger.warning(
+                '%s: las fuentes de descubrimiento difieren de forma significativa: %s',
+                source_name, counts,
+            )
+        return result[:limit] if limit else result
+
+    def _discover_html_product_entries(
+        self, source, start_urls, is_product_url, is_category_url=None,
+        canonicalize=None, max_pages=300,
+    ):
+        """Rastrea categorías HTML como inventario complementario y acotado.
+
+        El conector conserva el control de qué constituye una ficha o categoría.
+        Esto evita filtros globales por nombres como ``bikes`` o ``shoes`` que
+        excluyen accesorios. Solo se siguen URLs aceptadas por el conector.
+        """
+        canonicalize = canonicalize or (lambda value: value)
+        session = self._get_session(source)
+        queue = list(start_urls or [])
+        queued = set(queue)
+        visited = set()
+        products = {}
+        while queue and len(visited) < max_pages:
+            requested = queue.pop(0)
+            try:
+                response = self._http_get(session, requested, source)
+                page_url = canonicalize(response.url)
+                if page_url in visited:
+                    continue
+                visited.add(page_url)
+                tree = lxml_html.fromstring(response.content)
+            except Exception as exc:
+                _logger.info('Descubrimiento HTML: no se pudo leer %s: %s', requested, exc)
+                continue
+            for href in tree.xpath('//a[@href]/@href'):
+                absolute = canonicalize(urljoin(response.url, href))
+                if not absolute:
+                    continue
+                if is_product_url(absolute):
+                    products.setdefault(absolute, {'url': absolute, 'lastmod': False})
+                elif is_category_url and is_category_url(absolute):
+                    if absolute not in queued and absolute not in visited:
+                        queue.append(absolute)
+                        queued.add(absolute)
+        return list(products.values())
+
+    # ------------------------------------------------------------------
     # Mecánica genérica de ficha de producto: SOLO extrae metaetiquetas
     # (Open Graph / Twitter Card), sin interpretar estilo/color/categoría
     # -eso es cada conector quien lo decide en su propio fetch_preview-.
@@ -1336,7 +1440,7 @@ class SitemapImportService(models.AbstractModel):
                 'name': staging_row.name or staging_row.url,
                 # Campo estándar usado en presupuestos: siempre texto plano.
                 'description_sale': self._html_to_plain_text(short_description),
-                # Campos OCA de product_sale_description.
+                # Campos OCA de website_sale_product_description.
                 'description_sale_short': self._html_to_plain_text(short_description),
                 'description_sale_long': full_description,
                 # No usar el campo core de website_sale: en ciertas plantillas se

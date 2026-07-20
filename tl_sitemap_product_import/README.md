@@ -1,3 +1,14 @@
+# Versión 19.0.1.66.0 — descubrimiento multifuente refactorizado
+
+Esta versión evita considerar completo un catálogo solo porque un sitemap haya
+respondido correctamente. El servicio base puede fusionar sitemap, catálogo
+HTML y APIs públicas, deduplicar por identificador de producto, aplicar filtros
+y límites después de la unión y registrar métricas de cobertura.
+
+Conectores adaptados en esta revisión: Bicicletas Quer, Mustang, Scalextric,
+NINCO, Cervélo y WeThePeople. Conor, Ridley y Panama Jack ya combinaban varias
+fuentes y conservan ese comportamiento.
+
 # Importación de productos por sitemap para Odoo 19
 
 Módulo multi-fuente para descubrir, previsualizar e importar productos desde los
@@ -869,7 +880,7 @@ Odoo 19 eliminó el modelo `uom.category` y el campo `category_id` de `uom.uom`.
 ## 19.0.1.60.0
 
 - Las descripciones importadas se guardan en los campos OCA de
-  `product_sale_description`: `description_sale_short` y
+  `website_sale_product_description`: `description_sale_short` y
   `description_sale_long`.
 - El campo core `description_ecommerce` se limpia y deja de utilizarse para
   evitar que algunas plantillas lo rendericen superpuesto a la imagen.
@@ -889,3 +900,17 @@ sitemap publico.
 
 - Conor Bikes: se añaden como fuentes permanentes del catálogo completo las categorías de e-bikes y accesorios con `resultsPerPage=99999`.
 - El descubrimiento combina bicicletas, bicicletas eléctricas, accesorios, categoría general y sitemaps, deduplicando por ID maestro de producto PrestaShop.
+
+
+## 19.0.1.64.0
+
+- Ridley: combina siempre sitemap y catálogo HTML.
+- Detecta fichas Ridley incluidas en JSON/JavaScript aunque no aparezcan como enlaces HTML.
+- Amplía el recorrido a categorías y plataformas de e-bikes.
+
+
+## 19.0.1.65.0
+
+- Panama Jack: combina los sitemaps Shopify con `/products.json` paginado.
+- Deduplicación por `handle` para incorporar productos activos ausentes de un sitemap parcial, incluido `felia-igloo-trav-b2`.
+- Admite tanto índices de sitemap como `urlset` directos.

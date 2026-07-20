@@ -19,24 +19,95 @@ class SitemapConnectorPanamajackEs(models.AbstractModel):
         path = urlparse(url).path
         return not path.startswith('/en/')
 
+    @staticmethod
+    def _product_handle(url):
+        path = urlparse(url).path.rstrip('/')
+        match = re.search(r'/products/([^/]+)$', path, flags=re.IGNORECASE)
+        return match.group(1).lower() if match else False
+
+    def _shopify_catalog_entries(self, source, limit=0):
+        """Read Shopify's public product catalogue as a sitemap fallback.
+
+        Shopify can publish active products in ``/products.json`` before, or
+        independently from, the product sitemap shard currently returned by the
+        store. Reading both sources prevents valid handles from being omitted.
+        """
+        session = self._get_session(source)
+        parsed = urlparse(source.sitemap_index_url)
+        base_url = f'{parsed.scheme}://{parsed.netloc}'
+        entries = []
+        page = 1
+        while page <= 100:
+            endpoint = f'{base_url}/products.json?limit=250&page={page}'
+            try:
+                response = self._http_get(session, endpoint, source)
+                payload = response.json()
+            except Exception:  # noqa: BLE001 - sitemap remains the primary source
+                break
+            products = payload.get('products') if isinstance(payload, dict) else []
+            if not isinstance(products, list) or not products:
+                break
+            for product in products:
+                if not isinstance(product, dict):
+                    continue
+                handle = self._clean_text(product.get('handle'))
+                if not handle:
+                    continue
+                entries.append({
+                    'url': f'{base_url}/products/{handle}',
+                    'lastmod': self._parse_lastmod(product.get('updated_at')),
+                })
+                if limit and len(entries) >= limit:
+                    return entries
+            if len(products) < 250:
+                break
+            page += 1
+        return entries
+
     def get_product_entries(self, source, category_filter=None, limit=0):
-        sub_sitemaps = self._fetch_sitemap_index_locs(source, source.sitemap_index_url)
+        entries, seen = [], set()
+
+        def add_entry(entry):
+            url = (entry.get('url') or '').strip()
+            handle = self._product_handle(url)
+            if not handle or handle in seen:
+                return False
+            if not self._is_default_locale(url):
+                return False
+            if category_filter and category_filter.lower() not in url.lower():
+                return False
+            seen.add(handle)
+            entries.append(entry)
+            return bool(limit and len(entries) >= limit)
+
+        # Shopify normally exposes an index, but tolerate a direct product urlset
+        # as well so a theme/platform change does not empty the connector.
+        try:
+            sub_sitemaps = self._fetch_sitemap_index_locs(source, source.sitemap_index_url)
+        except Exception:  # noqa: BLE001 - direct urlset/fallback handled below
+            sub_sitemaps = []
         product_sitemaps = [
             sitemap_url
             for sitemap_url in sub_sitemaps
-            if 'product' in sitemap_url.lower() and self._is_default_locale(sitemap_url)
+            if 'product' in sitemap_url.lower()
         ]
-        entries, seen = [], set()
+        if not product_sitemaps:
+            product_sitemaps = [source.sitemap_index_url]
+
         for sitemap_url in product_sitemaps:
-            for entry in self._fetch_urlset(source, sitemap_url):
-                if entry['url'] in seen:
-                    continue
-                if category_filter and category_filter.lower() not in entry['url'].lower():
-                    continue
-                seen.add(entry['url'])
-                entries.append(entry)
-                if limit and len(entries) >= limit:
+            try:
+                sitemap_entries = self._fetch_urlset(source, sitemap_url)
+            except Exception:  # noqa: BLE001 - continue with other sources
+                continue
+            for entry in sitemap_entries:
+                if add_entry(entry):
                     return entries
+
+        # Always merge the live Shopify catalogue. This specifically covers active
+        # products missing from a partial/stale sitemap shard.
+        for entry in self._shopify_catalog_entries(source, limit=0):
+            if add_entry(entry):
+                return entries
         return entries
 
     def get_image_map(self, source):

@@ -276,27 +276,28 @@ class SitemapConnectorCerveloEs(models.AbstractModel):
 
     def get_product_entries(self, source, category_filter=None, limit=0):
         try:
-            entries_by_key, _images = self._collect_sitemap_products(source)
+            sitemap_entries, _images = self._collect_sitemap_products(source)
         except Exception as exc:
-            _logger.warning(
-                'Cervélo: el sitemap no pudo procesarse; se usa el catálogo como respaldo: %s',
-                exc,
-            )
-            entries_by_key = self._fallback_product_entries(source)
+            _logger.warning('Cervélo: no se pudo procesar el sitemap: %s', exc)
+            sitemap_entries = {}
+        try:
+            catalog_entries = self._fallback_product_entries(source)
+        except Exception as exc:
+            _logger.warning('Cervélo: no se pudo recorrer el catálogo alternativo: %s', exc)
+            catalog_entries = {}
 
-        if not entries_by_key:
+        result = self._merge_discovery_entries(
+            'Cervélo',
+            [
+                ('sitemap', list(sitemap_entries.values())),
+                ('catalogo_html', list(catalog_entries.values())),
+            ],
+            key_getter=self._product_key,
+            category_filter=category_filter,
+            limit=limit,
+        )
+        if not result:
             raise ValueError('No se localizaron fichas españolas de Cervélo.')
-
-        filter_text = (category_filter or '').strip().casefold()
-        result = []
-        for key, entry in sorted(entries_by_key.items(), key=lambda item: item[0]):
-            category = '/'.join(self.parse_category_path(entry['url']))
-            haystack = f'{key} {entry["url"]} {category}'.casefold()
-            if filter_text and filter_text not in haystack:
-                continue
-            result.append(entry)
-            if limit and len(result) >= limit:
-                break
         return result
 
     def get_image_map(self, source):

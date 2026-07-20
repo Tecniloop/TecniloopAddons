@@ -196,22 +196,22 @@ class SitemapConnectorScalextricEs(models.AbstractModel):
         return result[:limit] if limit else result
 
     def get_product_entries(self, source, category_filter=None, limit=0):
-        entries, image_map, errors = self._collect_products(source)
-        if entries:
-            result = list(entries.values())
-            if category_filter:
-                needle = str(category_filter).casefold()
-                result = [item for item in result if needle in item['url'].casefold()]
-            result.sort(key=lambda item: item['url'])
-            return result[:limit] if limit else result
-
-        fallback = self._fallback_html_entries(source, category_filter=category_filter, limit=limit)
-        if fallback:
-            return fallback
+        entries, _image_map, errors = self._collect_products(source)
+        html_entries = self._fallback_html_entries(
+            source, category_filter=None, limit=0,
+        )
+        result = self._merge_discovery_entries(
+            'Scalextric España',
+            [('sitemap', list(entries.values())), ('catalogo_html', html_entries)],
+            key_getter=self._product_key,
+            category_filter=category_filter,
+            limit=limit,
+        )
+        if result:
+            return result
         raise ValueError(
-            'No se pudieron descubrir productos de Scalextric España. '
-            'El índice declarado en robots.txt no devolvió fichas y el catálogo HTML '
-            'de respaldo tampoco resultó utilizable.'
+            'No se pudieron descubrir productos de Scalextric España ni por sitemap '
+            'ni recorriendo el catálogo HTML.'
             + (' Intentos: ' + ' | '.join(errors[:4]) if errors else '')
         )
 
