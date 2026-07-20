@@ -928,3 +928,12 @@ sitemap publico.
 - Electrotren y Jouef fusionan siempre sitemap y catálogo HTML.
 - El límite se aplica únicamente tras la fusión y deduplicación.
 - Revisados Conor, Ridley, Panama Jack, Mustang, Bicicletas Quer, Cervélo, WeThePeople, Scalextric y NINCO: mantienen fusión multifuente correcta.
+
+
+## 19.0.1.69.0 - Auditoría Shopify
+
+Los conectores Shopify comparten ahora un único lector de producto que prueba
+``/products/<handle>.js`` y ``/products/<handle>.json``, conserva rutas de idioma,
+acepta respuestas directas o envueltas en ``product`` y evita depender del tema.
+Se aplica a Panama Jack, Callaghan, Fluchos, Gioseppo, Pitillos, Colnago, Lapierre,
+GT Bicycles y Miguel Bellido.

@@ -202,26 +202,11 @@ class SitemapConnectorPanamajackEs(models.AbstractModel):
         return images
 
     def _fetch_shopify_product(self, source, canonical_url):
-        """Use Shopify's product JSON endpoint when available.
-
-        This endpoint is more reliable than theme-specific meta tags and exposes the
-        product title, prices and complete image gallery. Failures intentionally fall
-        back to the rendered HTML because stores may disable either endpoint.
-        """
-        session = self._get_session(source)
-        base_url = canonical_url.split('?', 1)[0].rstrip('/')
-        for suffix in ('.js', '.json'):
-            try:
-                response = self._http_get(session, base_url + suffix, source)
-                payload = response.json()
-            except Exception:  # noqa: BLE001 - fallback is expected for disabled endpoints
-                continue
-            product = payload.get('product') if isinstance(payload, dict) else None
-            if not isinstance(product, dict) and isinstance(payload, dict):
-                product = payload
-            if isinstance(product, dict) and (product.get('title') or product.get('name')):
-                return product
-        return {}
+        """Use the shared theme-independent Shopify endpoint parser."""
+        try:
+            return self._fetch_shopify_product_payload(source, canonical_url)
+        except ValueError:
+            return {}
 
     @classmethod
     def _shopify_images(cls, product, base_url):

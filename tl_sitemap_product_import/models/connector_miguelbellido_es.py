@@ -170,9 +170,7 @@ class SitemapConnectorMiguelBellidoEs(models.AbstractModel):
         return values
 
     def _preview_from_ajax(self, source, product_url):
-        session = self._get_session(source)
-        response = self._http_get(session, self._ajax_product_url(product_url), source)
-        product_data = response.json()
+        product_data = self._fetch_shopify_product_payload(source, product_url)
         if not isinstance(product_data, dict) or not product_data.get('title'):
             raise ValueError('El endpoint Ajax de Shopify no devolvió un producto válido.')
 

@@ -766,6 +766,40 @@ class SitemapImportService(models.AbstractModel):
                 existing_eans.add(item['ean'])
         return self._normalise_ean_variants(result)
 
+    def _shopify_product_endpoint_urls(self, product_url):
+        """Return locale-preserving Shopify JSON endpoints in priority order."""
+        parsed = urlparse(product_url)
+        path = parsed.path.rstrip('/')
+        for suffix in ('.js', '.json'):
+            endpoint_path = path if path.endswith(suffix) else path + suffix
+            yield parsed._replace(path=endpoint_path, query='', fragment='').geturl()
+
+    def _fetch_shopify_product_payload(self, source, product_url):
+        """Fetch and normalize a Shopify product independently of the theme.
+
+        Supports the public ``.js`` response, the ``.json`` response wrapped in
+        ``product``, and stores returning the product object directly.
+        """
+        session = self._get_session(source)
+        errors = []
+        for endpoint in self._shopify_product_endpoint_urls(product_url):
+            try:
+                response = self._http_get(session, endpoint, source)
+                payload = response.json()
+            except Exception as exc:  # endpoint may be disabled by the shop
+                errors.append(str(exc))
+                continue
+            product = payload.get('product') if isinstance(payload, dict) else None
+            if not isinstance(product, dict) and isinstance(payload, dict):
+                product = payload
+            if isinstance(product, dict) and (
+                product.get('title') or product.get('name') or product.get('handle')
+            ):
+                return product
+        raise ValueError(
+            'Los endpoints públicos .js/.json de Shopify no devolvieron un producto válido.'
+        )
+
     def _shopify_ajax_product_url(self, product_url):
         parsed = urlparse(product_url)
         path = parsed.path.rstrip('/')
