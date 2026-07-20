@@ -295,7 +295,7 @@ Limitaciones conocidas
     # sale, sale_management...). Si no quieres esto, puedes quitar 'website_sale'
     # de esta lista y desactivar "Importar categorías de comercio electrónico" en
     # cada fuente; el resto del módulo funciona igual sin esa parte.
-    'depends': ['product', 'website_sale', 'product_sale_description', 'product_dimension', 'tl_product_package_dimensions'],
+    'depends': ['product', 'website_sale', 'website_sale_product_description', 'product_dimension', 'tl_product_package_dimensions'],
     'external_dependencies': {
         'python': ['lxml', 'requests'],
     },
