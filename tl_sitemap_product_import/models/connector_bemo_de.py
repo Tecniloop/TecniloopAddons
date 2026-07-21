@@ -218,6 +218,12 @@ class SitemapConnectorBemoDe(models.AbstractModel):
 
     @classmethod
     def _images(cls, tree, product, page_url, sku):
+        """Extract product images, including Elementor lazy-loaded thumbnails.
+
+        BEMO uses Elementor-generated URLs under ``wp-content/uploads/elementor/thumbs``
+        and may publish them through ``srcset``, lazy-load attributes, links or inline
+        background styles instead of a plain ``img[src]``.
+        """
         candidates = []
         image = product.get('image') if product else None
         if isinstance(image, list):
@@ -226,23 +232,60 @@ class SitemapConnectorBemoDe(models.AbstractModel):
             candidates.append(image.get('url') or image.get('contentUrl'))
         elif image:
             candidates.append(image)
+
         candidates.extend(tree.xpath(
             '//meta[@property="og:image"]/@content | '
+            '//meta[@name="twitter:image"]/@content | '
             '//main//a[contains(@href,"wp-content/uploads")]/@href | '
-            '//main//img/@data-large-file | //main//img/@data-src | //main//img/@src'
+            '//main//img/@data-large-file | //main//img/@data-large_image | '
+            '//main//img/@data-full | //main//img/@data-original | '
+            '//main//img/@data-lazy-src | //main//img/@data-src | '
+            '//main//img/@src'
         ))
+
+        # Elementor/WordPress commonly places the useful URL in srcset.
+        srcsets = tree.xpath(
+            '//main//img/@srcset | //main//img/@data-srcset | '
+            '//main//source/@srcset | //main//source/@data-srcset'
+        )
+        for srcset in srcsets:
+            for item in str(srcset or '').split(','):
+                url = item.strip().split()[0] if item.strip() else ''
+                if url:
+                    candidates.append(url)
+
+        # Elementor may render gallery images as CSS background-image URLs.
+        styles = tree.xpath('//main//*[@style]/@style')
+        for style in styles:
+            candidates.extend(re.findall(
+                r'url\(\s*["\']?(.*?\.(?:jpe?g|png|webp|gif))(?:\?[^"\')\s]*)?["\']?\s*\)',
+                str(style or ''),
+                flags=re.I,
+            ))
+
         result = []
         compact_sku = re.sub(r'\D', '', sku or '')
         for value in candidates:
             if not value:
                 continue
-            absolute = urljoin(page_url, str(value))
+            absolute = urljoin(page_url, html.unescape(str(value)).strip())
             folded = absolute.casefold()
-            if not absolute.startswith('http') or any(token in folded for token in ('logo', 'icon', 'avatar', 'header')):
+            path = urlsplit(absolute).path.casefold()
+            if not absolute.startswith(('http://', 'https://')):
+                continue
+            if not re.search(r'\.(?:jpe?g|png|webp|gif)$', path, re.I):
+                continue
+            if any(token in folded for token in ('logo', 'icon', 'avatar', 'header', 'lieferbar')):
                 continue
             if absolute not in result:
                 result.append(absolute)
-        matching = [url for url in result if compact_sku and compact_sku in re.sub(r'\D', '', url)]
+
+        # Product-reference images first. For SKU ``1001 802``, BEMO uses
+        # ``1001802-<elementor hash>.jpg``.
+        matching = [
+            url for url in result
+            if compact_sku and compact_sku in re.sub(r'\D', '', urlsplit(url).path)
+        ]
         return matching + [url for url in result if url not in matching]
 
     @classmethod

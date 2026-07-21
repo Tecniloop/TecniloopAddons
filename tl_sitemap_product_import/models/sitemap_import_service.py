@@ -1,4 +1,6 @@
 import base64
+import hashlib
+import mimetypes
 import json
 import logging
 import re
@@ -1584,6 +1586,113 @@ class SitemapImportService(models.AbstractModel):
             stored, ensure_ascii=False, sort_keys=True)
 
     # ------------------------------------------------------------------
+    # Documentos adjuntos (genérico, compatible con Community)
+    # ------------------------------------------------------------------
+    _DOCUMENT_EXTENSIONS = {
+        '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.zip', '.rar', '.7z',
+        '.txt', '.csv', '.stl', '.dxf', '.dwg', '.step', '.stp',
+    }
+
+    @classmethod
+    def _normalise_attachments(cls, values, base_url=False):
+        result = []
+        seen = set()
+        for item in values or []:
+            if isinstance(item, str):
+                item = {'url': item}
+            if not isinstance(item, dict):
+                continue
+            url = urljoin(base_url or '', str(item.get('url') or '').strip())
+            if not url or url in seen or not url.lower().startswith(('http://', 'https://')):
+                continue
+            seen.add(url)
+            name = cls._html_to_plain_text(item.get('name') or '')
+            if not name:
+                name = unquote(urlparse(url).path.rsplit('/', 1)[-1]) or 'Documento'
+            result.append({
+                'url': url,
+                'name': name[:255],
+                'document_type': item.get('document_type') or cls._guess_document_type(name, url),
+                'language_code': item.get('language_code') or False,
+            })
+        return result
+
+    @staticmethod
+    def _guess_document_type(name, url=''):
+        text = f'{name} {url}'.casefold()
+        if any(token in text for token in ('spare', 'ersatz', 'exploded', 'despiece', 'repuesto')):
+            return 'spare_parts'
+        if any(token in text for token in ('manual', 'instruction', 'anleitung', 'instruccion')):
+            return 'manual'
+        if any(token in text for token in ('technical', 'datasheet', 'data-sheet', 'ficha tecnica')):
+            return 'technical'
+        if any(token in text for token in ('certificate', 'certificat', 'certificado', 'declaration')):
+            return 'certificate'
+        if any(token in text for token in ('catalog', 'catalogue', 'brochure', 'prospekt', 'folleto')):
+            return 'catalog'
+        if any(token in text for token in ('warranty', 'garantie', 'garantia')):
+            return 'warranty'
+        if any(token in text for token in ('firmware', 'software', 'driver')):
+            return 'software'
+        return 'other'
+
+    def _download_attachment(self, source, document):
+        session = self._get_session(source)
+        response = self._http_get(session, document['url'], source)
+        content_type = (response.headers.get('Content-Type') or '').split(';', 1)[0].strip()
+        return response.content, content_type
+
+    def _sync_website_attachments(self, product_tmpl, documents, source):
+        documents = self._normalise_attachments(documents, product_tmpl.sitemap_source_url)
+        if not documents:
+            return
+        limit = max(int(source.max_attachments_per_product or 20), 1)
+        Attachment = self.env['ir.attachment'].sudo()
+        linked_ids = []
+        for document in documents[:limit]:
+            try:
+                content, content_type = self._download_attachment(source, document)
+                if not content:
+                    continue
+                digest = hashlib.sha256(content).hexdigest()
+                existing = Attachment.search([
+                    ('sitemap_imported', '=', True),
+                    ('sitemap_sha256', '=', digest),
+                ], limit=1)
+                filename = unquote(urlparse(document['url']).path.rsplit('/', 1)[-1])
+                if not filename or '.' not in filename:
+                    extension = mimetypes.guess_extension(content_type or '') or ''
+                    filename = f"{document['name']}{extension}"
+                vals = {
+                    'name': filename[:255],
+                    'website_name': document['name'][:255],
+                    'public': True,
+                    'sitemap_source_url': document['url'],
+                    'sitemap_sha256': digest,
+                    'sitemap_document_type': document.get('document_type') or 'other',
+                    'sitemap_imported': True,
+                }
+                if existing:
+                    attachment = existing
+                    update_vals = {k: v for k, v in vals.items() if attachment[k] != v}
+                    if update_vals:
+                        attachment.write(update_vals)
+                else:
+                    vals.update({
+                        'datas': base64.b64encode(content),
+                        'mimetype': content_type or mimetypes.guess_type(filename)[0],
+                    })
+                    attachment = Attachment.create(vals)
+                linked_ids.append(attachment.id)
+            except Exception as exc:
+                _logger.warning(
+                    'Sitemap import: no se pudo importar el documento %s: %s',
+                    document.get('url'), exc,
+                )
+        if linked_ids:
+            product_tmpl.write({'website_attachment_ids': [(4, attachment_id) for attachment_id in linked_ids]})
+
+    # ------------------------------------------------------------------
     # Imágenes (genérico)
     # ------------------------------------------------------------------
     def _download_image(self, source, image_url):
@@ -1718,6 +1827,12 @@ class SitemapImportService(models.AbstractModel):
             ),
             'main_image_url': data['main_image_url'] or False,
             'image_urls_json': json.dumps(data.get('image_urls') or [], ensure_ascii=False),
+            'attachment_urls_json': json.dumps(
+                self._normalise_attachments(data.get('attachments') or [], staging_row.url),
+                ensure_ascii=False,
+            ),
+            'attachment_count': len(self._normalise_attachments(
+                data.get('attachments') or [], staging_row.url)),
             'ean': data.get('ean') or False,
             'ean_count': data.get('ean_count', 0),
             'ean_checked': data.get('ean_checked', False),
@@ -1893,6 +2008,17 @@ class SitemapImportService(models.AbstractModel):
                         merged_image_urls.append(image_url)
                 image_data = {'main_image_url': staging_row.main_image_url}
                 self._import_images(product_tmpl, image_data, merged_image_urls, source)
+
+            if source.import_attachments and staging_row.attachment_urls_json:
+                try:
+                    documents = json.loads(staging_row.attachment_urls_json)
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    documents = []
+                    _logger.warning(
+                        'Sitemap import: JSON de documentos inválido para la fila %s',
+                        staging_row.id,
+                    )
+                self._sync_website_attachments(product_tmpl, documents, source)
 
             staging_row.write({
                 'state': 'imported',

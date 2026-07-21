@@ -1049,3 +1049,37 @@ queue job runner ready for db <base_de_datos>
 
 Si el runner no está activo, los trabajos permanecerán en estado `pending` o
 `enqueued` y no se procesarán.
+
+
+## 19.0.1.79.0
+
+- Adds a pre-migration creating the queue tracking columns on staging and batches.
+- Optimizes batch counters using one grouped query instead of loading every staging row.
+- This version must be installed with an explicit module upgrade (`-u tl_sitemap_product_import`).
+
+
+## 19.0.1.80.0 - Adjuntos de producto Community
+
+- Dependencia del port 19.0 de OCA `website_sale_product_attachment`.
+- Documentos detectados en vista previa sin descargar binarios.
+- Descarga al importar el producto, publicación e-commerce y relación con `product.template`.
+- Deduplicación global por SHA-256 y trazabilidad por URL origen.
+- Extracción específica de descargas de Märklin/Trix/Minitrix heredada por sus conectores.
+
+
+## 19.0.1.82.0
+
+- Descubrimiento numérico 00700-40000 para Märklin, Trix, Minitrix y LGB.
+- Trabajos queue_job por bloques de 250 referencias.
+- Descarte inmediato del HTML con el mensaje de producto inexistente antes de parsear.
+- Separación Trix/Minitrix mediante comprobación ligera del HTML.
+- Conserva la extracción de imágenes Elementor de BEMO añadida en 19.0.1.81.0.
+
+
+## 19.0.1.83.0
+
+- Rangos del escáner numérico configurables por fuente para Märklin, Trix, Minitrix y LGB.
+- Campos de artículo inicial, artículo final y tamaño de bloque.
+- Progreso informativo y opción de reanudar desde la última referencia completada.
+- Acción para reiniciar el progreso sin modificar el rango configurado.
+- Se conserva la detección de imágenes Elementor del conector BEMO.

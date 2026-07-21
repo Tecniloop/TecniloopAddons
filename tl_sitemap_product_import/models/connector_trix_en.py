@@ -43,6 +43,10 @@ class SitemapConnectorTrixEn(models.AbstractModel):
             path = path.rstrip('/')
         return urlunsplit((parts.scheme or 'https', cls._HOST, path, '', ''))
 
+    def _numeric_page_matches_source(self, content):
+        payload = bytes(content or b'').lower()
+        return b'minitrix' not in payload
+
     def _candidate_sitemaps(self, source):
         candidates = []
         session = self._get_session(source)

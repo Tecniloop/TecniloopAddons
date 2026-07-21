@@ -23,6 +23,18 @@
                             <field name="http_retry_backoff" invisible="http_retry_count == 0"/>
                         </group>
                     </group>
+                    <group string="Escáner numérico" invisible="connector_model not in ['sitemap.connector.maerklin_en', 'sitemap.connector.trix_en', 'sitemap.connector.minitrix_en', 'sitemap.connector.lgb_en']">
+                        <group>
+                            <field name="numeric_scan_start" placeholder="00700"/>
+                            <field name="numeric_scan_end" placeholder="40000"/>
+                            <field name="numeric_scan_block_size"/>
+                        </group>
+                        <group>
+                            <field name="numeric_scan_resume"/>
+                            <field name="numeric_scan_last_article" widget="integer"/>
+                            <button name="action_reset_numeric_scan_progress" type="object" string="Reiniciar progreso" class="btn-secondary" invisible="not numeric_scan_last_article" confirm="El próximo escaneo volverá a comenzar desde el artículo inicial configurado. ¿Continuar?"/>
+                        </group>
+                    </group>
                     <group>
                         <group string="Procesamiento">
                             <field name="products_per_run"/>
@@ -32,6 +44,8 @@
                         <group string="Imágenes y códigos">
                             <field name="import_images"/>
                             <field name="max_images_per_product"/>
+                            <field name="import_attachments"/>
+                            <field name="max_attachments_per_product" invisible="not import_attachments"/>
                             <field name="import_eans"/>
                             <field name="max_ean_requests_per_product" invisible="not import_eans"/>
                         </group>

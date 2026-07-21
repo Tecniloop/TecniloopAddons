@@ -26,6 +26,7 @@
                 <field name="ean" optional="show"/>
                 <field name="ean_count" optional="show"/>
                 <field name="ean_checked" optional="hide"/>
+                <field name="attachment_count" optional="show"/>
                 <field name="preview_attempt_count" optional="hide"/>
                 <field name="last_attempt_date" optional="hide"/>
                 <field name="state"/>
@@ -93,6 +94,10 @@
                     </group>
                     <group string="Atributos técnicos" invisible="not attributes_json">
                         <field name="attributes_json" nolabel="1" readonly="1"/>
+                    </group>
+                    <group string="Documentos detectados" invisible="not attachment_count">
+                        <field name="attachment_count" readonly="1"/>
+                        <field name="attachment_urls_json" nolabel="1" readonly="1"/>
                     </group>
                     <group string="EAN/GTIN por variante" invisible="not ean_count">
                         <field name="ean_variants_json" nolabel="1" readonly="1"/>

@@ -124,6 +124,40 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
         parser = etree.XMLParser(resolve_entities=False, no_network=True, recover=False)
         return etree.fromstring(content, parser=parser)
 
+    # ------------------------------------------------------------------
+    # Descubrimiento numérico del catálogo del grupo Märklin
+    # ------------------------------------------------------------------
+    def _uses_numeric_scanner(self, source):
+        """Estas fuentes no dependen del sitemap para descubrir artículos."""
+        return True
+
+    def _numeric_scan_bounds(self, source):
+        start = int(source.numeric_scan_start or 0)
+        end = int(source.numeric_scan_end or 0)
+        if source.numeric_scan_resume and source.numeric_scan_last_article:
+            start = max(start, int(source.numeric_scan_last_article) + 1)
+        return start, end
+
+    def _numeric_scan_block_size(self, source):
+        return max(int(source.numeric_scan_block_size or 250), 1)
+
+    def _numeric_scan_url(self, source, article_number):
+        return f"https://{self._HOST}/en/products/details/article/{article_number:05d}"
+
+    @staticmethod
+    def _numeric_page_missing(content):
+        """Descarta la página antes de construir lxml o analizar metadatos."""
+        payload = bytes(content or b'').lower()
+        return any(message in payload for message in (
+            b'unfortunately, no product could be found for your search inquiry',
+            b'leider konnte kein produkt zu ihrer suchanfrage gefunden werden',
+        ))
+
+    def _numeric_page_matches_source(self, content):
+        # Märklin usa un dominio independiente, por lo que una ficha válida
+        # pertenece a esta fuente. Trix/Minitrix especializan este método.
+        return True
+
     def _candidate_sitemaps(self, source):
         candidates = []
         session = self._get_session(source)
@@ -589,6 +623,38 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
         return short_description, full_description, plain_description, digital
 
     @classmethod
+    def _download_attachments(cls, tree, canonical):
+        documents = []
+        seen = set()
+        anchors = tree.xpath('//a[@href]')
+        for anchor in anchors:
+            href = cls._normalise_text(anchor.get('href'))
+            if not href:
+                continue
+            absolute = urljoin(canonical, href)
+            path = urlparse(absolute).path.casefold()
+            text = cls._normalise_text(' '.join(anchor.itertext()))
+            context = cls._normalise_text(' '.join(anchor.xpath(
+                'ancestor::*[self::li or self::div or self::section][1]//text()'
+            )))
+            combined = f'{text} {context} {path}'.casefold()
+            extension = path.rsplit('.', 1)[-1] if '.' in path.rsplit('/', 1)[-1] else ''
+            is_file = extension in {'pdf', 'zip', 'doc', 'docx', 'xls', 'xlsx'}
+            is_download = any(token in combined for token in (
+                'download', 'manual', 'instruction', 'anleitung', 'spare part',
+                'ersatzteil', 'exploded', 'brochure', 'catalog', 'certificate',
+            ))
+            if not (is_file and is_download) or absolute in seen:
+                continue
+            seen.add(absolute)
+            documents.append({
+                'url': absolute,
+                'name': text or unquote(path.rsplit('/', 1)[-1]) or 'Documento',
+                'document_type': cls._guess_document_type(text, absolute),
+            })
+        return documents
+
+    @classmethod
     def _translated_kind(cls, value):
         text = cls._normalise_text(value)
         folded = text.casefold()
@@ -709,6 +775,7 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
             'attributes': attributes,
             'main_image_url': images[0] if images else False,
             'image_urls': images,
+            'attachments': self._download_attachments(tree, canonical),
             'canonical_url': canonical,
             'ean_variants': ean_variants,
             # La capa común seguirá inspeccionando JSON y atributos HTML para

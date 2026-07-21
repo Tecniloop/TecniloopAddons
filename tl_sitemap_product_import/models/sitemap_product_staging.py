@@ -71,6 +71,8 @@ class SitemapProductStaging(models.Model):
         string='Unidad de peso del embalaje', readonly=True)
     main_image_url = fields.Char(string='URL imagen principal (no descargada)')
     image_urls_json = fields.Text(string='URLs de imágenes (JSON)', readonly=True)
+    attachment_urls_json = fields.Text(string='Documentos detectados (JSON)', readonly=True)
+    attachment_count = fields.Integer(string='Número de documentos', readonly=True)
     ean = fields.Char(
         string='EAN único', readonly=True,
         help='Solo se informa cuando la ficha publica exactamente un GTIN válido.')

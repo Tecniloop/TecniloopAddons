@@ -53,19 +53,42 @@ class SitemapImportBatch(models.Model):
     queued_count = fields.Integer(compute='_compute_staging_stats', string='En cola')
     processing_count = fields.Integer(compute='_compute_staging_stats', string='Procesando')
     collect_job_uuid = fields.Char(string='Trabajo de recopilación', readonly=True, copy=False)
+    numeric_scan_total_blocks = fields.Integer(
+        string='Bloques de escaneo', readonly=True, copy=False)
+    numeric_scan_completed_blocks = fields.Integer(
+        string='Bloques completados', readonly=True, copy=False)
+    numeric_scan_found_count = fields.Integer(
+        string='Artículos encontrados', readonly=True, copy=False)
 
     @api.depends('staging_ids.state')
     def _compute_staging_stats(self):
+        """Compute counters with one grouped query instead of prefetching every staging row.
+
+        Besides being faster for large catalogues, this avoids making the batch list depend
+        on unrelated stored columns of ``sitemap.product.staging`` being prefetched.
+        """
+        counters = {batch.id: {} for batch in self}
+        if self.ids:
+            grouped = self.env['sitemap.product.staging']._read_group(
+                [('batch_id', 'in', self.ids)],
+                ['batch_id', 'state'],
+                ['__count'],
+            )
+            for batch, state, count in grouped:
+                counters.setdefault(batch.id, {})[state] = count
+
         for batch in self:
-            lines = batch.staging_ids
-            batch.staging_count = len(lines)
-            batch.pending_count = len(lines.filtered(lambda l: l.state == 'pending'))
-            batch.preview_ready_count = len(lines.filtered(lambda l: l.state == 'preview_ready'))
-            batch.imported_count = len(lines.filtered(lambda l: l.state == 'imported'))
-            batch.skipped_count = len(lines.filtered(lambda l: l.state == 'skipped'))
-            batch.error_count = len(lines.filtered(lambda l: l.state == 'error'))
-            batch.queued_count = len(lines.filtered(lambda l: l.state in ('queued_preview', 'queued_import')))
-            batch.processing_count = len(lines.filtered(lambda l: l.state in ('previewing', 'importing')))
+            states = counters.get(batch.id, {})
+            batch.staging_count = sum(states.values())
+            batch.pending_count = states.get('pending', 0)
+            batch.preview_ready_count = states.get('preview_ready', 0)
+            batch.imported_count = states.get('imported', 0)
+            batch.skipped_count = states.get('skipped', 0)
+            batch.error_count = states.get('error', 0)
+            batch.queued_count = (
+                states.get('queued_preview', 0) + states.get('queued_import', 0)
+            )
+            batch.processing_count = states.get('previewing', 0) + states.get('importing', 0)
 
     def _get_service(self):
         """Devuelve el conector Python correspondiente a la fuente de este lote."""
@@ -111,6 +134,10 @@ class SitemapImportBatch(models.Model):
                     'Revisa la opción "Respetar robots.txt" en la fuente, o el permiso del '
                     'sitio de origen.')
 
+            if getattr(service, '_uses_numeric_scanner', lambda _source: False)(source):
+                self._queue_numeric_scan(service)
+                return True
+
             entries = service.get_product_entries(
                 source, category_filter=self.category_filter or None, limit=self.url_limit or 0)
             if not entries:
@@ -143,6 +170,124 @@ class SitemapImportBatch(models.Model):
                 raise RetryableJobError(str(exc)) from exc
             self.write({'state': 'error', 'error_message': str(exc)[:4000]})
             raise UserError(f'Error al recopilar las URLs del sitemap: {exc}') from exc
+
+    def _queue_numeric_scan(self, service):
+        """Divide el rango configurado por el usuario en trabajos reintentables."""
+        self.ensure_one()
+        source = self.source_id
+        start, end = service._numeric_scan_bounds(source)
+        block_size = max(int(service._numeric_scan_block_size(source) or 250), 1)
+        if start > end:
+            self.write({
+                'state': 'ready',
+                'date_end': fields.Datetime.now(),
+                'numeric_scan_total_blocks': 0,
+                'numeric_scan_completed_blocks': 0,
+                'numeric_scan_found_count': 0,
+                'error_message': False,
+            })
+            return True
+        blocks = [(first, min(first + block_size - 1, end))
+                  for first in range(start, end + 1, block_size)]
+        self.write({
+            'state': 'collecting',
+            'numeric_scan_total_blocks': len(blocks),
+            'numeric_scan_completed_blocks': 0,
+            'numeric_scan_found_count': 0,
+            'error_message': False,
+        })
+        for first, last in blocks:
+            self.with_delay(
+                priority=12,
+                max_retries=max(source.http_retry_count or 3, 1),
+                identity_key=f'sitemap_numeric_scan_{self.id}_{first}_{last}',
+                description=_('Escanear artículos %05d-%05d: %s') % (
+                    first, last, source.name),
+            )._job_scan_numeric_block(first, last)
+        return True
+
+    def _job_scan_numeric_block(self, first, last):
+        """Comprueba HTML bruto y solo crea staging para artículos existentes."""
+        self.ensure_one()
+        source = self.source_id
+        service = self._get_service()
+        session = service._get_session(source)
+        existing_urls = set(self.staging_ids.mapped('url'))
+        vals_list = []
+        try:
+            for article_number in range(int(first), int(last) + 1):
+                url = service._numeric_scan_url(source, article_number)
+                try:
+                    response = service._http_get(session, url, source)
+                except requests.HTTPError as exc:
+                    status = getattr(getattr(exc, 'response', None), 'status_code', None)
+                    if status in (404, 410):
+                        continue
+                    raise
+                content = response.content or b''
+                # Requisito funcional: esta comprobación se realiza antes de
+                # lxml, JSON-LD, imágenes o cualquier otro análisis.
+                if service._numeric_page_missing(content):
+                    continue
+                if not service._numeric_page_matches_source(content):
+                    continue
+                canonical = service._canonical_url(response.url) or url
+                if canonical in existing_urls:
+                    continue
+                existing_urls.add(canonical)
+                vals_list.append({
+                    'batch_id': self.id,
+                    'url': canonical,
+                    'sitemap_lastmod': False,
+                })
+
+            rows = self.env['sitemap.product.staging'].create(vals_list) if vals_list else self.env['sitemap.product.staging']
+            if rows:
+                rows.action_queue_preview()
+
+            # Incremento atómico: varios bloques pueden finalizar a la vez.
+            self.env.cr.execute(
+                """
+                UPDATE sitemap_import_batch
+                   SET numeric_scan_completed_blocks = COALESCE(numeric_scan_completed_blocks, 0) + 1,
+                       numeric_scan_found_count = COALESCE(numeric_scan_found_count, 0) + %s
+                 WHERE id = %s
+             RETURNING numeric_scan_completed_blocks, numeric_scan_total_blocks
+                """,
+                [len(vals_list), self.id],
+            )
+            completed, total = self.env.cr.fetchone()
+            self.invalidate_recordset([
+                'numeric_scan_completed_blocks', 'numeric_scan_found_count',
+            ])
+            # Progreso informativo por fuente, actualizado atómicamente porque
+            # distintos bloques pueden terminar simultáneamente.
+            self.env.cr.execute(
+                """
+                UPDATE sitemap_import_source
+                   SET numeric_scan_last_article = GREATEST(
+                       COALESCE(numeric_scan_last_article, 0), %s
+                   )
+                 WHERE id = %s
+                """,
+                [int(last), source.id],
+            )
+            source.invalidate_recordset(['numeric_scan_last_article'])
+            if completed >= total:
+                self.write({'state': 'previewing'})
+                self._update_queue_completion()
+            return len(vals_list)
+        except Exception as exc:
+            _logger.exception(
+                'Error escaneando rango %05d-%05d para %s', first, last, source.name)
+            response = getattr(exc, 'response', None)
+            transient = isinstance(exc, (requests.Timeout, requests.ConnectionError)) or getattr(
+                response, 'status_code', None
+            ) in {429, 500, 502, 503, 504}
+            if transient:
+                raise RetryableJobError(str(exc)) from exc
+            self.write({'error_message': str(exc)[:4000]})
+            raise
 
     def action_fetch_previews(self, limit=None):
         self.ensure_one()

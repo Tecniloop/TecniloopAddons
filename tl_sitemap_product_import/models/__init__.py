@@ -1,3 +1,4 @@
+from . import ir_attachment
 from . import sitemap_import_source
 from . import sitemap_category_mapping
 from . import sitemap_product_staging

@@ -32,6 +32,15 @@
                             <field name="date_end"/>
                         </group>
                     </group>
+                    <group string="Progreso del escáner numérico" invisible="not numeric_scan_total_blocks">
+                        <group>
+                            <field name="numeric_scan_total_blocks"/>
+                            <field name="numeric_scan_completed_blocks"/>
+                        </group>
+                        <group>
+                            <field name="numeric_scan_found_count"/>
+                        </group>
+                    </group>
                     <group string="Resumen (vistas previas, sin imágenes)">
                         <group>
                             <field name="pending_count"/>

@@ -1,4 +1,5 @@
-from odoo import fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 # Cada conector instalado añade aquí su opción (modelo técnico -> nombre a mostrar). Para dar
 # de alta un sitio nuevo con una estructura de sitemap distinta: crea un fichero
@@ -143,9 +144,61 @@ class SitemapImportSource(models.Model):
         string='Vistas previas por ejecución de cron', default=40,
         help='Número máximo de fichas de producto que se procesan en cada ejecución del cron de vistas previas.')
 
+    # --- Descubrimiento numérico (grupo Märklin) ---
+    numeric_scan_start = fields.Char(
+        string='Artículo inicial', default='00700', size=5,
+        help='Primera referencia del escáner numérico, escrita siempre con cinco dígitos; por ejemplo 00700.')
+    numeric_scan_end = fields.Char(
+        string='Artículo final', default='40000', size=5,
+        help='Última referencia del escáner numérico, incluida y escrita con cinco dígitos.')
+    numeric_scan_block_size = fields.Integer(
+        string='Tamaño de bloque', default=250,
+        help='Cantidad de referencias procesadas por cada trabajo de queue_job. Un valor pequeño facilita reintentos selectivos; uno grande crea menos trabajos.')
+    numeric_scan_last_article = fields.Integer(
+        string='Último artículo completado', readonly=True, copy=False,
+        help='Mayor referencia cuyo bloque ha terminado correctamente. Es un dato informativo del último escaneo.')
+    numeric_scan_resume = fields.Boolean(
+        string='Reanudar desde el último artículo', default=False,
+        help='Al iniciar un nuevo lote, comienza después del último artículo completado. Desactívalo para volver a recorrer todo el rango configurado.')
+
+    @api.constrains('numeric_scan_start', 'numeric_scan_end', 'numeric_scan_block_size')
+    def _check_numeric_scan_configuration(self):
+        for source in self:
+            start = (source.numeric_scan_start or '').strip()
+            end = (source.numeric_scan_end or '').strip()
+            if len(start) != 5 or not start.isdigit():
+                raise ValidationError(_('El artículo inicial debe contener exactamente cinco dígitos, por ejemplo 00700.'))
+            if len(end) != 5 or not end.isdigit():
+                raise ValidationError(_('El artículo final debe contener exactamente cinco dígitos, por ejemplo 40000.'))
+            if int(start) > int(end):
+                raise ValidationError(_('El artículo inicial no puede ser mayor que el artículo final.'))
+            if not (1 <= source.numeric_scan_block_size <= 10000):
+                raise ValidationError(_('El tamaño de bloque debe estar entre 1 y 10.000 referencias.'))
+
+    def action_reset_numeric_scan_progress(self):
+        self.write({
+            'numeric_scan_last_article': 0,
+            'numeric_scan_resume': False,
+        })
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Progreso reiniciado'),
+                'message': _('El próximo escaneo comenzará en el artículo inicial configurado.'),
+                'type': 'success',
+                'sticky': False,
+            },
+        }
+
     # --- Imágenes ---
     import_images = fields.Boolean(string='Importar imágenes', default=True)
     max_images_per_product = fields.Integer(string='Máximo de imágenes por producto', default=6)
+    import_attachments = fields.Boolean(
+        string='Importar documentos', default=True,
+        help='Descarga manuales, fichas técnicas y otros documentos publicados en la ficha y los muestra en el eCommerce.')
+    max_attachments_per_product = fields.Integer(
+        string='Máximo de documentos por producto', default=20)
 
     # --- EAN / GTIN ---
     import_eans = fields.Boolean(

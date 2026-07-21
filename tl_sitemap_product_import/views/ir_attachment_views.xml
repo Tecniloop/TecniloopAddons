@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_attachment_form_sitemap_metadata" model="ir.ui.view">
+        <field name="name">ir.attachment.form.sitemap.metadata</field>
+        <field name="model">ir.attachment</field>
+        <field name="inherit_id" ref="website_sale_product_attachment.view_attachment_form_inherit_website"/>
+        <field name="arch" type="xml">
+            <field name="website_name" position="after">
+                <field name="sitemap_document_type" invisible="not sitemap_imported"/>
+                <field name="sitemap_source_url" widget="url" invisible="not sitemap_imported"/>
+                <field name="sitemap_sha256" invisible="not sitemap_imported"/>
+                <field name="sitemap_imported" invisible="1"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="product_template_form_attachment_sitemap_metadata" model="ir.ui.view">
+        <field name="name">product.template.form.attachment.sitemap.metadata</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="website_sale_product_attachment.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <field name="website_name" position="after">
+                <field name="sitemap_document_type" optional="show"/>
+                <field name="sitemap_imported" optional="hide"/>
+            </field>
+        </field>
+    </record>
+</odoo>

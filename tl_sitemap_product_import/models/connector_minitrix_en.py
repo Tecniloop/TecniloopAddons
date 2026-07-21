@@ -15,6 +15,9 @@ class SitemapConnectorMinitrixEn(models.AbstractModel):
     )
     _CATALOG_PATH_TOKENS = ('/minitrix/',)
 
+    def _numeric_page_matches_source(self, content):
+        return b'minitrix' in bytes(content or b'').lower()
+
     def _collect_products(self, source, limit=0):
         entries = self._fallback_catalog_entries(source, limit=limit)
         if not entries:
