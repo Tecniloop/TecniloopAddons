@@ -28,6 +28,7 @@ class SuenlaceImport(models.Model):
     _description = "Importación de fichero SUENLACE (a3asesor)"
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "create_date desc"
+    _check_company_auto = True
 
     name = fields.Char(
         string="Referencia",
@@ -41,6 +42,17 @@ class SuenlaceImport(models.Model):
         string="Compañía",
         required=True,
         default=lambda self: self.env.company,
+        index=True,
+    )
+    source_company_code = fields.Char(
+        string="Código empresa del DAT",
+        readonly=True,
+        copy=False,
+        index=True,
+        help=(
+            "Código único detectado en las posiciones 2 a 6 del fichero. "
+            "Debe coincidir con el código configurado en la compañía Odoo."
+        ),
     )
     file_data = fields.Binary(
         string="Fichero SUENLACE", required=True, attachment=True)
@@ -100,16 +112,19 @@ class SuenlaceImport(models.Model):
         "account.journal",
         string="Diario de asientos varios",
         domain="[('type', '=', 'general'), ('company_id', '=', company_id)]",
+        check_company=True,
     )
     journal_sale_id = fields.Many2one(
         "account.journal",
         string="Diario de ventas",
         domain="[('type', '=', 'sale'), ('company_id', '=', company_id)]",
+        check_company=True,
     )
     journal_purchase_id = fields.Many2one(
         "account.journal",
         string="Diario de compras",
         domain="[('type', '=', 'purchase'), ('company_id', '=', company_id)]",
+        check_company=True,
     )
     line_ids = fields.One2many(
         "tl.suenlace.import.line", "import_id", string="Registros")
@@ -120,7 +135,8 @@ class SuenlaceImport(models.Model):
     account_ids = fields.Many2many(
         "account.account", string="Cuentas creadas", copy=False)
     move_ids = fields.Many2many(
-        "account.move", string="Asientos creados", copy=False)
+        "account.move", string="Asientos creados", copy=False,
+        check_company=True)
     move_count = fields.Integer(
         string="Nº documentos", readonly=True, copy=False)
     log = fields.Text(string="Registro de proceso", readonly=True)
@@ -139,6 +155,9 @@ class SuenlaceImport(models.Model):
                     rec.company_id.suenlace_skip_vat_validation
                 )
                 rec.associate_taxes = rec.company_id.suenlace_associate_taxes
+                rec.journal_misc_id = False
+                rec.journal_sale_id = False
+                rec.journal_purchase_id = False
 
     # ------------------------------------------------------------------ #
     #  CRUD                                                              #
@@ -147,10 +166,56 @@ class SuenlaceImport(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get("name", _("Nuevo")) == _("Nuevo"):
-                seq = self.env["ir.sequence"].next_by_code(
-                    "tl.suenlace.import")
-                vals["name"] = seq or _("Import/%s") % fields.Date.today()
+                company = self.env["res.company"].browse(
+                    vals.get("company_id") or self.env.company.id
+                )
+                seq = (
+                    self.env["ir.sequence"]
+                    .with_company(company)
+                    .next_by_code("tl.suenlace.import")
+                )
+                reference = seq or _("Import/%s") % fields.Date.today()
+                company_code = company.suenlace_company_code
+                if company_code:
+                    if reference.startswith("SUENLACE/"):
+                        reference = "SUENLACE/%s/%s" % (
+                            company_code, reference[len("SUENLACE/"):],
+                        )
+                    else:
+                        reference = "%s/%s" % (company_code, reference)
+                vals["name"] = reference
         return super().create(vals_list)
+
+    def write(self, vals):
+        if "company_id" in vals:
+            for record in self:
+                if record.state != "draft" and vals["company_id"] != record.company_id.id:
+                    raise SuenlaceImportError(_(
+                        "No puede cambiar la compañía de una importación ya "
+                        "iniciada. Cree un lote nuevo para la otra compañía."
+                    ))
+        return super().write(vals)
+
+    @api.constrains(
+        "company_id", "journal_misc_id", "journal_sale_id",
+        "journal_purchase_id",
+    )
+    def _check_suenlace_journal_companies(self):
+        for record in self:
+            for journal in (
+                record.journal_misc_id,
+                record.journal_sale_id,
+                record.journal_purchase_id,
+            ):
+                if journal and journal.company_id != record.company_id:
+                    raise SuenlaceImportError(_(
+                        "El diario %(journal)s pertenece a %(journal_company)s, "
+                        "pero el lote pertenece a %(import_company)s."
+                    ) % {
+                        "journal": journal.display_name,
+                        "journal_company": journal.company_id.display_name,
+                        "import_company": record.company_id.display_name,
+                    })
 
     # ------------------------------------------------------------------ #
     #  Utilidades                                                        #
@@ -161,10 +226,74 @@ class SuenlaceImport(models.Model):
         _logger.info("[SUENLACE %(name)s] %(msg)s",
                      {"name": self.name, "msg": message})
 
+    @staticmethod
+    def _normalize_source_company_code(value):
+        code = (value or "").strip()
+        if not code:
+            return False
+        if not code.isdigit() or len(code) > 5:
+            return False
+        return code.zfill(5)
+
+    def _required_company_code(self):
+        self.ensure_one()
+        code = self.company_id.suenlace_company_code
+        if not code:
+            raise SuenlaceImportError(_(
+                "Configure el Código de empresa SUENLACE de la compañía "
+                "%(company)s antes de importar el fichero."
+            ) % {"company": self.company_id.display_name})
+        return code
+
+    def _validate_source_company_code(
+        self, raw_code, sequence=None, detected_code=False
+    ):
+        self.ensure_one()
+        expected = self._required_company_code()
+        code = self._normalize_source_company_code(raw_code)
+        where = _(" en el registro %s") % sequence if sequence else ""
+        if not code:
+            raise SuenlaceImportError(_(
+                "El fichero no contiene un código de empresa SUENLACE válido"
+                "%(where)s."
+            ) % {"where": where})
+        previous = detected_code or self.source_company_code
+        if previous and previous != code:
+            raise SuenlaceImportError(_(
+                "El fichero mezcla varias empresas SUENLACE: %(first)s y "
+                "%(second)s%(where)s. Separe los registros en un fichero por "
+                "empresa."
+            ) % {
+                "first": previous,
+                "second": code,
+                "where": where,
+            })
+        if code != expected:
+            raise SuenlaceImportError(_(
+                "El fichero pertenece a la empresa SUENLACE %(source)s, pero "
+                "la compañía Odoo %(company)s tiene configurado el código "
+                "%(expected)s%(where)s."
+            ) % {
+                "source": code,
+                "company": self.company_id.display_name,
+                "expected": expected,
+                "where": where,
+            })
+        return code
+
     def _read_records(self):
         self.ensure_one()
+        self._required_company_code()
         raw = base64.b64decode(self.file_data)
-        return list(parser.iter_records(raw, encoding=self.encoding or None))
+        records = list(parser.iter_records(raw, encoding=self.encoding or None))
+        detected = False
+        for number, data in records:
+            detected = self._validate_source_company_code(
+                data.get("empresa"), sequence=number, detected_code=detected
+            )
+        if detected and self.source_company_code != detected:
+            self.source_company_code = detected
+        return records
 
     # ------------------------------------------------------------------ #
     #  Acciones de usuario                                               #
@@ -172,22 +301,34 @@ class SuenlaceImport(models.Model):
     def action_parse(self):
         """Parsea el fichero en el proceso actual."""
         for rec in self:
-            if not rec.file_data:
+            company_rec = rec.with_company(rec.company_id).with_context(
+                allowed_company_ids=[rec.company_id.id],
+                force_company=rec.company_id.id,
+            )
+            if not company_rec.file_data:
                 raise SuenlaceImportError(
                     _("Debe adjuntar un fichero SUENLACE."))
-            rec.job_parse()
+            company_rec.job_parse()
         return True
 
     def action_process(self):
         """Procesa el fichero en el proceso actual."""
         for rec in self:
-            if rec.state == "draft":
-                rec.job_parse()
-            rec.job_process()
+            company_rec = rec.with_company(rec.company_id).with_context(
+                allowed_company_ids=[rec.company_id.id],
+                force_company=rec.company_id.id,
+            )
+            if company_rec.state == "draft":
+                company_rec.job_parse()
+            company_rec.job_process()
         return True
 
     def action_reset_draft(self):
-        self.write({"state": "draft", "log": ""})
+        self.write({
+            "state": "draft",
+            "log": "",
+            "source_company_code": False,
+        })
         self.line_ids.unlink()
 
     # ------------------------------------------------------------------ #
@@ -207,6 +348,9 @@ class SuenlaceImport(models.Model):
                 "import_id": self.id,
                 "sequence": num,
                 "record_type": rtype,
+                "source_company_code": self._normalize_source_company_code(
+                    data.get("empresa")
+                ),
                 "payload": repr(data),
                 "unsupported": bool(data.get("_unsupported")),
             })
@@ -820,6 +964,7 @@ class SuenlaceImport(models.Model):
     # ---- Fase 2: documentos -------------------------------------------- #
     def _process_documents(self, records):
         moves = self.env["account.move"]
+        invoice_blocks = {}
         current_entry = []
         i = 0
         n = len(records)
@@ -833,7 +978,9 @@ class SuenlaceImport(models.Model):
                 else:
                     move = self._create_invoice_as_literal_entry(block)
                 if move:
+                    self._prepare_suenlace_document(move, block)
                     moves |= move
+                    invoice_blocks[move.id] = block
                 continue
             if rtype == "0":
                 current_entry.append(rec)
@@ -861,12 +1008,18 @@ class SuenlaceImport(models.Model):
             )
             if to_post:
                 to_post.action_post()
+            for invoice_move_id, invoice_block in invoice_blocks.items():
+                self._finalize_suenlace_document(
+                    self.env["account.move"].browse(invoice_move_id),
+                    invoice_block,
+                )
             review_count = len(moves.filtered(
                 lambda m: (
                     m.suenlace_needs_review
                     or m.suenlace_fiscal_needs_review
                     or m.suenlace_partner_needs_review
                     or m.suenlace_tax_needs_review
+                    or m.suenlace_payment_needs_review
                 )
             ))
             if review_count:
@@ -874,6 +1027,12 @@ class SuenlaceImport(models.Model):
                     _("%(n)d documentos no se contabilizan porque requieren "
                       "revisión de totales, tercero, impuestos o posición fiscal.")
                     % {"n": review_count})
+        if not self.post_moves:
+            for invoice_move_id, invoice_block in invoice_blocks.items():
+                self._finalize_suenlace_document(
+                    self.env["account.move"].browse(invoice_move_id),
+                    invoice_block,
+                )
         self.move_ids = [(4, m.id) for m in moves]
         self.move_count = len(self.move_ids)
         self._append_log(
@@ -1371,6 +1530,320 @@ class SuenlaceImport(models.Model):
             )
         self._check_invoice_totals(move, header, details)
         return move
+
+
+    # ---- Vencimientos, cobros/pagos y conciliación ------------------- #
+    @staticmethod
+    def _paid_state_for_installment(installment, extension):
+        """Indica si la ampliación V/A representa un cobro o pago realizado."""
+        state = str((extension or {}).get("estado") or "").strip().upper()
+        kind = str(installment.get("tipo_vencimiento") or "").strip().upper()
+        return (kind == "C" and state == "C") or (kind == "P" and state == "G")
+
+    def _extract_installments(self, block):
+        """Devuelve V emparejados con V/A y aplica las bajas B del fichero."""
+        installments = []
+        last = None
+        for record in block:
+            rtype = record.get("_type")
+            if rtype == "V" and record.get("subtipo") == "vencimiento":
+                last = {"record": record, "extension": {}}
+                installments.append(last)
+            elif rtype == "VA" and last is not None:
+                last["extension"] = record
+                last = None
+            elif rtype == "B":
+                def matches(item):
+                    due = item["record"]
+                    return all([
+                        (due.get("tipo_vencimiento") or "") == (record.get("tipo_vencimiento") or ""),
+                        (due.get("cuenta") or "") == (record.get("cuenta") or ""),
+                        due.get("fecha_vencimiento") == record.get("fecha_vencimiento"),
+                        float_compare(
+                            abs(due.get("importe") or 0.0),
+                            abs(record.get("importe") or 0.0),
+                            precision_rounding=self.company_id.currency_id.rounding,
+                        ) == 0,
+                        (due.get("num_vencimiento") or "") == (record.get("num_vencimiento") or ""),
+                    ])
+                installments = [item for item in installments if not matches(item)]
+                last = None
+            elif rtype not in ("3", "4", "5", "6", "A", "D"):
+                if rtype != "VA":
+                    last = None
+        return installments
+
+    def _schedule_payment_review(self, move, message):
+        move.suenlace_payment_needs_review = True
+        move.activity_schedule(
+            "mail.mail_activity_data_todo",
+            date_deadline=fields.Date.context_today(self),
+            summary=_("Revisar vencimientos/cobros SUENLACE"),
+            note=message,
+            user_id=self.env.user.id,
+        )
+        self._append_log(
+            _("%(move)s requiere revisión de vencimientos/cobros: %(msg)s") % {
+                "move": move.display_name,
+                "msg": message,
+            }
+        )
+
+    def _set_official_sii_operation_date(self, move, operation_date):
+        """Escribe la fecha solo cuando está instalado el SII oficial de Odoo SA.
+
+        No se añade dependencia ni campo propio. Se detecta el módulo oficial y
+        el campo fecha expuesto por la versión instalada, tolerando cambios de
+        nombre entre revisiones de Odoo 19.
+        """
+        if not operation_date:
+            return
+        installed = self.env["ir.module.module"].sudo().search_count([
+            ("name", "in", ["l10n_es_edi_sii", "l10n_es_sii"]),
+            ("state", "=", "installed"),
+        ])
+        if not installed:
+            return
+        candidates = (
+            "l10n_es_sii_operation_date",
+            "l10n_es_operation_date",
+            "sii_operation_date",
+        )
+        field_name = next((name for name in candidates if name in move._fields), False)
+        if not field_name:
+            field_record = self.env["ir.model.fields"].sudo().search([
+                ("model", "=", "account.move"),
+                ("ttype", "=", "date"),
+                ("modules", "ilike", "l10n_es"),
+                "|",
+                ("field_description", "ilike", "fecha de operación"),
+                ("field_description", "ilike", "operation date"),
+            ], limit=1)
+            field_name = field_record.name if field_record and field_record.name in move._fields else False
+        if field_name:
+            move.with_context(check_move_validity=False).write({field_name: operation_date})
+
+    def _partner_term_lines(self, move):
+        lines = move.line_ids.filtered(
+            lambda line: line.account_id.account_type in (
+                "asset_receivable", "liability_payable"
+            )
+        )
+        return lines.sorted(lambda line: (line.date_maturity or move.date, line.id))
+
+    def _apply_installment_dates(self, move, block):
+        """Sustituye la contrapartida por vencimientos con fecha e importe exactos."""
+        installments = self._extract_installments(block)
+        if not installments:
+            return
+        source_lines = self._partner_term_lines(move)
+        if not source_lines:
+            self._schedule_payment_review(
+                move,
+                _("No existe una línea a cobrar/pagar donde aplicar los vencimientos."),
+            )
+            return
+        if len(source_lines) != 1:
+            self._schedule_payment_review(
+                move,
+                _("El documento ya contiene varias líneas a cobrar/pagar; no se "
+                  "han reemplazado automáticamente sus vencimientos."),
+            )
+            return
+
+        source = source_lines[0]
+        currency = move.company_currency_id
+        amounts = [abs(item["record"].get("importe") or 0.0) for item in installments]
+        expected = abs(source.balance)
+        total = sum(amounts)
+        if float_compare(total, expected, precision_rounding=currency.rounding) != 0:
+            self._schedule_payment_review(
+                move,
+                _("La suma de vencimientos (%(due).2f) no coincide con la "
+                  "contrapartida del documento (%(move).2f). Se conserva la "
+                  "línea original.") % {"due": total, "move": expected},
+            )
+            return
+
+        if len(installments) == 1:
+            source.write({"date_maturity": installments[0]["record"].get("fecha_vencimiento") or move.date})
+            return
+
+        sign = 1.0 if source.balance >= 0 else -1.0
+        source_amount_currency = source.amount_currency
+        vals_list = []
+        allocated_balance = 0.0
+        allocated_currency = 0.0
+        for index, item in enumerate(installments):
+            amount = amounts[index]
+            is_last = index == len(installments) - 1
+            balance = source.balance - allocated_balance if is_last else currency.round(sign * amount)
+            if source.currency_id and source.currency_id != move.company_currency_id:
+                amount_currency = source_amount_currency - allocated_currency if is_last else source.currency_id.round(
+                    source_amount_currency * (amount / expected) if expected else 0.0
+                )
+            else:
+                amount_currency = balance
+            allocated_balance += balance
+            allocated_currency += amount_currency
+            vals = {
+                "move_id": move.id,
+                "name": item["record"].get("vencimiento_desc") or source.name,
+                "account_id": source.account_id.id,
+                "partner_id": source.partner_id.id,
+                "currency_id": source.currency_id.id,
+                "amount_currency": amount_currency,
+                "debit": balance if balance > 0 else 0.0,
+                "credit": -balance if balance < 0 else 0.0,
+                "date_maturity": item["record"].get("fecha_vencimiento") or move.date,
+                "display_type": source.display_type,
+                "sequence": source.sequence + index,
+                "suenlace_source_account_code": source.suenlace_source_account_code,
+            }
+            vals_list.append(vals)
+        line_model = self.env["account.move.line"].with_context(
+            check_move_validity=False,
+            skip_invoice_sync=True,
+            skip_account_move_synchronization=True,
+        )
+        source.with_context(
+            check_move_validity=False,
+            skip_invoice_sync=True,
+            skip_account_move_synchronization=True,
+        ).unlink()
+        line_model.create(vals_list)
+
+    def _payment_journal_for_treasury_account(self, account):
+        journals = self.env["account.journal"].search([
+            ("company_id", "=", self.company_id.id),
+            ("type", "in", ("bank", "cash")),
+        ])
+        exact = journals.filtered(
+            lambda journal: account in (
+                journal.default_account_id,
+                getattr(journal, "suspense_account_id", self.env["account.account"]),
+            )
+        )[:1]
+        return exact
+
+    def _create_payment_entry(self, move, installment, extension):
+        record = installment
+        amount = abs(record.get("importe") or 0.0)
+        if not amount:
+            return self.env["account.move"]
+        partner_lines = self._partner_term_lines(move).filtered(lambda line: not line.reconciled)
+        if not partner_lines:
+            return self.env["account.move"]
+        due_date = record.get("fecha_vencimiento")
+        target = partner_lines.filtered(lambda line: line.date_maturity == due_date)[:1] or partner_lines[:1]
+        treasury_code = (record.get("cuenta_tesoreria") or "").strip()
+        if not treasury_code:
+            self._schedule_payment_review(
+                move,
+                _("El vencimiento %(number)s figura cobrado/pagado pero no "
+                  "informa cuenta de tesorería.") % {
+                    "number": record.get("num_vencimiento") or "",
+                },
+            )
+            return self.env["account.move"]
+        treasury = self._upsert_account(treasury_code, _("Tesorería SUENLACE %(code)s") % {"code": treasury_code})
+        if not treasury:
+            self._schedule_payment_review(move, _("No se pudo crear la cuenta de tesorería %s.") % treasury_code)
+            return self.env["account.move"]
+        journal = self._payment_journal_for_treasury_account(treasury)
+        if not journal:
+            journal = self.journal_misc_id
+        if not journal:
+            self._schedule_payment_review(move, _("No existe diario para registrar el cobro/pago."))
+            return self.env["account.move"]
+
+        is_receivable = target.account_id.account_type == "asset_receivable"
+        # Cobro: banco al Debe y cliente al Haber. Pago: proveedor al Debe y banco al Haber.
+        partner_debit = amount if not is_receivable else 0.0
+        partner_credit = amount if is_receivable else 0.0
+        treasury_debit = amount if is_receivable else 0.0
+        treasury_credit = amount if not is_receivable else 0.0
+        payment_date = extension.get("fecha_cobro_pago") or due_date or move.date
+        reference = extension.get("num_efecto") or record.get("vencimiento_desc") or move.ref or move.name
+        payment_key = "|".join([
+            str(move.id),
+            str(record.get("num_vencimiento") or ""),
+            str(due_date or ""),
+            "%.2f" % amount,
+            str(extension.get("num_efecto") or ""),
+        ])
+        existing = self.env["account.move"].search([
+            ("company_id", "=", self.company_id.id),
+            ("suenlace_payment_key", "=", payment_key),
+        ], limit=1)
+        if existing:
+            return existing
+        payment_move = self.env["account.move"].with_context(check_move_validity=False).create({
+            "move_type": "entry",
+            "journal_id": journal.id,
+            "company_id": self.company_id.id,
+            "date": payment_date,
+            "ref": reference,
+            "suenlace_import_id": self.id,
+            "suenlace_document_mode": "payment_entry",
+            "suenlace_parent_move_id": move.id,
+            "suenlace_payment_key": payment_key,
+            "line_ids": [
+                (0, 0, {
+                    "name": reference,
+                    "account_id": target.account_id.id,
+                    "partner_id": target.partner_id.id,
+                    "debit": partner_debit,
+                    "credit": partner_credit,
+                    "date_maturity": payment_date,
+                    "suenlace_source_account_code": target.account_id.code,
+                }),
+                (0, 0, {
+                    "name": reference,
+                    "account_id": treasury.id,
+                    "debit": treasury_debit,
+                    "credit": treasury_credit,
+                    "suenlace_source_account_code": treasury_code,
+                }),
+            ],
+        })
+        payment_move.action_post()
+        payment_line = payment_move.line_ids.filtered(lambda line: line.account_id == target.account_id)
+        (target + payment_line).reconcile()
+        return payment_move
+
+    def _prepare_suenlace_document(self, move, block):
+        """Aplica fecha de operación SII y vencimientos antes de contabilizar."""
+        if not move or not block or block[0].get("_type") not in ("1", "2"):
+            return
+        self._set_official_sii_operation_date(
+            move, block[0].get("fecha_operacion")
+        )
+        self._apply_installment_dates(move, block)
+
+    def _finalize_suenlace_document(self, move, block):
+        """Crea cobros/pagos históricos y los concilia tras contabilizar."""
+        if not move or not block or block[0].get("_type") not in ("1", "2"):
+            return self.env["account.move"]
+        installments = self._extract_installments(block)
+        paid = [item for item in installments if self._paid_state_for_installment(item["record"], item["extension"])]
+        if not paid:
+            return self.env["account.move"]
+        if move.state != "posted":
+            self._schedule_payment_review(
+                move,
+                _("Existen cobros/pagos realizados en SUENLACE, pero el "
+                  "documento está en borrador. Contabilícelo y reprocese para "
+                  "crear y conciliar los movimientos de tesorería."),
+            )
+            return self.env["account.move"]
+        payment_moves = self.env["account.move"]
+        for item in paid:
+            payment_moves |= self._create_payment_entry(move, item["record"], item["extension"])
+        if payment_moves:
+            all_payments = move.suenlace_payment_move_ids | payment_moves
+            move.write({"suenlace_payment_move_ids": [(6, 0, all_payments.ids)]})
+        return payment_moves
 
     @staticmethod
     def _detail_has_recargo(det):

@@ -1,6 +1,7 @@
 # Copyright 2026 Tecniloop
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 def _background_default(env):
@@ -27,6 +28,11 @@ class SuenlaceImportWizard(models.TransientModel):
     company_id = fields.Many2one(
         "res.company", required=True,
         default=lambda self: self.env.company)
+    company_suenlace_code = fields.Char(
+        related="company_id.suenlace_company_code",
+        string="Código empresa SUENLACE",
+        readonly=True,
+    )
     file_data = fields.Binary(string="Fichero SUENLACE", required=True)
     file_name = fields.Char(string="Nombre del fichero")
     encoding = fields.Char(string="Codificación")
@@ -75,13 +81,16 @@ class SuenlaceImportWizard(models.TransientModel):
     )
     journal_misc_id = fields.Many2one(
         "account.journal", string="Diario asientos varios",
-        domain="[('type', '=', 'general')]")
+        domain="[('type', '=', 'general'), ('company_id', '=', company_id)]",
+        check_company=True)
     journal_sale_id = fields.Many2one(
         "account.journal", string="Diario ventas",
-        domain="[('type', '=', 'sale')]")
+        domain="[('type', '=', 'sale'), ('company_id', '=', company_id)]",
+        check_company=True)
     journal_purchase_id = fields.Many2one(
         "account.journal", string="Diario compras",
-        domain="[('type', '=', 'purchase')]")
+        domain="[('type', '=', 'purchase'), ('company_id', '=', company_id)]",
+        check_company=True)
 
     @api.onchange("company_id")
     def _onchange_company_suenlace_options(self):
@@ -93,6 +102,9 @@ class SuenlaceImportWizard(models.TransientModel):
                 self.company_id.suenlace_skip_vat_validation
             )
             self.associate_taxes = self.company_id.suenlace_associate_taxes
+            self.journal_misc_id = False
+            self.journal_sale_id = False
+            self.journal_purchase_id = False
 
     def _prepare_import_vals(self):
         self.ensure_one()
@@ -115,6 +127,11 @@ class SuenlaceImportWizard(models.TransientModel):
 
     def action_create_and_parse(self):
         self.ensure_one()
+        if not self.company_suenlace_code:
+            raise UserError(_(
+                "Configure el Código de empresa SUENLACE de la compañía "
+                "antes de iniciar la importación."
+            ))
         record = self.env["tl.suenlace.import"].create(
             self._prepare_import_vals()
         )

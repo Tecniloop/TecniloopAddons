@@ -6,6 +6,10 @@ from odoo import fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    suenlace_company_code = fields.Char(
+        related="company_id.suenlace_company_code",
+        readonly=False,
+    )
     suenlace_associate_partners = fields.Boolean(
         related="company_id.suenlace_associate_partners",
         readonly=False,

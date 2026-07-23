@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rule_tl_suenlace_import_company" model="ir.rule">
+        <field name="name">Importaciones SUENLACE por compañía</field>
+        <field name="model_id" ref="model_tl_suenlace_import"/>
+        <field name="domain_force">[("company_id", "in", company_ids)]</field>
+        <field name="groups" eval="[(4, ref('account.group_account_manager'))]"/>
+    </record>
+
+    <record id="rule_tl_suenlace_import_line_company" model="ir.rule">
+        <field name="name">Registros SUENLACE por compañía</field>
+        <field name="model_id" ref="model_tl_suenlace_import_line"/>
+        <field name="domain_force">[("company_id", "in", company_ids)]</field>
+        <field name="groups" eval="[(4, ref('account.group_account_manager'))]"/>
+    </record>
+
+    <record id="rule_tl_suenlace_tax_mapping_company" model="ir.rule">
+        <field name="name">Mapeos fiscales SUENLACE por compañía</field>
+        <field name="model_id" ref="model_tl_suenlace_tax_mapping"/>
+        <field name="domain_force">[("company_id", "in", company_ids)]</field>
+        <field name="groups" eval="[(4, ref('account.group_account_manager'))]"/>
+    </record>
+
+    <record id="rule_tl_suenlace_fiscal_position_mapping_company" model="ir.rule">
+        <field name="name">Posiciones fiscales SUENLACE por compañía</field>
+        <field name="model_id" ref="model_tl_suenlace_fiscal_position_mapping"/>
+        <field name="domain_force">[("company_id", "in", company_ids)]</field>
+        <field name="groups" eval="[(4, ref('account.group_account_manager'))]"/>
+    </record>
+</odoo>

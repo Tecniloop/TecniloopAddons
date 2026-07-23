@@ -20,6 +20,7 @@ class SuenlaceTaxMapping(models.Model):
 
     _name = "tl.suenlace.tax.mapping"
     _description = "Mapeo de impuestos SUENLACE (a3) a Odoo"
+    _check_company_auto = True
     _order = (
         "company_id, application, tax_kind, retention_nature, percent"
     )
@@ -29,6 +30,7 @@ class SuenlaceTaxMapping(models.Model):
         string="Compañía",
         required=True,
         default=lambda self: self.env.company,
+        index=True,
     )
     application = fields.Selection(
         [
@@ -70,6 +72,7 @@ class SuenlaceTaxMapping(models.Model):
         string="Impuesto Odoo",
         required=True,
         domain="[('company_id', '=', company_id)]",
+        check_company=True,
     )
     entry_account_codes = fields.Char(
         string="Subcuentas a3 en asientos",

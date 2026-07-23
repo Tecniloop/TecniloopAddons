@@ -260,11 +260,15 @@ class SuenlaceImport(models.Model):
                 or not has_lines
                 or (record.state == "parsed" and not record.type_count_json)
                 or (record.state == "error" and not record.move_ids)
+                or not record.source_company_code
             ):
                 record._prepare_background_parse(
                     requested_operation="process"
                 )
             else:
+                record._validate_source_company_code(
+                    record.source_company_code
+                )
                 # Reanuda solo elementos pendientes o con error. Los ya
                 # procesados no vuelven a crearse.
                 self.env["tl.suenlace.import.line"].search([
@@ -320,6 +324,7 @@ class SuenlaceImport(models.Model):
                 "failed_master_count": 0,
                 "type_count_json": False,
                 "last_batch_date": False,
+                "source_company_code": False,
             })
         return True
 
@@ -327,6 +332,7 @@ class SuenlaceImport(models.Model):
         self.ensure_one()
         if not self.file_data:
             raise UserError(_("Debe adjuntar un fichero SUENLACE."))
+        self._required_company_code()
         if self.move_ids:
             raise UserError(_(
                 "Este lote ya contiene documentos creados. Para evitar "
@@ -355,6 +361,7 @@ class SuenlaceImport(models.Model):
             "line_count": 0,
             "log": "",
             "last_batch_date": False,
+            "source_company_code": False,
         })
 
     def _trigger_background_worker(self):
@@ -383,7 +390,14 @@ class SuenlaceImport(models.Model):
     @api.model
     def _cron_process_pending_imports(self):
         domain = self._native_worker_domain()
-        records = self.search(domain, order="create_date, id", limit=10)
+        company_ids = self.env["res.company"].sudo().search([]).ids
+        worker_model = self.sudo().with_context(
+            allowed_company_ids=company_ids,
+            force_company=False,
+        )
+        records = worker_model.search(
+            domain, order="create_date, id", limit=10
+        )
         cron_model = self.env["ir.cron"]
         if not records:
             cron_model._commit_progress(remaining=0)
@@ -402,7 +416,7 @@ class SuenlaceImport(models.Model):
                     "processing_phase": "idle",
                 })
                 record._append_log(_("ERROR NO CONTROLADO: %s") % exc)
-            remaining = self.search_count(domain)
+            remaining = worker_model.search_count(domain)
             seconds = cron_model._commit_progress(
                 processed=1,
                 remaining=remaining,
@@ -418,9 +432,14 @@ class SuenlaceImport(models.Model):
         confirmados como procesados.
         """
         self.ensure_one()
-        record = self.with_company(self.company_id)
+        record = self.with_company(self.company_id).with_context(
+            allowed_company_ids=[self.company_id.id],
+            force_company=self.company_id.id,
+        )
         if record.state not in ("queued", "processing"):
             return False
+        if record.processing_phase != "parse" and record.source_company_code:
+            record._validate_source_company_code(record.source_company_code)
 
         messages = []
         worker = record.with_context(suenlace_log_buffer=messages)
@@ -442,6 +461,10 @@ class SuenlaceImport(models.Model):
             else:
                 worker.write({"state": "error", "processing_phase": "idle"})
                 worker._append_log(_("Fase de procesamiento desconocida."))
+        except UserError as exc:
+            worker.write({"state": "error", "processing_phase": "idle"})
+            worker._append_log(_("ERROR DE VALIDACIÓN: %s") % exc)
+            processed = False
         finally:
             record._flush_log_buffer(messages)
 
@@ -571,6 +594,7 @@ class SuenlaceImport(models.Model):
         current_key = self.parse_current_document_key or False
         current_type = self.parse_current_document_type or False
         type_counts = json.loads(self.type_count_json or "{}")
+        detected_company_code = self.source_company_code or False
         values = []
         last_offset = offset
 
@@ -588,6 +612,11 @@ class SuenlaceImport(models.Model):
             data = parser.parse_line(text)
             if data is None:
                 continue
+            detected_company_code = self._validate_source_company_code(
+                data.get("empresa"),
+                sequence=sequence,
+                detected_code=detected_company_code,
+            )
             rtype = data.get("_type") or "?"
             type_counts[rtype] = type_counts.get(rtype, 0) + 1
             (
@@ -607,6 +636,7 @@ class SuenlaceImport(models.Model):
                 "import_id": self.id,
                 "sequence": sequence,
                 "record_type": rtype,
+                "source_company_code": detected_company_code,
                 "payload": self._serialize_payload(data),
                 "unsupported": bool(data.get("_unsupported")),
                 "document_key": document_key or False,
@@ -629,6 +659,7 @@ class SuenlaceImport(models.Model):
             "total_document_count": counter,
             "type_count_json": json.dumps(type_counts, sort_keys=True),
             "line_count": self.line_count + len(values),
+            "source_company_code": detected_company_code or False,
         }
         if eof:
             update_values.update({
@@ -639,6 +670,12 @@ class SuenlaceImport(models.Model):
                 "%s=%s" % (key, value)
                 for key, value in sorted(type_counts.items())
             )
+            self._append_log(_(
+                "Empresa SUENLACE validada: %(code)s → %(company)s."
+            ) % {
+                "code": detected_company_code,
+                "company": self.company_id.display_name,
+            })
             self._append_log(
                 _("Parseados %(records)d registros en %(documents)d "
                   "documentos: %(summary)s") % {
@@ -726,6 +763,7 @@ class SuenlaceImport(models.Model):
             move.suenlace_fiscal_needs_review,
             move.suenlace_partner_needs_review,
             move.suenlace_tax_needs_review,
+            move.suenlace_payment_needs_review,
         ])
         if not requires_review:
             move.action_post()
@@ -761,7 +799,9 @@ class SuenlaceImport(models.Model):
             move = self._create_entry(entry_records)
 
         if move:
+            self._prepare_suenlace_document(move, records)
             self._post_move_if_allowed(move)
+            self._finalize_suenlace_document(move, records)
             self.write({
                 "move_ids": [(4, move.id)],
                 "move_count": self.move_count + 1,

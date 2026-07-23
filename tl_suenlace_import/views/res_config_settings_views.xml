@@ -10,6 +10,11 @@
             <xpath expr="//app[@name='account']" position="inside">
                 <block title="Importación SUENLACE"
                        name="tl_suenlace_import_settings">
+                    <setting id="tl_suenlace_company_code_setting"
+                             string="Código de empresa SUENLACE"
+                             help="Código de cinco dígitos de las posiciones 2 a 6 del DAT. Se valida antes de crear cuentas, partners o asientos.">
+                        <field name="suenlace_company_code" placeholder="00001"/>
+                    </setting>
                     <setting id="tl_suenlace_background_mode_setting"
                              string="Procesar en segundo plano"
                              help="Evita el timeout HTTP dividiendo el parseo y la creación de documentos en lotes ejecutados por el cron nativo de Odoo.">

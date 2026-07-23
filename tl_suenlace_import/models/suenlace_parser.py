@@ -482,7 +482,9 @@ def parse_line(line):
     func = _DISPATCH.get(rtype)
     if func is None:
         _logger.warning("Tipo de registro no soportado: %r", rtype)
-        return {"_type": rtype, "_unsupported": True, "_raw": line}
+        data = _common_header(line, rtype)
+        data.update({"_unsupported": True, "_raw": line})
+        return data
     return func(line)
 
 

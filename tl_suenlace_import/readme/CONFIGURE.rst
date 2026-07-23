@@ -96,3 +96,12 @@ La opción ``Procesar en segundo plano`` está activada por defecto. Los valores
 iniciales son 25 documentos y 2.000 registros de parseo por lote. Para
 facturas con muchas líneas o servidores limitados puede reducirse el número de
 documentos por lote a 5 o 10.
+
+Multicompañía
+-------------
+
+Configure en cada compañía su **Código de empresa SUENLACE** (00001-99999).
+El importador comprueba todas las líneas del DAT, rechaza ficheros con varios
+códigos y no permite procesar un fichero cuyo código no corresponda a la
+compañía seleccionada. Las importaciones y los mapeos quedan protegidos por
+reglas de compañía.

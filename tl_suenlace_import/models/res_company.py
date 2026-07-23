@@ -1,10 +1,24 @@
 # Copyright 2026 Tecniloop
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 
 class ResCompany(models.Model):
     _inherit = "res.company"
+
+
+    suenlace_company_code = fields.Char(
+        string="Código de empresa SUENLACE",
+        compute="_compute_suenlace_company_code",
+        inverse="_inverse_suenlace_company_code",
+        help=(
+            "Código de empresa de cinco dígitos informado en las posiciones "
+            "2 a 6 de cada registro SUENLACE. El importador rechaza ficheros "
+            "de otra empresa o con varios códigos para evitar cruces "
+            "multicompañía."
+        ),
+    )
 
     suenlace_associate_partners = fields.Boolean(
         string="Asociar terceros en asientos SUENLACE",
@@ -38,6 +52,49 @@ class ResCompany(models.Model):
             "pueden interpretar subcuentas fiscales expresamente mapeadas."
         ),
     )
+
+    @staticmethod
+    def _suenlace_company_code_param_key(company_id):
+        return "tl_suenlace_import.company_code_%s" % company_id
+
+    @staticmethod
+    def _normalize_suenlace_company_code(value):
+        code = (value or "").strip()
+        if not code:
+            return False
+        if not code.isdigit() or len(code) > 5:
+            raise ValidationError(_(
+                "El código de empresa SUENLACE debe contener entre 1 y 5 "
+                "dígitos."
+            ))
+        code = code.zfill(5)
+        if code == "00000":
+            raise ValidationError(_(
+                "El código de empresa SUENLACE debe estar comprendido entre "
+                "00001 y 99999."
+            ))
+        return code
+
+    @api.depends_context("company")
+    def _compute_suenlace_company_code(self):
+        parameters = self.env["ir.config_parameter"].sudo()
+        for company in self:
+            company.suenlace_company_code = parameters.get_param(
+                self._suenlace_company_code_param_key(company.id),
+                default=False,
+            ) or False
+
+    def _inverse_suenlace_company_code(self):
+        parameters = self.env["ir.config_parameter"].sudo()
+        for company in self:
+            code = self._normalize_suenlace_company_code(
+                company.suenlace_company_code
+            )
+            parameters.set_param(
+                self._suenlace_company_code_param_key(company.id),
+                code or "",
+            )
+            company.suenlace_company_code = code
 
     @staticmethod
     def _suenlace_skip_vat_validation_param_key(company_id):

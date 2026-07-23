@@ -9,6 +9,7 @@ class SuenlaceImportLine(models.Model):
     _name = "tl.suenlace.import.line"
     _description = "Registro SUENLACE parseado"
     _order = "sequence"
+    _check_company_auto = True
 
     import_id = fields.Many2one(
         "tl.suenlace.import",
@@ -16,6 +17,18 @@ class SuenlaceImportLine(models.Model):
         required=True,
         ondelete="cascade",
         index=True,
+        check_company=True,
+    )
+    company_id = fields.Many2one(
+        "res.company",
+        related="import_id.company_id",
+        string="Compañía",
+        store=True,
+        index=True,
+        readonly=True,
+    )
+    source_company_code = fields.Char(
+        string="Código empresa DAT", index=True, copy=False
     )
     sequence = fields.Integer(string="Nº registro")
     record_type = fields.Char(string="Tipo", index=True)

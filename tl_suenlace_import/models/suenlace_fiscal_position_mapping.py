@@ -10,6 +10,7 @@ class SuenlaceFiscalPositionMapping(models.Model):
 
     _name = "tl.suenlace.fiscal.position.mapping"
     _description = "Mapeo de posiciones fiscales SUENLACE"
+    _check_company_auto = True
     _order = (
         "company_id, application, invoice_subtype, has_recargo desc, "
         "has_retention desc, retention_nature, retention_percent, sequence, id"
@@ -21,6 +22,7 @@ class SuenlaceFiscalPositionMapping(models.Model):
         string="Compañía",
         required=True,
         default=lambda self: self.env.company,
+        index=True,
     )
     application = fields.Selection(
         [("sale", "Ventas"), ("purchase", "Compras")],
@@ -61,6 +63,7 @@ class SuenlaceFiscalPositionMapping(models.Model):
         string="Posición fiscal Odoo",
         required=True,
         domain="[('company_id', 'in', [False, company_id])]",
+        check_company=True,
     )
     active = fields.Boolean(default=True)
 
