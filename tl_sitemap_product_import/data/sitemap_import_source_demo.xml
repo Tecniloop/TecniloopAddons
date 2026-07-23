@@ -357,6 +357,7 @@
     </record>
 
     <record id="sitemap_import_source_electrotren_es" model="sitemap.import.source">
+        <field name="shopify_js_mode">disabled</field>
         <field name="name">Electrotren Espa&#241;a</field>
         <field name="connector_model">sitemap.connector.electrotren_es</field>
         <field name="sitemap_index_url">https://es.electrotren.com/robots.txt</field>
@@ -371,6 +372,7 @@
     </record>
 
     <record id="sitemap_import_source_jouef_uk" model="sitemap.import.source">
+        <field name="shopify_js_mode">disabled</field>
         <field name="name">Jouef Europa (precio EUR)</field>
         <field name="connector_model">sitemap.connector.jouef_uk</field>
         <field name="sitemap_index_url">https://uk.jouef.com/robots.txt</field>
@@ -388,6 +390,7 @@
     <!-- Resto de marcas oficiales Hornby Hobbies. Las tiendas continentales
          publican directamente EUR; las británicas usan el selector oficial EUR. -->
     <record id="sitemap_import_source_arnold_de" model="sitemap.import.source">
+        <field name="shopify_js_mode">disabled</field>
         <field name="name">Arnold Europa (precio EUR)</field>
         <field name="connector_model">sitemap.connector.arnold_de</field>
         <field name="sitemap_index_url">https://de.arnoldmodel.com/robots.txt</field>
@@ -396,6 +399,7 @@
         <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
     </record>
     <record id="sitemap_import_source_rivarossi_it" model="sitemap.import.source">
+        <field name="shopify_js_mode">disabled</field>
         <field name="name">Rivarossi Europa (precio EUR)</field>
         <field name="connector_model">sitemap.connector.rivarossi_it</field>
         <field name="sitemap_index_url">https://it.rivarossi.com/robots.txt</field>
@@ -404,6 +408,7 @@
         <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
     </record>
     <record id="sitemap_import_source_lima_it" model="sitemap.import.source">
+        <field name="shopify_js_mode">disabled</field>
         <field name="name">Lima Europa (precio EUR)</field>
         <field name="connector_model">sitemap.connector.lima_it</field>
         <field name="sitemap_index_url">https://it.limamodel.it/robots.txt</field>
@@ -412,6 +417,7 @@
         <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
     </record>
     <record id="sitemap_import_source_pocher_uk" model="sitemap.import.source">
+        <field name="shopify_js_mode">disabled</field>
         <field name="name">Pocher Europa (precio EUR)</field>
         <field name="connector_model">sitemap.connector.pocher_uk</field>
         <field name="sitemap_index_url">https://uk.pocher.com/robots.txt</field>
@@ -420,6 +426,7 @@
         <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
     </record>
     <record id="sitemap_import_source_hornby_uk" model="sitemap.import.source">
+        <field name="shopify_js_mode">disabled</field>
         <field name="name">Hornby Europa (precio EUR)</field>
         <field name="connector_model">sitemap.connector.hornby_uk</field>
         <field name="sitemap_index_url">https://uk.hornby.com/robots.txt</field>
@@ -428,6 +435,7 @@
         <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
     </record>
     <record id="sitemap_import_source_airfix_uk" model="sitemap.import.source">
+        <field name="shopify_js_mode">disabled</field>
         <field name="name">Airfix Europa (precio EUR)</field>
         <field name="connector_model">sitemap.connector.airfix_uk</field>
         <field name="sitemap_index_url">https://uk.airfix.com/robots.txt</field>
@@ -436,6 +444,7 @@
         <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
     </record>
     <record id="sitemap_import_source_corgi_uk" model="sitemap.import.source">
+        <field name="shopify_js_mode">disabled</field>
         <field name="name">Corgi y Corgi Premiums Europa (precio EUR)</field>
         <field name="connector_model">sitemap.connector.corgi_uk</field>
         <field name="sitemap_index_url">https://uk.corgi.co.uk/robots.txt</field>
@@ -444,6 +453,7 @@
         <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
     </record>
     <record id="sitemap_import_source_humbrol_uk" model="sitemap.import.source">
+        <field name="shopify_js_mode">disabled</field>
         <field name="name">Humbrol Europa (precio EUR)</field>
         <field name="connector_model">sitemap.connector.humbrol_uk</field>
         <field name="sitemap_index_url">https://uk.humbrol.com/robots.txt</field>
@@ -452,6 +462,7 @@
         <field name="products_per_run">20</field><field name="max_images_per_product">10</field>
     </record>
     <record id="sitemap_import_source_bassett_lowke_uk" model="sitemap.import.source">
+        <field name="shopify_js_mode">disabled</field>
         <field name="name">Bassett-Lowke Europa (precio EUR)</field>
         <field name="connector_model">sitemap.connector.bassett_lowke_uk</field>
         <field name="sitemap_index_url">https://uk.bassettlowke.co.uk/robots.txt</field>

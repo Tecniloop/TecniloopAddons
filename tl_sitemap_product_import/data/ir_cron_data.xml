@@ -19,4 +19,14 @@
         <field name="interval_type">days</field>
         <field name="active" eval="False"/>
     </record>
+
+    <record id="ir_cron_sitemap_restore_missing_jobs" model="ir.cron">
+        <field name="name">Sitemap: restaurar trabajos eliminados</field>
+        <field name="model_id" ref="model_sitemap_product_staging"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_restore_missing_jobs()</field>
+        <field name="interval_number">10</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">True</field>
+    </record>
 </odoo>

@@ -95,6 +95,45 @@ class SitemapImportBatch(models.Model):
         self.ensure_one()
         return self.env[self.source_id.connector_model]
 
+
+    def _restore_missing_collect_jobs(self):
+        """Restore queued batches when their collection job was deleted."""
+        queued = self.filtered(lambda batch: batch.state == 'queued_collect') if self else self.search([
+            ('state', '=', 'queued_collect')
+        ])
+        uuids = list(filter(None, queued.mapped('collect_job_uuid')))
+        existing = set(self.env['queue.job'].sudo().search([
+            ('uuid', 'in', uuids)
+        ]).mapped('uuid')) if uuids else set()
+        restored = self.env['sitemap.import.batch']
+        for batch in queued:
+            if not batch.collect_job_uuid or batch.collect_job_uuid not in existing:
+                batch.write({
+                    'state': 'draft',
+                    'collect_job_uuid': False,
+                    'error_message': _('El trabajo de recopilación ya no existe; el lote ha vuelto a borrador.'),
+                })
+                restored |= batch
+        return restored
+
+    def action_restore_previous_state(self):
+        restored_batches = self._restore_missing_collect_jobs()
+        restored_rows = self.mapped('staging_ids')._missing_job_rows()
+        row_count = len(restored_rows)
+        if restored_rows:
+            restored_rows.action_restore_previous_state()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Estados restaurados'),
+                'message': _('%s lotes y %s productos han retrocedido al proceso anterior.') % (
+                    len(restored_batches), row_count),
+                'type': 'success' if restored_batches or row_count else 'warning',
+                'sticky': False,
+            },
+        }
+
     def action_collect_urls(self):
         self.ensure_one()
         self.write({

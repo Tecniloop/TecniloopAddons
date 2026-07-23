@@ -9,6 +9,7 @@ from datetime import datetime
 from urllib.parse import unquote, urljoin, urlparse
 
 import requests
+from psycopg2 import errors as pg_errors
 from lxml import etree
 from lxml import html as lxml_html
 
@@ -828,13 +829,46 @@ class SitemapImportService(models.AbstractModel):
                 existing_eans.add(item['ean'])
         return self._normalise_ean_variants(result)
 
-    def _shopify_product_endpoint_urls(self, product_url):
-        """Return locale-preserving Shopify JSON endpoints in priority order."""
+    def _shopify_product_endpoint_urls(self, product_url, include_js=True):
+        """Return locale-preserving Shopify JSON endpoints in priority order.
+
+        ``include_js`` lets a source permanently skip the lightweight ``.js``
+        endpoint after the shop has answered 404 once. The ``.json`` and
+        ``products.json`` fallbacks remain available.
+        """
         parsed = urlparse(product_url)
         path = parsed.path.rstrip('/')
-        for suffix in ('.js', '.json'):
+        suffixes = ('.js', '.json') if include_js else ('.json',)
+        for suffix in suffixes:
             endpoint_path = path if path.endswith(suffix) else path + suffix
             yield parsed._replace(path=endpoint_path, query='', fragment='').geturl()
+
+    @staticmethod
+    def _shopify_js_should_be_used(source):
+        mode = getattr(source, 'shopify_js_mode', 'auto') or 'auto'
+        status = getattr(source, 'shopify_js_status', 'unknown') or 'unknown'
+        if mode == 'disabled':
+            return False
+        if mode == 'enabled':
+            return True
+        return status != 'unsupported'
+
+    @staticmethod
+    def _set_shopify_js_status(source, status):
+        if not source or getattr(source, 'shopify_js_mode', 'auto') != 'auto':
+            return
+        if getattr(source, 'shopify_js_status', 'unknown') == status:
+            return
+        try:
+            source.sudo().write({
+                'shopify_js_status': status,
+                'shopify_js_checked_at': fields.Datetime.now(),
+            })
+        except Exception:
+            _logger.debug(
+                'Shopify: no se pudo guardar el estado .js de la fuente %s',
+                getattr(source, 'display_name', source), exc_info=True,
+            )
 
     @staticmethod
     def _shopify_product_handle(product_url):
@@ -890,20 +924,37 @@ class SitemapImportService(models.AbstractModel):
     def _fetch_shopify_product_payload(self, source, product_url):
         """Fetch and normalize a Shopify product independently of the theme.
 
-        Priority: localized ``.js``, localized ``.json`` and finally the
-        paginated public catalogue matched by the stable product handle.
+        Priority: localized ``.js`` when enabled/supported, localized ``.json``
+        and finally the paginated public catalogue. A 404 from ``.js`` in auto
+        mode is an expected capability result: it is stored once on the source
+        and not logged as a product error on subsequent requests.
         """
         session = self._get_session(source)
         errors = []
-        for endpoint in self._shopify_product_endpoint_urls(product_url):
+        include_js = self._shopify_js_should_be_used(source)
+        for endpoint in self._shopify_product_endpoint_urls(product_url, include_js=include_js):
+            is_js = urlparse(endpoint).path.endswith('.js')
             try:
                 response = self._http_get(session, endpoint, source)
                 payload = response.json()
-            except Exception as exc:  # endpoint may be disabled by the shop
+            except requests.HTTPError as exc:
+                status_code = getattr(getattr(exc, 'response', None), 'status_code', None)
+                if is_js and status_code in {404, 405, 410}:
+                    self._set_shopify_js_status(source, 'unsupported')
+                    _logger.debug(
+                        'Shopify .js no disponible para la fuente %s (%s); se omite en adelante.',
+                        source.display_name, status_code,
+                    )
+                    continue
+                errors.append(str(exc))
+                continue
+            except Exception as exc:  # JSON inválido o endpoint personalizado
                 errors.append(str(exc))
                 continue
             product = self._normalise_shopify_product_payload(payload)
             if product:
+                if is_js:
+                    self._set_shopify_js_status(source, 'supported')
                 return product
 
         product = self._fetch_shopify_catalog_product(source, product_url)
@@ -926,9 +977,8 @@ class SitemapImportService(models.AbstractModel):
     def _fetch_shopify_ean_variants(self, source, product_url):
         if '/products/' not in urlparse(product_url).path.casefold():
             return []
-        session = self._get_session(source)
-        response = self._http_get(session, self._shopify_ajax_product_url(product_url), source)
-        return self._ean_variants_from_shopify_product(response.json())
+        product = self._fetch_shopify_product_payload(source, product_url)
+        return self._ean_variants_from_shopify_product(product)
 
     def _fetch_generic_ean_variants(self, source, product_url):
         session = self._get_session(source)
@@ -1005,7 +1055,7 @@ class SitemapImportService(models.AbstractModel):
                 complete = True  # el endpoint devuelve la lista completa de variantes
                 checked = True
             except Exception as exc:
-                _logger.info('EAN: Shopify Ajax no disponible para %s: %s', product_url, exc)
+                _logger.debug('EAN: Shopify estructurado no disponible para %s: %s', product_url, exc)
 
         # JSON-LD puede contener solo el producto principal. Mientras el conector
         # no declare la lista completa, se buscan además endpoints de talla/color.
@@ -1952,14 +2002,29 @@ class SitemapImportService(models.AbstractModel):
             # La creación/actualización queda dentro de un savepoint. Si una
             # columna o restricción SQL falla, PostgreSQL revierte esta operación
             # antes de que el bloque exterior intente registrar el error.
-            with self.env.cr.savepoint():
-                if existing:
+            if existing:
+                with self.env.cr.savepoint():
                     existing.write(vals)
-                    product_tmpl = existing
-                    result = 'updated'
-                else:
-                    product_tmpl = Product.create(vals)
+                product_tmpl = existing
+                result = 'updated'
+            else:
+                try:
+                    with self.env.cr.savepoint():
+                        product_tmpl = Product.create(vals)
                     result = 'created'
+                except pg_errors.UniqueViolation:
+                    # Otro trabajo pudo crear la misma URL entre el search y el
+                    # create. El savepoint ya ha limpiado la transacción; se
+                    # recupera el registro ganador y se actualiza en vez de
+                    # convertir la condición de carrera en un error funcional.
+                    product_tmpl = Product.search(
+                        [('sitemap_source_url', '=', staging_row.url)], limit=1,
+                    )
+                    if not product_tmpl:
+                        raise
+                    with self.env.cr.savepoint():
+                        product_tmpl.write(vals)
+                    result = 'updated'
 
             staged_eans = []
             if staging_row.ean_variants_json:

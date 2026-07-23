@@ -2,7 +2,7 @@ import logging
 
 import requests
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
 from odoo.addons.queue_job.exception import RetryableJobError
 
 _logger = logging.getLogger(__name__)
@@ -224,6 +224,54 @@ class SitemapProductStaging(models.Model):
             raise
         row.batch_id._update_queue_completion()
         return result
+
+
+    def _missing_job_rows(self):
+        """Return rows whose queue state points to a job that no longer exists."""
+        QueueJob = self.env['queue.job'].sudo()
+        rows = self.filtered(lambda row: row.state in (
+            'queued_preview', 'previewing', 'queued_import', 'importing'))
+        uuids = set(filter(None, rows.mapped('preview_job_uuid') + rows.mapped('import_job_uuid')))
+        existing_uuids = set(QueueJob.search([('uuid', 'in', list(uuids))]).mapped('uuid')) if uuids else set()
+        missing = self.env['sitemap.product.staging']
+        for row in rows:
+            uuid = row.preview_job_uuid if row.state in ('queued_preview', 'previewing') else row.import_job_uuid
+            if not uuid or uuid not in existing_uuids:
+                missing |= row
+        return missing
+
+    def action_restore_previous_state(self):
+        """Roll back queue states when their queue.job record was deleted."""
+        restored = 0
+        for row in self._missing_job_rows():
+            if row.state in ('queued_preview', 'previewing'):
+                row.write({
+                    'state': 'pending',
+                    'preview_job_uuid': False,
+                    'error_message': _('El trabajo de vista previa ya no existe; se ha restaurado el estado pendiente.'),
+                })
+            else:
+                row.write({
+                    'state': 'preview_ready',
+                    'import_job_uuid': False,
+                    'error_message': _('El trabajo de importación ya no existe; se ha restaurado la vista previa lista.'),
+                })
+            restored += 1
+        return self._notification(
+            _('Estados restaurados'),
+            _('%s registros han retrocedido al proceso anterior.') % restored,
+            'success' if restored else 'warning',
+        )
+
+    @api.model
+    def _cron_restore_missing_jobs(self):
+        rows = self.search([('state', 'in', [
+            'queued_preview', 'previewing', 'queued_import', 'importing'])])
+        missing = rows._missing_job_rows()
+        if missing:
+            missing.action_restore_previous_state()
+        self.env['sitemap.import.batch']._restore_missing_collect_jobs()
+        return True
 
     def action_requeue_failed(self):
         preview_rows = self.filtered(lambda r: r.state == 'error' and not r.name)

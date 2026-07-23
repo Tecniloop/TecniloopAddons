@@ -1083,3 +1083,20 @@ Si el runner no está activo, los trabajos permanecerán en estado `pending` o
 - Progreso informativo y opción de reanudar desde la última referencia completada.
 - Acción para reiniciar el progreso sin modificar el rango configurado.
 - Se conserva la detección de imágenes Elementor del conector BEMO.
+
+
+## Shopify .js por fuente (19.0.1.84.0)
+
+Cada fuente puede usar el endpoint `/products/<handle>.js` en modo Automático,
+Forzar uso o No usar. En automático, un 404/405/410 marca la capacidad como no
+disponible y las siguientes fichas pasan directamente a `.json`, `products.json`
+y HTML, evitando peticiones y mensajes repetitivos. Las fuentes Hornby Hobbies
+incluidas se regeneran con `.js` desactivado.
+
+
+## Importación concurrente y recuperación de cola (19.0.1.85.0)
+
+- La creación de productos es idempotente ante trabajos concurrentes: una colisión de URL se convierte en actualización del producto existente.
+- Si se elimina un `queue.job`, las filas en vista previa vuelven a Pendiente y las filas de importación vuelven a Vista previa lista.
+- Los lotes cuya recopilación en cola fue eliminada vuelven a Borrador.
+- Puede ejecutarse manualmente desde los botones Restaurar estado/Restaurar estados y automáticamente cada diez minutos.

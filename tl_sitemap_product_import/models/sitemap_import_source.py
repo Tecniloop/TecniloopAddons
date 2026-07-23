@@ -139,6 +139,43 @@ class SitemapImportSource(models.Model):
         help='Si está activo, la importación se detiene si robots.txt no permite el acceso '
              'automatizado (el comprobador interpreta correctamente los comodines "*" de robots.txt).')
 
+    # --- Shopify: disponibilidad del endpoint ligero /products/<handle>.js ---
+    shopify_js_mode = fields.Selection(
+        [
+            ('auto', 'Automático'),
+            ('enabled', 'Forzar uso'),
+            ('disabled', 'No usar'),
+        ],
+        string='Endpoint Shopify .js', default='auto', required=True,
+        help='Automático prueba el endpoint .js hasta conocer si la fuente lo admite. '
+             'Forzar uso lo intenta siempre. No usar evita esa petición y pasa directamente '
+             'a .json, products.json y HTML.')
+    shopify_js_status = fields.Selection(
+        [
+            ('unknown', 'Sin comprobar'),
+            ('supported', 'Disponible'),
+            ('unsupported', 'No disponible'),
+        ],
+        string='Estado Shopify .js', default='unknown', readonly=True, copy=False)
+    shopify_js_checked_at = fields.Datetime(
+        string='Última comprobación Shopify .js', readonly=True, copy=False)
+
+    def action_reset_shopify_js_detection(self):
+        self.write({
+            'shopify_js_status': 'unknown',
+            'shopify_js_checked_at': False,
+        })
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Detección reiniciada'),
+                'message': _('El endpoint Shopify .js volverá a comprobarse en la próxima ficha.'),
+                'type': 'success',
+                'sticky': False,
+            },
+        }
+
     # --- Volumen de procesamiento ---
     products_per_run = fields.Integer(
         string='Vistas previas por ejecución de cron', default=40,
