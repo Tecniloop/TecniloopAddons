@@ -105,3 +105,26 @@ El importador comprueba todas las líneas del DAT, rechaza ficheros con varios
 códigos y no permite procesar un fichero cuyo código no corresponda a la
 compañía seleccionada. Las importaciones y los mapeos quedan protegidos por
 reglas de compañía.
+
+
+Diarios de banco y efectivo
+===========================
+
+No es necesario crear previamente los diarios de tesorería. Durante la
+importación, para cada cuenta ``572`` se comprueba la existencia de un diario
+``bank`` cuya cuenta predeterminada sea esa subcuenta. Para cada cuenta ``570``
+se hace lo mismo con un diario ``cash``. Si falta, se crea automáticamente en
+la compañía del lote.
+
+Los códigos cortos de diario se dejan calcular al estándar de Odoo para
+respetar su unicidad por compañía. El nombre del diario toma la descripción de
+la cuenta a3.
+
+Ubicación del menú
+==================
+
+El módulo base comprueba en cada instalación o actualización si
+``account_accountant`` está instalado. En ese caso mueve el menú raíz
+SUENLACE a **Contabilidad**; en caso contrario lo deja en **Facturación**.
+El paquete completo incluye ``tl_suenlace_import_accountant``, que se instala
+automáticamente cuando coinciden el importador y Contabilidad Enterprise.

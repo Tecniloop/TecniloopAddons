@@ -30,6 +30,39 @@ class SuenlaceImport(models.Model):
     _order = "create_date desc"
     _check_company_auto = True
 
+    @api.model
+    def configure_suenlace_menu_parent(self):
+        """Sitúa SUENLACE en Contabilidad EE o Facturación CE.
+
+        ``account_accountant`` es el indicador funcional de que está
+        disponible la aplicación Contabilidad Enterprise. La referencia se
+        resuelve de forma opcional para mantener el addon base instalable en
+        Community sin declarar una dependencia obligatoria.
+        """
+        menu = self.env.ref(
+            "tl_suenlace_import.tl_suenlace_menu_root",
+            raise_if_not_found=False,
+        )
+        if not menu:
+            return False
+        accountant_installed = bool(
+            self.env["ir.module.module"].sudo().search([
+                ("name", "=", "account_accountant"),
+                ("state", "=", "installed"),
+            ], limit=1)
+        )
+        parent = False
+        if accountant_installed:
+            parent = self.env.ref(
+                "account_accountant.menu_accounting",
+                raise_if_not_found=False,
+            )
+        if not parent:
+            parent = self.env.ref("account.menu_finance", raise_if_not_found=False)
+        if parent and menu.parent_id != parent:
+            menu.sudo().write({"parent_id": parent.id})
+        return bool(parent)
+
     name = fields.Char(
         string="Referencia",
         required=True,
@@ -431,12 +464,14 @@ class SuenlaceImport(models.Model):
     def _upsert_account(self, code, name):
         if not code:
             return self.env["account.account"]
+        code = str(code).strip()
         account_model = self.env["account.account"]
         account = account_model.search([
             ("code", "=", code),
             ("company_ids", "in", self.company_id.id),
         ], limit=1)
         if account:
+            self._ensure_liquidity_journal(account)
             return account
         account_type = self._guess_account_type(code)
         values = {
@@ -457,7 +492,94 @@ class SuenlaceImport(models.Model):
                 _("No se pudo crear la cuenta %(c)s: %(e)s")
                 % {"c": code, "e": exc})
             return account_model.browse()
+        self._ensure_liquidity_journal(account)
         return account
+
+    @staticmethod
+    def _suenlace_liquidity_journal_type(account_code):
+        """Devuelve el tipo de diario exigido por las cuentas de tesorería.
+
+        El PGC español utiliza normalmente 570 para caja y 572 para bancos.
+        Cada subcuenta debe mantener su propio diario para que los cobros y
+        pagos importados no terminen en un diario general o en otra cuenta de
+        liquidez.
+        """
+        code = str(account_code or "").strip()
+        if code.startswith("572"):
+            return "bank"
+        if code.startswith("570"):
+            return "cash"
+        return False
+
+    def _ensure_liquidity_journal(self, account):
+        """Localiza o crea el diario de banco/caja de una cuenta 572/570.
+
+        La relación válida es ``account.journal.default_account_id``. No se
+        considera suficiente que la cuenta sea únicamente la cuenta
+        transitoria del diario, ya que el objetivo es conservar una relación
+        inequívoca entre cada subcuenta a3 y su diario Odoo.
+        """
+        self.ensure_one()
+        if not account:
+            return self.env["account.journal"]
+        journal_type = self._suenlace_liquidity_journal_type(account.code)
+        if not journal_type:
+            return self.env["account.journal"]
+
+        journal_model = self.env["account.journal"].with_context(
+            active_test=False,
+            allowed_company_ids=[self.company_id.id],
+        ).with_company(self.company_id)
+        journal = journal_model.search([
+            ("company_id", "=", self.company_id.id),
+            ("type", "=", journal_type),
+            ("default_account_id", "=", account.id),
+        ], limit=1)
+        if journal:
+            if not journal.active:
+                journal.active = True
+                self._append_log(
+                    _("Se ha reactivado el diario %(journal)s para la "
+                      "cuenta %(account)s.") % {
+                        "journal": journal.display_name,
+                        "account": account.display_name,
+                    }
+                )
+            return journal
+
+        label = _("Banco") if journal_type == "bank" else _("Caja")
+        journal_name = account.name or _("%(label)s %(code)s") % {
+            "label": label,
+            "code": account.code,
+        }
+        try:
+            with self.env.cr.savepoint():
+                journal = journal_model.create({
+                    "name": journal_name,
+                    "type": journal_type,
+                    "company_id": self.company_id.id,
+                    "default_account_id": account.id,
+                })
+        except Exception as exc:  # noqa: BLE001
+            self._append_log(
+                _("No se pudo crear el diario %(type)s para la cuenta "
+                  "%(account)s: %(error)s") % {
+                    "type": label,
+                    "account": account.display_name,
+                    "error": exc,
+                }
+            )
+            return journal_model.browse()
+
+        self._append_log(
+            _("Diario %(type)s %(journal)s creado automáticamente para la "
+              "cuenta %(account)s.") % {
+                "type": label,
+                "journal": journal.display_name,
+                "account": account.display_name,
+            }
+        )
+        return journal
 
     @staticmethod
     def _guess_account_type(code):
@@ -1714,17 +1836,16 @@ class SuenlaceImport(models.Model):
         line_model.create(vals_list)
 
     def _payment_journal_for_treasury_account(self, account):
-        journals = self.env["account.journal"].search([
+        """Obtiene el diario exacto y crea el de 572/570 si falta."""
+        self.ensure_one()
+        ensured = self._ensure_liquidity_journal(account)
+        if ensured:
+            return ensured
+        return self.env["account.journal"].search([
             ("company_id", "=", self.company_id.id),
             ("type", "in", ("bank", "cash")),
-        ])
-        exact = journals.filtered(
-            lambda journal: account in (
-                journal.default_account_id,
-                getattr(journal, "suspense_account_id", self.env["account.account"]),
-            )
-        )[:1]
-        return exact
+            ("default_account_id", "=", account.id),
+        ], limit=1)
 
     def _create_payment_entry(self, move, installment, extension):
         record = installment

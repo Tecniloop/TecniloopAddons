@@ -259,3 +259,48 @@ class TestSuenlaceLiteralInvoiceRules(TransactionCase):
             self.model._literal_invoice_tax_account(detail, "sale", "iva"),
             "477000000021",
         )
+
+
+class TestSuenlaceLiquidityJournals(TransactionCase):
+
+    def setUp(self):
+        super().setUp()
+        self.import_batch = self.env["tl.suenlace.import"].create({
+            "company_id": self.env.company.id,
+            "file_data": base64.b64encode(b"test"),
+            "file_name": "SUENLACE.DAT",
+        })
+
+    def test_572_account_creates_bank_journal(self):
+        account = self.import_batch._upsert_account(
+            "572999999991", "Banco SUENLACE de prueba"
+        )
+        journal = self.env["account.journal"].search([
+            ("company_id", "=", self.env.company.id),
+            ("type", "=", "bank"),
+            ("default_account_id", "=", account.id),
+        ], limit=1)
+        self.assertTrue(journal)
+        self.assertEqual(journal.default_account_id, account)
+
+    def test_570_account_creates_cash_journal(self):
+        account = self.import_batch._upsert_account(
+            "570999999991", "Caja SUENLACE de prueba"
+        )
+        journal = self.env["account.journal"].search([
+            ("company_id", "=", self.env.company.id),
+            ("type", "=", "cash"),
+            ("default_account_id", "=", account.id),
+        ], limit=1)
+        self.assertTrue(journal)
+        self.assertEqual(journal.default_account_id, account)
+
+    def test_other_liquidity_account_does_not_create_journal(self):
+        account = self.import_batch._upsert_account(
+            "571999999991", "Caja tránsito SUENLACE"
+        )
+        journal = self.env["account.journal"].search([
+            ("company_id", "=", self.env.company.id),
+            ("default_account_id", "=", account.id),
+        ], limit=1)
+        self.assertFalse(journal)

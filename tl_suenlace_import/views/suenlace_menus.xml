@@ -39,4 +39,9 @@
               action="tl_suenlace_fiscal_position_mapping_action"
               sequence="40"/>
 
+    <!-- En Community permanece en Facturación. Si account_accountant está
+         instalado, el método lo mueve a la aplicación Contabilidad. -->
+    <function model="tl.suenlace.import"
+              name="configure_suenlace_menu_parent"/>
+
 </odoo>

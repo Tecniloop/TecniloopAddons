@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Tecniloop
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0). -->
+<odoo>
+    <!-- account_accountant es dependencia de este puente. Al cargarse,
+         vuelve a ejecutar la detección del módulo base y mueve el menú. -->
+    <function model="tl.suenlace.import"
+              name="configure_suenlace_menu_parent"/>
+</odoo>

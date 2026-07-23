@@ -55,3 +55,12 @@ correctos del mismo fichero.
 Si se instala ``tl_suenlace_import_queue_job``, el mismo motor incremental se
 ejecuta mediante OCA Queue Job. El cron nativo excluye automáticamente los
 lotes asignados a Queue Job para evitar procesamientos concurrentes.
+
+
+Cobros y pagos en cuentas 570/572
+=================================
+
+Al encontrar una cuenta de tesorería ``572...`` o ``570...``, el importador
+crea, si todavía no existe, su diario de banco o efectivo. Cada cuenta conserva
+un diario propio. Los movimientos de cobro/pago se registran en ese diario y
+se concilian con el vencimiento correspondiente.

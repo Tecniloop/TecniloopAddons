@@ -22,3 +22,18 @@ revisión cuando faltan cuentas o no cuadran los totales.
 El procesamiento del módulo base es síncrono. La integración con OCA
 ``queue_job`` se distribuye en el addon separado y opcional
 ``tl_suenlace_import_queue_job``.
+
+
+Tesorería y edición de Odoo
+===========================
+
+Las cuentas ``572`` generan o reutilizan un diario de tipo banco y las
+cuentas ``570`` un diario de tipo efectivo, siempre con la cuenta exacta como
+cuenta predeterminada del diario. Los cobros y pagos históricos utilizan ese
+diario y no un diario general.
+
+En Odoo Enterprise, cuando está instalado ``account_accountant``, los menús
+SUENLACE se sitúan dentro de la aplicación **Contabilidad**. En Community se
+mantienen dentro de **Facturación**. El addon puente opcional y auto-instalable
+``tl_suenlace_import_accountant`` mantiene el comportamiento si
+``account_accountant`` se instala posteriormente.
