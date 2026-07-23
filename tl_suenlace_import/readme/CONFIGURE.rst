@@ -79,3 +79,20 @@ los porcentajes y la naturaleza fiscal se convierten a ``account.tax`` y Odoo
 contabiliza las cuotas en las cuentas definidas en
 ``account.tax.repartition.line``. Las subcuentas de origen quedan guardadas
 como trazabilidad.
+
+Cuentas por cobrar y por pagar del tercero
+==========================================
+
+Las subcuentas de clientes y proveedores del DAT no se guardan únicamente en
+``ref``. También se asignan, con contexto de compañía, a
+``property_account_receivable_id`` o ``property_account_payable_id`` según
+sean cuentas ``43``/``44`` o ``40``/``41``. Si la cuenta no existe, se crea
+con tipo conciliable de cuenta a cobrar o a pagar.
+
+Rendimiento y timeout
+=====================
+
+La opción ``Procesar en segundo plano`` está activada por defecto. Los valores
+iniciales son 25 documentos y 2.000 registros de parseo por lote. Para
+facturas con muchas líneas o servidores limitados puede reducirse el número de
+documentos por lote a 5 o 10.

@@ -15,6 +15,9 @@
                     <field name="file_name" invisible="1"/>
                     <field name="encoding"
                            placeholder="autodetección (CP1252)"/>
+                    <field name="background_mode"/>
+                    <field name="batch_size" invisible="not background_mode"/>
+                    <field name="parse_batch_size" invisible="not background_mode"/>
                     <field name="post_moves"/>
                     <separator string="Modo de importación contable"/>
                     <field name="associate_partners"/>
@@ -28,7 +31,7 @@
                 </group>
                 <footer>
                     <button name="action_create_and_parse" type="object"
-                            string="Crear y parsear" class="oe_highlight"/>
+                            string="Crear e iniciar" class="oe_highlight"/>
                     <button string="Cancelar" class="btn-secondary"
                             special="cancel"/>
                 </footer>

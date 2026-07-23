@@ -140,6 +140,50 @@ class TestSuenlacePartnerMatching(TransactionCase):
         })
         self.assertEqual(result, partner)
         self.assertEqual(result.vat, "ES12345678Z")
+        self.assertEqual(result.company_type, "company")
+
+    def test_new_partner_is_company_and_receivable_account_is_assigned(self):
+        result = self.import_batch._find_or_create_partner({
+            "nombre": "Cliente SUENLACE único",
+            "cuenta": "430999999991",
+            "cuenta_desc": "Cliente SUENLACE único",
+        })
+        account = self.env["account.account"].search([
+            ("code", "=", "430999999991"),
+            ("company_ids", "in", self.env.company.id),
+        ], limit=1)
+        self.assertTrue(account)
+        self.assertEqual(account.account_type, "asset_receivable")
+        self.assertEqual(result.company_type, "company")
+        self.assertEqual(
+            result.with_company(self.env.company).property_account_receivable_id,
+            account,
+        )
+
+    def test_same_partner_can_receive_payable_account_too(self):
+        result = self.import_batch._find_or_create_partner({
+            "nombre": "Tercero mixto SUENLACE",
+            "cuenta": "430999999992",
+            "cuenta_desc": "Tercero mixto SUENLACE",
+        })
+        result_2 = self.import_batch._find_or_create_partner({
+            "nombre": "Tercero mixto SUENLACE",
+            "cuenta": "400999999992",
+            "cuenta_desc": "Tercero mixto SUENLACE",
+        })
+        payable = self.env["account.account"].search([
+            ("code", "=", "400999999992"),
+            ("company_ids", "in", self.env.company.id),
+        ], limit=1)
+        self.assertEqual(result_2, result)
+        self.assertEqual(payable.account_type, "liability_payable")
+        self.assertEqual(
+            result.with_company(self.env.company).property_account_payable_id,
+            payable,
+        )
+        self.assertTrue(
+            result.with_company(self.env.company).property_account_receivable_id
+        )
 
 
 class TestSuenlaceLiteralInvoiceRules(TransactionCase):
@@ -194,4 +238,24 @@ class TestSuenlaceLiteralInvoiceRules(TransactionCase):
         self.assertEqual(
             self.model._amount_to_debit_credit(-25.0, "debit"),
             (0.0, 25.0),
+        )
+
+    def test_tax_account_uses_alternate_suenlace_field_when_needed(self):
+        detail = {
+            "cuenta_iva_soportado": "472000000021",
+            "cuenta_iva2_repercutido": "",
+        }
+        self.assertEqual(
+            self.model._literal_invoice_tax_account(detail, "sale", "iva"),
+            "472000000021",
+        )
+
+    def test_tax_account_prefers_expected_field(self):
+        detail = {
+            "cuenta_iva_soportado": "472000000021",
+            "cuenta_iva2_repercutido": "477000000021",
+        }
+        self.assertEqual(
+            self.model._literal_invoice_tax_account(detail, "sale", "iva"),
+            "477000000021",
         )

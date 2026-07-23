@@ -10,6 +10,21 @@
             <xpath expr="//app[@name='account']" position="inside">
                 <block title="Importación SUENLACE"
                        name="tl_suenlace_import_settings">
+                    <setting id="tl_suenlace_background_mode_setting"
+                             string="Procesar en segundo plano"
+                             help="Evita el timeout HTTP dividiendo el parseo y la creación de documentos en lotes ejecutados por el cron nativo de Odoo.">
+                        <field name="suenlace_background_mode"/>
+                        <div class="content-group" invisible="not suenlace_background_mode">
+                            <div class="row mt16">
+                                <label for="suenlace_batch_size" class="col-lg-5 o_light_label" string="Documentos por lote"/>
+                                <field name="suenlace_batch_size" class="oe_inline"/>
+                            </div>
+                            <div class="row mt16">
+                                <label for="suenlace_parse_batch_size" class="col-lg-5 o_light_label" string="Registros por lote de parseo"/>
+                                <field name="suenlace_parse_batch_size" class="oe_inline"/>
+                            </div>
+                        </div>
+                    </setting>
                     <setting id="tl_suenlace_associate_partners_setting"
                              string="Asociar terceros en asientos"
                              help="Asigna partner_id a asientos tipo 0 y a facturas importadas como asiento literal. Las facturas Odoo siempre identifican su tercero.">

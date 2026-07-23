@@ -18,3 +18,19 @@ class ResConfigSettings(models.TransientModel):
         related="company_id.suenlace_associate_taxes",
         readonly=False,
     )
+
+    suenlace_background_mode = fields.Boolean(
+        string="Procesar SUENLACE en segundo plano",
+        config_parameter="tl_suenlace_import.background_mode",
+        default=True,
+    )
+    suenlace_batch_size = fields.Integer(
+        string="Documentos SUENLACE por lote",
+        config_parameter="tl_suenlace_import.batch_size",
+        default=25,
+    )
+    suenlace_parse_batch_size = fields.Integer(
+        string="Registros SUENLACE por lote de parseo",
+        config_parameter="tl_suenlace_import.parse_batch_size",
+        default=2000,
+    )

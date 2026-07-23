@@ -3,6 +3,21 @@
 from odoo import api, fields, models, _
 
 
+def _background_default(env):
+    value = env["ir.config_parameter"].sudo().get_param(
+        "tl_suenlace_import.background_mode", "True"
+    )
+    return str(value).lower() in {"1", "true", "yes", "on"}
+
+
+def _integer_default(env, key, default):
+    value = env["ir.config_parameter"].sudo().get_param(key, str(default))
+    try:
+        return max(1, int(value))
+    except (TypeError, ValueError):
+        return default
+
+
 class SuenlaceImportWizard(models.TransientModel):
     """Asistente para crear un lote de importación y encolar su parseo."""
 
@@ -16,6 +31,23 @@ class SuenlaceImportWizard(models.TransientModel):
     file_name = fields.Char(string="Nombre del fichero")
     encoding = fields.Char(string="Codificación")
     post_moves = fields.Boolean(string="Contabilizar asientos")
+    background_mode = fields.Boolean(
+        string="Procesar en segundo plano",
+        default=lambda self: _background_default(self.env),
+        help="Evita el timeout HTTP ejecutando la importación por lotes.",
+    )
+    batch_size = fields.Integer(
+        string="Documentos por lote",
+        default=lambda self: _integer_default(
+            self.env, "tl_suenlace_import.batch_size", 25
+        ),
+    )
+    parse_batch_size = fields.Integer(
+        string="Registros por lote de parseo",
+        default=lambda self: _integer_default(
+            self.env, "tl_suenlace_import.parse_batch_size", 2000
+        ),
+    )
     associate_partners = fields.Boolean(
         string="Asociar terceros en asientos",
         default=lambda self: self.env.company.suenlace_associate_partners,
@@ -70,6 +102,9 @@ class SuenlaceImportWizard(models.TransientModel):
             "file_name": self.file_name,
             "encoding": self.encoding or False,
             "post_moves": self.post_moves,
+            "background_mode": self.background_mode,
+            "batch_size": max(1, self.batch_size or 25),
+            "parse_batch_size": max(1, self.parse_batch_size or 2000),
             "associate_partners": self.associate_partners,
             "skip_vat_validation": self.skip_vat_validation,
             "associate_taxes": self.associate_taxes,

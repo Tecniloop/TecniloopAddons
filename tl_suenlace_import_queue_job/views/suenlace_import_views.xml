@@ -13,7 +13,7 @@
                 </button>
             </xpath>
             <xpath expr="//field[@name='post_moves']" position="before">
-                <field name="async_mode"/>
+                <field name="async_mode" invisible="not background_mode"/>
                 <field name="job_uuids" invisible="1"/>
             </xpath>
         </field>

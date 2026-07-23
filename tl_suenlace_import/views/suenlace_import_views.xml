@@ -18,7 +18,7 @@
                     <button name="action_reset_draft" string="Reiniciar"
                             type="object" invisible="state == 'draft'"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="draft,parsed,done"/>
+                           statusbar_visible="draft,queued,processing,parsed,done,error"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -40,6 +40,9 @@
                             <field name="file_name" invisible="1"/>
                             <field name="encoding"
                                    placeholder="autodetección"/>
+                            <field name="background_mode"/>
+                            <field name="batch_size" invisible="not background_mode"/>
+                            <field name="parse_batch_size" invisible="not background_mode"/>
                         </group>
                         <group string="Modo de importación contable">
                             <field name="post_moves"/>
@@ -47,6 +50,16 @@
                             <field name="skip_vat_validation"/>
                             <field name="associate_taxes"/>
                         </group>
+                    </group>
+                    <group string="Progreso" invisible="not background_mode">
+                        <field name="processing_phase"/>
+                        <field name="progress_percent" widget="progressbar"/>
+                        <field name="total_record_count"/>
+                        <field name="processed_document_count"/>
+                        <field name="total_document_count"/>
+                        <field name="failed_document_count"/>
+                        <field name="failed_master_count"/>
+                        <field name="last_batch_date"/>
                     </group>
                     <group string="Diarios por defecto">
                         <field name="journal_misc_id"/>
@@ -60,8 +73,12 @@
                                 <list>
                                     <field name="sequence"/>
                                     <field name="record_type"/>
+                                    <field name="document_key"/>
+                                    <field name="document_type"/>
+                                    <field name="processing_state"/>
                                     <field name="unsupported"/>
-                                    <field name="payload"/>
+                                    <field name="error_message" optional="hide"/>
+                                    <field name="payload" optional="hide"/>
                                 </list>
                             </field>
                         </page>

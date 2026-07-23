@@ -114,29 +114,20 @@ class SuenlaceImport(models.Model):
     line_ids = fields.One2many(
         "tl.suenlace.import.line", "import_id", string="Registros")
     line_count = fields.Integer(
-        compute="_compute_line_count", string="Nº registros")
+        string="Nº registros", readonly=True, copy=False)
     partner_ids = fields.Many2many(
         "res.partner", string="Terceros creados", copy=False)
     account_ids = fields.Many2many(
         "account.account", string="Cuentas creadas", copy=False)
     move_ids = fields.Many2many(
         "account.move", string="Asientos creados", copy=False)
-    move_count = fields.Integer(compute="_compute_move_count")
+    move_count = fields.Integer(
+        string="Nº documentos", readonly=True, copy=False)
     log = fields.Text(string="Registro de proceso", readonly=True)
 
     # ------------------------------------------------------------------ #
     #  Compute                                                           #
     # ------------------------------------------------------------------ #
-    @api.depends("line_ids")
-    def _compute_line_count(self):
-        for rec in self:
-            rec.line_count = len(rec.line_ids)
-
-    @api.depends("move_ids")
-    def _compute_move_count(self):
-        for rec in self:
-            rec.move_count = len(rec.move_ids)
-
     @api.onchange("company_id")
     def _onchange_company_suenlace_options(self):
         for rec in self:
@@ -220,6 +211,7 @@ class SuenlaceImport(models.Model):
                 "unsupported": bool(data.get("_unsupported")),
             })
         line_model.create(vals_list)
+        self.line_count = len(vals_list)
         summary = ", ".join(
             "%s=%d" % (k, v) for k, v in sorted(counts.items()))
         self._append_log(
@@ -302,13 +294,20 @@ class SuenlaceImport(models.Model):
         ], limit=1)
         if account:
             return account
+        account_type = self._guess_account_type(code)
+        values = {
+            "code": code,
+            "name": name or code,
+            "account_type": account_type,
+            "company_ids": [(4, self.company_id.id)],
+        }
+        if account_type in ("asset_receivable", "liability_payable"):
+            values["reconcile"] = True
         try:
-            account = account_model.create({
-                "code": code,
-                "name": name or code,
-                "account_type": self._guess_account_type(code),
-                "company_ids": [(4, self.company_id.id)],
-            })
+            # El savepoint evita dejar toda la transacción abortada si una
+            # cuenta concreta no puede crearse durante un lote voluminoso.
+            with self.env.cr.savepoint():
+                account = account_model.create(values)
         except Exception as exc:  # noqa: BLE001
             self._append_log(
                 _("No se pudo crear la cuenta %(c)s: %(e)s")
@@ -434,6 +433,11 @@ class SuenlaceImport(models.Model):
 
         self._apply_partner_roles(
             partner, account_code, invoice_type=rec.get("tipo_factura"))
+        self._apply_partner_account_properties(
+            partner,
+            account_code,
+            rec.get("cuenta_desc") or rec.get("nombre"),
+        )
         return partner
 
     def _company_partner_domain(self):
@@ -579,7 +583,10 @@ class SuenlaceImport(models.Model):
             "zip": rec.get("cp") or False,
             "phone": rec.get("telefono") or False,
             "email": rec.get("email") or False,
-            "company_type": partner_utils.infer_company_type(nif),
+            # Los registros C y las cabeceras 1/2 representan cuentas de
+            # clientes/proveedores. Se crean como compañías aunque el NIF
+            # tenga formato de persona física.
+            "company_type": "company",
             "ref": account_code or False,
         }
         if country:
@@ -620,6 +627,13 @@ class SuenlaceImport(models.Model):
                 if partner.name != value:
                     write_vals["name"] = value
                 continue
+            if field_name == "company_type":
+                # Todo tercero tratado por SUENLACE representa la cuenta
+                # contable de un cliente/proveedor y debe quedar como compañía,
+                # también cuando ya existía por una importación anterior.
+                if partner.company_type != value:
+                    write_vals[field_name] = value
+                continue
             current = partner[field_name]
             if not current:
                 write_vals[field_name] = value
@@ -636,6 +650,76 @@ class SuenlaceImport(models.Model):
             vals["supplier_rank"] = max(partner.supplier_rank, 1)
         if vals:
             partner.write(vals)
+
+    def _apply_partner_account_properties(
+            self, partner, account_code, account_name=None):
+        """Asigna al tercero la subcuenta a3 de cliente/proveedor.
+
+        Odoo guarda las cuentas por cobrar y por pagar como propiedades
+        dependientes de compañía. Una cuenta 43/44 se asigna como cuenta a
+        cobrar y una cuenta 40/41 como cuenta a pagar. Si el mismo tercero
+        aparece en ambos ámbitos, se conservan ambas propiedades.
+        """
+        if not partner:
+            return
+        account_code = (account_code or "").strip()
+        if account_code.startswith(("43", "44")):
+            property_field = "property_account_receivable_id"
+            expected_type = "asset_receivable"
+            role_label = _("cuenta a cobrar")
+        elif account_code.startswith(("40", "41")):
+            property_field = "property_account_payable_id"
+            expected_type = "liability_payable"
+            role_label = _("cuenta a pagar")
+        else:
+            return
+
+        account = self._upsert_account(
+            account_code,
+            account_name or partner.display_name or account_code,
+        )
+        if not account:
+            self._append_log(
+                _("No se pudo crear o localizar la cuenta %(account)s para "
+                  "asignarla como %(role)s de %(partner)s.") % {
+                    "account": account_code,
+                    "role": role_label,
+                    "partner": partner.display_name,
+                }
+            )
+            return
+        if account.account_type != expected_type:
+            self._append_log(
+                _("La cuenta %(account)s no se asigna como %(role)s de "
+                  "%(partner)s porque su tipo es %(actual)s y se esperaba "
+                  "%(expected)s.") % {
+                    "account": account.display_name,
+                    "role": role_label,
+                    "partner": partner.display_name,
+                    "actual": account.account_type,
+                    "expected": expected_type,
+                }
+            )
+            return
+
+        commercial_partner = partner.commercial_partner_id.with_company(
+            self.company_id
+        )
+        current_account = commercial_partner[property_field]
+        if current_account == account:
+            return
+        self._suenlace_partner_record(commercial_partner).write({
+            property_field: account.id,
+        })
+        self._append_log(
+            _("Asignada %(account)s como %(role)s de %(partner)s para la "
+              "compañía %(company)s.") % {
+                "account": account.display_name,
+                "role": role_label,
+                "partner": commercial_partner.display_name,
+                "company": self.company_id.display_name,
+            }
+        )
 
     @staticmethod
     def _compose_street(rec):
@@ -791,6 +875,7 @@ class SuenlaceImport(models.Model):
                       "revisión de totales, tercero, impuestos o posición fiscal.")
                     % {"n": review_count})
         self.move_ids = [(4, m.id) for m in moves]
+        self.move_count = len(self.move_ids)
         self._append_log(
             _("Documentos contables creados: %d") % len(moves))
 
@@ -845,21 +930,33 @@ class SuenlaceImport(models.Model):
 
     @staticmethod
     def _literal_invoice_tax_account(detail, application, tax_kind):
+        """Obtiene la subcuenta fiscal informada por a3 sin sustituirla.
+
+        Algunos generadores rellenan las posiciones 192/204 y otros las
+        228/240 con independencia de que la factura sea de compra o venta.
+        Se prioriza el campo esperado por el tipo de operación y se usa el
+        alternativo cuando el primero viene vacío. Así, si el DAT contiene el
+        código, la cuenta se localiza o se crea automáticamente.
+        """
         if tax_kind == "retention":
-            return (detail.get("cuenta_retencion") or "").strip()
-        if application == "sale":
-            field_name = (
-                "cuenta_iva2_repercutido"
-                if tax_kind == "iva"
-                else "cuenta_recargo2_repercutido"
+            candidates = ("cuenta_retencion",)
+        elif tax_kind == "iva":
+            candidates = (
+                ("cuenta_iva2_repercutido", "cuenta_iva_soportado")
+                if application == "sale"
+                else ("cuenta_iva_soportado", "cuenta_iva2_repercutido")
             )
         else:
-            field_name = (
-                "cuenta_iva_soportado"
-                if tax_kind == "iva"
-                else "cuenta_recargo_soportado"
+            candidates = (
+                ("cuenta_recargo2_repercutido", "cuenta_recargo_soportado")
+                if application == "sale"
+                else ("cuenta_recargo_soportado", "cuenta_recargo2_repercutido")
             )
-        return (detail.get(field_name) or "").strip()
+        for field_name in candidates:
+            account_code = (detail.get(field_name) or "").strip()
+            if account_code:
+                return account_code
+        return ""
 
     def _create_invoice_as_literal_entry(self, block):
         """Importa 1/2+9 como asiento, sin account.tax ni sustituciones.

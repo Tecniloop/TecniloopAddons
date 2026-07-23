@@ -7,9 +7,9 @@ class SuenlaceImportWizard(models.TransientModel):
     _inherit = "tl.suenlace.import.wizard"
 
     async_mode = fields.Boolean(
-        string="Proceso asíncrono",
+        string="Usar OCA Queue Job",
         default=True,
-        help="Encola el parseo mediante OCA Queue Job.",
+        help="Ejecuta cada lote mediante OCA Queue Job. Si se desmarca se usa el cron nativo.",
     )
 
     def _prepare_import_vals(self):
