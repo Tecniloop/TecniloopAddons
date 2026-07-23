@@ -1,43 +1,51 @@
-============================
-Mass Journal Entry Cancel v19
-============================
+.. image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
 
-Módulo para cancelar o resetear múltiples asientos contables en Odoo 19.
+Mass Journal Entry Cancel
+=========================
+This module helps to cancel or reset multiple journal entries
 
-Cambios en la migración a v19
-=============================
+Configuration
+=============
+- No additional configuration required
 
-1. **Version actualizada**: de 18.0 a 19.0
-2. **API Compatibility**: Todos los métodos utilizados (button_cancel, button_draft) son compatibles con Odoo 19
-3. **TransientModel**: Sigue siendo el mismo en Odoo 19
-4. **Server Actions**: Las acciones de servidor con bindings siguen siendo compatibles
+License
+-------
+General Public License, Version 3 (LGPL v3).
+(https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
-Características
-===============
+Company
+-------
+* `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
-- Cancelar múltiples asientos contables en estado "posted"
-- Resetear múltiples asientos contables en estado "cancel" a estado "draft"
-- Integración con la lista de asientos contables mediante acciones de servidor
+Credits
+-------
+* Developer:
+            (V16) Sreeshanth V S ,
+            (V17) Mufeeda Shirin ,
+            (V18) Ammu Raj ,
+  Contact: odoo@cybrosys.com
 
-Instalación
-===========
+Contacts
+--------
+* Mail Contact : odoo@cybrosys.com
+* Website : https://cybrosys.com
 
-1. Copiar el módulo al directorio de módulos personalizados
-2. Actualizar la lista de módulos
-3. Instalar el módulo "Mass Journal Entry Cancel"
-4. Asignar el grupo "Manage Multiple Journal Entry Cancel" a los usuarios que necesiten acceso
+Bug Tracker
+-----------
+Bugs are tracked on GitHub Issues. In case of trouble, please check there if
+your issue has already been reported.
 
-Uso
-===
-
-1. Ir a Contabilidad > Asientos Contables
-2. Seleccionar uno o más asientos
-3. En el menú de acciones de lista, seleccionar:
-   - "Multiple Journal Entry Cancel" para cancelar asientos
-   - "Multiple Journal Entry Reset" para resetear asientos a draft
-
-Requisitos
+Maintainer
 ==========
+.. image:: https://cybrosys.com/images/logo.png
+   :target: https://cybrosys.com
 
-- Odoo 19.0
-- Módulo base: account
+This module is maintained by Cybrosys Technologies.
+
+For support and more information, please visit `Our Website <https://cybrosys.com/>`__
+
+Further information
+===================
+HTML Description: `<static/description/index.html>`__
