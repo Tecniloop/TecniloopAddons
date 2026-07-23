@@ -64,15 +64,12 @@ class SuenlaceFiscalPositionMapping(models.Model):
     )
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        (
-            "tl_suenlace_fiscal_position_mapping_uniq_v2",
-            "unique(company_id, application, invoice_subtype, has_recargo, "
-            "has_retention, retention_nature, retention_percent)",
-            "Ya existe un mapeo para esa combinación de ámbito, subtipo, "
-            "recargo, retención, naturaleza y porcentaje.",
-        ),
-    ]
+    _unique_fiscal_profile = models.Constraint(
+        "UNIQUE(company_id, application, invoice_subtype, has_recargo, "
+        "has_retention, retention_nature, retention_percent)",
+        "Ya existe un mapeo para esa combinación de ámbito, subtipo, "
+        "recargo, retención, naturaleza y porcentaje.",
+    )
 
     def _auto_init(self):
         self.env.cr.execute(
@@ -83,6 +80,11 @@ class SuenlaceFiscalPositionMapping(models.Model):
                 "ALTER TABLE tl_suenlace_fiscal_position_mapping "
                 "DROP CONSTRAINT IF EXISTS "
                 "tl_suenlace_fiscal_position_mapping_uniq"
+            )
+            self.env.cr.execute(
+                "ALTER TABLE tl_suenlace_fiscal_position_mapping "
+                "DROP CONSTRAINT IF EXISTS "
+                "tl_suenlace_fiscal_position_mapping_uniq_v2"
             )
         return super()._auto_init()
 

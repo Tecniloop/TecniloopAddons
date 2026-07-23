@@ -82,14 +82,11 @@ class SuenlaceTaxMapping(models.Model):
     )
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        (
-            "tl_suenlace_tax_mapping_uniq_v2",
-            "unique(company_id, application, tax_kind, retention_nature, percent)",
-            "Ya existe un mapeo para esa combinación de ámbito, tipo, "
-            "naturaleza y porcentaje.",
-        ),
-    ]
+    _unique_tax_profile = models.Constraint(
+        "UNIQUE(company_id, application, tax_kind, retention_nature, percent)",
+        "Ya existe un mapeo para esa combinación de ámbito, tipo, "
+        "naturaleza y porcentaje.",
+    )
 
     def _auto_init(self):
         # La versión anterior no incluía retention_nature en la restricción.
@@ -100,6 +97,10 @@ class SuenlaceTaxMapping(models.Model):
             self.env.cr.execute(
                 "ALTER TABLE tl_suenlace_tax_mapping "
                 "DROP CONSTRAINT IF EXISTS tl_suenlace_tax_mapping_uniq"
+            )
+            self.env.cr.execute(
+                "ALTER TABLE tl_suenlace_tax_mapping "
+                "DROP CONSTRAINT IF EXISTS tl_suenlace_tax_mapping_uniq_v2"
             )
         return super()._auto_init()
 
