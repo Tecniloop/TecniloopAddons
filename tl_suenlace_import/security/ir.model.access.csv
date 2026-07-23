@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tl_suenlace_import_manager,tl.suenlace.import.manager,model_tl_suenlace_import,account.group_account_manager,1,1,1,1
+access_tl_suenlace_import_line_manager,tl.suenlace.import.line.manager,model_tl_suenlace_import_line,account.group_account_manager,1,1,1,1
+access_tl_suenlace_tax_mapping_manager,tl.suenlace.tax.mapping.manager,model_tl_suenlace_tax_mapping,account.group_account_manager,1,1,1,1
+access_tl_suenlace_import_wizard_manager,tl.suenlace.import.wizard.manager,model_tl_suenlace_import_wizard,account.group_account_manager,1,1,1,1
+access_tl_suenlace_fiscal_position_mapping_manager,tl.suenlace.fiscal.position.mapping.manager,model_tl_suenlace_fiscal_position_mapping,account.group_account_manager,1,1,1,1
+access_tl_suenlace_default_mapping_wizard_manager,tl.suenlace.default.mapping.wizard.manager,model_tl_suenlace_default_mapping_wizard,account.group_account_manager,1,1,1,1

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Tecniloop
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0). -->
+<odoo>
+
+    <record id="tl_suenlace_import_view_form" model="ir.ui.view">
+        <field name="name">tl.suenlace.import.view.form</field>
+        <field name="model">tl.suenlace.import</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_parse" string="1. Parsear"
+                            type="object" class="oe_highlight"
+                            invisible="state not in ('draft', 'error')"/>
+                    <button name="action_process" string="2. Procesar"
+                            type="object" class="oe_highlight"
+                            invisible="state not in ('parsed', 'error')"/>
+                    <button name="action_reset_draft" string="Reiniciar"
+                            type="object" invisible="state == 'draft'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,parsed,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_moves" type="object"
+                                class="oe_stat_button" icon="fa-book"
+                                invisible="move_count == 0">
+                            <field name="move_count" widget="statinfo"
+                                   string="Asientos"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                            <field name="file_data" filename="file_name"/>
+                            <field name="file_name" invisible="1"/>
+                            <field name="encoding"
+                                   placeholder="autodetección"/>
+                        </group>
+                        <group string="Modo de importación contable">
+                            <field name="post_moves"/>
+                            <field name="associate_partners"/>
+                            <field name="associate_taxes"/>
+                        </group>
+                    </group>
+                    <group string="Diarios por defecto">
+                        <field name="journal_misc_id"/>
+                        <field name="journal_sale_id" invisible="not associate_taxes"/>
+                        <field name="journal_purchase_id" invisible="not associate_taxes"/>
+                    </group>
+                    <notebook>
+                        <page string="Registros" name="lines">
+                            <field name="line_count" readonly="1"/>
+                            <field name="line_ids" readonly="1">
+                                <list>
+                                    <field name="sequence"/>
+                                    <field name="record_type"/>
+                                    <field name="unsupported"/>
+                                    <field name="payload"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Proceso" name="log">
+                            <field name="log" readonly="1"/>
+                        </page>
+                        <page string="Resultados" name="results">
+                            <group>
+                                <field name="partner_ids"
+                                       widget="many2many_tags"/>
+                                <field name="account_ids"
+                                       widget="many2many_tags"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="tl_suenlace_import_view_tree" model="ir.ui.view">
+        <field name="name">tl.suenlace.import.view.tree</field>
+        <field name="model">tl.suenlace.import</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'done'"
+                  decoration-danger="state == 'error'"
+                  decoration-muted="state in ('queued', 'processing')">
+                <field name="name"/>
+                <field name="file_name"/>
+                <field name="company_id"
+                       groups="base.group_multi_company"/>
+                <field name="line_count"/>
+                <field name="move_count"/>
+                <field name="state" widget="badge"/>
+                <field name="create_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="tl_suenlace_import_action" model="ir.actions.act_window">
+        <field name="name">Importaciones SUENLACE</field>
+        <field name="res_model">tl.suenlace.import</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

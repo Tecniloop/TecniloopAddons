@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="tl_suenlace_import_wizard_view_form_queue_job" model="ir.ui.view">
+        <field name="name">tl.suenlace.import.wizard.view.form.queue.job</field>
+        <field name="model">tl.suenlace.import.wizard</field>
+        <field name="inherit_id" ref="tl_suenlace_import.tl_suenlace_import_wizard_view_form"/>
+        <field name="arch" type="xml">
+            <field name="encoding" position="after">
+                <field name="async_mode"/>
+            </field>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Tecniloop
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0). -->
+<odoo>
+
+    <record id="tl_suenlace_tax_mapping_view_tree" model="ir.ui.view">
+        <field name="name">tl.suenlace.tax.mapping.view.tree</field>
+        <field name="model">tl.suenlace.tax.mapping</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="application"/>
+                <field name="tax_kind"/>
+                <field name="retention_nature" optional="show"/>
+                <field name="percent"/>
+                <field name="tax_id"/>
+                <field name="entry_account_codes" optional="show"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="tl_suenlace_tax_mapping_action" model="ir.actions.act_window">
+        <field name="name">Mapeo de impuestos SUENLACE</field>
+        <field name="res_model">tl.suenlace.tax.mapping</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure el override manual de impuestos a3 &#8594; Odoo
+            </p>
+            <p>
+                Los casos habituales de facturas se cargan automáticamente. Para los asientos tipo 0, indique explícitamente las subcuentas a3 en cada mapeo. También puede
+                volver a cargarlos desde «Cargar mapeos predeterminados»; los
+                registros manuales existentes no se sobrescriben.
+            </p>
+        </field>
+    </record>
+
+</odoo>

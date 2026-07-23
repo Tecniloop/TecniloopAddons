@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Tecniloop
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0). -->
+<odoo noupdate="1">
+
+
+    <!-- Canal dedicado para no saturar el canal root -->
+    <record id="channel_suenlace" model="queue.job.channel">
+        <field name="name">suenlace</field>
+        <field name="parent_id" ref="queue_job.channel_root"/>
+    </record>
+
+    <!-- Funciones de job: parseo y procesado -->
+    <record id="job_function_suenlace_parse" model="queue.job.function">
+        <field name="model_id" ref="tl_suenlace_import.model_tl_suenlace_import"/>
+        <field name="method">job_parse</field>
+        <field name="channel_id" ref="channel_suenlace"/>
+        <field name="retry_pattern" eval="{1: 60, 3: 180, 5: 600}"/>
+    </record>
+
+    <record id="job_function_suenlace_process" model="queue.job.function">
+        <field name="model_id" ref="tl_suenlace_import.model_tl_suenlace_import"/>
+        <field name="method">job_process</field>
+        <field name="channel_id" ref="channel_suenlace"/>
+        <field name="retry_pattern" eval="{1: 60, 3: 300, 5: 900}"/>
+    </record>
+
+</odoo>

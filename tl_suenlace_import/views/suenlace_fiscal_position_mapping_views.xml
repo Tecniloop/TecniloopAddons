@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Tecniloop
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0). -->
+<odoo>
+
+    <record id="tl_suenlace_fiscal_position_mapping_view_list" model="ir.ui.view">
+        <field name="name">tl.suenlace.fiscal.position.mapping.view.list</field>
+        <field name="model">tl.suenlace.fiscal.position.mapping</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="application"/>
+                <field name="invoice_subtype"/>
+                <field name="has_recargo"/>
+                <field name="has_retention"/>
+                <field name="retention_nature" optional="show"/>
+                <field name="retention_percent" optional="show"/>
+                <field name="fiscal_position_id"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="tl_suenlace_fiscal_position_mapping_action" model="ir.actions.act_window">
+        <field name="name">Mapeo de posiciones fiscales SUENLACE</field>
+        <field name="res_model">tl.suenlace.fiscal.position.mapping</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure la posición fiscal según el perfil de la factura SUENLACE
+            </p>
+            <p>
+                El importador distingue ámbito, subtipo de operación, recargo de
+                equivalencia, naturaleza de la retención y porcentaje. Los casos
+                habituales se cargan automáticamente sin reemplazar reglas manuales.
+            </p>
+        </field>
+    </record>
+
+</odoo>

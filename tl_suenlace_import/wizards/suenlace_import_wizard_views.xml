@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Tecniloop
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0). -->
+<odoo>
+
+    <record id="tl_suenlace_import_wizard_view_form" model="ir.ui.view">
+        <field name="name">tl.suenlace.import.wizard.view.form</field>
+        <field name="model">tl.suenlace.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Importar fichero SUENLACE">
+                <group>
+                    <field name="company_id"
+                           groups="base.group_multi_company"/>
+                    <field name="file_data" filename="file_name"/>
+                    <field name="file_name" invisible="1"/>
+                    <field name="encoding"
+                           placeholder="autodetección (CP1252)"/>
+                    <field name="post_moves"/>
+                    <separator string="Modo de importación contable"/>
+                    <field name="associate_partners"/>
+                    <field name="associate_taxes"/>
+                </group>
+                <group string="Diarios por defecto (opcional)">
+                    <field name="journal_misc_id"/>
+                    <field name="journal_sale_id" invisible="not associate_taxes"/>
+                    <field name="journal_purchase_id" invisible="not associate_taxes"/>
+                </group>
+                <footer>
+                    <button name="action_create_and_parse" type="object"
+                            string="Crear y parsear" class="oe_highlight"/>
+                    <button string="Cancelar" class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="tl_suenlace_import_wizard_action"
+            model="ir.actions.act_window">
+        <field name="name">Importar SUENLACE</field>
+        <field name="res_model">tl.suenlace.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Tecniloop
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0). -->
+<odoo>
+    <record id="tl_suenlace_account_move_view_form" model="ir.ui.view">
+        <field name="name">account.move.view.form.suenlace</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="SUENLACE" name="suenlace"
+                      invisible="not suenlace_import_id">
+                    <group>
+                        <group string="Origen">
+                            <field name="suenlace_import_id"/>
+                            <field name="suenlace_document_mode"/>
+                            <field name="suenlace_associate_partners" invisible="move_type != 'entry'"/>
+                            <field name="suenlace_associate_taxes"/>
+                            <field name="suenlace_invoice_subtype"/>
+                            <field name="suenlace_has_recargo"/>
+                            <field name="suenlace_has_retention"/>
+                            <field name="suenlace_retention_percent"
+                                   invisible="not suenlace_has_retention"/>
+                            <field name="suenlace_retention_nature"
+                                   invisible="not suenlace_has_retention"/>
+                        </group>
+                        <group string="Revisión">
+                            <field name="suenlace_partner_needs_review"/>
+                            <field name="suenlace_tax_needs_review"/>
+                            <field name="suenlace_fiscal_needs_review"/>
+                            <field name="suenlace_needs_review"/>
+                        </group>
+                    </group>
+                    <group string="Cuentas fiscales">
+                        <field name="suenlace_source_tax_accounts"
+                               placeholder="No informadas por el DAT"/>
+                        <field name="suenlace_odoo_tax_accounts"
+                               placeholder="Sin líneas fiscales Odoo"/>
+                    </group>
+                    <group string="Control de totales"
+                           invisible="not suenlace_needs_review">
+                        <field name="suenlace_expected_total"/>
+                        <field name="suenlace_source_detail_total"/>
+                        <field name="suenlace_calculated_total"/>
+                        <field name="suenlace_total_difference"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

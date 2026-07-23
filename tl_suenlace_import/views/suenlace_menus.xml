@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Tecniloop
+     License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0). -->
+<odoo>
+
+    <menuitem id="tl_suenlace_menu_root"
+              name="SUENLACE"
+              parent="account.menu_finance"
+              sequence="90"/>
+
+    <menuitem id="tl_suenlace_import_wizard_menu"
+              name="Importar fichero"
+              parent="tl_suenlace_menu_root"
+              action="tl_suenlace_import_wizard_action"
+              sequence="10"/>
+
+    <menuitem id="tl_suenlace_import_menu"
+              name="Importaciones"
+              parent="tl_suenlace_menu_root"
+              action="tl_suenlace_import_action"
+              sequence="20"/>
+
+
+    <menuitem id="tl_suenlace_default_mapping_wizard_menu"
+              name="Cargar mapeos predeterminados"
+              parent="tl_suenlace_menu_root"
+              action="tl_suenlace_default_mapping_wizard_action"
+              sequence="25"/>
+
+    <menuitem id="tl_suenlace_tax_mapping_menu"
+              name="Mapeo de impuestos"
+              parent="tl_suenlace_menu_root"
+              action="tl_suenlace_tax_mapping_action"
+              sequence="30"/>
+
+    <menuitem id="tl_suenlace_fiscal_position_mapping_menu"
+              name="Mapeo de posiciones fiscales"
+              parent="tl_suenlace_menu_root"
+              action="tl_suenlace_fiscal_position_mapping_action"
+              sequence="40"/>
+
+</odoo>
