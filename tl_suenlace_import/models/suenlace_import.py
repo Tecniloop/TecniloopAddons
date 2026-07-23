@@ -75,6 +75,16 @@ class SuenlaceImport(models.Model):
             "el cliente o proveedor es obligatorio y siempre se identifica."
         ),
     )
+    skip_vat_validation = fields.Boolean(
+        string="Omitir validación del NIF de Odoo",
+        default=lambda self: self.env.company.suenlace_skip_vat_validation,
+        help=(
+            "Permite crear o actualizar terceros de este lote aunque el NIF "
+            "no supere la validación estándar de Odoo. El NIF se conserva "
+            "normalizado y, para España, con el prefijo ES. No afecta a "
+            "altas o modificaciones realizadas fuera de SUENLACE."
+        ),
+    )
     associate_taxes = fields.Boolean(
         string="Interpretar impuestos y crear facturas",
         default=lambda self: self.env.company.suenlace_associate_taxes,
@@ -133,6 +143,9 @@ class SuenlaceImport(models.Model):
             if rec.company_id:
                 rec.associate_partners = (
                     rec.company_id.suenlace_associate_partners
+                )
+                rec.skip_vat_validation = (
+                    rec.company_id.suenlace_skip_vat_validation
                 )
                 rec.associate_taxes = rec.company_id.suenlace_associate_taxes
 
@@ -220,6 +233,10 @@ class SuenlaceImport(models.Model):
         self.ensure_one()
         self.state = "processing"
         self.log = ""
+        if self.skip_vat_validation:
+            self._append_log(
+                _("Validación de NIF de Odoo omitida para los terceros "
+                  "creados o actualizados por este lote."))
         records = [data for _num, data in self._read_records()]
         try:
             self._process_records(records)
@@ -334,6 +351,29 @@ class SuenlaceImport(models.Model):
         }
         return by_first.get(code[0], "asset_current")
 
+    def _suenlace_partner_context(self):
+        """Contexto limitado al alta/actualización de terceros del lote.
+
+        ``base_vat`` soporta oficialmente ``no_vat_validation`` para cargas
+        procedentes de plataformas externas. No se altera la validación global
+        ni se modifica el comportamiento manual de ``res.partner``.
+        """
+        self.ensure_one()
+        return {
+            "no_vat_validation": bool(self.skip_vat_validation),
+        }
+
+    def _suenlace_partner_model(self):
+        self.ensure_one()
+        return self.env["res.partner"].with_context(
+            active_test=False,
+            **self._suenlace_partner_context(),
+        )
+
+    def _suenlace_partner_record(self, partner):
+        self.ensure_one()
+        return partner.with_context(**self._suenlace_partner_context())
+
     def _upsert_partner(self, rec):
         """Localiza o crea un tercero sin duplicarlo por variaciones del NIF.
 
@@ -345,7 +385,7 @@ class SuenlaceImport(models.Model):
         return self._find_or_create_partner(rec)
 
     def _find_or_create_partner(self, rec, force_name=False):
-        partner_model = self.env["res.partner"].with_context(active_test=False)
+        partner_model = self._suenlace_partner_model()
         country_code = rec.get("pais")
         nif = partner_utils.normalize_vat(rec.get("nif"), country_code)
         account_code = (rec.get("cuenta") or "").strip()
@@ -584,7 +624,7 @@ class SuenlaceImport(models.Model):
             if not current:
                 write_vals[field_name] = value
         if write_vals:
-            partner.write(write_vals)
+            self._suenlace_partner_record(partner).write(write_vals)
 
     def _apply_partner_roles(self, partner, account_code, invoice_type=None):
         if not partner:

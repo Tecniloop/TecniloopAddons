@@ -18,6 +18,7 @@
                     <field name="post_moves"/>
                     <separator string="Modo de importación contable"/>
                     <field name="associate_partners"/>
+                    <field name="skip_vat_validation"/>
                     <field name="associate_taxes"/>
                 </group>
                 <group string="Diarios por defecto (opcional)">

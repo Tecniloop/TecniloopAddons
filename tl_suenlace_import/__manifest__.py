@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 {
     "name": "Importador SUENLACE (a3asesor Eco/Con)",
-    "version": "19.0.1.7.0",
+    "version": "19.0.1.8.0",
     "category": "Accounting/Accounting",
     "summary": "Importa SUENLACE.DAT como asientos literales o facturas "
                "Odoo, con terceros y control de totales.",

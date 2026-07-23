@@ -16,3 +16,7 @@ impuestos, utilice **Contabilidad > SUENLACE > Cargar mapeos predeterminados**.
 El módulo base ejecuta las operaciones de forma síncrona. Si está instalado
 ``tl_suenlace_import_queue_job`` puede activar el procesamiento asíncrono en
 cada lote.
+
+Si el fichero contiene un NIF que Odoo rechaza pero debe conservarse para la
+migración, active **Omitir validación del NIF de Odoo**. La excepción se aplica
+solo a los terceros creados o actualizados por ese lote.

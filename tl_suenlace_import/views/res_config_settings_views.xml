@@ -15,6 +15,11 @@
                              help="Asigna partner_id a asientos tipo 0 y a facturas importadas como asiento literal. Las facturas Odoo siempre identifican su tercero.">
                         <field name="suenlace_associate_partners"/>
                     </setting>
+                    <setting id="tl_suenlace_skip_vat_validation_setting"
+                             string="Omitir validación del NIF de Odoo"
+                             help="Permite importar terceros con un NIF que Odoo considere inválido. Solo se omite la validación durante esta importación SUENLACE; no se desactiva globalmente.">
+                        <field name="suenlace_skip_vat_validation"/>
+                    </setting>
                     <setting id="tl_suenlace_associate_taxes_setting"
                              string="Interpretar impuestos y crear facturas"
                              help="Desactivado importa todos los documentos como asientos y conserva las cuentas del DAT. Activado crea facturas Odoo para registros 1/2+9 e interpreta los impuestos configurados.">

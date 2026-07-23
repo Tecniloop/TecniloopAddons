@@ -116,6 +116,16 @@ class TestSuenlacePartnerMatching(TransactionCase):
         self.assertEqual(result.ref, "430000000001")
         self.assertGreaterEqual(result.customer_rank, 1)
 
+    def test_invalid_vat_can_be_imported_when_validation_is_skipped(self):
+        self.import_batch.skip_vat_validation = True
+        partner = self.import_batch._find_or_create_partner({
+            "nif": "ESB00000000",
+            "nombre": "NIF pendiente de revisión",
+            "cuenta": "430000000099",
+            "pais": "ES",
+        })
+        self.assertEqual(partner.vat, "ESB00000000")
+
     def test_existing_partner_with_formatted_vat_is_reused(self):
         partner = self.env["res.partner"].create({
             "name": "Persona de prueba",

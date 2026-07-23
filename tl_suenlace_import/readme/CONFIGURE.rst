@@ -33,6 +33,19 @@ Asigna ``partner_id`` a:
 No modifica la cuenta contable. Si se crean facturas Odoo, el tercero es
 obligatorio y se identifica o crea independientemente de esta opción.
 
+**Omitir validación del NIF de Odoo**
+----------------------------------------
+
+Permite que los terceros creados o actualizados por una importación SUENLACE
+se guarden aunque el NIF no supere la comprobación de formato o dígito de
+control de ``base_vat``. El importador usa el contexto estándar
+``no_vat_validation`` de Odoo únicamente durante esas operaciones.
+
+La opción no desactiva la validación global: las altas y modificaciones
+manuales de terceros, así como las realizadas por otros módulos, continúan
+validando el NIF normalmente. La normalización SUENLACE sigue aplicándose y
+los NIF españoles se guardan con prefijo ``ES``.
+
 **Interpretar impuestos y crear facturas**
 ------------------------------------------
 

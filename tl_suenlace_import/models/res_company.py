@@ -16,6 +16,17 @@ class ResCompany(models.Model):
             "identifica o crea."
         ),
     )
+    suenlace_skip_vat_validation = fields.Boolean(
+        string="Omitir validación del NIF de Odoo en SUENLACE",
+        default=False,
+        help=(
+            "Permite crear o actualizar terceros desde SUENLACE aunque el "
+            "NIF no supere la validación de formato o dígito de control de "
+            "Odoo. Solo afecta a las operaciones realizadas por este "
+            "importador; la validación estándar continúa activa en el resto "
+            "de Odoo."
+        ),
+    )
     suenlace_associate_taxes = fields.Boolean(
         string="Interpretar impuestos y crear facturas SUENLACE",
         default=False,

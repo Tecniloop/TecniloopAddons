@@ -10,6 +10,10 @@ class ResConfigSettings(models.TransientModel):
         related="company_id.suenlace_associate_partners",
         readonly=False,
     )
+    suenlace_skip_vat_validation = fields.Boolean(
+        related="company_id.suenlace_skip_vat_validation",
+        readonly=False,
+    )
     suenlace_associate_taxes = fields.Boolean(
         related="company_id.suenlace_associate_taxes",
         readonly=False,

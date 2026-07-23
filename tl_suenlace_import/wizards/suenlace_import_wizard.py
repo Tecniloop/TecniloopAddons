@@ -24,6 +24,15 @@ class SuenlaceImportWizard(models.TransientModel):
             "asiento literal. Las facturas Odoo siempre requieren tercero."
         ),
     )
+    skip_vat_validation = fields.Boolean(
+        string="Omitir validación del NIF de Odoo",
+        default=lambda self: self.env.company.suenlace_skip_vat_validation,
+        help=(
+            "Permite crear o actualizar terceros de este lote aunque el NIF "
+            "no supere la validación estándar de Odoo. Solo afecta a esta "
+            "importación SUENLACE."
+        ),
+    )
     associate_taxes = fields.Boolean(
         string="Interpretar impuestos y crear facturas",
         default=lambda self: self.env.company.suenlace_associate_taxes,
@@ -48,6 +57,9 @@ class SuenlaceImportWizard(models.TransientModel):
             self.associate_partners = (
                 self.company_id.suenlace_associate_partners
             )
+            self.skip_vat_validation = (
+                self.company_id.suenlace_skip_vat_validation
+            )
             self.associate_taxes = self.company_id.suenlace_associate_taxes
 
     def _prepare_import_vals(self):
@@ -59,6 +71,7 @@ class SuenlaceImportWizard(models.TransientModel):
             "encoding": self.encoding or False,
             "post_moves": self.post_moves,
             "associate_partners": self.associate_partners,
+            "skip_vat_validation": self.skip_vat_validation,
             "associate_taxes": self.associate_taxes,
             "journal_misc_id": self.journal_misc_id.id or False,
             "journal_sale_id": self.journal_sale_id.id or False,
