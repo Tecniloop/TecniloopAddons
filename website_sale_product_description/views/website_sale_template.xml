@@ -1,16 +1,66 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
+
+    <!--
+        ODOO 19 COMPAT PATCH
+        ====================
+        The original OCA 17.0 template injected the description with
+        `position="inside"` on `//div[@id='o-carousel-product']`, i.e. inside the
+        product image carousel. That is no longer viable on 19.0:
+
+        * `website_sale.carousel_product_indicators_left` (active by default)
+          adds `d-flex` to `#o-carousel-product`, so the injected node became a
+          third flex child, competing for width with the indicators strip and
+          the image itself.
+        * The carousel lives inside `.o_wsale_product_images .o_wsale_sticky_object`,
+          so a long description ended up half-width inside the sticky image column.
+        * The field was rendered into a `<p>`. Block-level content (`<p>`, `<ul>`,
+          `<h3>`...) forces the browser to close that `<p>` early, so the content
+          escaped its own wrapper.
+
+        The description is now rendered as a proper contained block, right above
+        the native `product.website_description` block, so both descriptions can
+        be used together. Anchor verified against odoo/odoo 19.0
+        `addons/website_sale/views/templates.xml` (`website_sale.product`).
+    -->
     <template
-        id="shop_product_carousel"
-        inherit_id="website_sale.shop_product_carousel"
+        id="product_public_description"
+        name="Product: e-Commerce Description"
+        inherit_id="website_sale.product"
     >
-        <xpath expr="//div[@id='o-carousel-product']" position="inside">
-            <div class="o_not_editable">
-                <p
-                    t-field="product.public_description"
-                    id="product_public_description"
-                />
+        <xpath expr="//div[@id='product_full_description']" position="before">
+            <div
+                t-if="product.public_description"
+                id="product_public_description"
+                class="container o_not_editable mt16"
+            >
+                <div t-field="product.public_description" />
             </div>
         </xpath>
     </template>
+
+    <!--
+        OPTIONAL, DISABLED BY DEFAULT.
+        `#product_full_description` is an `oe_structure` and Odoo deliberately
+        leaves it without a container, so that building blocks dropped into it
+        can span the full page width. If `product.website_description` is fed
+        programmatically (importers, `write()`, data loads) with bare markup
+        instead of snippets, that content renders edge to edge and looks wider
+        than the rest of the page. Enabling this view constrains it.
+
+        Enable from Settings > Technical > Views (or Website editor > Theme),
+        or set `active="True"` here. Only do this if you never drop full-width
+        building blocks into the product description.
+    -->
+    <template
+        id="product_full_description_container"
+        name="Product: Contain Full Description"
+        inherit_id="website_sale.product"
+        active="False"
+    >
+        <xpath expr="//div[@id='product_full_description']" position="attributes">
+            <attribute name="class" add="container" separator=" " />
+        </xpath>
+    </template>
+
 </odoo>
