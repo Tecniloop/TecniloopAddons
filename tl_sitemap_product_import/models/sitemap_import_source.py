@@ -98,6 +98,7 @@ CONNECTOR_SELECTION = [
     ('sitemap.connector.noch_athearn', 'Athearn — catálogo NOCH Alemania'),
     ('sitemap.connector.noch_ammo', 'AMMO — catálogo NOCH Alemania'),
     ('sitemap.connector.noch_proxxon', 'PROXXON — catálogo NOCH Alemania'),
+    ('sitemap.connector.munichsports_es', 'MUNICH Sports España'),
 ]
 
 
