@@ -227,7 +227,7 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
         return result
 
     @classmethod
-    def _description(cls, tree, product):
+    def _extract_description(cls, tree, product):
         blocks = []
         if product and product.get('description'):
             blocks.append(cls._clean(product.get('description')))
@@ -303,7 +303,7 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
         if not name:
             raise ValueError('La ficha de MUNICH Sports no publica un nombre reconocible.')
 
-        description = self._description(tree, product)
+        description = self._extract_description(tree, product)
         price = self._prices(tree, product)
         images = self._images(tree, product, canonical)
         breadcrumbs = self._breadcrumbs(tree, name)

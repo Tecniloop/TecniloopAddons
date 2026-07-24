@@ -1123,8 +1123,13 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 - Corrige la comprobación de campos dinámicos para usar el modelo `Product` real.
 
 
-## 19.0.1.90.0
+## 19.0.1.91.0
 
 - Elimina la herencia múltiple con `res.brand.mixin`, incompatible con la reflexión de modelos de esta instalación.
 - Mantiene la dependencia OCA `brand` y usa directamente `res.brand` mediante `product.template.brand_id`.
 - Conserva la marca configurable por fuente y su asignación durante creación y actualización.
+
+
+## 19.0.1.91.0
+
+- Corrige el conector MUNICH: el extractor privado `_description` se renombra a `_extract_description` para no sobrescribir el atributo reservado `_description` de los modelos Odoo.
