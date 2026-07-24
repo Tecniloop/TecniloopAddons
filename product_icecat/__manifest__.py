@@ -25,7 +25,6 @@
         "views/icecat_import_line_views.xml",
         "views/product_brand_views.xml",
         "views/product_template_views.xml",
-        "views/website_sale_template.xml",
         "wizards/icecat_product_import_views.xml",
         "views/icecat_menus.xml",
         "data/ir_cron_data.xml",
