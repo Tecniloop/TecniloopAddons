@@ -259,8 +259,8 @@ class SitemapImportSource(models.Model):
         help='Categoría de comercio electrónico bajo la que se crearán las subcategorías. Si se '
              'deja vacío se creará/usará una categoría con el mismo nombre que esta fuente.')
     product_tag_ids = fields.Many2many('product.tag', string='Etiquetas a aplicar a los productos importados')
-    product_brand_id = fields.Many2one(
-        'product.brand', string='Marca del producto', ondelete='restrict',
+    brand_id = fields.Many2one(
+        'res.brand', string='Marca OCA del producto', ondelete='restrict',
         help='Marca OCA que se asignará a todos los productos creados o actualizados desde esta fuente.')
     sale_ok = fields.Boolean(string='Marcar productos como vendibles', default=True)
     purchase_ok = fields.Boolean(string='Marcar productos como comprables', default=False)

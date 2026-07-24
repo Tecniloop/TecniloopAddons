@@ -1101,11 +1101,16 @@ incluidas se regeneran con `.js` desactivado.
 - Los lotes cuya recopilación en cola fue eliminada vuelven a Borrador.
 - Puede ejecutarse manualmente desde los botones Restaurar estado/Restaurar estados y automáticamente cada diez minutos.
 
+## 19.0.1.86.0 - MUNICH Sports España
 
-## Marca OCA por fuente
+Añade la fuente `https://www.munichsports.com/sitemap.xml` y un conector específico
+que deduplica las traducciones, conserva la ficha española, importa el precio vigente,
+referencia, descripción, categorías, galería y crea variantes por talla aunque no exista EAN.
 
-Cada fuente dispone del campo **Marca del producto** (`product_brand_id`), basado en el
-módulo OCA `product_brand`. Al crear o actualizar un `product.template`, el importador
-asigna siempre la marca configurada en su fuente. Las fuentes incluidas por el módulo
-se entregan con su marca preconfigurada; en fuentes creadas manualmente puede elegirse
-o crearse la marca desde la propia ficha.
+## 19.0.1.88.0 - Marca OCA por fuente
+
+Cada fuente dispone del campo **Marca OCA del producto** (`brand_id`), basado en el
+módulo OCA `brand` y su modelo `res.brand`. `product.template` incorpora el mixin
+`res.brand.mixin`, de modo que los productos creados o actualizados reciben la marca
+configurada en la fuente. Esta versión no depende de `product_brand`.
+

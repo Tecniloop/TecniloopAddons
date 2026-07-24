@@ -1,276 +1,276 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
-    <record id="product_brand_skechers_es" model="product.brand">
+    <record id="product_brand_skechers_es" model="res.brand">
         <field name="name">Skechers</field>
     </record>
-    <record id="product_brand_mtng_es" model="product.brand">
+    <record id="product_brand_mtng_es" model="res.brand">
         <field name="name">Mustang</field>
     </record>
-    <record id="product_brand_pikolinos_es" model="product.brand">
+    <record id="product_brand_pikolinos_es" model="res.brand">
         <field name="name">Pikolinos</field>
     </record>
-    <record id="product_brand_panamajack_es" model="product.brand">
+    <record id="product_brand_panamajack_es" model="res.brand">
         <field name="name">Panama Jack</field>
     </record>
-    <record id="product_brand_miguelbellido_es" model="product.brand">
+    <record id="product_brand_miguelbellido_es" model="res.brand">
         <field name="name">Miguel Bellido</field>
     </record>
-    <record id="product_brand_levis_es" model="product.brand">
+    <record id="product_brand_levis_es" model="res.brand">
         <field name="name">Levi's</field>
     </record>
-    <record id="product_brand_fruitoftheloom_eu" model="product.brand">
+    <record id="product_brand_fruitoftheloom_eu" model="res.brand">
         <field name="name">Fruit of the Loom</field>
     </record>
-    <record id="product_brand_blendcompany_eu" model="product.brand">
+    <record id="product_brand_blendcompany_eu" model="res.brand">
         <field name="name">Blend</field>
     </record>
-    <record id="product_brand_selected_es" model="product.brand">
+    <record id="product_brand_selected_es" model="res.brand">
         <field name="name">SELECTED</field>
     </record>
-    <record id="product_brand_geox_es" model="product.brand">
+    <record id="product_brand_geox_es" model="res.brand">
         <field name="name">Geox</field>
     </record>
-    <record id="product_brand_callaghan_es" model="product.brand">
+    <record id="product_brand_callaghan_es" model="res.brand">
         <field name="name">Callaghan</field>
     </record>
-    <record id="product_brand_fluchos_es" model="product.brand">
+    <record id="product_brand_fluchos_es" model="res.brand">
         <field name="name">Fluchos</field>
     </record>
-    <record id="product_brand_pitillos_es" model="product.brand">
+    <record id="product_brand_pitillos_es" model="res.brand">
         <field name="name">Pitillos</field>
     </record>
-    <record id="product_brand_gioseppo_es" model="product.brand">
+    <record id="product_brand_gioseppo_es" model="res.brand">
         <field name="name">Gioseppo</field>
     </record>
-    <record id="product_brand_bhbikes_es" model="product.brand">
+    <record id="product_brand_bhbikes_es" model="res.brand">
         <field name="name">BH</field>
     </record>
-    <record id="product_brand_lapierre_es" model="product.brand">
+    <record id="product_brand_lapierre_es" model="res.brand">
         <field name="name">Lapierre</field>
     </record>
-    <record id="product_brand_wethepeoplebmx" model="product.brand">
+    <record id="product_brand_wethepeoplebmx" model="res.brand">
         <field name="name">WeThePeople BMX</field>
     </record>
-    <record id="product_brand_mondraker_es" model="product.brand">
+    <record id="product_brand_mondraker_es" model="res.brand">
         <field name="name">Mondraker</field>
     </record>
-    <record id="product_brand_cervelo_es" model="product.brand">
+    <record id="product_brand_cervelo_es" model="res.brand">
         <field name="name">Cervélo</field>
     </record>
-    <record id="product_brand_colnago_es" model="product.brand">
+    <record id="product_brand_colnago_es" model="res.brand">
         <field name="name">Colnago</field>
     </record>
-    <record id="product_brand_bicicletasquer_es" model="product.brand">
+    <record id="product_brand_bicicletasquer_es" model="res.brand">
         <field name="name">Bicicletas Quer</field>
     </record>
-    <record id="product_brand_ridley_es" model="product.brand">
+    <record id="product_brand_ridley_es" model="res.brand">
         <field name="name">Ridley</field>
     </record>
-    <record id="product_brand_gtbicycles" model="product.brand">
+    <record id="product_brand_gtbicycles" model="res.brand">
         <field name="name">GT Bicycles</field>
     </record>
-    <record id="product_brand_conor_es" model="product.brand">
+    <record id="product_brand_conor_es" model="res.brand">
         <field name="name">Conor</field>
     </record>
-    <record id="product_brand_merida_es" model="product.brand">
+    <record id="product_brand_merida_es" model="res.brand">
         <field name="name">MERIDA BIKES</field>
     </record>
-    <record id="product_brand_orbea_es" model="product.brand">
+    <record id="product_brand_orbea_es" model="res.brand">
         <field name="name">Orbea</field>
     </record>
-    <record id="product_brand_scalextric_es" model="product.brand">
+    <record id="product_brand_scalextric_es" model="res.brand">
         <field name="name">Scalextric</field>
     </record>
-    <record id="product_brand_ninco_es" model="product.brand">
+    <record id="product_brand_ninco_es" model="res.brand">
         <field name="name">NINCO</field>
     </record>
-    <record id="product_brand_electrotren_es" model="product.brand">
+    <record id="product_brand_electrotren_es" model="res.brand">
         <field name="name">Electrotren</field>
     </record>
-    <record id="product_brand_jouef_uk" model="product.brand">
+    <record id="product_brand_jouef_uk" model="res.brand">
         <field name="name">Jouef</field>
     </record>
-    <record id="product_brand_arnold_de" model="product.brand">
+    <record id="product_brand_arnold_de" model="res.brand">
         <field name="name">Arnold</field>
     </record>
-    <record id="product_brand_rivarossi_it" model="product.brand">
+    <record id="product_brand_rivarossi_it" model="res.brand">
         <field name="name">Rivarossi</field>
     </record>
-    <record id="product_brand_lima_it" model="product.brand">
+    <record id="product_brand_lima_it" model="res.brand">
         <field name="name">Lima</field>
     </record>
-    <record id="product_brand_pocher_uk" model="product.brand">
+    <record id="product_brand_pocher_uk" model="res.brand">
         <field name="name">Pocher</field>
     </record>
-    <record id="product_brand_hornby_uk" model="product.brand">
+    <record id="product_brand_hornby_uk" model="res.brand">
         <field name="name">Hornby</field>
     </record>
-    <record id="product_brand_airfix_uk" model="product.brand">
+    <record id="product_brand_airfix_uk" model="res.brand">
         <field name="name">Airfix</field>
     </record>
-    <record id="product_brand_corgi_uk" model="product.brand">
+    <record id="product_brand_corgi_uk" model="res.brand">
         <field name="name">Corgi / Corgi Premiums</field>
     </record>
-    <record id="product_brand_humbrol_uk" model="product.brand">
+    <record id="product_brand_humbrol_uk" model="res.brand">
         <field name="name">Humbrol</field>
     </record>
-    <record id="product_brand_bassett_lowke_uk" model="product.brand">
+    <record id="product_brand_bassett_lowke_uk" model="res.brand">
         <field name="name">Bassett-Lowke</field>
     </record>
-    <record id="product_brand_maerklin_en" model="product.brand">
+    <record id="product_brand_maerklin_en" model="res.brand">
         <field name="name">Märklin</field>
     </record>
-    <record id="product_brand_trix_en" model="product.brand">
+    <record id="product_brand_trix_en" model="res.brand">
         <field name="name">Trix</field>
     </record>
-    <record id="product_brand_minitrix_en" model="product.brand">
+    <record id="product_brand_minitrix_en" model="res.brand">
         <field name="name">Minitrix</field>
     </record>
-    <record id="product_brand_lgb_en" model="product.brand">
+    <record id="product_brand_lgb_en" model="res.brand">
         <field name="name">LGB</field>
     </record>
-    <record id="product_brand_preiser_de" model="product.brand">
+    <record id="product_brand_preiser_de" model="res.brand">
         <field name="name">Preiser Figuren</field>
     </record>
-    <record id="product_brand_roco_es" model="product.brand">
+    <record id="product_brand_roco_es" model="res.brand">
         <field name="name">ROCO</field>
     </record>
-    <record id="product_brand_fleischmann_es" model="product.brand">
+    <record id="product_brand_fleischmann_es" model="res.brand">
         <field name="name">Fleischmann</field>
     </record>
-    <record id="product_brand_piko_en" model="product.brand">
+    <record id="product_brand_piko_en" model="res.brand">
         <field name="name">PIKO</field>
     </record>
-    <record id="product_brand_brawa_en" model="product.brand">
+    <record id="product_brand_brawa_en" model="res.brand">
         <field name="name">BRAWA</field>
     </record>
-    <record id="product_brand_hape_es" model="product.brand">
+    <record id="product_brand_hape_es" model="res.brand">
         <field name="name">Hape</field>
     </record>
-    <record id="product_brand_viessmann_viessmann" model="product.brand">
+    <record id="product_brand_viessmann_viessmann" model="res.brand">
         <field name="name">Viessmann</field>
     </record>
-    <record id="product_brand_viessmann_kibri" model="product.brand">
+    <record id="product_brand_viessmann_kibri" model="res.brand">
         <field name="name">Kibri</field>
     </record>
-    <record id="product_brand_viessmann_vollmer" model="product.brand">
+    <record id="product_brand_viessmann_vollmer" model="res.brand">
         <field name="name">Vollmer</field>
     </record>
-    <record id="product_brand_ree_modeles_fr" model="product.brand">
+    <record id="product_brand_ree_modeles_fr" model="res.brand">
         <field name="name">REE Modèles</field>
     </record>
-    <record id="product_brand_bemo_de" model="product.brand">
+    <record id="product_brand_bemo_de" model="res.brand">
         <field name="name">BEMO Modelleisenbahnen</field>
     </record>
-    <record id="product_brand_bachmann_bachmann_branchline" model="product.brand">
+    <record id="product_brand_bachmann_bachmann_branchline" model="res.brand">
         <field name="name">Bachmann Branchline</field>
     </record>
-    <record id="product_brand_bachmann_graham_farish" model="product.brand">
+    <record id="product_brand_bachmann_graham_farish" model="res.brand">
         <field name="name">Graham Farish</field>
     </record>
-    <record id="product_brand_bachmann_liliput" model="product.brand">
+    <record id="product_brand_bachmann_liliput" model="res.brand">
         <field name="name">Liliput</field>
     </record>
-    <record id="product_brand_bachmann_efe_rail" model="product.brand">
+    <record id="product_brand_bachmann_efe_rail" model="res.brand">
         <field name="name">EFE Rail</field>
     </record>
-    <record id="product_brand_bachmann_scenecraft" model="product.brand">
+    <record id="product_brand_bachmann_scenecraft" model="res.brand">
         <field name="name">Scenecraft</field>
     </record>
-    <record id="product_brand_bachmann_bachmann_narrow_gauge" model="product.brand">
+    <record id="product_brand_bachmann_bachmann_narrow_gauge" model="res.brand">
         <field name="name">Bachmann Narrow Gauge</field>
     </record>
-    <record id="product_brand_bachmann_thomas_friends" model="product.brand">
+    <record id="product_brand_bachmann_thomas_friends" model="res.brand">
         <field name="name">Thomas &amp; Friends</field>
     </record>
-    <record id="product_brand_bachmann_woodland_scenics" model="product.brand">
+    <record id="product_brand_bachmann_woodland_scenics" model="res.brand">
         <field name="name">Woodland Scenics</field>
     </record>
-    <record id="product_brand_bachmann_proses" model="product.brand">
+    <record id="product_brand_bachmann_proses" model="res.brand">
         <field name="name">Proses</field>
     </record>
-    <record id="product_brand_bachmann_bachmann_trains_usa" model="product.brand">
+    <record id="product_brand_bachmann_bachmann_trains_usa" model="res.brand">
         <field name="name">Bachmann Trains USA</field>
     </record>
-    <record id="product_brand_bachmann_bachmann_china" model="product.brand">
+    <record id="product_brand_bachmann_bachmann_china" model="res.brand">
         <field name="name">Bachmann China</field>
     </record>
-    <record id="product_brand_bachmann_efe_road" model="product.brand">
+    <record id="product_brand_bachmann_efe_road" model="res.brand">
         <field name="name">EFE Road</field>
     </record>
-    <record id="product_brand_bachmann_exclusive_first_editions" model="product.brand">
+    <record id="product_brand_bachmann_exclusive_first_editions" model="res.brand">
         <field name="name">Exclusive First Editions</field>
     </record>
-    <record id="product_brand_bachmann_greenlight" model="product.brand">
+    <record id="product_brand_bachmann_greenlight" model="res.brand">
         <field name="name">GreenLight</field>
     </record>
-    <record id="product_brand_bachmann_mini_gt" model="product.brand">
+    <record id="product_brand_bachmann_mini_gt" model="res.brand">
         <field name="name">Mini GT</field>
     </record>
-    <record id="product_brand_bachmann_academy" model="product.brand">
+    <record id="product_brand_bachmann_academy" model="res.brand">
         <field name="name">Academy</field>
     </record>
-    <record id="product_brand_bachmann_trumpeter" model="product.brand">
+    <record id="product_brand_bachmann_trumpeter" model="res.brand">
         <field name="name">Trumpeter</field>
     </record>
-    <record id="product_brand_bachmann_accurate_figures" model="product.brand">
+    <record id="product_brand_bachmann_accurate_figures" model="res.brand">
         <field name="name">Accurate Figures</field>
     </record>
-    <record id="product_brand_bachmann_afv_club" model="product.brand">
+    <record id="product_brand_bachmann_afv_club" model="res.brand">
         <field name="name">AFV Club</field>
     </record>
-    <record id="product_brand_bachmann_amt" model="product.brand">
+    <record id="product_brand_bachmann_amt" model="res.brand">
         <field name="name">AMT</field>
     </record>
-    <record id="product_brand_bachmann_emhar" model="product.brand">
+    <record id="product_brand_bachmann_emhar" model="res.brand">
         <field name="name">Emhar</field>
     </record>
-    <record id="product_brand_bachmann_hk_models" model="product.brand">
+    <record id="product_brand_bachmann_hk_models" model="res.brand">
         <field name="name">HK Models</field>
     </record>
-    <record id="product_brand_bachmann_i_love_kit" model="product.brand">
+    <record id="product_brand_bachmann_i_love_kit" model="res.brand">
         <field name="name">I Love Kit</field>
     </record>
-    <record id="product_brand_bachmann_mpc" model="product.brand">
+    <record id="product_brand_bachmann_mpc" model="res.brand">
         <field name="name">MPC</field>
     </record>
-    <record id="product_brand_bachmann_polar_lights" model="product.brand">
+    <record id="product_brand_bachmann_polar_lights" model="res.brand">
         <field name="name">Polar Lights</field>
     </record>
-    <record id="product_brand_bachmann_roden" model="product.brand">
+    <record id="product_brand_bachmann_roden" model="res.brand">
         <field name="name">Roden</field>
     </record>
-    <record id="product_brand_bachmann_takom" model="product.brand">
+    <record id="product_brand_bachmann_takom" model="res.brand">
         <field name="name">Takom</field>
     </record>
-    <record id="product_brand_bachmann_toyway" model="product.brand">
+    <record id="product_brand_bachmann_toyway" model="res.brand">
         <field name="name">Toyway</field>
     </record>
-    <record id="product_brand_faller_faller" model="product.brand">
+    <record id="product_brand_faller_faller" model="res.brand">
         <field name="name">FALLER</field>
     </record>
-    <record id="product_brand_faller_pola_g" model="product.brand">
+    <record id="product_brand_faller_pola_g" model="res.brand">
         <field name="name">POLA G</field>
     </record>
-    <record id="product_brand_aneste_datank_es" model="product.brand">
+    <record id="product_brand_aneste_datank_es" model="res.brand">
         <field name="name">Aneste Datank</field>
     </record>
-    <record id="product_brand_noch_noch" model="product.brand">
+    <record id="product_brand_noch_noch" model="res.brand">
         <field name="name">NOCH</field>
     </record>
-    <record id="product_brand_noch_rokuhan" model="product.brand">
+    <record id="product_brand_noch_rokuhan" model="res.brand">
         <field name="name">Rokuhan</field>
     </record>
-    <record id="product_brand_noch_athearn" model="product.brand">
+    <record id="product_brand_noch_athearn" model="res.brand">
         <field name="name">Athearn</field>
     </record>
-    <record id="product_brand_noch_ammo" model="product.brand">
+    <record id="product_brand_noch_ammo" model="res.brand">
         <field name="name">AMMO</field>
     </record>
-    <record id="product_brand_noch_proxxon" model="product.brand">
+    <record id="product_brand_noch_proxxon" model="res.brand">
         <field name="name">PROXXON</field>
     </record>
-    <record id="product_brand_munichsports_es" model="product.brand">
+    <record id="product_brand_munichsports_es" model="res.brand">
         <field name="name">MUNICH</field>
     </record>
     <record id="sitemap_import_source_skechers_es" model="sitemap.import.source">
@@ -279,7 +279,7 @@
         <field name="sitemap_index_url">https://www.skechers.es/sitemap_index.xml</field>
         <field name="import_eans">1</field>
         <field name="max_ean_requests_per_product">30</field>
-        <field name="product_brand_id" ref="product_brand_skechers_es" />
+        <field name="brand_id" ref="product_brand_skechers_es" />
     </record>
     <record id="sitemap_import_source_mtng_es" model="sitemap.import.source">
         <field name="name">Mustang Shoes España</field>
@@ -287,7 +287,7 @@
         <field name="sitemap_index_url">https://www.mtngshoes.com/sitemap_index.xml</field>
         <field name="import_eans">1</field>
         <field name="max_ean_requests_per_product">30</field>
-        <field name="product_brand_id" ref="product_brand_mtng_es" />
+        <field name="brand_id" ref="product_brand_mtng_es" />
     </record>
     <record id="sitemap_import_source_pikolinos_es" model="sitemap.import.source">
         <field name="name">Pikolinos España</field>
@@ -300,7 +300,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_pikolinos_es" />
+        <field name="brand_id" ref="product_brand_pikolinos_es" />
     </record>
     <record id="sitemap_import_source_panamajack_es" model="sitemap.import.source">
         <field name="name">Panama Jack España</field>
@@ -308,7 +308,7 @@
         <field name="sitemap_index_url">https://www.panamajack.es/sitemap.xml</field>
         <field name="import_eans">1</field>
         <field name="max_ean_requests_per_product">30</field>
-        <field name="product_brand_id" ref="product_brand_panamajack_es" />
+        <field name="brand_id" ref="product_brand_panamajack_es" />
     </record>
     <record id="sitemap_import_source_miguelbellido_es" model="sitemap.import.source">
         <field name="name">Miguel Bellido España</field>
@@ -318,7 +318,7 @@
         <field name="max_ean_requests_per_product">30</field>
         <field name="products_per_run">30</field>
         <field name="max_images_per_product">6</field>
-        <field name="product_brand_id" ref="product_brand_miguelbellido_es" />
+        <field name="brand_id" ref="product_brand_miguelbellido_es" />
     </record>
     <record id="sitemap_import_source_levis_es" model="sitemap.import.source">
         <field name="name">Levi's España</field>
@@ -331,7 +331,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_levis_es" />
+        <field name="brand_id" ref="product_brand_levis_es" />
     </record>
     <record id="sitemap_import_source_fruitoftheloom_eu" model="sitemap.import.source">
         <field name="name">Fruit of the Loom Europa</field>
@@ -344,7 +344,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_fruitoftheloom_eu" />
+        <field name="brand_id" ref="product_brand_fruitoftheloom_eu" />
     </record>
     <record id="sitemap_import_source_blendcompany_eu" model="sitemap.import.source">
         <field name="name">Blend Europa</field>
@@ -357,7 +357,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_blendcompany_eu" />
+        <field name="brand_id" ref="product_brand_blendcompany_eu" />
     </record>
     <record id="sitemap_import_source_selected_es" model="sitemap.import.source">
         <field name="name">SELECTED España</field>
@@ -370,7 +370,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_selected_es" />
+        <field name="brand_id" ref="product_brand_selected_es" />
     </record>
     <record id="sitemap_import_source_geox_es" model="sitemap.import.source">
         <field name="name">Geox España</field>
@@ -383,7 +383,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_geox_es" />
+        <field name="brand_id" ref="product_brand_geox_es" />
     </record>
     <record id="sitemap_import_source_callaghan_es" model="sitemap.import.source">
         <field name="name">Callaghan España</field>
@@ -396,7 +396,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_callaghan_es" />
+        <field name="brand_id" ref="product_brand_callaghan_es" />
     </record>
     <record id="sitemap_import_source_fluchos_es" model="sitemap.import.source">
         <field name="name">Fluchos España</field>
@@ -409,7 +409,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_fluchos_es" />
+        <field name="brand_id" ref="product_brand_fluchos_es" />
     </record>
     <record id="sitemap_import_source_pitillos_es" model="sitemap.import.source">
         <field name="name">Pitillos España</field>
@@ -422,7 +422,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_pitillos_es" />
+        <field name="brand_id" ref="product_brand_pitillos_es" />
     </record>
     <record id="sitemap_import_source_gioseppo_es" model="sitemap.import.source">
         <field name="name">Gioseppo España</field>
@@ -435,7 +435,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_gioseppo_es" />
+        <field name="brand_id" ref="product_brand_gioseppo_es" />
     </record>
     <record id="sitemap_import_source_bhbikes_es" model="sitemap.import.source">
         <field name="name">BH Bikes España</field>
@@ -448,7 +448,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_bhbikes_es" />
+        <field name="brand_id" ref="product_brand_bhbikes_es" />
     </record>
     <record id="sitemap_import_source_lapierre_es" model="sitemap.import.source">
         <field name="name">Lapierre Bikes España</field>
@@ -461,7 +461,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_lapierre_es" />
+        <field name="brand_id" ref="product_brand_lapierre_es" />
     </record>
     <record id="sitemap_import_source_wethepeoplebmx" model="sitemap.import.source">
         <field name="name">WeThePeople BMX</field>
@@ -474,7 +474,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_wethepeoplebmx" />
+        <field name="brand_id" ref="product_brand_wethepeoplebmx" />
     </record>
     <record id="sitemap_import_source_mondraker_es" model="sitemap.import.source">
         <field name="name">Mondraker España</field>
@@ -487,7 +487,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_mondraker_es" />
+        <field name="brand_id" ref="product_brand_mondraker_es" />
     </record>
     <record id="sitemap_import_source_cervelo_es" model="sitemap.import.source">
         <field name="name">Cervélo España</field>
@@ -500,7 +500,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_cervelo_es" />
+        <field name="brand_id" ref="product_brand_cervelo_es" />
     </record>
     <record id="sitemap_import_source_colnago_es" model="sitemap.import.source">
         <field name="name">Colnago España</field>
@@ -513,7 +513,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
-        <field name="product_brand_id" ref="product_brand_colnago_es" />
+        <field name="brand_id" ref="product_brand_colnago_es" />
     </record>
     <record id="sitemap_import_source_bicicletasquer_es" model="sitemap.import.source">
         <field name="name">Bicicletas Quer B2B España</field>
@@ -527,7 +527,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bicicletasquer_es" />
+        <field name="brand_id" ref="product_brand_bicicletasquer_es" />
     </record>
     <record id="sitemap_import_source_ridley_es" model="sitemap.import.source">
         <field name="name">Ridley Bikes España</field>
@@ -541,7 +541,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_ridley_es" />
+        <field name="brand_id" ref="product_brand_ridley_es" />
     </record>
     <record id="sitemap_import_source_gtbicycles" model="sitemap.import.source">
         <field name="name">GT Bicycles</field>
@@ -555,7 +555,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_gtbicycles" />
+        <field name="brand_id" ref="product_brand_gtbicycles" />
     </record>
     <record id="sitemap_import_source_conor_es" model="sitemap.import.source">
         <field name="name">Conor Bikes España</field>
@@ -569,7 +569,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_conor_es" />
+        <field name="brand_id" ref="product_brand_conor_es" />
     </record>
     <record id="sitemap_import_source_merida_es" model="sitemap.import.source">
         <field name="name">MERIDA BIKES España</field>
@@ -583,7 +583,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_merida_es" />
+        <field name="brand_id" ref="product_brand_merida_es" />
     </record>
     <record id="sitemap_import_source_orbea_es" model="sitemap.import.source">
         <field name="name">Orbea España</field>
@@ -597,7 +597,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_orbea_es" />
+        <field name="brand_id" ref="product_brand_orbea_es" />
     </record>
     <record id="sitemap_import_source_scalextric_es" model="sitemap.import.source">
         <field name="name">Scalextric España</field>
@@ -611,7 +611,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_scalextric_es" />
+        <field name="brand_id" ref="product_brand_scalextric_es" />
     </record>
     <record id="sitemap_import_source_ninco_es" model="sitemap.import.source">
         <field name="name">NINCO España</field>
@@ -625,7 +625,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_ninco_es" />
+        <field name="brand_id" ref="product_brand_ninco_es" />
     </record>
     <record id="sitemap_import_source_electrotren_es" model="sitemap.import.source">
         <field name="shopify_js_mode">disabled</field>
@@ -640,7 +640,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_electrotren_es" />
+        <field name="brand_id" ref="product_brand_electrotren_es" />
     </record>
     <record id="sitemap_import_source_jouef_uk" model="sitemap.import.source">
         <field name="shopify_js_mode">disabled</field>
@@ -655,7 +655,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_jouef_uk" />
+        <field name="brand_id" ref="product_brand_jouef_uk" />
     </record>
     <record id="sitemap_import_source_arnold_de" model="sitemap.import.source">
         <field name="shopify_js_mode">disabled</field>
@@ -668,7 +668,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
-        <field name="product_brand_id" ref="product_brand_arnold_de" />
+        <field name="brand_id" ref="product_brand_arnold_de" />
     </record>
     <record id="sitemap_import_source_rivarossi_it" model="sitemap.import.source">
         <field name="shopify_js_mode">disabled</field>
@@ -681,7 +681,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
-        <field name="product_brand_id" ref="product_brand_rivarossi_it" />
+        <field name="brand_id" ref="product_brand_rivarossi_it" />
     </record>
     <record id="sitemap_import_source_lima_it" model="sitemap.import.source">
         <field name="shopify_js_mode">disabled</field>
@@ -694,7 +694,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
-        <field name="product_brand_id" ref="product_brand_lima_it" />
+        <field name="brand_id" ref="product_brand_lima_it" />
     </record>
     <record id="sitemap_import_source_pocher_uk" model="sitemap.import.source">
         <field name="shopify_js_mode">disabled</field>
@@ -707,7 +707,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
-        <field name="product_brand_id" ref="product_brand_pocher_uk" />
+        <field name="brand_id" ref="product_brand_pocher_uk" />
     </record>
     <record id="sitemap_import_source_hornby_uk" model="sitemap.import.source">
         <field name="shopify_js_mode">disabled</field>
@@ -720,7 +720,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
-        <field name="product_brand_id" ref="product_brand_hornby_uk" />
+        <field name="brand_id" ref="product_brand_hornby_uk" />
     </record>
     <record id="sitemap_import_source_airfix_uk" model="sitemap.import.source">
         <field name="shopify_js_mode">disabled</field>
@@ -733,7 +733,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
-        <field name="product_brand_id" ref="product_brand_airfix_uk" />
+        <field name="brand_id" ref="product_brand_airfix_uk" />
     </record>
     <record id="sitemap_import_source_corgi_uk" model="sitemap.import.source">
         <field name="shopify_js_mode">disabled</field>
@@ -746,7 +746,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
-        <field name="product_brand_id" ref="product_brand_corgi_uk" />
+        <field name="brand_id" ref="product_brand_corgi_uk" />
     </record>
     <record id="sitemap_import_source_humbrol_uk" model="sitemap.import.source">
         <field name="shopify_js_mode">disabled</field>
@@ -759,7 +759,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
-        <field name="product_brand_id" ref="product_brand_humbrol_uk" />
+        <field name="brand_id" ref="product_brand_humbrol_uk" />
     </record>
     <record id="sitemap_import_source_bassett_lowke_uk" model="sitemap.import.source">
         <field name="shopify_js_mode">disabled</field>
@@ -772,7 +772,7 @@
         <field name="request_timeout">30</field>
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
-        <field name="product_brand_id" ref="product_brand_bassett_lowke_uk" />
+        <field name="brand_id" ref="product_brand_bassett_lowke_uk" />
     </record>
     <record id="sitemap_import_source_maerklin_en" model="sitemap.import.source">
         <field name="name">Märklin Europa</field>
@@ -786,7 +786,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_maerklin_en" />
+        <field name="brand_id" ref="product_brand_maerklin_en" />
     </record>
     <record id="sitemap_import_source_trix_en" model="sitemap.import.source">
         <field name="name">Trix Europa</field>
@@ -800,7 +800,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_trix_en" />
+        <field name="brand_id" ref="product_brand_trix_en" />
     </record>
     <record id="sitemap_import_source_minitrix_en" model="sitemap.import.source">
         <field name="name">Minitrix Europa</field>
@@ -814,7 +814,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_minitrix_en" />
+        <field name="brand_id" ref="product_brand_minitrix_en" />
     </record>
     <record id="sitemap_import_source_lgb_en" model="sitemap.import.source">
         <field name="name">LGB Europa</field>
@@ -828,7 +828,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_lgb_en" />
+        <field name="brand_id" ref="product_brand_lgb_en" />
     </record>
     <record id="sitemap_import_source_preiser_de" model="sitemap.import.source">
         <field name="name">Preiser Figuren Europa</field>
@@ -842,7 +842,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_preiser_de" />
+        <field name="brand_id" ref="product_brand_preiser_de" />
     </record>
     <record id="sitemap_import_source_roco_es" model="sitemap.import.source">
         <field name="name">ROCO España</field>
@@ -856,7 +856,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_roco_es" />
+        <field name="brand_id" ref="product_brand_roco_es" />
     </record>
     <record id="sitemap_import_source_fleischmann_es" model="sitemap.import.source">
         <field name="name">Fleischmann España</field>
@@ -870,7 +870,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_fleischmann_es" />
+        <field name="brand_id" ref="product_brand_fleischmann_es" />
     </record>
     <record id="sitemap_import_source_piko_en" model="sitemap.import.source">
         <field name="name">PIKO Europa</field>
@@ -884,7 +884,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_piko_en" />
+        <field name="brand_id" ref="product_brand_piko_en" />
     </record>
     <record id="sitemap_import_source_brawa_en" model="sitemap.import.source">
         <field name="name">BRAWA Europa</field>
@@ -898,7 +898,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_brawa_en" />
+        <field name="brand_id" ref="product_brand_brawa_en" />
     </record>
     <record id="sitemap_import_source_hape_es" model="sitemap.import.source">
         <field name="name">Hape España</field>
@@ -912,7 +912,7 @@
         <field name="products_per_run">25</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_hape_es" />
+        <field name="brand_id" ref="product_brand_hape_es" />
     </record>
     <record id="sitemap_import_source_viessmann_viessmann" model="sitemap.import.source">
         <field name="name">Viessmann Europa</field>
@@ -925,7 +925,7 @@
         <field name="products_per_run">30</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_viessmann_viessmann" />
+        <field name="brand_id" ref="product_brand_viessmann_viessmann" />
     </record>
     <record id="sitemap_import_source_viessmann_kibri" model="sitemap.import.source">
         <field name="name">Kibri Europa</field>
@@ -938,7 +938,7 @@
         <field name="products_per_run">30</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_viessmann_kibri" />
+        <field name="brand_id" ref="product_brand_viessmann_kibri" />
     </record>
     <record id="sitemap_import_source_viessmann_vollmer" model="sitemap.import.source">
         <field name="name">Vollmer Europa</field>
@@ -951,7 +951,7 @@
         <field name="products_per_run">30</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_viessmann_vollmer" />
+        <field name="brand_id" ref="product_brand_viessmann_vollmer" />
     </record>
     <record id="sitemap_import_source_ree_modeles_fr" model="sitemap.import.source">
         <field name="name">REE Modèles Francia</field>
@@ -965,7 +965,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_ree_modeles_fr" />
+        <field name="brand_id" ref="product_brand_ree_modeles_fr" />
     </record>
     <record id="sitemap_import_source_bemo_de" model="sitemap.import.source">
         <field name="name">BEMO Modelleisenbahnen Europa</field>
@@ -979,7 +979,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bemo_de" />
+        <field name="brand_id" ref="product_brand_bemo_de" />
     </record>
     <record id="sitemap_import_source_bachmann_bachmann_branchline" model="sitemap.import.source">
         <field name="name">Bachmann Branchline — catálogo Bachmann UK</field>
@@ -992,7 +992,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_bachmann_branchline" />
+        <field name="brand_id" ref="product_brand_bachmann_bachmann_branchline" />
     </record>
     <record id="sitemap_import_source_bachmann_graham_farish" model="sitemap.import.source">
         <field name="name">Graham Farish — catálogo Bachmann UK</field>
@@ -1005,7 +1005,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_graham_farish" />
+        <field name="brand_id" ref="product_brand_bachmann_graham_farish" />
     </record>
     <record id="sitemap_import_source_bachmann_liliput" model="sitemap.import.source">
         <field name="name">Liliput — catálogo Bachmann UK</field>
@@ -1018,7 +1018,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_liliput" />
+        <field name="brand_id" ref="product_brand_bachmann_liliput" />
     </record>
     <record id="sitemap_import_source_bachmann_efe_rail" model="sitemap.import.source">
         <field name="name">EFE Rail — catálogo Bachmann UK</field>
@@ -1031,7 +1031,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_efe_rail" />
+        <field name="brand_id" ref="product_brand_bachmann_efe_rail" />
     </record>
     <record id="sitemap_import_source_bachmann_scenecraft" model="sitemap.import.source">
         <field name="name">Scenecraft — catálogo Bachmann UK</field>
@@ -1044,7 +1044,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_scenecraft" />
+        <field name="brand_id" ref="product_brand_bachmann_scenecraft" />
     </record>
     <record id="sitemap_import_source_bachmann_bachmann_narrow_gauge" model="sitemap.import.source">
         <field name="name">Bachmann Narrow Gauge — catálogo Bachmann UK</field>
@@ -1057,7 +1057,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_bachmann_narrow_gauge" />
+        <field name="brand_id" ref="product_brand_bachmann_bachmann_narrow_gauge" />
     </record>
     <record id="sitemap_import_source_bachmann_thomas_friends" model="sitemap.import.source">
         <field name="name">Thomas &amp; Friends — catálogo Bachmann UK</field>
@@ -1070,7 +1070,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_thomas_friends" />
+        <field name="brand_id" ref="product_brand_bachmann_thomas_friends" />
     </record>
     <record id="sitemap_import_source_bachmann_woodland_scenics" model="sitemap.import.source">
         <field name="name">Woodland Scenics — catálogo Bachmann UK</field>
@@ -1083,7 +1083,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_woodland_scenics" />
+        <field name="brand_id" ref="product_brand_bachmann_woodland_scenics" />
     </record>
     <record id="sitemap_import_source_bachmann_proses" model="sitemap.import.source">
         <field name="name">Proses — catálogo Bachmann UK</field>
@@ -1096,7 +1096,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_proses" />
+        <field name="brand_id" ref="product_brand_bachmann_proses" />
     </record>
     <record id="sitemap_import_source_bachmann_bachmann_trains_usa" model="sitemap.import.source">
         <field name="name">Bachmann Trains USA — catálogo Bachmann UK</field>
@@ -1109,7 +1109,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_bachmann_trains_usa" />
+        <field name="brand_id" ref="product_brand_bachmann_bachmann_trains_usa" />
     </record>
     <record id="sitemap_import_source_bachmann_bachmann_china" model="sitemap.import.source">
         <field name="name">Bachmann China — catálogo Bachmann UK</field>
@@ -1122,7 +1122,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_bachmann_china" />
+        <field name="brand_id" ref="product_brand_bachmann_bachmann_china" />
     </record>
     <record id="sitemap_import_source_bachmann_efe_road" model="sitemap.import.source">
         <field name="name">EFE Road — catálogo Bachmann UK</field>
@@ -1135,7 +1135,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_efe_road" />
+        <field name="brand_id" ref="product_brand_bachmann_efe_road" />
     </record>
     <record id="sitemap_import_source_bachmann_exclusive_first_editions" model="sitemap.import.source">
         <field name="name">Exclusive First Editions — catálogo Bachmann UK</field>
@@ -1148,7 +1148,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_exclusive_first_editions" />
+        <field name="brand_id" ref="product_brand_bachmann_exclusive_first_editions" />
     </record>
     <record id="sitemap_import_source_bachmann_greenlight" model="sitemap.import.source">
         <field name="name">GreenLight — catálogo Bachmann UK</field>
@@ -1161,7 +1161,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_greenlight" />
+        <field name="brand_id" ref="product_brand_bachmann_greenlight" />
     </record>
     <record id="sitemap_import_source_bachmann_mini_gt" model="sitemap.import.source">
         <field name="name">Mini GT — catálogo Bachmann UK</field>
@@ -1174,7 +1174,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_mini_gt" />
+        <field name="brand_id" ref="product_brand_bachmann_mini_gt" />
     </record>
     <record id="sitemap_import_source_bachmann_academy" model="sitemap.import.source">
         <field name="name">Academy — catálogo Bachmann UK</field>
@@ -1187,7 +1187,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_academy" />
+        <field name="brand_id" ref="product_brand_bachmann_academy" />
     </record>
     <record id="sitemap_import_source_bachmann_trumpeter" model="sitemap.import.source">
         <field name="name">Trumpeter — catálogo Bachmann UK</field>
@@ -1200,7 +1200,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_trumpeter" />
+        <field name="brand_id" ref="product_brand_bachmann_trumpeter" />
     </record>
     <record id="sitemap_import_source_bachmann_airfix_bachmann" model="sitemap.import.source">
         <field name="name">Airfix — catálogo Bachmann UK</field>
@@ -1213,7 +1213,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_airfix_uk" />
+        <field name="brand_id" ref="product_brand_airfix_uk" />
     </record>
     <record id="sitemap_import_source_bachmann_accurate_figures" model="sitemap.import.source">
         <field name="name">Accurate Figures — catálogo Bachmann UK</field>
@@ -1226,7 +1226,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_accurate_figures" />
+        <field name="brand_id" ref="product_brand_bachmann_accurate_figures" />
     </record>
     <record id="sitemap_import_source_bachmann_afv_club" model="sitemap.import.source">
         <field name="name">AFV Club — catálogo Bachmann UK</field>
@@ -1239,7 +1239,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_afv_club" />
+        <field name="brand_id" ref="product_brand_bachmann_afv_club" />
     </record>
     <record id="sitemap_import_source_bachmann_amt" model="sitemap.import.source">
         <field name="name">AMT — catálogo Bachmann UK</field>
@@ -1252,7 +1252,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_amt" />
+        <field name="brand_id" ref="product_brand_bachmann_amt" />
     </record>
     <record id="sitemap_import_source_bachmann_emhar" model="sitemap.import.source">
         <field name="name">Emhar — catálogo Bachmann UK</field>
@@ -1265,7 +1265,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_emhar" />
+        <field name="brand_id" ref="product_brand_bachmann_emhar" />
     </record>
     <record id="sitemap_import_source_bachmann_hk_models" model="sitemap.import.source">
         <field name="name">HK Models — catálogo Bachmann UK</field>
@@ -1278,7 +1278,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_hk_models" />
+        <field name="brand_id" ref="product_brand_bachmann_hk_models" />
     </record>
     <record id="sitemap_import_source_bachmann_i_love_kit" model="sitemap.import.source">
         <field name="name">I Love Kit — catálogo Bachmann UK</field>
@@ -1291,7 +1291,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_i_love_kit" />
+        <field name="brand_id" ref="product_brand_bachmann_i_love_kit" />
     </record>
     <record id="sitemap_import_source_bachmann_mpc" model="sitemap.import.source">
         <field name="name">MPC — catálogo Bachmann UK</field>
@@ -1304,7 +1304,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_mpc" />
+        <field name="brand_id" ref="product_brand_bachmann_mpc" />
     </record>
     <record id="sitemap_import_source_bachmann_polar_lights" model="sitemap.import.source">
         <field name="name">Polar Lights — catálogo Bachmann UK</field>
@@ -1317,7 +1317,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_polar_lights" />
+        <field name="brand_id" ref="product_brand_bachmann_polar_lights" />
     </record>
     <record id="sitemap_import_source_bachmann_roden" model="sitemap.import.source">
         <field name="name">Roden — catálogo Bachmann UK</field>
@@ -1330,7 +1330,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_roden" />
+        <field name="brand_id" ref="product_brand_bachmann_roden" />
     </record>
     <record id="sitemap_import_source_bachmann_takom" model="sitemap.import.source">
         <field name="name">Takom — catálogo Bachmann UK</field>
@@ -1343,7 +1343,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_takom" />
+        <field name="brand_id" ref="product_brand_bachmann_takom" />
     </record>
     <record id="sitemap_import_source_bachmann_toyway" model="sitemap.import.source">
         <field name="name">Toyway — catálogo Bachmann UK</field>
@@ -1356,7 +1356,7 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_bachmann_toyway" />
+        <field name="brand_id" ref="product_brand_bachmann_toyway" />
     </record>
     <record id="sitemap_import_source_faller_faller" model="sitemap.import.source">
         <field name="name">FALLER Europa</field>
@@ -1369,7 +1369,7 @@
         <field name="products_per_run">30</field>
         <field name="max_images_per_product">12</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_faller_faller" />
+        <field name="brand_id" ref="product_brand_faller_faller" />
     </record>
     <record id="sitemap_import_source_faller_pola_g" model="sitemap.import.source">
         <field name="name">POLA G Europa</field>
@@ -1382,7 +1382,7 @@
         <field name="products_per_run">30</field>
         <field name="max_images_per_product">12</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_faller_pola_g" />
+        <field name="brand_id" ref="product_brand_faller_pola_g" />
     </record>
     <record id="sitemap_import_source_aneste_datank_es" model="sitemap.import.source">
         <field name="name">Aneste Datank España</field>
@@ -1395,7 +1395,7 @@
         <field name="products_per_run">60</field>
         <field name="max_images_per_product">8</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_aneste_datank_es" />
+        <field name="brand_id" ref="product_brand_aneste_datank_es" />
     </record>
     <record id="sitemap_import_source_noch_noch" model="sitemap.import.source">
         <field name="name">NOCH — catálogo NOCH Alemania</field>
@@ -1408,7 +1408,7 @@
         <field name="products_per_run">30</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_noch_noch" />
+        <field name="brand_id" ref="product_brand_noch_noch" />
     </record>
     <record id="sitemap_import_source_noch_rokuhan" model="sitemap.import.source">
         <field name="name">Rokuhan — catálogo NOCH Alemania</field>
@@ -1421,7 +1421,7 @@
         <field name="products_per_run">30</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_noch_rokuhan" />
+        <field name="brand_id" ref="product_brand_noch_rokuhan" />
     </record>
     <record id="sitemap_import_source_noch_athearn" model="sitemap.import.source">
         <field name="name">Athearn — catálogo NOCH Alemania</field>
@@ -1434,7 +1434,7 @@
         <field name="products_per_run">30</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_noch_athearn" />
+        <field name="brand_id" ref="product_brand_noch_athearn" />
     </record>
     <record id="sitemap_import_source_noch_ammo" model="sitemap.import.source">
         <field name="name">AMMO — catálogo NOCH Alemania</field>
@@ -1447,7 +1447,7 @@
         <field name="products_per_run">30</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_noch_ammo" />
+        <field name="brand_id" ref="product_brand_noch_ammo" />
     </record>
     <record id="sitemap_import_source_noch_proxxon" model="sitemap.import.source">
         <field name="name">PROXXON — catálogo NOCH Alemania</field>
@@ -1460,7 +1460,7 @@
         <field name="products_per_run">30</field>
         <field name="max_images_per_product">10</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_noch_proxxon" />
+        <field name="brand_id" ref="product_brand_noch_proxxon" />
     </record>
     <record id="sitemap_import_source_munichsports_es" model="sitemap.import.source">
         <field name="name">MUNICH Sports España</field>
@@ -1474,6 +1474,6 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">12</field>
         <field name="auto_archive_discontinued">0</field>
-        <field name="product_brand_id" ref="product_brand_munichsports_es" />
+        <field name="brand_id" ref="product_brand_munichsports_es" />
     </record>
 </odoo>

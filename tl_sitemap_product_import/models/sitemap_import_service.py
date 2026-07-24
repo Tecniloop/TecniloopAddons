@@ -1942,8 +1942,8 @@ class SitemapImportService(models.AbstractModel):
                 'purchase_ok': source.purchase_ok,
                 'active': True,
             }
-            if source.product_brand_id:
-                vals['product_brand_id'] = source.product_brand_id.id
+            if source.brand_id and 'brand_id' in ProductTemplate._fields:
+                vals['brand_id'] = source.brand_id.id
 
             # Las extensiones de descripción cambian entre versiones y ediciones
             # de Odoo/OCA. Solo se escriben los campos realmente presentes en la
