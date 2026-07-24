@@ -29,16 +29,7 @@
                             <field name="suenlace_tax_needs_review"/>
                             <field name="suenlace_fiscal_needs_review"/>
                             <field name="suenlace_needs_review"/>
-                            <field name="suenlace_payment_needs_review"/>
                         </group>
-                    </group>
-                    <group string="Vencimientos y cobros/pagos">
-                        <field name="suenlace_parent_move_id"
-                               invisible="not suenlace_parent_move_id"/>
-                        <field name="suenlace_payment_move_ids" widget="many2many_tags"
-                               invisible="not suenlace_payment_move_ids"/>
-                        <field name="suenlace_payment_key"
-                               invisible="not suenlace_payment_key"/>
                     </group>
                     <group string="Cuentas fiscales">
                         <field name="suenlace_source_tax_accounts"

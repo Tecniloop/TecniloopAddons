@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 {
     "name": "Importador SUENLACE - Menú Contabilidad Enterprise",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.0.1",
     "category": "Accounting/Accounting",
     "summary": "Sitúa SUENLACE en la aplicación Contabilidad Enterprise",
     "author": "Tecniloop",

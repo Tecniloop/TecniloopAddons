@@ -1,6 +1,7 @@
 # Copyright 2026 Tecniloop
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 import base64
+import hashlib
 import logging
 
 from odoo import api, fields, models, _
@@ -1126,6 +1127,7 @@ class SuenlaceImport(models.Model):
                     and not m.suenlace_fiscal_needs_review
                     and not m.suenlace_partner_needs_review
                     and not m.suenlace_tax_needs_review
+                    and not self._has_payment_review_activity(m)
                 )
             )
             if to_post:
@@ -1141,7 +1143,7 @@ class SuenlaceImport(models.Model):
                     or m.suenlace_fiscal_needs_review
                     or m.suenlace_partner_needs_review
                     or m.suenlace_tax_needs_review
-                    or m.suenlace_payment_needs_review
+                    or self._has_payment_review_activity(m)
                 )
             ))
             if review_count:
@@ -1695,8 +1697,30 @@ class SuenlaceImport(models.Model):
                     last = None
         return installments
 
+    @staticmethod
+    def _has_payment_review_activity(move):
+        """Detecta la actividad pendiente sin añadir columnas a account.move.
+
+        El indicador se deriva de mail.activity para que una actualización del
+        addon pueda arrancar incluso antes de ejecutar ``-u``. Añadir una nueva
+        columna almacenada a ``account.move`` hace que otros addons que leen
+        movimientos durante ``_register_hook`` fallen si el código se despliega
+        antes de actualizar el esquema.
+        """
+        for activity in move.activity_ids:
+            summary = str(activity.summary or "").casefold()
+            if "suenlace" in summary and (
+                "vencimiento" in summary
+                or "cobro" in summary
+                or "pago" in summary
+                or "payment" in summary
+            ):
+                return True
+        return False
+
     def _schedule_payment_review(self, move, message):
-        move.suenlace_payment_needs_review = True
+        if self._has_payment_review_activity(move):
+            return
         move.activity_schedule(
             "mail.mail_activity_data_todo",
             date_deadline=fields.Date.context_today(self),
@@ -1893,22 +1917,31 @@ class SuenlaceImport(models.Model):
             "%.2f" % amount,
             str(extension.get("num_efecto") or ""),
         ])
+        payment_fingerprint = hashlib.sha1(
+            payment_key.encode("utf-8")
+        ).hexdigest()
+        technical_ref = "SUENLACE-PAY/%s" % payment_fingerprint
         existing = self.env["account.move"].search([
             ("company_id", "=", self.company_id.id),
-            ("suenlace_payment_key", "=", payment_key),
+            ("ref", "=", technical_ref),
+            ("suenlace_document_mode", "=", "payment_entry"),
         ], limit=1)
         if existing:
             return existing
-        payment_move = self.env["account.move"].with_context(check_move_validity=False).create({
+        payment_vals = {
             "move_type": "entry",
             "journal_id": journal.id,
             "company_id": self.company_id.id,
             "date": payment_date,
-            "ref": reference,
+            "ref": technical_ref,
+            "narration": _(
+                "Cobro/pago SUENLACE de %(document)s. Referencia: %(reference)s"
+            ) % {
+                "document": move.display_name,
+                "reference": reference,
+            },
             "suenlace_import_id": self.id,
             "suenlace_document_mode": "payment_entry",
-            "suenlace_parent_move_id": move.id,
-            "suenlace_payment_key": payment_key,
             "line_ids": [
                 (0, 0, {
                     "name": reference,
@@ -1927,7 +1960,12 @@ class SuenlaceImport(models.Model):
                     "suenlace_source_account_code": treasury_code,
                 }),
             ],
-        })
+        }
+        if "payment_reference" in self.env["account.move"]._fields:
+            payment_vals["payment_reference"] = reference
+        payment_move = self.env["account.move"].with_context(
+            check_move_validity=False
+        ).create(payment_vals)
         payment_move.action_post()
         payment_line = payment_move.line_ids.filtered(lambda line: line.account_id == target.account_id)
         (target + payment_line).reconcile()
@@ -1962,8 +2000,10 @@ class SuenlaceImport(models.Model):
         for item in paid:
             payment_moves |= self._create_payment_entry(move, item["record"], item["extension"])
         if payment_moves:
-            all_payments = move.suenlace_payment_move_ids | payment_moves
-            move.write({"suenlace_payment_move_ids": [(6, 0, all_payments.ids)]})
+            self._append_log(
+                _("%(count)d cobros/pagos creados y conciliados para %(move)s.")
+                % {"count": len(payment_moves), "move": move.display_name}
+            )
         return payment_moves
 
     @staticmethod

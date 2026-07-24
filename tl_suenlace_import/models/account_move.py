@@ -121,34 +121,6 @@ class AccountMove(models.Model):
         copy=False,
         readonly=True,
     )
-    suenlace_payment_needs_review = fields.Boolean(
-        string="Revisión de vencimientos/cobros SUENLACE",
-        copy=False,
-        index=True,
-        readonly=True,
-    )
-    suenlace_payment_key = fields.Char(
-        string="Clave de cobro/pago SUENLACE",
-        copy=False,
-        index=True,
-        readonly=True,
-    )
-    suenlace_parent_move_id = fields.Many2one(
-        "account.move",
-        string="Documento SUENLACE conciliado",
-        copy=False,
-        index=True,
-        readonly=True,
-    )
-    suenlace_payment_move_ids = fields.Many2many(
-        "account.move",
-        "account_move_suenlace_payment_rel",
-        "invoice_move_id",
-        "payment_move_id",
-        string="Cobros/pagos SUENLACE",
-        copy=False,
-        readonly=True,
-    )
 
     suenlace_source_detail_total = fields.Monetary(
         string="Suma detalles SUENLACE",

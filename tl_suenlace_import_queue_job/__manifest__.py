@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 {
     "name": "Importador SUENLACE - Queue Job",
-    "version": "19.0.1.4.0",
+    "version": "19.0.1.4.1",
     "category": "Accounting/Accounting",
     "summary": "Procesamiento asíncrono opcional para el importador SUENLACE",
     "author": "Tecniloop",

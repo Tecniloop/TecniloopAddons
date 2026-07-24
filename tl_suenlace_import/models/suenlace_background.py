@@ -763,7 +763,7 @@ class SuenlaceImport(models.Model):
             move.suenlace_fiscal_needs_review,
             move.suenlace_partner_needs_review,
             move.suenlace_tax_needs_review,
-            move.suenlace_payment_needs_review,
+            self._has_payment_review_activity(move),
         ])
         if not requires_review:
             move.action_post()
