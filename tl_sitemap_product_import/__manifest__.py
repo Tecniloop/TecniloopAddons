@@ -1,6 +1,6 @@
 {
     'name': 'Importación de productos por sitemap',
-    'version': '19.0.1.85.0',
+    'version': '19.0.1.87.0',
     'category': 'Sales/Sales',
     'summary': 'Importa y actualiza productos desde el sitemap público de una o varias tiendas online',
     'description': """
@@ -295,7 +295,8 @@ Limitaciones conocidas
     # sale, sale_management...). Si no quieres esto, puedes quitar 'website_sale'
     # de esta lista y desactivar "Importar categorías de comercio electrónico" en
     # cada fuente; el resto del módulo funciona igual sin esa parte.
-    'depends': ['product', 'website_sale', 'website_sale_product_description', 'product_dimension', 'tl_product_package_dimensions', 'queue_job', 'website_sale_product_attachment'],
+    'depends': ['product', 'website_sale', 'website_sale_product_description', 'product_dimension', 'tl_product_package_dimensions', 'queue_job',
+        'product_brand', 'website_sale_product_attachment'],
     'external_dependencies': {
         'python': ['lxml', 'requests'],
     },

@@ -59,6 +59,7 @@
                             <field name="root_category_id"/>
                             <field name="import_public_categories"/>
                             <field name="public_root_category_id" invisible="not import_public_categories"/>
+                            <field name="product_brand_id" options="{'no_create_edit': False}"/>
                             <field name="product_tag_ids" widget="many2many_tags"/>
                         </group>
                         <group string="Producto">
@@ -85,6 +86,7 @@
             <list string="Fuentes de importación">
                 <field name="name"/>
                 <field name="connector_model"/>
+                <field name="product_brand_id" optional="show"/>
                 <field name="sitemap_index_url"/>
                 <field name="auto_sync_enabled"/>
                 <field name="active" widget="boolean_toggle"/>

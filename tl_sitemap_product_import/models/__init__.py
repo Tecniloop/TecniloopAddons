@@ -62,6 +62,7 @@ from . import connector_viessmann_en
 
 from . import connector_ree_modeles_fr
 from . import connector_bemo_de
+from . import connector_munichsports_es
 
 from . import connector_bachmann_uk
 from . import connector_faller_en

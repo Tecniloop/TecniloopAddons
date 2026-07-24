@@ -1100,3 +1100,12 @@ incluidas se regeneran con `.js` desactivado.
 - Si se elimina un `queue.job`, las filas en vista previa vuelven a Pendiente y las filas de importación vuelven a Vista previa lista.
 - Los lotes cuya recopilación en cola fue eliminada vuelven a Borrador.
 - Puede ejecutarse manualmente desde los botones Restaurar estado/Restaurar estados y automáticamente cada diez minutos.
+
+
+## Marca OCA por fuente
+
+Cada fuente dispone del campo **Marca del producto** (`product_brand_id`), basado en el
+módulo OCA `product_brand`. Al crear o actualizar un `product.template`, el importador
+asigna siempre la marca configurada en su fuente. Las fuentes incluidas por el módulo
+se entregan con su marca preconfigurada; en fuentes creadas manualmente puede elegirse
+o crearse la marca desde la propia ficha.
