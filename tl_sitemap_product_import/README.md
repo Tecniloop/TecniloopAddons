@@ -1107,10 +1107,17 @@ Añade la fuente `https://www.munichsports.com/sitemap.xml` y un conector espec�
 que deduplica las traducciones, conserva la ficha española, importa el precio vigente,
 referencia, descripción, categorías, galería y crea variantes por talla aunque no exista EAN.
 
-## 19.0.1.88.0 - Marca OCA por fuente
+## 19.0.1.89.0 - Marca OCA por fuente
 
 Cada fuente dispone del campo **Marca OCA del producto** (`brand_id`), basado en el
 módulo OCA `brand` y su modelo `res.brand`. `product.template` incorpora el mixin
 `res.brand.mixin`, de modo que los productos creados o actualizados reciben la marca
 configurada en la fuente. Esta versión no depende de `product_brand`.
 
+
+
+## 19.0.1.89.0
+
+- Restaura todos los campos de `product.template` del importador que se perdieron al integrar `res.brand.mixin`.
+- Mantiene la marca OCA mediante `brand_id`.
+- Corrige la comprobación de campos dinámicos para usar el modelo `Product` real.
