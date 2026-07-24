@@ -1121,3 +1121,10 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 - Restaura todos los campos de `product.template` del importador que se perdieron al integrar `res.brand.mixin`.
 - Mantiene la marca OCA mediante `brand_id`.
 - Corrige la comprobación de campos dinámicos para usar el modelo `Product` real.
+
+
+## 19.0.1.90.0
+
+- Elimina la herencia múltiple con `res.brand.mixin`, incompatible con la reflexión de modelos de esta instalación.
+- Mantiene la dependencia OCA `brand` y usa directamente `res.brand` mediante `product.template.brand_id`.
+- Conserva la marca configurable por fuente y su asignación durante creación y actualización.

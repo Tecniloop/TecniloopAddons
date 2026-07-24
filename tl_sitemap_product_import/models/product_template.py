@@ -3,8 +3,15 @@ from odoo.exceptions import UserError
 
 
 class ProductTemplate(models.Model):
-    _inherit = ['product.template', 'res.brand.mixin']
+    _inherit = 'product.template'
 
+    brand_id = fields.Many2one(
+        'res.brand',
+        string='Marca',
+        index=True,
+        ondelete='restrict',
+        help='Marca OCA asignada al producto.',
+    )
     is_sitemap_import_product = fields.Boolean(
         string='Producto importado por sitemap', default=False, copy=False, index=True, readonly=True)
     sitemap_source_id = fields.Many2one(
