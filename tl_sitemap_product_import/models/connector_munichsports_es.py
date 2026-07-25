@@ -1,11 +1,14 @@
 import html
 import json
+import logging
 import re
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
 from lxml import etree
 from lxml import html as lxml_html
 from odoo import models
+
+_logger = logging.getLogger(__name__)
 
 
 class SitemapConnectorMunichSportsEs(models.AbstractModel):
@@ -73,14 +76,47 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
             return []
         visited.add(clean_url)
         response = self._http_get(self._get_session(source), clean_url, source)
-        root = etree.fromstring(response.content)
+        content = response.content or b''
+        stripped = content.lstrip()
+        if not stripped.startswith(b'<'):
+            preview = stripped[:160].decode('utf-8', errors='replace').replace('\n', ' ')
+            message = (
+                'MUNICH Sports devolvió contenido no XML para %s '
+                '(HTTP %s, Content-Type %s, inicio: %r)'
+                % (
+                    clean_url,
+                    response.status_code,
+                    response.headers.get('Content-Type', ''),
+                    preview,
+                )
+            )
+            if depth:
+                _logger.warning('%s. Se omite este sitemap hijo.', message)
+                return []
+            raise ValueError(message)
+        try:
+            parser = etree.XMLParser(resolve_entities=False, no_network=True, recover=False)
+            root = etree.fromstring(content, parser=parser)
+        except (etree.ParserError, etree.XMLSyntaxError) as exc:
+            message = 'MUNICH Sports devolvió XML inválido para %s: %s' % (clean_url, exc)
+            if depth:
+                _logger.warning('%s. Se omite este sitemap hijo.', message)
+                return []
+            raise ValueError(message) from exc
         tag = etree.QName(root.tag).localname.casefold()
         if tag == 'sitemapindex':
             result = []
             for loc in root.xpath('./*[local-name()="sitemap"]/*[local-name()="loc"]/text()'):
                 child = self._canonical_url(loc)
                 if child:
-                    result.extend(self._walk_sitemap(source, child, visited, depth + 1))
+                    try:
+                        result.extend(self._walk_sitemap(source, child, visited, depth + 1))
+                    except Exception as exc:
+                        _logger.warning(
+                            'MUNICH Sports: se omite el sitemap hijo %s por error: %s',
+                            child,
+                            exc,
+                        )
             return result
         if tag != 'urlset':
             raise ValueError('MUNICH Sports no devolvió un sitemap XML válido.')

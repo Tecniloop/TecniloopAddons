@@ -134,13 +134,22 @@ tipo de producto, opciones, variantes e imágenes. El conector utiliza:
 Si el endpoint Ajax no está disponible, el conector usa como respaldo JSON-LD,
 Open Graph y el contenido HTML de la ficha.
 
+## Importación directa sin cola
+
+Desde la lista o el formulario de productos en vista previa se puede usar
+**Importar directamente** / **Crear/actualizar ahora**. Esta acción ejecuta la
+creación o actualización en la petición actual y no genera registros en
+`queue.job`. Cada fila usa un savepoint independiente, por lo que un error no
+revierte los productos importados correctamente en la misma selección.
+
 ## Conector Levi's España
 
-`https://www.levi.com/ES/es_ES/sitemap.xml` se procesa de forma dinámica como
-`urlset` o como índice de otros sitemaps, incluidos índices anidados y ficheros
-XML comprimidos. Si el frontal redirige ese recurso al mapa del sitio HTML, el
-conector localiza el catálogo general y recorre su paginación como respaldo.
-Solo se aceptan URLs españolas de producto terminadas en `/p/<código>`.
+`https://www.levi.com/ES/es_ES/sitemap.xml`, publicado por Levi's en
+`robots.txt`, se procesa de forma dinámica como `urlset` o como índice de otros
+sitemaps, incluidos índices anidados y ficheros XML comprimidos. El conector no
+recorre categorías HTML ni su paginación, evitando los bloqueos HTTP 403 del
+frontal. Solo se aceptan URLs españolas de producto terminadas en
+`/p/<código>`.
 
 La ruta anterior al slug del producto se convierte en la categoría de Odoo. De
 la ficha se obtienen el título, el precio vigente, el color, el bloque "Acerca

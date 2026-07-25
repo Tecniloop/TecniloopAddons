@@ -198,6 +198,49 @@ class SitemapProductStaging(models.Model):
             _('%s productos se han enviado a la cola de importación.') % jobs,
         )
 
+    def action_import_direct(self):
+        """Crea o actualiza los productos seleccionados en la petición actual.
+
+        Esta acción no crea registros de ``queue.job``. Se procesa cada fila en
+        un savepoint independiente para que el error de un producto no revierta
+        los que ya se importaron correctamente.
+        """
+        imported = 0
+        failed = 0
+        skipped = 0
+        for row in self:
+            if row.state not in ('preview_ready', 'error', 'imported') or not row.name:
+                skipped += 1
+                continue
+            try:
+                with self.env.cr.savepoint():
+                    row.write({
+                        'state': 'importing',
+                        'error_message': False,
+                        'import_job_uuid': False,
+                        'last_job_date': fields.Datetime.now(),
+                    })
+                    connector = row.env[row.source_id.connector_model]
+                    result = connector.import_staging_row(row, row.source_id, [])
+                    if result == 'error':
+                        raise ValueError(row.error_message or _('Error importando el producto.'))
+                    imported += 1
+            except Exception as exc:
+                failed += 1
+                row.write({
+                    'state': 'error',
+                    'error_message': ('%s: %s' % (exc.__class__.__name__, exc))[:4000],
+                    'import_job_uuid': False,
+                    'last_attempt_date': fields.Datetime.now(),
+                })
+        self.mapped('batch_id')._update_queue_completion()
+        return self._notification(
+            _('Importación directa finalizada'),
+            _('%s productos importados, %s con error y %s omitidos.')
+            % (imported, failed, skipped),
+            notification_type='warning' if failed else 'success',
+        )
+
     def _job_import_product(self):
         self.ensure_one()
         row = self.exists()

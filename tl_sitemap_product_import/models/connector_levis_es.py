@@ -2,7 +2,8 @@ import gzip
 import html
 import logging
 import re
-from urllib.parse import parse_qsl, unquote, urlencode, urljoin, urlparse, urlsplit, urlunsplit
+
+from urllib.parse import parse_qsl, unquote, urlencode, urlparse, urlsplit, urlunsplit
 
 from lxml import etree
 from lxml import html as lxml_html
@@ -20,7 +21,9 @@ class SitemapConnectorLevisEs(models.AbstractModel):
     sitemaps, por lo que el conector detecta ambos formatos y admite índices
     anidados y ficheros XML comprimidos con gzip.
 
-    Las fichas se procesan desde el HTML público. Se extraen el título, el precio
+    La recopilación de URLs utiliza exclusivamente el sitemap oficial publicado
+    en robots.txt; no recorre categorías HTML ni paginaciones. Las fichas se
+    procesan desde el HTML público. Se extraen el título, el precio
     vigente, el color, la descripción de "Acerca de este estilo", el código de
     estilo y las imágenes del producto servidas por Adobe Scene7. Las imágenes
     de productos relacionados se descartan comparando el identificador del
@@ -143,157 +146,6 @@ class SitemapConnectorLevisEs(models.AbstractModel):
             content = bytes(content).decode('utf-8', errors='replace')
         return lxml_html.fromstring(content)
 
-    @classmethod
-    def _catalog_url_from_html(cls, content, base_url):
-        """Localiza el catálogo general cuando ``sitemap.xml`` devuelve HTML.
-
-        Levi's puede redirigir la URL facilitada a su mapa del sitio visible en
-        navegador. Ese documento no contiene todas las fichas, pero sí enlaza el
-        catálogo ``ropa/c/levi_clothing``. Se usa únicamente como respaldo del
-        sitemap XML, nunca como primera opción.
-        """
-        try:
-            tree = cls._html_document(content)
-        except (TypeError, ValueError, etree.ParserError):
-            tree = None
-
-        if tree is not None:
-            for href in tree.xpath('//a[@href]/@href'):
-                absolute_url = cls._without_query_fragment(urljoin(base_url, href))
-                parsed = urlparse(absolute_url)
-                if (
-                    parsed.netloc.lower() in ('www.levi.com', 'levi.com')
-                    and parsed.path.lower().startswith('/es/es_es/')
-                    and parsed.path.lower().rstrip('/').endswith('/ropa/c/levi_clothing')
-                ):
-                    return absolute_url
-
-        parsed = urlparse(base_url)
-        locale_match = re.match(r'^/(ES/es_ES)(?:/|$)', parsed.path, flags=re.IGNORECASE)
-        if locale_match and parsed.scheme and parsed.netloc:
-            locale = locale_match.group(1)
-            return f'{parsed.scheme}://{parsed.netloc}/{locale}/ropa/c/levi_clothing'
-        return 'https://www.levi.com/ES/es_ES/ropa/c/levi_clothing'
-
-    @classmethod
-    def _product_urls_from_catalog_html(cls, content, page_url):
-        """Extrae solo enlaces PDP españoles de una página de categoría."""
-        tree = cls._html_document(content)
-        urls = []
-        seen = set()
-        for href in tree.xpath('//a[@href]/@href'):
-            product_url = cls._without_query_fragment(urljoin(page_url, href))
-            if not cls._is_spanish_product_url(product_url) or product_url in seen:
-                continue
-            seen.add(product_url)
-            urls.append(product_url)
-        return urls
-
-    @staticmethod
-    def _catalog_page_url(catalog_url, page_number):
-        if not page_number:
-            return catalog_url
-        parts = urlsplit(catalog_url)
-        query = [(key, value) for key, value in parse_qsl(parts.query, keep_blank_values=True) if key != 'page']
-        query.append(('page', str(page_number)))
-        return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), ''))
-
-    @classmethod
-    def _next_catalog_page_url(cls, content, current_url):
-        """Devuelve la siguiente página enlazada por la paginación pública."""
-        tree = cls._html_document(content)
-        current_parts = urlsplit(current_url)
-        current_query = dict(parse_qsl(current_parts.query, keep_blank_values=True))
-        try:
-            current_page = int(current_query.get('page') or 0)
-        except (TypeError, ValueError):
-            current_page = 0
-
-        candidates = []
-        for href in tree.xpath('//a[@href]/@href'):
-            absolute = urljoin(current_url, href)
-            parts = urlsplit(absolute)
-            if parts.netloc.lower() not in ('www.levi.com', 'levi.com'):
-                continue
-            if parts.path.rstrip('/').lower() != current_parts.path.rstrip('/').lower():
-                continue
-            query = dict(parse_qsl(parts.query, keep_blank_values=True))
-            try:
-                page_number = int(query.get('page'))
-            except (TypeError, ValueError):
-                continue
-            if page_number > current_page:
-                candidates.append((page_number, urlunsplit((parts.scheme, parts.netloc, parts.path, parts.query, ''))))
-        return min(candidates, key=lambda item: item[0])[1] if candidates else False
-
-    def _iter_catalog_entries(self, source, sitemap_error=None):
-        """Respaldo para el mapa HTML: recorre la paginación del catálogo.
-
-        La paginación pública de Levi's usa ``?page=1`` para la segunda página.
-        Se detiene cuando una página no contiene fichas nuevas. El límite de 100
-        páginas evita bucles si el frontal cambia o redirige páginas inexistentes.
-        """
-        session = self._get_session(source)
-        fallback_reason = sitemap_error or 'sin URLs de producto'
-        try:
-            sitemap_response = self._http_get(session, source.sitemap_index_url, source)
-            catalog_url = self._catalog_url_from_html(
-                sitemap_response.content,
-                sitemap_response.url or source.sitemap_index_url,
-            )
-        except Exception as exc:
-            # También puede ocurrir que el endpoint ``sitemap.xml`` sea bloqueado
-            # mientras las categorías y fichas públicas siguen accesibles.
-            fallback_reason = f'{fallback_reason}; segundo acceso al sitemap: {exc}'
-            catalog_url = self._catalog_url_from_html(b'', source.sitemap_index_url)
-
-        _logger.warning(
-            "Levi's: el recurso %s no se pudo usar como sitemap XML (%s). "
-            'Se recurre al catálogo paginado %s; las entradas no tendrán lastmod.',
-            source.sitemap_index_url,
-            fallback_reason,
-            catalog_url,
-        )
-
-        seen = set()
-        visited_pages = set()
-        page_url = catalog_url
-        for _page_index in range(100):
-            normalized_page_url = self._without_query_fragment(page_url)
-            page_key = (normalized_page_url, urlsplit(page_url).query)
-            if page_key in visited_pages:
-                raise ValueError("La paginación del catálogo de Levi's ha entrado en un bucle.")
-            visited_pages.add(page_key)
-
-            response = self._http_get(session, page_url, source)
-            effective_url = response.url or page_url
-            product_urls = self._product_urls_from_catalog_html(response.content, effective_url)
-            new_urls = [url for url in product_urls if url not in seen]
-            if not product_urls:
-                raise ValueError(
-                    "Una página enlazada del catálogo de Levi's no contiene fichas de producto: "
-                    f'{effective_url}'
-                )
-            if not new_urls:
-                raise ValueError(
-                    "Una página enlazada del catálogo de Levi's solo repite productos ya leídos: "
-                    f'{effective_url}'
-                )
-
-            for product_url in new_urls:
-                seen.add(product_url)
-                yield {'url': product_url, 'lastmod': False}
-
-            next_page_url = self._next_catalog_page_url(response.content, effective_url)
-            if not next_page_url:
-                return
-            page_url = next_page_url
-
-        raise ValueError(
-            "Se alcanzó el límite de 100 páginas del catálogo de Levi's; "
-            'revise la paginación antes de archivar productos.'
-        )
-
     def _collect_product_entries(self, raw_entries, category_filter=None, limit=0):
         entries = []
         seen = set()
@@ -319,26 +171,24 @@ class SitemapConnectorLevisEs(models.AbstractModel):
         return entries, product_count
 
     def get_product_entries(self, source, category_filter=None, limit=0):
-        sitemap_error = None
-        try:
-            entries, product_count = self._collect_product_entries(
-                self._iter_sitemap_entries(source, source.sitemap_index_url),
-                category_filter=category_filter,
-                limit=limit,
-            )
-            # Si el sitemap era válido y sí contenía productos, una lista vacía
-            # puede ser simplemente el resultado normal del filtro solicitado.
-            if product_count:
-                return entries
-        except Exception as exc:  # el respaldo informa del motivo exacto en log
-            sitemap_error = exc
+        """Obtiene exclusivamente las fichas publicadas en el sitemap oficial.
 
-        fallback_entries, _product_count = self._collect_product_entries(
-            self._iter_catalog_entries(source, sitemap_error=sitemap_error),
+        Levi's declara el sitemap español en ``robots.txt``. No se recorren
+        categorías ni paginaciones HTML: además de ser más lento, ese catálogo
+        puede responder HTTP 403 y está sujeto a cambios de frontend.
+        """
+        entries, product_count = self._collect_product_entries(
+            self._iter_sitemap_entries(source, source.sitemap_index_url),
             category_filter=category_filter,
             limit=limit,
         )
-        return fallback_entries
+        if product_count:
+            return entries
+        raise ValueError(
+            "El sitemap oficial de Levi's no contiene URLs españolas de producto "
+            "con el patrón /ES/es_ES/.../p/<código>. Revise la URL configurada "
+            "en la fuente; el conector no utiliza páginas de categoría como fallback."
+        )
 
     def get_image_map(self, source):
         # La propia ficha ofrece la galería completa y permite descartar imágenes

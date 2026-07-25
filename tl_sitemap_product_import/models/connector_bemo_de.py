@@ -233,20 +233,25 @@ class SitemapConnectorBemoDe(models.AbstractModel):
         elif image:
             candidates.append(image)
 
+        # En la plantilla actual de BEMO la imagen principal puede quedar
+        # fuera de <main> dentro de un contenedor Elementor. Por eso se analiza
+        # el documento completo y no solo el bloque principal.
         candidates.extend(tree.xpath(
             '//meta[@property="og:image"]/@content | '
+            '//meta[@property="og:image:secure_url"]/@content | '
             '//meta[@name="twitter:image"]/@content | '
-            '//main//a[contains(@href,"wp-content/uploads")]/@href | '
-            '//main//img/@data-large-file | //main//img/@data-large_image | '
-            '//main//img/@data-full | //main//img/@data-original | '
-            '//main//img/@data-lazy-src | //main//img/@data-src | '
-            '//main//img/@src'
+            '//link[@rel="image_src"]/@href | '
+            '//link[@rel="preload" and @as="image"]/@href | '
+            '//a[contains(@href,"wp-content/uploads")]/@href | '
+            '//img/@data-large-file | //img/@data-large_image | '
+            '//img/@data-full | //img/@data-original | '
+            '//img/@data-lazy-src | //img/@data-src | //img/@src'
         ))
 
         # Elementor/WordPress commonly places the useful URL in srcset.
         srcsets = tree.xpath(
-            '//main//img/@srcset | //main//img/@data-srcset | '
-            '//main//source/@srcset | //main//source/@data-srcset'
+            '//img/@srcset | //img/@data-srcset | '
+            '//source/@srcset | //source/@data-srcset'
         )
         for srcset in srcsets:
             for item in str(srcset or '').split(','):
@@ -255,13 +260,26 @@ class SitemapConnectorBemoDe(models.AbstractModel):
                     candidates.append(url)
 
         # Elementor may render gallery images as CSS background-image URLs.
-        styles = tree.xpath('//main//*[@style]/@style')
+        styles = tree.xpath('//*[@style]/@style')
         for style in styles:
             candidates.extend(re.findall(
                 r'url\(\s*["\']?(.*?\.(?:jpe?g|png|webp|gif))(?:\?[^"\')\s]*)?["\']?\s*\)',
                 str(style or ''),
                 flags=re.I,
             ))
+
+        # Último recurso para atributos Elementor no contemplados arriba:
+        # extrae URLs absolutas del HTML serializado. Es especialmente útil en
+        # fichas como la referencia 1258 021, cuya imagen se publica como
+        # .../elementor/thumbs/1258021-<hash>.jpg.
+        try:
+            raw_html = etree.tostring(tree, encoding='unicode', method='html')
+        except Exception:
+            raw_html = ''
+        candidates.extend(re.findall(
+            r'https?://[^\s\"\']+?\.(?:jpe?g|png|webp|gif)(?:\?[^\s\"\']*)?',
+            html.unescape(raw_html), flags=re.I,
+        ))
 
         result = []
         compact_sku = re.sub(r'\D', '', sku or '')

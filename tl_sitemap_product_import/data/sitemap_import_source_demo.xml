@@ -1,5 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
+    <record id="product_brand_autentishoes_es" model="res.brand">
+        <field name="name">Autenti Shoes</field>
+    </record>
     <record id="product_brand_skechers_es" model="res.brand">
         <field name="name">Skechers</field>
     </record>
@@ -1475,5 +1478,19 @@
         <field name="max_images_per_product">12</field>
         <field name="auto_archive_discontinued">0</field>
         <field name="brand_id" ref="product_brand_munichsports_es" />
+    </record>
+    <record id="sitemap_import_source_autentishoes_es" model="sitemap.import.source">
+        <field name="name">Autenti Shoes España</field>
+        <field name="connector_model">sitemap.connector.autentishoes_es</field>
+        <field name="sitemap_index_url">https://autentishoes.com/sitemap_index.xml</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">30</field>
+        <field name="max_images_per_product">12</field>
+        <field name="auto_archive_discontinued">0</field>
+        <field name="brand_id" ref="product_brand_autentishoes_es" />
     </record>
 </odoo>

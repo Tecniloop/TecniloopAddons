@@ -1903,8 +1903,28 @@ class SitemapImportService(models.AbstractModel):
         necesita ya es un simple diccionario de datos, sin decisiones específicas del sitio.
         Devuelve 'created', 'updated' o 'error'."""
         Product = self.env['product.template']
-        existing = staging_row.product_tmpl_id or Product.search(
+
+        # La URL de origen es la identidad funcional del producto importado.
+        # Debe tener prioridad sobre un product_tmpl_id antiguo o incorrecto de
+        # la fila de staging. De lo contrario, al escribir la URL sobre ese
+        # producto enlazado se produce una UniqueViolation si otro producto ya
+        # es el propietario legítimo de la URL.
+        url_owner = Product.search(
             [('sitemap_source_url', '=', staging_row.url)], limit=1)
+        linked_product = staging_row.product_tmpl_id
+        if url_owner:
+            existing = url_owner
+            if linked_product != url_owner:
+                staging_row.product_tmpl_id = url_owner.id
+        elif linked_product and (
+            not linked_product.sitemap_source_url
+            or linked_product.sitemap_source_url == staging_row.url
+        ):
+            existing = linked_product
+        else:
+            # No se reutiliza un producto enlazado que pertenece a otra URL.
+            # Se crea uno nuevo para no secuestrar ni corromper otra ficha.
+            existing = Product.browse()
 
         try:
             segments = staging_row.category_path.split('/') if staging_row.category_path else []
