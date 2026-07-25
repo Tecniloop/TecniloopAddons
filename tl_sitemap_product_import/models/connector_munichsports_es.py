@@ -27,7 +27,7 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
 
     _HOSTS = {'munichsports.com', 'www.munichsports.com'}
     _PRODUCT_PATTERNS = (
-        re.compile(r'^/(?:es/)?products/(?P<reference>\d{1,12})/?$', re.I),
+        re.compile(r'^/(?:[a-z]{2}/)?products/(?P<reference>\d{1,12})(?:[-/][^?#]*)?/?$', re.I),
         re.compile(r'^/(?P<slug>[^/]+)-(?P<reference>\d{5,12})/?$', re.I),
     )
     _LANG_SUFFIX_RE = re.compile(r'-(?:ca|it|en)$', re.I)
@@ -159,8 +159,12 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
     def get_product_entries(self, source, category_filter=None, limit=0):
         needle = self._clean(category_filter).casefold()
         products = {}
-        for entry in self._walk_sitemap(source, source.sitemap_index_url):
+        sample_urls = []
+        raw_entries = self._walk_sitemap(source, source.sitemap_index_url)
+        for entry in raw_entries:
             url = self._canonical_url(entry.get('url'))
+            if url and len(sample_urls) < 10:
+                sample_urls.append(url)
             reference = self._reference(url)
             if not reference:
                 continue
@@ -174,8 +178,9 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
                 break
         if not products:
             raise ValueError(
-                'El sitemap de MUNICH Sports no contiene fichas con los patrones actuales '
-                '(/es/products/<id> o la ruta histórica terminada en -<referencia>).'
+                'MUNICH 19.0.1.103.0: se leyeron %s entradas del sitemap, pero ninguna '
+                'coincide con una ficha /es/products/<id>. Primeras URLs: %s'
+                % (len(raw_entries), ', '.join(sample_urls) or '(ninguna URL recibida)')
             )
         return list(products.values())
 
