@@ -6,6 +6,7 @@ import re
 from urllib.parse import parse_qsl, unquote, urlencode, urlparse, urlsplit, urlunsplit
 
 from lxml import etree
+import requests
 from lxml import html as lxml_html
 
 from odoo import models
@@ -37,6 +38,11 @@ class SitemapConnectorLevisEs(models.AbstractModel):
     _PRODUCT_PATH_RE = re.compile(r'/p/([^/?#]+)/?$', re.IGNORECASE)
     _SCENE7_HOST = 'lscoglobal.scene7.com'
     _SCENE7_PATH = '/is/image/lscoglobal/'
+    _SPANISH_PRODUCT_SITEMAP_COUNT = 75
+    _SPANISH_PRODUCT_SITEMAP_TEMPLATE = (
+        'https://www.levi.com/ES/es_ES/sitemap/medias/'
+        'Product-es-ES-EUR-{index}.xml'
+    )
 
     # ------------------------------------------------------------------
     # HTTP y sitemap
@@ -82,7 +88,31 @@ class SitemapConnectorLevisEs(models.AbstractModel):
         visited.add(sitemap_url)
 
         session = self._get_session(source)
-        response = self._http_get(session, sitemap_url, source)
+        try:
+            response = self._http_get(session, sitemap_url, source)
+        except requests.HTTPError as exc:
+            status = exc.response.status_code if exc.response is not None else 0
+            if depth == 0 and status == 403:
+                _logger.warning(
+                    "Levi's: el índice %s devuelve HTTP 403 al cliente del servidor. "
+                    "Se recorren directamente los %s sitemaps españoles de producto "
+                    "publicados por el índice.",
+                    sitemap_url, self._SPANISH_PRODUCT_SITEMAP_COUNT,
+                )
+                for index in range(self._SPANISH_PRODUCT_SITEMAP_COUNT):
+                    child_url = self._SPANISH_PRODUCT_SITEMAP_TEMPLATE.format(index=index)
+                    yield from self._iter_sitemap_entries(
+                        source, child_url, depth=1, visited=visited
+                    )
+                return
+            if depth > 0 and status in (403, 404, 410):
+                _logger.warning(
+                    "Levi's: se omite el sitemap hijo %s porque devuelve HTTP %s.",
+                    sitemap_url, status,
+                )
+                return
+            raise
+
         root = self._xml_root(response.content)
         root_name = self._local_name(root)
 
@@ -111,12 +141,19 @@ class SitemapConnectorLevisEs(models.AbstractModel):
         # Si los nombres permiten identificar sitemaps de producto, evitamos leer
         # páginas editoriales/categorías. Si no, se recorren todos y se filtran las
         # URLs finales por el patrón inequívoco /p/<código>.
-        product_named = [
+        spanish_product_named = [
             value for value in child_urls
-            if any(token in value.lower() for token in ('product', 'products', 'pdp'))
+            if re.search(r'/Product-es-ES-EUR-\d+\.xml(?:\?.*)?$', value, re.IGNORECASE)
         ]
-        if product_named:
-            child_urls = product_named
+        if spanish_product_named:
+            child_urls = spanish_product_named
+        else:
+            product_named = [
+                value for value in child_urls
+                if any(token in value.lower() for token in ('product', 'products', 'pdp'))
+            ]
+            if product_named:
+                child_urls = product_named
 
         for child_url in child_urls:
             yield from self._iter_sitemap_entries(
