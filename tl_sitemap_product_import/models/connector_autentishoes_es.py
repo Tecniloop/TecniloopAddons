@@ -6,9 +6,20 @@ from urllib.parse import urljoin, urlparse
 
 from lxml import html as lxml_html
 
-from odoo import models
+from odoo import fields, models
 
 _logger = logging.getLogger(__name__)
+
+
+class SitemapImportSourceAutentiShoes(models.Model):
+    _inherit = 'sitemap.import.source'
+
+    connector_model = fields.Selection(
+        selection_add=[
+            ('sitemap.connector.autentishoes_es', 'Autenti Shoes España'),
+        ],
+        ondelete={'sitemap.connector.autentishoes_es': 'cascade'},
+    )
 
 
 class SitemapConnectorAutentiShoesEs(models.AbstractModel):
