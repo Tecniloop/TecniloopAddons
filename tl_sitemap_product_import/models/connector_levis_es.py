@@ -2,6 +2,7 @@ import gzip
 import html
 import logging
 import re
+import subprocess
 
 from urllib.parse import parse_qsl, unquote, urlencode, urlparse, urlsplit, urlunsplit
 
@@ -66,6 +67,55 @@ class SitemapConnectorLevisEs(models.AbstractModel):
         })
         return session
 
+    def _levis_get_content(self, session, url, source):
+        """Descarga XML de Levi's con fallback a curl ante bloqueos 403.
+
+        Algunos nodos de Akamai bloquean la huella TLS de ``requests`` aunque
+        la misma URL sea pública y funcione desde un navegador. Primero usamos
+        el cliente HTTP común del módulo y, exclusivamente ante HTTP 403,
+        repetimos la descarga con curl y cabeceras de navegación.
+        """
+        try:
+            return self._http_get(session, url, source).content
+        except requests.HTTPError as exc:
+            status = exc.response.status_code if exc.response is not None else 0
+            if status != 403:
+                raise
+
+        timeout = max(int(source.request_timeout or 20), 5)
+        command = [
+            'curl', '--location', '--silent', '--show-error', '--fail',
+            '--compressed', '--max-time', str(timeout),
+            '--user-agent', session.headers.get('User-Agent', ''),
+            '--header', 'Accept: application/xml,text/xml;q=0.9,*/*;q=0.8',
+            '--header', 'Accept-Language: es-ES,es;q=0.9,en;q=0.5',
+            '--header', 'Cache-Control: no-cache',
+            '--header', 'Pragma: no-cache',
+            '--header', 'Sec-Fetch-Dest: document',
+            '--header', 'Sec-Fetch-Mode: navigate',
+            '--header', 'Sec-Fetch-Site: same-origin',
+            '--header', 'Upgrade-Insecure-Requests: 1',
+            '--referer', 'https://www.levi.com/ES/es_ES/sitemap.xml',
+            url,
+        ]
+        try:
+            result = subprocess.run(
+                command, check=False, capture_output=True, timeout=timeout + 5,
+            )
+        except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+            raise requests.HTTPError(
+                "Levi's devuelve HTTP 403 y no se pudo ejecutar el fallback curl: %s" % exc
+            ) from exc
+        if result.returncode != 0 or not result.stdout.strip():
+            detail = result.stderr.decode('utf-8', errors='replace').strip()
+            raise requests.HTTPError(
+                "Levi's devuelve HTTP 403 también mediante curl para %s%s" % (
+                    url, ': ' + detail if detail else '',
+                )
+            )
+        _logger.info("Levi's: XML obtenido mediante fallback curl: %s", url)
+        return result.stdout
+
     @staticmethod
     def _xml_root(content):
         if content[:2] == b'\x1f\x8b':
@@ -88,32 +138,8 @@ class SitemapConnectorLevisEs(models.AbstractModel):
         visited.add(sitemap_url)
 
         session = self._get_session(source)
-        try:
-            response = self._http_get(session, sitemap_url, source)
-        except requests.HTTPError as exc:
-            status = exc.response.status_code if exc.response is not None else 0
-            if depth == 0 and status == 403:
-                _logger.warning(
-                    "Levi's: el índice %s devuelve HTTP 403 al cliente del servidor. "
-                    "Se recorren directamente los %s sitemaps españoles de producto "
-                    "publicados por el índice.",
-                    sitemap_url, self._SPANISH_PRODUCT_SITEMAP_COUNT,
-                )
-                for index in range(self._SPANISH_PRODUCT_SITEMAP_COUNT):
-                    child_url = self._SPANISH_PRODUCT_SITEMAP_TEMPLATE.format(index=index)
-                    yield from self._iter_sitemap_entries(
-                        source, child_url, depth=1, visited=visited
-                    )
-                return
-            if depth > 0 and status in (403, 404, 410):
-                _logger.warning(
-                    "Levi's: se omite el sitemap hijo %s porque devuelve HTTP %s.",
-                    sitemap_url, status,
-                )
-                return
-            raise
-
-        root = self._xml_root(response.content)
+        content = self._levis_get_content(session, sitemap_url, source)
+        root = self._xml_root(content)
         root_name = self._local_name(root)
 
         if root_name == 'urlset':

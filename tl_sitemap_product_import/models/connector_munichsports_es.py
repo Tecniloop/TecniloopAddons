@@ -1,3 +1,4 @@
+import gzip
 import html
 import json
 import logging
@@ -14,10 +15,10 @@ _logger = logging.getLogger(__name__)
 class SitemapConnectorMunichSportsEs(models.AbstractModel):
     """Conector de la tienda oficial MUNICH Sports.
 
-    El sitemap mezcla páginas corporativas, categorías y las traducciones
-    ``-ca``, ``-it`` y ``-en`` de cada ficha. Solo se conserva la URL española
-    canónica cuyo último segmento termina en la referencia numérica del artículo.
-    Las tallas se importan como variantes incluso cuando la web no publica GTIN.
+    El CMS Trilogi publica índices y urlsets que pueden estar comprimidos con
+    gzip. Se reconocen las fichas actuales ``/es/products/<id>`` y también el
+    patrón histórico terminado en referencia numérica. Las tallas se importan
+    como variantes incluso cuando la web no publica GTIN.
     """
 
     _name = 'sitemap.connector.munichsports_es'
@@ -25,7 +26,10 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
     _description = 'Conector MUNICH Sports España'
 
     _HOSTS = {'munichsports.com', 'www.munichsports.com'}
-    _PRODUCT_RE = re.compile(r'^/(?P<slug>[^/]+)-(?P<reference>\d{5,12})/?$', re.I)
+    _PRODUCT_PATTERNS = (
+        re.compile(r'^/(?:es/)?products/(?P<reference>\d{1,12})/?$', re.I),
+        re.compile(r'^/(?P<slug>[^/]+)-(?P<reference>\d{5,12})/?$', re.I),
+    )
     _LANG_SUFFIX_RE = re.compile(r'-(?:ca|it|en)$', re.I)
     _PRICE_RE = re.compile(r'(?<!\d)(\d{1,5}(?:[.]\d{3})*(?:,\d{2})|\d+(?:[.]\d{2}))\s*€')
     _IMAGE_RE = re.compile(r'\.(?:avif|gif|jpe?g|png|webp)(?:$|[?#])', re.I)
@@ -44,8 +48,7 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
         if parts.netloc.casefold() not in cls._HOSTS:
             return False
         path = re.sub(r'/+', '/', parts.path or '/')
-        # El sitemap puede publicar /es/<slug>; la ficha española canónica no lo necesita.
-        path = re.sub(r'^/es/', '/', path, flags=re.I)
+        # Trilogi publica rutas localizadas como /es/products/<id>.
         return urlunsplit(('https', 'www.munichsports.com', path.rstrip('/') or '/', '', ''))
 
     @classmethod
@@ -56,7 +59,11 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
         path = urlsplit(canonical).path
         if cls._LANG_SUFFIX_RE.search(path):
             return False
-        return cls._PRODUCT_RE.match(path)
+        for pattern in cls._PRODUCT_PATTERNS:
+            match = pattern.match(path)
+            if match:
+                return match
+        return False
 
     @classmethod
     def _is_product_url(cls, value):
@@ -77,6 +84,23 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
         visited.add(clean_url)
         response = self._http_get(self._get_session(source), clean_url, source)
         content = response.content or b''
+        content_type = (response.headers.get('Content-Type') or '').casefold()
+        content_encoding = (response.headers.get('Content-Encoding') or '').casefold()
+        compressed = (
+            content.startswith(b'\x1f\x8b')
+            or clean_url.casefold().endswith('.gz')
+            or 'gzip' in content_type
+            or ('gzip' in content_encoding and not content.lstrip().startswith(b'<'))
+        )
+        if compressed and content.startswith(b'\x1f\x8b'):
+            try:
+                content = gzip.decompress(content)
+            except (OSError, EOFError) as exc:
+                message = 'MUNICH Sports devolvió un sitemap gzip inválido para %s: %s' % (clean_url, exc)
+                if depth:
+                    _logger.warning('%s. Se omite este sitemap hijo.', message)
+                    return []
+                raise ValueError(message) from exc
         stripped = content.lstrip()
         if not stripped.startswith(b'<'):
             preview = stripped[:160].decode('utf-8', errors='replace').replace('\n', ' ')
@@ -150,7 +174,8 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
                 break
         if not products:
             raise ValueError(
-                'El sitemap de MUNICH Sports no contiene fichas españolas cuyo URL termine en una referencia numérica.'
+                'El sitemap de MUNICH Sports no contiene fichas con los patrones actuales '
+                '(/es/products/<id> o la ruta histórica terminada en -<referencia>).'
             )
         return list(products.values())
 
@@ -320,6 +345,25 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
                     values.append(value)
         return values
 
+    @classmethod
+    def _commercial_reference(cls, tree, product, fallback):
+        """Obtiene la referencia comercial publicada por Trilogi, no el id interno URL."""
+        candidates = []
+        if isinstance(product, dict):
+            candidates.extend([product.get('sku'), product.get('mpn'), product.get('productID')])
+        candidates.extend(tree.xpath(
+            '//*[@itemprop="sku"]/@content | //*[@itemprop="sku"]//text()'
+        ))
+        page_text = cls._clean(' '.join(tree.xpath('//body//text()')))
+        match = re.search(r'\bRef\s*:\s*([A-Za-z0-9._/-]+)', page_text, re.I)
+        if match:
+            candidates.insert(0, match.group(1))
+        for value in candidates:
+            value = cls._clean(value)
+            if value and re.search(r'\d', value):
+                return value
+        return fallback
+
     def fetch_preview(self, source, url):
         response = self._http_get(self._get_session(source), url, source)
         tree = lxml_html.fromstring(response.content)
@@ -333,6 +377,7 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
 
         products = self._json_products(tree)
         product = products[0] if products else {}
+        commercial_reference = self._commercial_reference(tree, product, reference)
         name = self._clean(product.get('name')) or self._clean(' '.join(tree.xpath('//h1[1]//text()')))
         if not name:
             name = self._clean(self._meta(tree, 'og:title'))
@@ -347,7 +392,7 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
         variants = [
             {
                 'ean': False,
-                'sku': f'{reference}-{size}',
+                'sku': f'{commercial_reference}-{size}',
                 'label': name,
                 'variant_label': f'Talla: {size}',
                 'external_variant_id': f'{reference}-{size}',
@@ -370,7 +415,7 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
             'main_image_url': images[0] if images else False,
             'image_urls': images,
             'canonical_url': canonical,
-            'style_code': reference,
+            'style_code': commercial_reference,
             'color_code': False,
             'category_path': ' / '.join(['MUNICH Sports'] + breadcrumbs),
             'ean_variants': self._normalise_ean_variants(variants),
