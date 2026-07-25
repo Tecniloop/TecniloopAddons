@@ -35,7 +35,7 @@ class SitemapConnectorLevisEs(models.AbstractModel):
     _inherit = 'sitemap.import.service'
     _description = "Conector Levi's España"
 
-    _PRODUCT_PATH_RE = re.compile(r'/p/([^/?#]+)/?$', re.IGNORECASE)
+    _PRODUCT_PATH_RE = re.compile(r'(?:^|/)p/([^/?#]+)', re.IGNORECASE)
     _SCENE7_HOST = 'lscoglobal.scene7.com'
     _SCENE7_PATH = '/is/image/lscoglobal/'
     _SPANISH_PRODUCT_SITEMAP_COUNT = 75
@@ -162,11 +162,19 @@ class SitemapConnectorLevisEs(models.AbstractModel):
 
     @classmethod
     def _is_spanish_product_url(cls, value):
-        parsed = urlparse(value)
+        """Reconoce las fichas Levi's publicadas en los sitemaps ES.
+
+        Los sitemaps de producto ya están segmentados por ``Product-es-ES-EUR``;
+        por ello no debemos volver a exigir una forma exacta de locale ni que el
+        código sea literalmente el último segmento. Levi's puede añadir una barra,
+        un sufijo o parámetros de campaña sin dejar de ser una ficha válida.
+        """
+        parsed = urlparse(html.unescape((value or '').strip()))
+        host = (parsed.hostname or '').lower()
+        path = unquote(parsed.path or '')
         return (
-            parsed.netloc.lower() in ('www.levi.com', 'levi.com')
-            and parsed.path.lower().startswith('/es/es_es/')
-            and bool(cls._PRODUCT_PATH_RE.search(parsed.path))
+            host in ('www.levi.com', 'levi.com')
+            and bool(cls._PRODUCT_PATH_RE.search(path))
         )
 
     @staticmethod
@@ -189,9 +197,13 @@ class SitemapConnectorLevisEs(models.AbstractModel):
         product_count = 0
         filter_text = (category_filter or '').strip().lower()
 
+        rejected_samples = []
         for entry in raw_entries:
-            product_url = self._without_query_fragment(entry['url'])
+            raw_url = html.unescape((entry.get('url') or '').strip())
+            product_url = self._without_query_fragment(raw_url)
             if not self._is_spanish_product_url(product_url):
+                if raw_url and len(rejected_samples) < 10:
+                    rejected_samples.append(raw_url)
                 continue
             product_count += 1
 
@@ -205,6 +217,12 @@ class SitemapConnectorLevisEs(models.AbstractModel):
             entries.append({'url': product_url, 'lastmod': entry.get('lastmod') or False})
             if limit and len(entries) >= limit:
                 break
+        if not product_count and rejected_samples:
+            _logger.warning(
+                "Levi's: el sitemap se leyó, pero ninguna URL fue reconocida como "
+                "producto. Primeras URLs recibidas: %s",
+                rejected_samples,
+            )
         return entries, product_count
 
     def get_product_entries(self, source, category_filter=None, limit=0):
@@ -222,9 +240,9 @@ class SitemapConnectorLevisEs(models.AbstractModel):
         if product_count:
             return entries
         raise ValueError(
-            "El sitemap oficial de Levi's no contiene URLs españolas de producto "
-            "con el patrón /ES/es_ES/.../p/<código>. Revise la URL configurada "
-            "en la fuente; el conector no utiliza páginas de categoría como fallback."
+            "No se ha podido obtener ninguna URL de producto desde los sitemaps "
+            "Product-es-ES-EUR de Levi's. Revise en el log si los sitemaps hijos "
+            "han respondido HTTP 403/404 o qué primeras URLs fueron recibidas."
         )
 
     def get_image_map(self, source):
