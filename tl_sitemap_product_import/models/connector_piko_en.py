@@ -128,28 +128,87 @@ class SitemapConnectorPikoEn(models.AbstractModel):
 
     @classmethod
     def _images(cls, tree, product, page_url):
+        """Return the complete PIKO product gallery in page order."""
         candidates = []
+
+        def add(value):
+            if isinstance(value, dict):
+                value = value.get('url') or value.get('contentUrl')
+            if value:
+                candidates.append(str(value).strip())
+
         image = product.get('image') if product else None
         if isinstance(image, list):
-            candidates.extend(image)
-        elif isinstance(image, dict):
-            candidates.append(image.get('url') or image.get('contentUrl'))
-        elif image:
-            candidates.append(image)
-        candidates.extend(tree.xpath(
-            '//meta[@property="og:image"]/@content | '
-            '//a[contains(@class,"fancybox") or contains(@class,"lightbox")]/@href | '
-            '//*[contains(@class,"product") and contains(@class,"image")]//img/@src | '
-            '//img[@data-zoom-image]/@data-zoom-image | //img[@data-large]/@data-large'
-        ))
+            for value in image:
+                add(value)
+        else:
+            add(image)
+
+        for value in tree.xpath(
+            '//meta[@property="og:image" or @property="og:image:secure_url"]/@content | '
+            '//meta[@name="twitter:image" or @name="twitter:image:src"]/@content | '
+            '//link[@rel="preload" and @as="image"]/@href | '
+            '//a[contains(@href, "/media/oart_")]/@href | '
+            '//img[contains(@src, "/media/oart_")]/@src | '
+            '//img[contains(@data-src, "/media/oart_")]/@data-src | '
+            '//img[contains(@data-original, "/media/oart_")]/@data-original | '
+            '//img[contains(@data-lazy-src, "/media/oart_")]/@data-lazy-src | '
+            '//img[contains(@data-zoom-image, "/media/oart_")]/@data-zoom-image | '
+            '//img[contains(@data-large, "/media/oart_")]/@data-large'
+        ):
+            add(value)
+
+        for raw in tree.xpath('//img/@srcset | //img/@data-srcset | //source/@srcset'):
+            choices = []
+            for part in str(raw).split(','):
+                bits = part.strip().split()
+                if not bits:
+                    continue
+                weight = 0
+                if len(bits) > 1:
+                    token = bits[-1].lower()
+                    try:
+                        weight = int(float(token[:-1])) if token.endswith(('w', 'x')) else 0
+                    except ValueError:
+                        weight = 0
+                choices.append((weight, bits[0]))
+            if choices:
+                add(max(choices, key=lambda item: item[0])[1])
+
+        document = '\n'.join(tree.xpath('//script/text() | //style/text() | //@style'))
+        media_re = re.compile(
+            r"(?P<url>(?:https?:)?//[^\s\"'<>]+/media/oart_[^\s\"'<>]+?\.(?:jpe?g|png|webp)(?:\?[^\s\"'<>]*)?|/media/oart_[^\s\"'<>]+?\.(?:jpe?g|png|webp)(?:\?[^\s\"'<>]*)?)",
+            re.IGNORECASE,
+        )
+        for match in media_re.finditer(html.unescape(document).replace('\\/', '/')):
+            add(match.group('url'))
+
         result = []
+        seen = set()
         for value in candidates:
-            if not value:
+            value = html.unescape(value).replace('\\/', '/')
+            absolute = urljoin(page_url, value)
+            parts = urlsplit(absolute)
+            if parts.scheme not in {'http', 'https'}:
                 continue
-            absolute = urljoin(page_url, str(value))
-            if absolute.startswith('http') and absolute not in result:
-                result.append(absolute)
-        return result
+            if parts.netloc.casefold().removeprefix('www.') != 'piko-shop.de':
+                continue
+            path = parts.path
+            folded = path.casefold()
+            if '/media/oart_' not in folded:
+                if any(token in folded for token in ('logo', 'icon', 'placeholder', 'spinner')):
+                    continue
+                if not re.search(r'\.(?:jpe?g|png|webp)$', folded):
+                    continue
+            normalized = urlunsplit(('https', 'www.piko-shop.de', path, parts.query, ''))
+            dedupe_key = urlunsplit(('https', 'www.piko-shop.de', path, '', '')).casefold()
+            if dedupe_key in seen:
+                continue
+            seen.add(dedupe_key)
+            result.append(normalized)
+
+        gallery = [url for url in result if '/media/oart_' in url.casefold()]
+        return gallery or result
 
     @classmethod
     def _descriptions(cls, tree, product):
