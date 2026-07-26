@@ -142,7 +142,7 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
         return max(int(source.numeric_scan_block_size or 250), 1)
 
     def _numeric_scan_url(self, source, article_number):
-        return f"https://{self._HOST}/en/products/details/article/{article_number:05d}"
+        return f"https://{self._HOST}/en/products/details/article/{article_number}"
 
     @staticmethod
     def _numeric_page_missing(content):
@@ -735,7 +735,7 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
         article_no = self._product_key(canonical)
         page_article = self._line_value(lines, ('Article No.', 'Article No'))
         if page_article:
-            match = re.search(r'\b(\d{4,8})\b', page_article)
+            match = re.search(r'\b(\d+)\b', page_article)
             if match and match.group(1) != article_no:
                 raise ValueError(
                     f'La ficha recibida corresponde al artículo {match.group(1)}, no a {article_no}.'
