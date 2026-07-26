@@ -37,7 +37,7 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
 
     _HOST = 'www.maerklin.de'
     _PRODUCT_RE = re.compile(
-        r'^/en/products/details/article/(?P<code>\d{4,8})(?:/[^/?#]+)?/?$',
+        r'^/en/products/details/article/(?P<code>\d+)(?:/[^/?#]+)?/?$',
         re.IGNORECASE,
     )
     _PRICE_RE = re.compile(

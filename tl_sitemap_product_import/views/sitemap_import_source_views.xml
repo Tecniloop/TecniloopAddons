@@ -30,7 +30,7 @@
                     </group>
                     <group string="Escáner numérico" invisible="connector_model not in ['sitemap.connector.maerklin_en', 'sitemap.connector.trix_en', 'sitemap.connector.minitrix_en', 'sitemap.connector.lgb_en']">
                         <group>
-                            <field name="numeric_scan_start" placeholder="00700"/>
+                            <field name="numeric_scan_start" placeholder="700"/>
                             <field name="numeric_scan_end" placeholder="40000"/>
                             <field name="numeric_scan_block_size"/>
                         </group>

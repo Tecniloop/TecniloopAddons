@@ -24,7 +24,7 @@ class SitemapConnectorLgbEn(models.AbstractModel):
 
     _HOST = 'www.lgb.com'
     _PRODUCT_RE = re.compile(
-        r'^/(?:en/)?products/details/article/(?P<code>\d{4,8})(?:/[^/?#]+)?/?$',
+        r'^/(?:en/)?products/details/article/(?P<code>\d+)(?:/[^/?#]+)?/?$',
         re.IGNORECASE,
     )
 

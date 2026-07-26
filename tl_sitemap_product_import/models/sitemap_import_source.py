@@ -185,11 +185,11 @@ class SitemapImportSource(models.Model):
 
     # --- Descubrimiento numérico (grupo Märklin) ---
     numeric_scan_start = fields.Char(
-        string='Artículo inicial', default='00700', size=5,
-        help='Primera referencia del escáner numérico, escrita siempre con cinco dígitos; por ejemplo 00700.')
+        string='Artículo inicial', default='700',
+        help='Primera referencia numérica del escáner. Puede tener cualquier cantidad de dígitos; por ejemplo 700, 00700 o 123456.')
     numeric_scan_end = fields.Char(
-        string='Artículo final', default='40000', size=5,
-        help='Última referencia del escáner numérico, incluida y escrita con cinco dígitos.')
+        string='Artículo final', default='40000',
+        help='Última referencia numérica incluida en el escaneo. Puede tener cualquier cantidad de dígitos.')
     numeric_scan_block_size = fields.Integer(
         string='Tamaño de bloque', default=250,
         help='Cantidad de referencias procesadas por cada trabajo de queue_job. Un valor pequeño facilita reintentos selectivos; uno grande crea menos trabajos.')
@@ -205,10 +205,10 @@ class SitemapImportSource(models.Model):
         for source in self:
             start = (source.numeric_scan_start or '').strip()
             end = (source.numeric_scan_end or '').strip()
-            if len(start) != 5 or not start.isdigit():
-                raise ValidationError(_('El artículo inicial debe contener exactamente cinco dígitos, por ejemplo 00700.'))
-            if len(end) != 5 or not end.isdigit():
-                raise ValidationError(_('El artículo final debe contener exactamente cinco dígitos, por ejemplo 40000.'))
+            if not start or not start.isdigit():
+                raise ValidationError(_('El artículo inicial debe contener únicamente dígitos.'))
+            if not end or not end.isdigit():
+                raise ValidationError(_('El artículo final debe contener únicamente dígitos.'))
             if int(start) > int(end):
                 raise ValidationError(_('El artículo inicial no puede ser mayor que el artículo final.'))
             if not (1 <= source.numeric_scan_block_size <= 10000):

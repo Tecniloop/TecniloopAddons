@@ -240,7 +240,7 @@ class SitemapImportBatch(models.Model):
                 priority=12,
                 max_retries=max(source.http_retry_count or 3, 1),
                 identity_key=f'sitemap_numeric_scan_{self.id}_{first}_{last}',
-                description=_('Escanear artículos %05d-%05d: %s') % (
+                description=_('Escanear artículos %d-%d: %s') % (
                     first, last, source.name),
             )._job_scan_numeric_block(first, last)
         return True
@@ -318,7 +318,7 @@ class SitemapImportBatch(models.Model):
             return len(vals_list)
         except Exception as exc:
             _logger.exception(
-                'Error escaneando rango %05d-%05d para %s', first, last, source.name)
+                'Error escaneando rango %d-%d para %s', first, last, source.name)
             response = getattr(exc, 'response', None)
             transient = isinstance(exc, (requests.Timeout, requests.ConnectionError)) or getattr(
                 response, 'status_code', None

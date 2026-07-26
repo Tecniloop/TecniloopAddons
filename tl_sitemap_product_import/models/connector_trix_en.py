@@ -25,7 +25,7 @@ class SitemapConnectorTrixEn(models.AbstractModel):
 
     _HOST = 'www.trix.de'
     _PRODUCT_RE = re.compile(
-        r'^/en/products/details/article/(?P<code>\d{4,8})(?:/[^/?#]+)?/?$',
+        r'^/en/products/details/article/(?P<code>\d+)(?:/[^/?#]+)?/?$',
         re.IGNORECASE,
     )
 
