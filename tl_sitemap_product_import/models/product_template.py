@@ -48,14 +48,33 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _sitemap_prepare_public_description(self, value):
-        """Conserva el HTML de origen y convierte texto plano a HTML de Odoo."""
-        value = str(value or '').strip()
+        """Normaliza HTML importado y convierte texto plano a HTML de Odoo.
+
+        Algunas fuentes entregan el fragmento HTML escapado una o varias veces,
+        por ejemplo ``&lt;p&gt;Texto&lt;/p&gt;`` o
+        ``&amp;lt;p&amp;gt;Texto&amp;lt;/p&amp;gt;``. Antes de decidir si el
+        contenido es HTML se desescapa de forma limitada e iterativa.
+        """
+        value = str(value or '').strip().replace('\\/', '/')
         if not value:
             return False
+
+        # Deshacer hasta tres niveles de entidades HTML. El límite evita ciclos
+        # o transformaciones excesivas en textos que contengan entidades válidas.
+        for _iteration in range(3):
+            decoded = html.unescape(value)
+            if decoded == value:
+                break
+            value = decoded.strip()
+
         if re.search(r'<\s*[a-zA-Z][^>]*>', value):
-            # No se transforma el HTML recuperado de la fuente. El campo Html de
-            # Odoo aplicará su saneado estándar al escribirlo.
-            return value
+            # Conservar el fragmento original, pero envolverlo para que el editor
+            # web de Odoo aplique la estructura y márgenes habituales. Si ya es
+            # contenido de Odoo no se añade otro contenedor.
+            if re.search(r'<\s*div\b[^>]*data-oe-version=', value, flags=re.I):
+                return value
+            return '<div data-oe-version="2.0">%s</div>' % value
+
         paragraphs = [
             '<p>%s</p>' % html.escape(block.strip()).replace('\n', '<br/>')
             for block in re.split(r'\n\s*\n', value)
