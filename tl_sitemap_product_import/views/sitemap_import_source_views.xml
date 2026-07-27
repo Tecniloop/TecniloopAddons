@@ -28,7 +28,7 @@
                             <field name="http_retry_backoff" invisible="http_retry_count == 0"/>
                         </group>
                     </group>
-                    <group string="Escáner numérico" invisible="connector_model not in ['sitemap.connector.maerklin_en', 'sitemap.connector.trix_en', 'sitemap.connector.minitrix_en', 'sitemap.connector.lgb_en']">
+                    <group string="Escáner numérico Märklin / Trix / Minitrix / LGB" invisible="connector_model not in ['sitemap.connector.maerklin_en', 'sitemap.connector.trix_en', 'sitemap.connector.minitrix_en', 'sitemap.connector.lgb_en']">
                         <group>
                             <field name="numeric_scan_start" placeholder="700"/>
                             <field name="numeric_scan_end" placeholder="40000"/>

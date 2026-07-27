@@ -1,4 +1,8 @@
-from odoo import _, fields, models
+import html
+import json
+import re
+
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -41,6 +45,131 @@ class ProductTemplate(models.Model):
         'unique(sitemap_source_url)',
         message='Ya existe un producto importado con esta URL de origen.',
     )
+
+    @api.model
+    def _sitemap_prepare_public_description(self, value):
+        """Conserva el HTML de origen y convierte texto plano a HTML de Odoo."""
+        value = str(value or '').strip()
+        if not value:
+            return False
+        if re.search(r'<\s*[a-zA-Z][^>]*>', value):
+            # No se transforma el HTML recuperado de la fuente. El campo Html de
+            # Odoo aplicará su saneado estándar al escribirlo.
+            return value
+        paragraphs = [
+            '<p>%s</p>' % html.escape(block.strip()).replace('\n', '<br/>')
+            for block in re.split(r'\n\s*\n', value)
+            if block.strip()
+        ]
+        return '<div data-oe-version="2.0">%s</div>' % ''.join(paragraphs)
+
+    @api.model
+    def _sitemap_description_cleanup_vals(self, public_html):
+        """Valores comunes: una sola descripción web y ninguna descripción de venta."""
+        vals = {}
+        if 'public_description' in self._fields:
+            vals['public_description'] = self._sitemap_prepare_public_description(public_html)
+        # Estos campos fueron usados históricamente por distintos conectores y
+        # módulos OCA. Además de contaminar presupuestos, algunos crean un bloque
+        # adicional sin márgenes en la ficha web. Se vacían deliberadamente.
+        for field_name in (
+            'description_sale',
+            'description_sale_short',
+            'description_sale_long',
+            'description_ecommerce',
+            'website_description',
+        ):
+            if field_name in self._fields:
+                vals[field_name] = False
+        return vals
+
+    def _is_munich_sitemap_product(self):
+        self.ensure_one()
+        return bool(
+            self.is_sitemap_import_product
+            and self.sitemap_source_id
+            and self.sitemap_source_id.connector_model == 'sitemap.connector.munichsports_es'
+            and self.sitemap_source_url
+        )
+
+    def action_queue_repair_imported_products(self):
+        products = self.filtered(
+            lambda product: product.is_sitemap_import_product
+            and product.sitemap_source_id
+            and product.sitemap_source_url
+        )
+        if not products:
+            raise UserError(_('Seleccione productos importados por sitemap.'))
+        for product in products:
+            product.with_delay(
+                channel='root.sitemap.import',
+                description=_('Corregir producto importado: %s') % product.display_name,
+                identity_key=f'sitemap_repair_imported_{product.id}',
+            )._job_repair_imported_product()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Corrección de productos en cola'),
+                'message': _('%s productos enviados a queue_job.') % len(products),
+                'type': 'success',
+                'sticky': False,
+            },
+        }
+
+    def _job_repair_imported_product(self):
+        self.ensure_one()
+        source = self.sitemap_source_id
+        if not self.is_sitemap_import_product or not source or not self.sitemap_source_url:
+            return False
+
+        connector = self.env[source.connector_model]
+        data = connector.fetch_preview(source, self.sitemap_source_url)
+
+        # Se prioriza siempre el HTML ampliado recuperado de la fuente. Solo si
+        # no existe se usa la descripción genérica/breve como respaldo.
+        source_description = (
+            data.get('full_description')
+            or data.get('description_html')
+            or data.get('description')
+            or data.get('short_description')
+            or ''
+        )
+        self.write(self._sitemap_description_cleanup_vals(source_description))
+
+        if self._is_munich_sitemap_product():
+            variants = connector._normalise_ean_variants(data.get('ean_variants') or [])
+            labelled = [
+                item for item in variants
+                if connector._variant_label_parts(item.get('variant_label'))
+            ]
+            if labelled:
+                connector._sync_product_variants(self, labelled)
+            connector._remove_duplicate_variant_informational_attributes(self, labelled)
+
+            # Limpia además líneas históricas Talla (informativo/informativa).
+            suffix_re = re.compile(r'^talla\s*\((?:informativo|informativa)\)\s*$', re.I)
+            duplicate_lines = self.attribute_line_ids.filtered(
+                lambda line: bool(suffix_re.match(line.attribute_id.name or ''))
+            )
+            if duplicate_lines:
+                duplicate_lines.unlink()
+
+            try:
+                stored = json.loads(self.sitemap_attributes_json or '{}')
+            except (TypeError, ValueError, json.JSONDecodeError):
+                stored = {}
+            if isinstance(stored, dict):
+                stored = {
+                    name: values for name, values in stored.items()
+                    if re.sub(
+                        r'\s*\((?:informativo|informativa)\)\s*$', '', name, flags=re.I
+                    ).strip().casefold() != 'talla'
+                }
+                self.sitemap_attributes_json = json.dumps(
+                    stored, ensure_ascii=False, sort_keys=True
+                )
+        return True
 
     def action_refresh_sitemap_eans(self):
         """Vuelve a consultar los EAN sin modificar precio, descripción o imágenes."""

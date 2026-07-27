@@ -183,13 +183,13 @@ class SitemapImportSource(models.Model):
         string='Vistas previas por ejecución de cron', default=40,
         help='Número máximo de fichas de producto que se procesan en cada ejecución del cron de vistas previas.')
 
-    # --- Descubrimiento numérico (grupo Märklin) ---
+    # --- Descubrimiento numérico (Märklin, Trix, Minitrix y LGB) ---
     numeric_scan_start = fields.Char(
         string='Artículo inicial', default='700',
-        help='Primera referencia numérica del escáner. Puede tener cualquier cantidad de dígitos; por ejemplo 700, 00700 o 123456.')
+        help='Primera referencia numérica para Märklin, Trix, Minitrix o LGB. Puede tener cualquier cantidad de dígitos; por ejemplo 700, 00700 o 123456.')
     numeric_scan_end = fields.Char(
         string='Artículo final', default='40000',
-        help='Última referencia numérica incluida en el escaneo. Puede tener cualquier cantidad de dígitos.')
+        help='Última referencia numérica incluida en el escaneo de Märklin, Trix, Minitrix o LGB. Puede tener cualquier cantidad de dígitos.')
     numeric_scan_block_size = fields.Integer(
         string='Tamaño de bloque', default=250,
         help='Cantidad de referencias procesadas por cada trabajo de queue_job. Un valor pequeño facilita reintentos selectivos; uno grande crea menos trabajos.')

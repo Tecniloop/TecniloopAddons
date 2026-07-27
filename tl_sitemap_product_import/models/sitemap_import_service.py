@@ -1112,6 +1112,37 @@ class SitemapImportService(models.AbstractModel):
             attribute.write({'create_variant': 'always'})
         return attribute
 
+    @staticmethod
+    def _variant_attribute_names(variants):
+        names = set()
+        for item in variants or []:
+            label = item.get('variant_label') if isinstance(item, dict) else False
+            for name, _value in SitemapImportService._variant_label_parts(label):
+                names.add(name.strip().casefold())
+        return names
+
+    def _remove_duplicate_variant_informational_attributes(self, product_tmpl, variants):
+        """Elimina líneas informativas que duplican atributos de variante.
+
+        Históricamente Munich enviaba ``Talla`` tanto en ``attributes`` como en
+        ``variant_label``. El primer canal generaba ``Talla (informativo)`` y el
+        segundo ``Talla``. Se conserva únicamente el atributo generador.
+        """
+        variant_names = self._variant_attribute_names(variants)
+        if not variant_names:
+            return
+        suffix_re = re.compile(r'\s*\((?:informativo|informativa)\)\s*$', re.I)
+        lines = product_tmpl.attribute_line_ids.filtered(
+            lambda line: line.attribute_id.create_variant == 'no_variant'
+        )
+        to_remove = self.env['product.template.attribute.line']
+        for line in lines:
+            base_name = suffix_re.sub('', line.attribute_id.name or '').strip().casefold()
+            if base_name in variant_names:
+                to_remove |= line
+        if to_remove:
+            to_remove.unlink()
+
     def _sync_product_variants(self, product_tmpl, variants):
         variants = self._normalise_ean_variants(variants)
         parsed = []
@@ -1240,6 +1271,7 @@ class SitemapImportService(models.AbstractModel):
         labelled = [item for item in variants if self._variant_label_parts(item.get('variant_label'))]
         if labelled:
             self._sync_product_variants(product_tmpl, labelled)
+            self._remove_duplicate_variant_informational_attributes(product_tmpl, labelled)
             return
 
         variants_odoo = product_tmpl.product_variant_ids
@@ -1965,24 +1997,18 @@ class SitemapImportService(models.AbstractModel):
             if source.brand_id and 'brand_id' in Product._fields:
                 vals['brand_id'] = source.brand_id.id
 
-            # Las extensiones de descripción cambian entre versiones y ediciones
-            # de Odoo/OCA. Solo se escriben los campos realmente presentes en la
-            # base de datos para evitar errores como ``Invalid field``.
-            plain_short_description = self._html_to_plain_text(short_description)
-            optional_description_vals = {
-                # Campo estándar de product.template.
-                'description_sale': plain_short_description,
-                # website_sale_product_description (según versión).
-                'description_sale_short': plain_short_description,
-                'description_sale_long': full_description,
-                # Personalizaciones/ediciones que usan un campo e-commerce propio.
-                'description_ecommerce': False,
-                # Campo estándar de website_sale en instalaciones que lo exponen.
-                'website_description': full_description,
-            }
-            for field_name, field_value in optional_description_vals.items():
-                if field_name in Product._fields:
-                    vals[field_name] = field_value
+            # La descripción recuperada es contenido para e-commerce. Se prioriza
+            # el HTML ampliado del registro importado y se guarda únicamente en
+            # ``public_description``. Los campos de venta y los campos web
+            # alternativos se vacían para no crear textos en presupuestos ni un
+            # segundo bloque sin márgenes en la página del producto.
+            imported_description = (
+                staging_row.full_description_preview
+                or staging_row.description_preview
+                or staging_row.short_description_preview
+                or ''
+            )
+            vals.update(Product._sitemap_description_cleanup_vals(imported_description))
 
             if staging_row.dimensional_uom_name and (
                     staging_row.product_length or staging_row.product_height or staging_row.product_width):
@@ -2075,7 +2101,17 @@ class SitemapImportService(models.AbstractModel):
                         staging_row.id,
                     )
             if staged_attributes:
-                self._sync_product_attributes(product_tmpl, staged_attributes)
+                variant_names = self._variant_attribute_names(staged_eans)
+                if variant_names:
+                    staged_attributes = {
+                        name: values for name, values in staged_attributes.items()
+                        if name.strip().casefold() not in variant_names
+                    }
+                self._remove_duplicate_variant_informational_attributes(
+                    product_tmpl, staged_eans,
+                )
+                if staged_attributes:
+                    self._sync_product_attributes(product_tmpl, staged_attributes)
 
             if source.import_images:
                 staged_image_urls = []

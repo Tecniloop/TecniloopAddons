@@ -41,4 +41,10 @@
         <field name="channel_id" ref="queue_channel_sitemap_import"/>
         <field name="retry_pattern" eval="{1: 30, 2: 120, 3: 600}"/>
     </record>
+    <record id="queue_job_function_sitemap_repair_imported_product" model="queue.job.function">
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="method">_job_repair_imported_product</field>
+        <field name="channel_id" ref="queue_channel_sitemap_import"/>
+        <field name="retry_pattern" eval="{1: 30, 2: 120, 3: 600}"/>
+    </record>
 </odoo>

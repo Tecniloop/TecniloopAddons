@@ -404,15 +404,22 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
             }
             for size in sizes
         ]
+        # La talla ya se declara en ``variant_label`` y debe existir una sola
+        # vez como atributo generador de variantes. No se incluye en el mapa de
+        # atributos informativos porque el servicio crearía ``Talla
+        # (informativo)`` y duplicaría la información/las combinaciones.
         attributes = {'Marca': ['MUNICH']}
-        if sizes:
-            attributes['Talla'] = sizes
+        description_html = ''.join(
+            '<p>%s</p>' % html.escape(block.strip())
+            for block in re.split(r'\n\s*\n', description or '')
+            if block.strip()
+        )
 
         return {
             'name': name,
             'description': description,
             'short_description': description,
-            'full_description': description,
+            'full_description': description_html,
             'attributes': attributes,
             'price': price,
             'price_available': bool(price),
