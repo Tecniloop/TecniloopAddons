@@ -1,3 +1,4 @@
+import html
 import base64
 import hashlib
 import mimetypes
@@ -1352,6 +1353,54 @@ class SitemapImportService(models.AbstractModel):
                 best_len, best_target = n, mapping[target_field]
         return best_target, best_len
 
+    @staticmethod
+    def _category_token(value):
+        value = html.unescape(str(value or '')).casefold()
+        value = re.sub(r'[^a-z0-9]+', ' ', value)
+        return re.sub(r'\s+', ' ', value).strip()
+
+    def _sanitize_product_category_segments(self, segments, product_name=False, style_code=False, url=False):
+        """Elimina hojas que en realidad son el producto o su slug.
+
+        Muchas plataformas usan rutas como ``/products/<slug>`` y algunos
+        breadcrumbs incluyen la ficha como último elemento. Ese último elemento
+        no debe crear una categoría distinta para cada producto.
+        """
+        clean = []
+        for segment in segments or []:
+            text = re.sub(r'\s+', ' ', str(segment or '')).strip(' /')
+            if text and (not clean or text.casefold() != clean[-1].casefold()):
+                clean.append(text)
+        if not clean:
+            return []
+
+        product_tokens = set()
+        for candidate in (product_name, style_code):
+            token = self._category_token(candidate)
+            if token:
+                product_tokens.add(token)
+        combined = self._category_token(' '.join(filter(None, [style_code, product_name])))
+        if combined:
+            product_tokens.add(combined)
+        if url:
+            slug = unquote(urlparse(url).path.rstrip('/').rsplit('/', 1)[-1])
+            slug_token = self._category_token(slug)
+            if slug_token:
+                product_tokens.add(slug_token)
+
+        while clean:
+            leaf = self._category_token(clean[-1])
+            is_product_leaf = leaf in product_tokens
+            if style_code:
+                code = self._category_token(style_code)
+                is_product_leaf = is_product_leaf or bool(code and code in leaf and (
+                    self._category_token(product_name) in leaf or len(clean) > 1
+                ))
+            if not is_product_leaf:
+                break
+            clean.pop()
+        return clean
+
     def _resolve_category_chain(self, category_segments, source, category_field='internal'):
         Model = self.env['product.category'] if category_field == 'internal' else self.env['product.public.category']
         mapped_target, consumed = self._find_category_mapping(category_segments, category_field, source)
@@ -1959,7 +2008,13 @@ class SitemapImportService(models.AbstractModel):
             existing = Product.browse()
 
         try:
-            segments = staging_row.category_path.split('/') if staging_row.category_path else []
+            raw_segments = staging_row.category_path.split('/') if staging_row.category_path else []
+            segments = self._sanitize_product_category_segments(
+                raw_segments,
+                product_name=staging_row.name,
+                style_code=staging_row.style_code,
+                url=staging_row.url,
+            )
             category = self._resolve_category_chain(segments, source, 'internal')
 
             full_description = (

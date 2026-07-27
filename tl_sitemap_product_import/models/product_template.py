@@ -154,7 +154,43 @@ class ProductTemplate(models.Model):
             or data.get('short_description')
             or ''
         )
-        self.write(self._sitemap_description_cleanup_vals(source_description))
+        vals = self._sitemap_description_cleanup_vals(source_description)
+
+        extracted_name = str(data.get('name') or '').strip()
+        style_code = str(data.get('style_code') or self.sitemap_style_code or '').strip()
+        if extracted_name and style_code:
+            if not extracted_name.casefold().startswith(style_code.casefold()):
+                extracted_name = f'{style_code} {extracted_name}'.strip()
+        if extracted_name:
+            vals['name'] = extracted_name
+        if style_code:
+            vals['sitemap_style_code'] = style_code
+
+        raw_segments = [
+            segment.strip() for segment in str(data.get('category_path') or '').split('/')
+            if segment.strip()
+        ]
+        segments = connector._sanitize_product_category_segments(
+            raw_segments,
+            product_name=extracted_name or self.name,
+            style_code=style_code,
+            url=self.sitemap_source_url,
+        )
+        internal_category = connector._resolve_category_chain(segments, source, 'internal')
+        vals['categ_id'] = internal_category.id
+
+        if source.import_public_categories:
+            public_category = connector._resolve_category_chain(segments, source, 'public')
+            commands = []
+            if self.sitemap_public_categ_id and self.sitemap_public_categ_id != public_category:
+                commands.append((3, self.sitemap_public_categ_id.id, 0))
+            commands.append((4, public_category.id, 0))
+            vals.update({
+                'public_categ_ids': commands,
+                'sitemap_public_categ_id': public_category.id,
+            })
+
+        self.write(vals)
 
         if self._is_munich_sitemap_product():
             variants = connector._normalise_ean_variants(data.get('ean_variants') or [])

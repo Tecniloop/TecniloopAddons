@@ -365,6 +365,15 @@ class SitemapConnectorHornbyPlatformBase(models.AbstractModel):
             raise ValueError(f'La ficha de {self._BRAND_NAME} no contiene un nombre de producto.')
 
         style_code = self._item_code(tree, lines, product_node, canonical_response)
+        # En la plataforma Hornby el H1/JSON-LD puede omitir la referencia.
+        # El nombre comercial en Odoo debe conservarla para identificar bien
+        # productos y recambios: "HK105-U-01 Huracan Dashboard extension".
+        if style_code:
+            code_fold = self._normalise_text(style_code).casefold()
+            name_fold = self._normalise_text(name).casefold()
+            if not name_fold.startswith(code_fold):
+                name = self._normalise_text(f'{style_code} {name}')
+
         price, currency, price_available = self._official_eur_price(
             source, session, canonical_response, style_code, existing_response=response,
         )
@@ -397,6 +406,9 @@ class SitemapConnectorHornbyPlatformBase(models.AbstractModel):
 
         breadcrumbs = self._breadcrumb_json(payloads, name) or self._dom_breadcrumbs(tree, name)
         category_segments = self._translate_categories(breadcrumbs) if breadcrumbs else self._inferred_category(name, product_type)
+        category_segments = self._sanitize_product_category_segments(
+            category_segments, product_name=name, style_code=style_code, url=canonical_response,
+        )
         if not category_segments:
             category_segments = list(self._DEFAULT_CATEGORY)
 
