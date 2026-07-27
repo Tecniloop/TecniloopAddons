@@ -46,6 +46,35 @@ class ProductTemplate(models.Model):
         message='Ya existe un producto importado con esta URL de origen.',
     )
 
+    @staticmethod
+    def _sitemap_fix_mojibake(value):
+        """Repara texto UTF-8 interpretado como latin-1/cp1252."""
+        if not isinstance(value, str):
+            return value
+        text = value
+        markers = ('Ã', 'Â', 'â€', 'â€™', 'â€œ', 'â€\x9d', 'â€“', 'â€”', 'ðŸ', 'ï»¿', '\ufffd')
+
+        def score(candidate):
+            return sum(candidate.count(marker) for marker in markers)
+
+        for _index in range(3):
+            before = score(text)
+            if not before:
+                break
+            candidates = []
+            for codec in ('latin-1', 'cp1252'):
+                try:
+                    candidates.append(text.encode(codec).decode('utf-8'))
+                except (UnicodeEncodeError, UnicodeDecodeError):
+                    continue
+            if not candidates:
+                break
+            best = min(candidates, key=score)
+            if score(best) >= before:
+                break
+            text = best
+        return text.lstrip('\ufeff')
+
     @api.model
     def _sitemap_prepare_public_description(self, value):
         """Normaliza HTML importado y convierte texto plano a HTML de Odoo.
@@ -55,7 +84,7 @@ class ProductTemplate(models.Model):
         ``&amp;lt;p&amp;gt;Texto&amp;lt;/p&amp;gt;``. Antes de decidir si el
         contenido es HTML se desescapa de forma limitada e iterativa.
         """
-        value = str(value or '').strip().replace('\\/', '/')
+        value = self._sitemap_fix_mojibake(str(value or '')).strip().replace('\\/', '/')
         if not value:
             return False
 
@@ -144,6 +173,7 @@ class ProductTemplate(models.Model):
 
         connector = self.env[source.connector_model]
         data = connector.fetch_preview(source, self.sitemap_source_url)
+        data = connector._normalise_extracted_charset(data)
 
         # Se prioriza siempre el HTML ampliado recuperado de la fuente. Solo si
         # no existe se usa la descripción genérica/breve como respaldo.

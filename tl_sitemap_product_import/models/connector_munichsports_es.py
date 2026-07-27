@@ -371,7 +371,11 @@ class SitemapConnectorMunichSportsEs(models.AbstractModel):
 
     def fetch_preview(self, source, url):
         response = self._http_get(self._get_session(source), url, source)
-        tree = lxml_html.fromstring(response.content)
+        # Se usa el texto decodificado por el núcleo común. Esto evita que un
+        # charset ausente o incorrecto en origen convierta ``Portátil`` en
+        # ``PortÃ¡til`` antes de que lxml procese la página.
+        page_text = self._fix_mojibake_text(response.text or '')
+        tree = lxml_html.fromstring(page_text)
         canonical_values = tree.xpath('//link[@rel="canonical"]/@href')
         canonical = self._canonical_url(canonical_values[0] if canonical_values else response.url)
         if not self._is_product_url(canonical):

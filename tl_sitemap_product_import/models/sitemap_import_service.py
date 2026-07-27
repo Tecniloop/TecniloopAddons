@@ -61,6 +61,94 @@ class SitemapImportService(models.AbstractModel):
             text = re.sub(r'<[^>]+>', ' ', raw)
         return re.sub(r'\s+', ' ', text).strip()
 
+
+    @staticmethod
+    def _detect_response_encoding(response):
+        """Detecta el charset real sin confiar ciegamente en ISO-8859-1 por defecto.
+
+        Requests usa ISO-8859-1 cuando un ``text/*`` no declara charset. Muchas
+        tiendas modernas sirven UTF-8 sin declararlo, lo que produce mojibake
+        como ``PortÃ¡til``. Se priorizan BOM, cabecera, declaración XML/HTML y,
+        finalmente, UTF-8 cuando los bytes son válidos.
+        """
+        content = response.content or b''
+        if content.startswith(b'\xef\xbb\xbf'):
+            return 'utf-8-sig'
+        if content.startswith((b'\xff\xfe', b'\xfe\xff')):
+            return 'utf-16'
+        content_type = response.headers.get('Content-Type', '') or ''
+        match = re.search(r'charset\s*=\s*["\']?([^;"\'\s]+)', content_type, re.I)
+        if match:
+            return match.group(1).strip()
+        head = content[:4096]
+        match = re.search(
+            br'<\?xml[^>]+encoding=["\']\s*([^"\']+)', head, re.I
+        ) or re.search(
+            br'<meta[^>]+charset=["\']?\s*([^"\'\s/>]+)', head, re.I
+        ) or re.search(
+            br'<meta[^>]+content=["\'][^"\']*charset=([^;"\'\s>]+)', head, re.I
+        )
+        if match:
+            try:
+                return match.group(1).decode('ascii', errors='ignore').strip()
+            except Exception:
+                pass
+        try:
+            content.decode('utf-8')
+            return 'utf-8'
+        except UnicodeDecodeError:
+            return response.apparent_encoding or response.encoding or 'utf-8'
+
+    @classmethod
+    def _fix_mojibake_text(cls, value):
+        """Repara mojibake UTF-8 interpretado como latin-1/cp1252.
+
+        La conversión solo se acepta cuando reduce marcadores típicos de texto
+        corrupto, para no modificar palabras correctamente escritas. También se
+        aplica a fragmentos HTML sin alterar sus etiquetas.
+        """
+        if value is None or not isinstance(value, str):
+            return value
+        text = value
+        markers = ('Ã', 'Â', 'â€', 'â€™', 'â€œ', 'â€', 'â€“', 'â€”', 'ðŸ', 'ï»¿', '\ufffd')
+
+        def score(candidate):
+            return sum(candidate.count(marker) for marker in markers)
+
+        for _index in range(3):
+            before = score(text)
+            if not before:
+                break
+            candidates = []
+            for codec in ('latin-1', 'cp1252'):
+                try:
+                    candidates.append(text.encode(codec).decode('utf-8'))
+                except (UnicodeEncodeError, UnicodeDecodeError):
+                    continue
+            if not candidates:
+                break
+            best = min(candidates, key=score)
+            if score(best) >= before:
+                break
+            text = best
+        return text.lstrip('\ufeff')
+
+    @classmethod
+    def _normalise_extracted_charset(cls, value):
+        """Normaliza recursivamente cadenas recuperadas por cualquier conector."""
+        if isinstance(value, str):
+            return cls._fix_mojibake_text(value)
+        if isinstance(value, list):
+            return [cls._normalise_extracted_charset(item) for item in value]
+        if isinstance(value, tuple):
+            return tuple(cls._normalise_extracted_charset(item) for item in value)
+        if isinstance(value, dict):
+            return {
+                cls._normalise_extracted_charset(key): cls._normalise_extracted_charset(item)
+                for key, item in value.items()
+            }
+        return value
+
     # ------------------------------------------------------------------
     # HTTP
     # ------------------------------------------------------------------
@@ -94,6 +182,9 @@ class SitemapImportService(models.AbstractModel):
                 response = session.get(url, timeout=source.request_timeout or 20)
                 if response.status_code not in retry_statuses:
                     response.raise_for_status()
+                    detected_encoding = self._detect_response_encoding(response)
+                    if detected_encoding:
+                        response.encoding = detected_encoding
                     if source.request_delay:
                         time.sleep(source.request_delay)
                     return response
@@ -1899,7 +1990,9 @@ class SitemapImportService(models.AbstractModel):
         })
         try:
             data = self.fetch_preview(source, staging_row.url)
+            data = self._normalise_extracted_charset(data)
             data = self.enrich_preview_eans(source, staging_row.url, data)
+            data = self._normalise_extracted_charset(data)
             extracted_name = str((data or {}).get('name') or '').strip()
             normalized_name = extracted_name.rstrip('/').casefold()
             normalized_url = staging_row.url.strip().rstrip('/').casefold()
