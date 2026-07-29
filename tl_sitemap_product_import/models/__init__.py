@@ -71,3 +71,5 @@ from . import connector_faller_en
 from . import connector_aneste_datank_es
 
 from . import connector_noch_de
+
+from . import connector_tupperware_com

@@ -100,6 +100,7 @@ CONNECTOR_SELECTION = [
     ('sitemap.connector.noch_proxxon', 'PROXXON — catálogo NOCH Alemania'),
     ('sitemap.connector.munichsports_es', 'MUNICH Sports España'),
     ('sitemap.connector.autentishoes_es', 'Autenti Shoes España'),
+    ('sitemap.connector.tupperware_com', 'Tupperware en español'),
 ]
 
 

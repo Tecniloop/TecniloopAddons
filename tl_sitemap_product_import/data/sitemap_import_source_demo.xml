@@ -1,5 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
+    <record id="product_brand_tupperware_com" model="res.brand">
+        <field name="name">Tupperware</field>
+    </record>
     <record id="product_brand_autentishoes_es" model="res.brand">
         <field name="name">Autenti Shoes</field>
     </record>
@@ -1492,5 +1495,18 @@
         <field name="max_images_per_product">12</field>
         <field name="auto_archive_discontinued">0</field>
         <field name="brand_id" ref="product_brand_autentishoes_es" />
+    </record>
+    <record id="sitemap_import_source_tupperware_com" model="sitemap.import.source">
+        <field name="name">Tupperware en español</field>
+        <field name="connector_model">sitemap.connector.tupperware_com</field>
+        <field name="sitemap_index_url">https://www.tupperware.com/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">40</field>
+        <field name="max_images_per_product">12</field>
+        <field name="auto_archive_discontinued">0</field>
+        <field name="brand_id" ref="product_brand_tupperware_com" />
     </record>
 </odoo>
