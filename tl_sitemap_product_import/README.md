@@ -1142,3 +1142,11 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 ## 19.0.1.91.0
 
 - Corrige el conector MUNICH: el extractor privado `_description` se renombra a `_extract_description` para no sobrescribir el atributo reservado `_description` de los modelos Odoo.
+
+## 19.0.1.113.0
+
+- Conserva el HTML estructurado de Shopify/Tupperware (párrafos, títulos, listas, negritas y enlaces).
+- Usa `website_description` como destino preferido cuando el campo OCA está instalado.
+- Usa `public_description` solo como compatibilidad cuando `website_description` no existe.
+- La reparación masiva vuelve a poblar la descripción web con el HTML original.
+- Evita capturar variables CSS como código de color en Tupperware.

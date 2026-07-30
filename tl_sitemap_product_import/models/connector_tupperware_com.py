@@ -182,6 +182,29 @@ class SitemapConnectorTupperwareCom(models.AbstractModel):
         if str(values.get('brand_name') or '').casefold() == 'panama jack':
             values['brand_name'] = 'Tupperware'
 
+        # El parser Shopify genérico convierte ``body_html`` a texto plano para
+        # obtener una descripción breve. Tupperware publica, sin embargo, un
+        # fragmento HTML completo y localizado con encabezados, listas, negritas
+        # y enlaces. Se vuelve a leer el payload de la ficha efectiva y se
+        # conserva ese fragmento sin aplanarlo para ``website_description``.
+        product_payload = self._fetch_shopify_product(source, effective_url)
+        raw_html = (
+            product_payload.get('body_html')
+            or product_payload.get('description')
+            or product_payload.get('content')
+            or ''
+        ) if isinstance(product_payload, dict) else ''
+        if raw_html:
+            values['full_description'] = raw_html
+            values['description_html'] = raw_html
+            values['description'] = self._strip_html(raw_html)
+            values['short_description'] = self._strip_html(raw_html)
+
+        # El detector de color heredado busca texto visible de calzado y puede
+        # capturar variables CSS del tema Shopify. Tupperware no publica aquí un
+        # código de color fiable, por lo que se descarta.
+        values['color_code'] = False
+
         # Mantener la URL española como canónica del importador cuando fue la
         # ficha que proporcionó el contenido. Shopify puede anunciar en el HTML
         # una canonical sin idioma, pero no debe hacer que Odoo vuelva a inglés.
