@@ -1193,3 +1193,12 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 - Descarga localmente la imagen de portada de artículos Shopify.
 - Evita URLs externas en `cover_properties` y `website_meta_og_img`.
 - Corrige el error 500 de `website.layout` al abrir recetas importadas.
+
+## 19.0.1.120.0
+
+- PIKO ya no usa el sitemap histórico como fuente principal.
+- Descubre productos activos desde los catálogos raíz G, H0, TT y N.
+- Solicita hasta 100 productos por página, deduplica URLs y corta la paginación cuando una página se repite o deja de aportar productos.
+- Permite filtrar por escala (`G`, `H0`, `TT`, `N`).
+- Conserva el sitemap únicamente como respaldo si las categorías no devuelven productos.
+- Las fichas continúan procesándose mediante trabajos independientes de `queue_job`, por lo que una ficha inválida no bloquea el resto del catálogo.

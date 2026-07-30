@@ -51,25 +51,177 @@ class SitemapConnectorPikoEn(models.AbstractModel):
         )
         return values[0].strip() if values else False
 
-    def get_product_entries(self, source, category_filter=None, limit=0):
-        entries = self._fetch_urlset(source, source.sitemap_index_url)
+    # Catálogos raíz actuales. Se recorren las categorías generales, no todas las
+    # subcategorías, porque estas últimas repiten productos y multiplican peticiones.
+    _CATALOG_ROOTS = (
+        ('G', 'https://www.piko-shop.de/en/warengruppe/g-scale-4.html'),
+        ('H0', 'https://www.piko-shop.de/en/warengruppe/h0-scale-20.html'),
+        ('TT', 'https://www.piko-shop.de/en/warengruppe/tt-scale-42.html'),
+        ('N', 'https://www.piko-shop.de/en/warengruppe/n-scale-50.html'),
+    )
+    _CATEGORY_RE = re.compile(r'^/en/warengruppe/[^/?#]+-\d+(?:/.*)?\.html/?$', re.I)
+    _PAGE_RE = re.compile(r'/p-(?P<page>\d+)\.html/?$', re.I)
+    _DEFAULT_PAGE_SIZE = 100
+    _MAX_CATEGORY_PAGES = 250
+
+    @classmethod
+    def _category_page_url(cls, root_url, page, page_size=None):
+        """Build a deterministic PIKO category page URL.
+
+        PIKO uses zero-based ``p-N`` paging. The first plain category page is
+        equivalent to page 0, but using the explicit URL makes resume/logging
+        predictable and allows requesting 100 products per response.
+        """
+        page_size = int(page_size or cls._DEFAULT_PAGE_SIZE)
+        canonical = cls._canonical_url(root_url)
+        if not canonical:
+            return False
+        path = urlsplit(canonical).path
+        path = re.sub(r'/l-\d+/o-[^/]+/p-\d+\.html$', '.html', path, flags=re.I)
+        path = re.sub(r'\.html$', '', path, flags=re.I)
+        return 'https://www.piko-shop.de%s/l-%d/o-itemnumber/p-%d.html' % (
+            path, page_size, int(page),
+        )
+
+    @classmethod
+    def _listing_product_urls(cls, tree, page_url):
+        """Extract only active product cards from a category listing."""
+        result = []
+        seen = set()
+        for href in tree.xpath('//a[contains(@href, "/en/artikel/")]/@href'):
+            canonical = cls._canonical_url(urljoin(page_url, href))
+            if not cls._product_match(canonical):
+                continue
+            if canonical in seen:
+                continue
+            seen.add(canonical)
+            result.append(canonical)
+        return result
+
+    @classmethod
+    def _listing_page_numbers(cls, tree):
+        pages = set()
+        for href in tree.xpath('//a[contains(@href, "/p-")]/@href'):
+            match = cls._PAGE_RE.search(urlsplit(str(href)).path)
+            if match:
+                pages.add(int(match.group('page')))
+        return pages
+
+    def _catalog_roots(self, category_filter=None):
+        needle = self._clean(category_filter).casefold()
+        if not needle:
+            return list(self._CATALOG_ROOTS)
+        aliases = {
+            'g': {'g', 'g scale', 'scale g'},
+            'h0': {'h0', 'ho', 'h0 scale', 'ho scale'},
+            'tt': {'tt', 'tt scale'},
+            'n': {'n', 'n scale'},
+        }
+        selected = []
+        for code, url in self._CATALOG_ROOTS:
+            accepted = aliases.get(code.casefold(), {code.casefold()})
+            if needle in accepted or needle in url.casefold():
+                selected.append((code, url))
+        return selected
+
+    def _fetch_catalog_entries(self, source, category_filter=None, limit=0):
+        """Discover current PIKO products from category pages.
+
+        This intentionally avoids the historical sitemap, which contains many
+        obsolete product URLs. A category stops when it returns no products,
+        repeats an already visited page, or exceeds the last pagination link.
+        """
+        roots = self._catalog_roots(category_filter)
+        if not roots:
+            raise ValueError(
+                'El filtro PIKO no coincide con los catálogos G, H0, TT o N.'
+            )
+
+        session = self._get_session(source)
         products = {}
+        for scale, root_url in roots:
+            page = 0
+            last_page = None
+            previous_signature = None
+            while page < self._MAX_CATEGORY_PAGES:
+                page_url = self._category_page_url(root_url, page)
+                response = self._http_get(session, page_url, source)
+                tree = lxml_html.fromstring(response.content)
+                urls = self._listing_product_urls(tree, response.url or page_url)
+
+                # Some installations may reject l-100. Retry the same page with
+                # the site's normal page size before giving up the category.
+                if not urls and page == 0:
+                    fallback_url = self._category_page_url(root_url, page, page_size=18)
+                    response = self._http_get(session, fallback_url, source)
+                    tree = lxml_html.fromstring(response.content)
+                    urls = self._listing_product_urls(tree, response.url or fallback_url)
+
+                if not urls:
+                    break
+                signature = tuple(urls)
+                if signature == previous_signature:
+                    _logger.warning(
+                        'PIKO %s: la página %s repite el contenido anterior; se detiene la paginación.',
+                        scale, page,
+                    )
+                    break
+                previous_signature = signature
+
+                new_count = 0
+                for canonical in urls:
+                    if canonical not in products:
+                        products[canonical] = {
+                            'url': canonical,
+                            'lastmod': False,
+                            'piko_scale': scale,
+                            'piko_listing_url': response.url or page_url,
+                        }
+                        new_count += 1
+                        if limit and len(products) >= limit:
+                            return list(products.values())
+
+                page_numbers = self._listing_page_numbers(tree)
+                if page_numbers:
+                    last_page = max(page_numbers)
+                if new_count == 0 or (last_page is not None and page >= last_page):
+                    break
+                page += 1
+
+        return list(products.values())
+
+    def get_product_entries(self, source, category_filter=None, limit=0):
+        products = self._fetch_catalog_entries(
+            source, category_filter=category_filter, limit=limit
+        )
+        if products:
+            return products[:limit] if limit else products
+
+        # Compatibility fallback: useful if PIKO temporarily changes or blocks
+        # category pages. It is deliberately secondary because the sitemap has
+        # historically contained removed products.
+        _logger.warning(
+            'PIKO: no se encontraron productos activos por categorías; se usa el sitemap como respaldo.'
+        )
+        entries = self._fetch_urlset(source, source.sitemap_index_url)
+        result = []
+        seen = set()
         needle = str(category_filter or '').casefold()
         for item in entries:
             canonical = self._canonical_url(item.get('url'))
-            if not self._product_match(canonical):
+            if not self._product_match(canonical) or canonical in seen:
                 continue
             if needle and needle not in canonical.casefold():
                 continue
-            products.setdefault(canonical, {'url': canonical, 'lastmod': item.get('lastmod') or False})
-            if limit and len(products) >= limit:
+            seen.add(canonical)
+            result.append({'url': canonical, 'lastmod': item.get('lastmod') or False})
+            if limit and len(result) >= limit:
                 break
-        if not products:
+        if not result:
             raise ValueError(
-                'El sitemap inglés de PIKO no contiene fichas con el patrón /en/artikel/*.html '
-                'o su estructura ha cambiado.'
+                'PIKO no devuelve productos activos en sus categorías ni fichas válidas en el sitemap.'
             )
-        return list(products.values())[:limit] if limit else list(products.values())
+        return result
 
     def get_image_map(self, source):
         return {}
@@ -78,9 +230,11 @@ class SitemapConnectorPikoEn(models.AbstractModel):
     def _json_ld_products(cls, tree):
         products = []
         for raw in tree.xpath('//script[@type="application/ld+json"]/text()'):
+            if not isinstance(raw, (str, bytes, bytearray)) or not raw:
+                continue
             try:
                 payload = json.loads(raw)
-            except Exception:
+            except (TypeError, ValueError, json.JSONDecodeError):
                 continue
             stack = payload if isinstance(payload, list) else [payload]
             while stack:

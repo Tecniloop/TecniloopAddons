@@ -49,6 +49,32 @@ class SitemapImportService(models.AbstractModel):
     _description = 'Mecánica compartida de importación por sitemap (base para los conectores)'
 
     @staticmethod
+    def _safe_json_loads(value, default=None):
+        """Carga JSON tolerando campos Odoo vacíos o booleanos heredados.
+
+        Los campos ``Text`` vacíos se leen como ``False``. Algunas filas antiguas
+        también pueden contener booleanos por escrituras previas. En esos casos no
+        se debe llamar a ``json.loads`` porque provoca ``TypeError`` y reintentos
+        infinitos de ``queue_job``.
+        """
+        fallback = default if default is not None else {}
+        if value in (None, False, True, ''):
+            return fallback
+        if isinstance(value, (dict, list, int, float)):
+            return value
+        if isinstance(value, bytes):
+            value = value.decode('utf-8', errors='replace')
+        if not isinstance(value, str):
+            return fallback
+        value = value.strip()
+        if not value:
+            return fallback
+        try:
+            return json.loads(value)
+        except (TypeError, ValueError, json.JSONDecodeError):
+            return fallback
+
+    @staticmethod
     def _html_to_plain_text(value):
         """Convierte HTML importado en texto seguro para documentos de venta."""
         if not value:
@@ -1763,7 +1789,7 @@ class SitemapImportService(models.AbstractModel):
         if not attributes:
             return
         try:
-            previous = json.loads(product_tmpl.sitemap_attributes_json or '{}')
+            previous = self._safe_json_loads(product_tmpl.sitemap_attributes_json, {})
             previous = self._normalise_product_attributes(previous)
         except (TypeError, ValueError, json.JSONDecodeError):
             previous = {}
@@ -2256,7 +2282,7 @@ class SitemapImportService(models.AbstractModel):
             staged_eans = []
             if staging_row.ean_variants_json:
                 try:
-                    loaded_eans = json.loads(staging_row.ean_variants_json)
+                    loaded_eans = self._safe_json_loads(staging_row.ean_variants_json, [])
                     if isinstance(loaded_eans, list):
                         staged_eans = loaded_eans
                 except (TypeError, ValueError, json.JSONDecodeError):
@@ -2272,7 +2298,7 @@ class SitemapImportService(models.AbstractModel):
             staged_attributes = {}
             if staging_row.attributes_json:
                 try:
-                    loaded_attributes = json.loads(staging_row.attributes_json)
+                    loaded_attributes = self._safe_json_loads(staging_row.attributes_json, {})
                     staged_attributes = self._normalise_product_attributes(loaded_attributes)
                 except (TypeError, ValueError, json.JSONDecodeError):
                     _logger.warning(
@@ -2296,7 +2322,7 @@ class SitemapImportService(models.AbstractModel):
                 staged_image_urls = []
                 if staging_row.image_urls_json:
                     try:
-                        loaded_urls = json.loads(staging_row.image_urls_json)
+                        loaded_urls = self._safe_json_loads(staging_row.image_urls_json, [])
                         if isinstance(loaded_urls, list):
                             staged_image_urls = loaded_urls
                     except (TypeError, ValueError):
@@ -2313,7 +2339,7 @@ class SitemapImportService(models.AbstractModel):
 
             if staging_row.shopify_blog_articles_json and hasattr(product_tmpl, '_sitemap_sync_blog_articles'):
                 try:
-                    blog_articles = json.loads(staging_row.shopify_blog_articles_json or '[]')
+                    blog_articles = self._safe_json_loads(staging_row.shopify_blog_articles_json, [])
                 except (TypeError, ValueError, json.JSONDecodeError):
                     blog_articles = []
                 if blog_articles:
@@ -2323,7 +2349,7 @@ class SitemapImportService(models.AbstractModel):
 
             if source.import_attachments and staging_row.attachment_urls_json:
                 try:
-                    documents = json.loads(staging_row.attachment_urls_json)
+                    documents = self._safe_json_loads(staging_row.attachment_urls_json, [])
                 except (TypeError, ValueError, json.JSONDecodeError):
                     documents = []
                     _logger.warning(
