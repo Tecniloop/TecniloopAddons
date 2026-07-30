@@ -2,6 +2,9 @@ import re
 import time
 from urllib.parse import urljoin, urlparse, urlunparse
 
+from lxml import etree
+from lxml import html as lxml_html
+
 from odoo import models
 
 
@@ -274,12 +277,102 @@ class SitemapConnectorTupperwareCom(models.AbstractModel):
             )
         return merged
 
+    @staticmethod
+    def _node_inner_html(node):
+        """Serialize the contents of an HTML node without its outer tag."""
+        parts = []
+        if node.text:
+            parts.append(node.text)
+        for child in node:
+            parts.append(etree.tostring(child, encoding='unicode', method='html'))
+        return ''.join(parts).strip()
+
+    def _localized_product_content(self, source, localized_url):
+        """Read commercial texts from the rendered localized storefront.
+
+        Shopify's public product JSON can return the market's base language
+        even when the HTML storefront is translated.  Names and descriptions
+        must therefore come from the rendered ``/es/products/...`` page.  The
+        JSON payload remains useful only for technical data such as SKU, EAN,
+        price, images and variants.
+        """
+        session = self._get_session(source)
+        response = self._http_get(session, localized_url, source)
+        tree = lxml_html.fromstring(response.content)
+
+        title = ''
+        for xpath in (
+            '//main//h1[normalize-space()]',
+            '//*[contains(concat(" ", normalize-space(@class), " "), " product__title ")][normalize-space()]',
+            '//h1[normalize-space()]',
+        ):
+            nodes = tree.xpath(xpath)
+            if nodes:
+                title = self._clean_text(' '.join(nodes[0].itertext()))
+                if title:
+                    break
+
+        description_html = ''
+        description_xpaths = (
+            '//main//*[contains(concat(" ", normalize-space(@class), " "), " product__description ")]',
+            '//*[@id and starts-with(@id, "ProductInfo-")]//*[contains(concat(" ", normalize-space(@class), " "), " rte ")]',
+            '//main//*[contains(concat(" ", normalize-space(@class), " "), " product__info-container ")]//*[contains(concat(" ", normalize-space(@class), " "), " rte ")]',
+        )
+        for xpath in description_xpaths:
+            nodes = tree.xpath(xpath)
+            fragments = []
+            seen_text = set()
+            for node in nodes:
+                plain = self._clean_text(' '.join(node.itertext()))
+                if len(plain) < 20:
+                    continue
+                token = plain.casefold()
+                if token in seen_text:
+                    continue
+                # Ignore nested duplicates when a parent description block was
+                # already selected by the same XPath.
+                if any(parent in nodes for parent in node.iterancestors()):
+                    continue
+                fragment = self._node_inner_html(node)
+                if fragment:
+                    fragments.append(fragment)
+                    seen_text.add(token)
+            if fragments:
+                description_html = ''.join(fragments).strip()
+                break
+
+        # Last localized fallback: use the visible product-information text,
+        # never the English body_html returned by Shopify JSON.
+        if not description_html:
+            product_info_nodes = tree.xpath(
+                '//*[@id and starts-with(@id, "ProductInfo-")] | '
+                '//main//*[contains(concat(" ", normalize-space(@class), " "), " product__info-container ")]'
+            )
+            if product_info_nodes:
+                visible = self._clean_text(' '.join(product_info_nodes[0].itertext()))
+                if visible:
+                    description_html = visible
+
+        return {
+            'name': title,
+            'description_html': description_html,
+        }
+
     def fetch_preview(self, source, url):
-        """Fetch Spanish content, with the unlocalized page as fallback."""
+        """Fetch Spanish commercial texts and Shopify technical data.
+
+        The localized HTML has absolute priority for ``name`` and the rich
+        description.  Shopify JSON is deliberately prevented from replacing
+        those fields with English content during both import and repair.
+        """
         localized_url = self._spanish_product_url(url)
         fallback_url = self._default_product_url(localized_url)
+        localized_content = {}
 
         try:
+            localized_content = self._localized_product_content(
+                source, localized_url
+            )
             values = super().fetch_preview(source, localized_url)
             effective_url = localized_url
         except Exception:  # noqa: BLE001 - localized storefront may miss a handle
@@ -292,36 +385,39 @@ class SitemapConnectorTupperwareCom(models.AbstractModel):
         if str(values.get('brand_name') or '').casefold() == 'panama jack':
             values['brand_name'] = 'Tupperware'
 
-        # El parser Shopify genérico convierte ``body_html`` a texto plano para
-        # obtener una descripción breve. Tupperware publica, sin embargo, un
-        # fragmento HTML completo y localizado con encabezados, listas, negritas
-        # y enlaces. Se vuelve a leer el payload de la ficha efectiva y se
-        # conserva ese fragmento sin aplanarlo para ``public_description``.
-        product_payload = self._fetch_shopify_product(source, effective_url)
-        raw_html = (
-            product_payload.get('body_html')
-            or product_payload.get('description')
-            or product_payload.get('content')
-            or ''
-        ) if isinstance(product_payload, dict) else ''
-        if raw_html:
-            values['full_description'] = raw_html
-            values['description_html'] = raw_html
-            values['description'] = self._strip_html(raw_html)
-            values['short_description'] = self._strip_html(raw_html)
+        # Commercial/localized fields: never overwrite them with title or
+        # body_html from products.json/.js, because Tupperware may return those
+        # payloads in English even for a Spanish storefront URL.
+        localized_name = self._clean_text(localized_content.get('name'))
+        localized_html = localized_content.get('description_html') or ''
+        if localized_name:
+            values['name'] = localized_name
+        if localized_html:
+            values['full_description'] = localized_html
+            values['description_html'] = localized_html
+            values['description'] = self._strip_html(localized_html)
+            values['short_description'] = self._strip_html(localized_html)
+        elif effective_url != localized_url:
+            # English/default-language fallback is allowed only when the
+            # localized product page itself is unavailable.
+            product_payload = self._fetch_shopify_product(source, effective_url)
+            raw_html = (
+                product_payload.get('body_html')
+                or product_payload.get('description')
+                or product_payload.get('content')
+                or ''
+            ) if isinstance(product_payload, dict) else ''
+            if raw_html:
+                values['full_description'] = raw_html
+                values['description_html'] = raw_html
+                values['description'] = self._strip_html(raw_html)
+                values['short_description'] = self._strip_html(raw_html)
 
-        # El detector de color heredado busca texto visible de calzado y puede
-        # capturar variables CSS del tema Shopify. Tupperware no publica aquí un
-        # código de color fiable, por lo que se descarta.
         values['color_code'] = False
 
-        # Mantener la URL española como canónica del importador cuando fue la
-        # ficha que proporcionó el contenido. Shopify puede anunciar en el HTML
-        # una canonical sin idioma, pero no debe hacer que Odoo vuelva a inglés.
         if effective_url == localized_url:
             values['canonical_url'] = localized_url
 
-        # En Shopify el slug no debe usarse como referencia si existe SKU.
         default_code = self._clean_text(values.get('default_code'))
         if default_code:
             values['style_code'] = default_code

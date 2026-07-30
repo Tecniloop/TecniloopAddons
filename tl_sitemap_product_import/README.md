@@ -1169,3 +1169,10 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 - La acción **Corregir productos importados** vuelve a calcular esas asociaciones.
 - Las categorías de Collections gestionadas por el importador se registran en `sitemap_collection_categ_ids`, permitiendo eliminar asociaciones obsoletas sin tocar categorías añadidas manualmente.
 - Se mantiene el HTML original en `public_description`.
+
+
+## 19.0.1.116.0
+
+- Tupperware: nombre y descripción ampliada se obtienen siempre del HTML localizado `/es/products/...`.
+- Los endpoints JSON de Shopify quedan limitados a datos técnicos y no pueden sustituir textos españoles por los ingleses.
+- La misma prioridad se aplica a la importación inicial, actualización desde staging y acción «Corregir productos importados».
