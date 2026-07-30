@@ -1186,3 +1186,10 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 - Tupperware: nombre y descripción ampliada se obtienen siempre del HTML localizado `/es/products/...`.
 - Los endpoints JSON de Shopify quedan limitados a datos técnicos y no pueden sustituir textos españoles por los ingleses.
 - La misma prioridad se aplica a la importación inicial, actualización desde staging y acción «Corregir productos importados».
+
+
+## 19.0.1.118.0
+
+- Descarga localmente la imagen de portada de artículos Shopify.
+- Evita URLs externas en `cover_properties` y `website_meta_og_img`.
+- Corrige el error 500 de `website.layout` al abrir recetas importadas.

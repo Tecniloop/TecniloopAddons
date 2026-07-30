@@ -1,5 +1,8 @@
+import base64
+import hashlib
 import json
 import logging
+import mimetypes
 import re
 from urllib.parse import urljoin, urlparse, urlunparse
 
@@ -142,6 +145,75 @@ class ProductTemplate(models.Model):
             'image_url': image_url,
         }
 
+
+    @api.model
+    def _sitemap_blog_sync_cover(self, connector, source, post, image_url):
+        """Download the remote cover and expose it through a local Odoo URL."""
+        if not image_url:
+            return False
+        try:
+            session = connector._get_session(source)
+            response = connector._http_get(session, image_url, source)
+            content = response.content or b''
+            if not content:
+                return False
+            content_type = (
+                response.headers.get('Content-Type') or ''
+            ).split(';', 1)[0].strip()
+            digest = hashlib.sha256(content).hexdigest()
+            Attachment = self.env['ir.attachment'].sudo()
+            attachment = Attachment.search([
+                ('res_model', '=', 'blog.post'),
+                ('res_id', '=', post.id),
+                ('sitemap_source_url', '=', image_url),
+            ], limit=1)
+            filename = urlparse(image_url).path.rsplit('/', 1)[-1] or 'blog-cover'
+            if '.' not in filename:
+                filename += mimetypes.guess_extension(content_type or '') or '.jpg'
+            attachment_vals = {
+                'name': filename[:255],
+                'res_model': 'blog.post',
+                'res_id': post.id,
+                'public': True,
+                'datas': base64.b64encode(content),
+                'mimetype': content_type or mimetypes.guess_type(filename)[0],
+                'sitemap_source_url': image_url,
+                'sitemap_sha256': digest,
+                'sitemap_imported': True,
+            }
+            if attachment:
+                attachment.write(attachment_vals)
+            else:
+                attachment = Attachment.create(attachment_vals)
+            local_url = '/web/image/ir.attachment/%s/datas' % attachment.id
+            write_vals = {}
+            if 'cover_properties' in post._fields:
+                write_vals['cover_properties'] = json.dumps({
+                    'background-image': "url('%s')" % local_url,
+                    'resize_class': 'o_record_has_cover o_half_screen_height',
+                    'opacity': '0',
+                })
+            # Keep the explicit OG image empty so Website derives it safely
+            # from the local cover instead of attempting to join a remote URL.
+            if 'website_meta_og_img' in post._fields:
+                write_vals['website_meta_og_img'] = False
+            if write_vals:
+                post.write(write_vals)
+            return attachment
+        except Exception as exc:  # noqa: BLE001 - cover is supplementary
+            _logger.warning(
+                'Sitemap import: no se pudo importar la portada %s: %s',
+                image_url, exc,
+            )
+            safe_vals = {}
+            if 'cover_properties' in post._fields:
+                safe_vals['cover_properties'] = False
+            if 'website_meta_og_img' in post._fields:
+                safe_vals['website_meta_og_img'] = False
+            if safe_vals:
+                post.write(safe_vals)
+            return False
+
     def _sitemap_sync_blog_articles(self, connector, source, articles, public_html):
         self.ensure_one()
         BlogPost = self.env['blog.post']
@@ -182,16 +254,22 @@ class ProductTemplate(models.Model):
                 vals['website_meta_title'] = payload['meta_title']
             if 'website_meta_description' in BlogPost._fields and payload.get('meta_description'):
                 vals['website_meta_description'] = payload['meta_description']
-            if 'cover_properties' in BlogPost._fields and payload.get('image_url'):
-                vals['cover_properties'] = json.dumps({
-                    'background-image': 'url(%s)' % payload['image_url'],
-                    'resize_class': 'o_record_has_cover o_half_screen_height',
-                    'opacity': '0',
-                })
+            # Never store an external URL in cover_properties or OpenGraph
+            # image fields. Odoo 19 validates those URLs against the current
+            # website host while rendering website.layout and raises a 500 for
+            # external Shopify/CDN URLs. The image is downloaded after the
+            # post exists and referenced through Odoo's own /web/image route.
+            if 'cover_properties' in BlogPost._fields:
+                vals['cover_properties'] = False
+            if 'website_meta_og_img' in BlogPost._fields:
+                vals['website_meta_og_img'] = False
             if post:
                 post.write(vals)
             else:
                 post = BlogPost.create(vals)
+            self._sitemap_blog_sync_cover(
+                connector, source, post, payload.get('image_url')
+            )
             posts |= post
             target = getattr(post, 'website_url', False)
             if target:
