@@ -1146,7 +1146,16 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 ## 19.0.1.113.0
 
 - Conserva el HTML estructurado de Shopify/Tupperware (párrafos, títulos, listas, negritas y enlaces).
-- Usa `website_description` como destino preferido cuando el campo OCA está instalado.
-- Usa `public_description` solo como compatibilidad cuando `website_description` no existe.
+- Usa siempre `public_description` como campo HTML editable de la ficha pública.
+- Conserva encabezados, párrafos, listas, negritas y enlaces del HTML original.
+- Limpia `website_description` en productos reparados para evitar contenido duplicado.
 - La reparación masiva vuelve a poblar la descripción web con el HTML original.
 - Evita capturar variables CSS como código de color en Tupperware.
+
+
+## 19.0.1.114.0
+
+- Corrige el destino de la descripción HTML: se vuelve a grabar siempre en `public_description`.
+- Mantiene el HTML estructurado de Shopify/Tupperware sin convertirlo en un único párrafo.
+- Vacía `website_description` al crear o reparar productos para eliminar la escritura introducida en 19.0.1.113.0.
+- Mantiene vacíos los campos alternativos de venta y comercio electrónico.

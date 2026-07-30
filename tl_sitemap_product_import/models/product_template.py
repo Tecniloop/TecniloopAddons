@@ -113,27 +113,26 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _sitemap_description_cleanup_vals(self, public_html):
-        """Guarda el HTML e-commerce en el campo web más específico disponible.
+        """Guarda el HTML original de la ficha en ``public_description``.
 
-        Los módulos OCA de comercio electrónico pueden añadir
-        ``website_description`` como campo HTML destinado a la ficha web. Cuando
-        existe debe utilizarse en lugar de aplanar el contenido en
-        ``public_description``. En instalaciones sin ese campo se mantiene la
-        compatibilidad usando ``public_description``.
+        ``public_description`` es el campo HTML editable utilizado por la ficha
+        pública del producto en esta instalación. El contenido se conserva como
+        HTML estructurado; no se convierte a texto plano ni se envuelve dentro de
+        un único párrafo.
         """
         vals = {}
         prepared_html = self._sitemap_prepare_public_description(public_html)
 
-        if 'website_description' in self._fields:
-            vals['website_description'] = prepared_html
-            if 'public_description' in self._fields:
-                vals['public_description'] = False
-        elif 'public_description' in self._fields:
+        if 'public_description' in self._fields:
             vals['public_description'] = prepared_html
 
+        # Limpiar el campo usado por la versión 19.0.1.113.0 para evitar que
+        # queden dos descripciones web distintas en productos reparados.
+        if 'website_description' in self._fields:
+            vals['website_description'] = False
+
         # Las descripciones de venta no deben contaminar presupuestos ni crear
-        # bloques e-commerce alternativos. ``website_description`` se excluye
-        # expresamente porque es ahora el destino HTML preferido.
+        # bloques e-commerce alternativos.
         for field_name in (
             'description_sale',
             'description_sale_short',

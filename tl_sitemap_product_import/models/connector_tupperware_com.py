@@ -186,7 +186,7 @@ class SitemapConnectorTupperwareCom(models.AbstractModel):
         # obtener una descripción breve. Tupperware publica, sin embargo, un
         # fragmento HTML completo y localizado con encabezados, listas, negritas
         # y enlaces. Se vuelve a leer el payload de la ficha efectiva y se
-        # conserva ese fragmento sin aplanarlo para ``website_description``.
+        # conserva ese fragmento sin aplanarlo para ``public_description``.
         product_payload = self._fetch_shopify_product(source, effective_url)
         raw_html = (
             product_payload.get('body_html')
