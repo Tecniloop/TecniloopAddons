@@ -47,6 +47,9 @@ class SitemapProductStaging(models.Model):
              'las actualizaciones conservan el precio que ya tenga el producto en Odoo.')
     currency_name = fields.Char(string='Moneda')
     category_path = fields.Char(string='Categoría (ruta)')
+    shopify_collections_json = fields.Text(
+        string='Collections Shopify (JSON)', readonly=True,
+        help='Collections Shopify a las que pertenece el producto, recuperadas durante la recopilación.')
     style_code = fields.Char(string='Código de estilo')
     color_code = fields.Char(string='Código de color')
     description_preview = fields.Text(string='Descripción')

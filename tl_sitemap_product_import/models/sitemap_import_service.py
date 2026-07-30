@@ -2184,6 +2184,34 @@ class SitemapImportService(models.AbstractModel):
                 vals['public_categ_ids'] = commands
                 vals['sitemap_public_categ_id'] = public_category.id
 
+                # Shopify Collections representan agrupaciones navegables y un
+                # producto puede pertenecer a varias. Se sincronizan aparte de
+                # la categoría principal para no eliminar categorías manuales.
+                resolver = getattr(self, 'resolve_product_collection_categories', None)
+                if resolver and 'sitemap_collection_categ_ids' in Product._fields:
+                    try:
+                        raw_collections = json.loads(
+                            staging_row.shopify_collections_json or '[]'
+                        )
+                    except (TypeError, ValueError, json.JSONDecodeError):
+                        raw_collections = []
+                    collection_categories = resolver(source, raw_collections)
+                    previous_collections = (
+                        existing.sitemap_collection_categ_ids
+                        if existing else self.env['product.public.category']
+                    )
+                    collection_commands = [
+                        (3, category.id, 0)
+                        for category in previous_collections - collection_categories
+                    ] + [
+                        (4, category.id, 0)
+                        for category in collection_categories - previous_collections
+                    ]
+                    vals['public_categ_ids'] += collection_commands
+                    vals['sitemap_collection_categ_ids'] = [
+                        (6, 0, collection_categories.ids)
+                    ]
+
             # Defensa adicional frente a dependencias opcionales o campos
             # renombrados: nunca enviar al ORM claves que no existan en el modelo
             # product.template de la instalación actual.

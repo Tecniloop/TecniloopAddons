@@ -1,4 +1,5 @@
 import re
+import time
 from urllib.parse import urljoin, urlparse, urlunparse
 
 from odoo import models
@@ -23,6 +24,8 @@ class SitemapConnectorTupperwareCom(models.AbstractModel):
     _description = 'Conector Tupperware en español'
 
     _SPANISH_PREFIX = '/es'
+    _COLLECTION_CACHE = {}
+    _COLLECTION_CACHE_TTL = 3600
 
     @classmethod
     def _spanish_product_url(cls, url):
@@ -107,6 +110,106 @@ class SitemapConnectorTupperwareCom(models.AbstractModel):
                 localized.append(entry)
         return localized
 
+
+    def _shopify_collection_map(self, source, force=False):
+        """Return ``product_handle -> collections`` for the Spanish storefront.
+
+        Shopify does not include collection memberships in ``products.json``.
+        The public collection catalogue and each collection's ``products.json``
+        endpoint are therefore read once and cached per worker for one hour.
+        """
+        cache_key = (self.env.cr.dbname, source.id)
+        cached = self._COLLECTION_CACHE.get(cache_key)
+        now = time.monotonic()
+        if cached and not force and now - cached['time'] < self._COLLECTION_CACHE_TTL:
+            return cached['map']
+
+        session = self._get_session(source)
+        parsed = urlparse(source.sitemap_index_url)
+        base_url = f'{parsed.scheme}://{parsed.netloc}'
+        locale_root = f'{base_url}{self._SPANISH_PREFIX}'
+        collections = []
+        page = 1
+        while page <= 100:
+            endpoint = f'{locale_root}/collections.json?limit=250&page={page}'
+            try:
+                response = self._http_get(session, endpoint, source)
+                payload = response.json()
+            except Exception:  # noqa: BLE001 - collections are supplementary
+                break
+            page_items = payload.get('collections') if isinstance(payload, dict) else []
+            if not isinstance(page_items, list) or not page_items:
+                break
+            collections.extend(item for item in page_items if isinstance(item, dict))
+            if len(page_items) < 250:
+                break
+            page += 1
+
+        membership = {}
+        for collection in collections:
+            handle = self._clean_text(collection.get('handle'))
+            title = self._clean_text(collection.get('title'))
+            if not handle or not title or handle.casefold() == 'all':
+                continue
+            collection_info = {
+                'handle': handle,
+                'name': title,
+                'url': f'{locale_root}/collections/{handle}',
+                'description_html': collection.get('body_html') or '',
+            }
+            product_page = 1
+            while product_page <= 100:
+                endpoint = (
+                    f'{locale_root}/collections/{handle}/products.json'
+                    f'?limit=250&page={product_page}'
+                )
+                try:
+                    response = self._http_get(session, endpoint, source)
+                    payload = response.json()
+                except Exception:  # noqa: BLE001 - skip inaccessible collection
+                    break
+                products = payload.get('products') if isinstance(payload, dict) else []
+                if not isinstance(products, list) or not products:
+                    break
+                for product in products:
+                    if not isinstance(product, dict):
+                        continue
+                    product_handle = self._clean_text(product.get('handle'))
+                    if not product_handle:
+                        continue
+                    rows = membership.setdefault(product_handle.casefold(), [])
+                    if not any(row.get('handle') == handle for row in rows):
+                        rows.append(dict(collection_info))
+                if len(products) < 250:
+                    break
+                product_page += 1
+
+        self._COLLECTION_CACHE[cache_key] = {'time': now, 'map': membership}
+        return membership
+
+    def get_product_collections(self, source, url, force=False):
+        handle = self._product_handle(url)
+        if not handle:
+            return []
+        return list(self._shopify_collection_map(source, force=force).get(handle.casefold(), []))
+
+    def resolve_product_collection_categories(self, source, collections):
+        """Create/find Odoo public categories matching Shopify Collections."""
+        categories = self.env['product.public.category']
+        seen = set()
+        for collection in collections or []:
+            if not isinstance(collection, dict):
+                continue
+            name = self._clean_text(collection.get('name') or collection.get('title'))
+            handle = self._clean_text(collection.get('handle'))
+            token = (handle or name).casefold()
+            if not name or not token or token in seen or handle.casefold() == 'all':
+                continue
+            seen.add(token)
+            category = self._resolve_category_chain([name], source, 'public')
+            categories |= category
+        return categories
+
     def get_product_entries(self, source, category_filter=None, limit=0):
         sitemap_entries = []
         sitemap_roots = self._configured_sitemap_urls(source)
@@ -156,13 +259,20 @@ class SitemapConnectorTupperwareCom(models.AbstractModel):
                 ],
             ))
 
-        return self._merge_discovery_entries(
+        merged = self._merge_discovery_entries(
             'Tupperware',
             filtered_groups,
             key_getter=self._product_handle,
             category_filter=category_filter,
             limit=limit,
         )
+        collection_map = self._shopify_collection_map(source)
+        for entry in merged:
+            handle = self._product_handle(entry.get('url'))
+            entry['shopify_collections'] = list(
+                collection_map.get((handle or '').casefold(), [])
+            )
+        return merged
 
     def fetch_preview(self, source, url):
         """Fetch Spanish content, with the unlocalized page as fallback."""

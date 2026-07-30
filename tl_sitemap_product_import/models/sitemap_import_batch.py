@@ -1,3 +1,4 @@
+import json
 import logging
 
 import requests
@@ -189,6 +190,9 @@ class SitemapImportBatch(models.Model):
                 'batch_id': self.id,
                 'url': entry['url'],
                 'sitemap_lastmod': entry['lastmod'],
+                'shopify_collections_json': json.dumps(
+                    entry.get('shopify_collections') or [], ensure_ascii=False
+                ) if entry.get('shopify_collections') else False,
             } for entry in entries if entry['url'] not in existing_urls]
             if vals_list:
                 self.env['sitemap.product.staging'].create(vals_list)

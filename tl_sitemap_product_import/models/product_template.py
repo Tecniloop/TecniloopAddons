@@ -34,6 +34,12 @@ class ProductTemplate(models.Model):
     sitemap_attributes_json = fields.Text(
         string='Atributos técnicos importados (JSON)', copy=False, readonly=True,
         help='Mapa de atributos informativos gestionados por el importador de sitemap.')
+    sitemap_collection_categ_ids = fields.Many2many(
+        'product.public.category',
+        'product_template_sitemap_collection_rel',
+        'product_tmpl_id', 'public_categ_id',
+        string='Collections Shopify importadas', copy=False, readonly=True,
+        help='Categorías públicas procedentes de Collections Shopify. Se guardan aparte para poder actualizar sus asociaciones sin eliminar categorías añadidas manualmente.')
     sitemap_public_categ_id = fields.Many2one(
         'product.public.category', string='Categoría e-commerce (asignada por el importador)',
         copy=False, readonly=True,
@@ -231,6 +237,25 @@ class ProductTemplate(models.Model):
                 'public_categ_ids': commands,
                 'sitemap_public_categ_id': public_category.id,
             })
+
+            resolver = getattr(connector, 'resolve_product_collection_categories', None)
+            collection_fetcher = getattr(connector, 'get_product_collections', None)
+            if resolver and collection_fetcher and 'sitemap_collection_categ_ids' in self._fields:
+                raw_collections = collection_fetcher(
+                    source, self.sitemap_source_url
+                )
+                collection_categories = resolver(source, raw_collections)
+                previous_collections = self.sitemap_collection_categ_ids
+                vals['public_categ_ids'] += [
+                    (3, category.id, 0)
+                    for category in previous_collections - collection_categories
+                ] + [
+                    (4, category.id, 0)
+                    for category in collection_categories - previous_collections
+                ]
+                vals['sitemap_collection_categ_ids'] = [
+                    (6, 0, collection_categories.ids)
+                ]
 
         self.write(vals)
 

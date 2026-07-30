@@ -1159,3 +1159,13 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 - Mantiene el HTML estructurado de Shopify/Tupperware sin convertirlo en un único párrafo.
 - Vacía `website_description` al crear o reparar productos para eliminar la escritura introducida en 19.0.1.113.0.
 - Mantiene vacíos los campos alternativos de venta y comercio electrónico.
+
+
+## 19.0.1.115.0
+
+- Tupperware recupera las Collections Shopify desde el storefront español.
+- La recopilación guarda en staging todas las Collections de cada producto.
+- La importación crea o reutiliza `product.public.category` bajo la raíz pública de la fuente y asocia el producto a todas sus Collections.
+- La acción **Corregir productos importados** vuelve a calcular esas asociaciones.
+- Las categorías de Collections gestionadas por el importador se registran en `sitemap_collection_categ_ids`, permitiendo eliminar asociaciones obsoletas sin tocar categorías añadidas manualmente.
+- Se mantiene el HTML original en `public_description`.
