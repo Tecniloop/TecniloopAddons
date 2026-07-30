@@ -50,6 +50,9 @@ class SitemapProductStaging(models.Model):
     shopify_collections_json = fields.Text(
         string='Collections Shopify (JSON)', readonly=True,
         help='Collections Shopify a las que pertenece el producto, recuperadas durante la recopilación.')
+    shopify_blog_articles_json = fields.Text(
+        string='Artículos Shopify relacionados (JSON)', readonly=True,
+        help='Recetas y artículos enlazados desde la descripción localizada del producto.')
     style_code = fields.Char(string='Código de estilo')
     color_code = fields.Char(string='Código de color')
     description_preview = fields.Text(string='Descripción')

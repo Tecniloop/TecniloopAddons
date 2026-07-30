@@ -2028,6 +2028,9 @@ class SitemapImportService(models.AbstractModel):
             'price_available': data.get('price_available', True),
             'currency_name': data['currency'],
             'category_path': data.get('category_path') or '',
+            'shopify_blog_articles_json': json.dumps(
+                data.get('shopify_blog_articles') or [], ensure_ascii=False
+            ),
             'style_code': data.get('style_code') or False,
             'color_code': data.get('color_code') or False,
             'description_preview': data.get('full_description') or data.get('description') or '',
@@ -2307,6 +2310,16 @@ class SitemapImportService(models.AbstractModel):
                         merged_image_urls.append(image_url)
                 image_data = {'main_image_url': staging_row.main_image_url}
                 self._import_images(product_tmpl, image_data, merged_image_urls, source)
+
+            if staging_row.shopify_blog_articles_json and hasattr(product_tmpl, '_sitemap_sync_blog_articles'):
+                try:
+                    blog_articles = json.loads(staging_row.shopify_blog_articles_json or '[]')
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    blog_articles = []
+                if blog_articles:
+                    product_tmpl._sitemap_sync_blog_articles(
+                        self, source, blog_articles, imported_description
+                    )
 
             if source.import_attachments and staging_row.attachment_urls_json:
                 try:

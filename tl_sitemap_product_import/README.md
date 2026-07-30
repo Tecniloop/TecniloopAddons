@@ -1,3 +1,13 @@
+
+## 19.0.1.117.0
+
+- Detecta recetas y artículos Shopify enlazados desde la descripción localizada del producto.
+- Crea o actualiza una única entrada `blog.post` por URL original en el blog **Recetas**.
+- Importa título, HTML, metadatos SEO e imagen de portada desde la página localizada.
+- Relaciona productos y artículos mediante una relación Many2many.
+- Reescribe los enlaces del `public_description` para apuntar al blog interno de Odoo.
+- La importación inicial y **Corregir productos importados** sincronizan artículos y eliminan solo relaciones obsoletas, sin borrar entradas compartidas.
+
 ## 19.0.1.77.0
 
 - Eliminados commits manuales del procesamiento masivo.

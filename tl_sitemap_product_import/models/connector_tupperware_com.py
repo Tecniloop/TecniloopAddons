@@ -358,6 +358,35 @@ class SitemapConnectorTupperwareCom(models.AbstractModel):
             'description_html': description_html,
         }
 
+
+    def _extract_localized_blog_articles(self, localized_url, description_html):
+        """Return localized Shopify blog links referenced by the product body."""
+        if not description_html:
+            return []
+        try:
+            root = lxml_html.fragment_fromstring(description_html, create_parent='div')
+        except (ValueError, etree.ParserError):
+            return []
+        result = []
+        seen = set()
+        for node in root.xpath('.//a[@href]'):
+            href = (node.get('href') or '').strip()
+            absolute = urljoin(localized_url, href)
+            parsed = urlparse(absolute)
+            path = re.sub(r'/+', '/', parsed.path or '/')
+            if not re.search(r'/(?:[a-z]{2}(?:-[a-z]{2})?/)?blogs/[^/]+/[^/?#]+', path, re.I):
+                continue
+            clean_url = urlunparse(parsed._replace(query='', fragment=''))
+            token = clean_url.casefold()
+            if token in seen:
+                continue
+            seen.add(token)
+            result.append({
+                'url': clean_url,
+                'name': self._clean_text(' '.join(node.itertext())),
+            })
+        return result
+
     def fetch_preview(self, source, url):
         """Fetch Spanish commercial texts and Shopify technical data.
 
@@ -412,6 +441,10 @@ class SitemapConnectorTupperwareCom(models.AbstractModel):
                 values['description_html'] = raw_html
                 values['description'] = self._strip_html(raw_html)
                 values['short_description'] = self._strip_html(raw_html)
+
+        values['shopify_blog_articles'] = self._extract_localized_blog_articles(
+            localized_url, localized_html
+        )
 
         values['color_code'] = False
 

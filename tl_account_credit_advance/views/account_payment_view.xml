@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_account_payment_form_credit_advance" model="ir.ui.view">
+        <field name="name">account.payment.form.credit.advance</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form" />
+        <field name="arch" type="xml">
+            <header position="inside">
+                <button
+                    name="action_credit_advance_settle"
+                    type="object"
+                    string="Settle at Maturity"
+                    class="oe_highlight"
+                    invisible="credit_advance_state not in ('assigned', 'advanced')"
+                />
+                <button
+                    name="action_credit_advance_unpaid"
+                    type="object"
+                    string="Register Charge-back"
+                    invisible="credit_advance_state not in ('assigned', 'advanced')"
+                />
+            </header>
+            <xpath expr="//group[@name='group2']" position="inside">
+                <field name="credit_advance_line_id" invisible="not credit_advance_line_id" />
+                <field name="credit_advance_state" invisible="not credit_advance_line_id" />
+                <field
+                    name="credit_advance_maturity_date"
+                    invisible="not credit_advance_line_id"
+                />
+                <field
+                    name="credit_advance_settle_move_id"
+                    invisible="not credit_advance_settle_move_id"
+                />
+                <field
+                    name="credit_advance_unpaid_move_id"
+                    invisible="not credit_advance_unpaid_move_id"
+                />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_payment_tree_credit_advance" model="ir.ui.view">
+        <field name="name">account.payment.list.credit.advance</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_tree" />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="credit_advance_line_id" optional="hide" />
+                <field name="credit_advance_maturity_date" optional="hide" />
+                <field
+                    name="credit_advance_state"
+                    optional="hide"
+                    widget="badge"
+                    decoration-info="credit_advance_state == 'advanced'"
+                    decoration-success="credit_advance_state == 'settled'"
+                    decoration-danger="credit_advance_state == 'unpaid'"
+                />
+            </field>
+        </field>
+    </record>
+
+    <record id="view_account_payment_search_credit_advance" model="ir.ui.view">
+        <field name="name">account.payment.search.credit.advance</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_search" />
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="credit_advance_line_id" />
+                <filter
+                    name="credit_advance_advanced"
+                    string="Advanced Effects"
+                    domain="[('credit_advance_state', 'in', ('assigned', 'advanced'))]"
+                />
+                <filter
+                    name="credit_advance_due"
+                    string="Matured Effects"
+                    domain="[('credit_advance_state', 'in', ('assigned', 'advanced')), ('credit_advance_maturity_date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"
+                />
+                <filter
+                    name="credit_advance_unpaid"
+                    string="Unpaid Effects"
+                    domain="[('credit_advance_state', '=', 'unpaid')]"
+                />
+            </field>
+        </field>
+    </record>
+
+    <record id="credit_advance_effect_action" model="ir.actions.act_window">
+        <field name="name">Advanced Effects</field>
+        <field name="res_model">account.payment</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('credit_advance_line_id', '!=', False)]</field>
+        <field name="context">{'search_default_credit_advance_advanced': 1}</field>
+    </record>
+</odoo>

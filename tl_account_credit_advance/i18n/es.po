@@ -1,0 +1,374 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* tl_account_credit_advance
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: tl_account_credit_advance
+msgid "Credit Advance Line"
+msgstr "Línea de anticipo"
+
+#. module: tl_account_credit_advance
+msgid "Credit Advance Lines"
+msgstr "Líneas de anticipo"
+
+#. module: tl_account_credit_advance
+msgid "Credit Advances"
+msgstr "Anticipos de crédito"
+
+#. module: tl_account_credit_advance
+msgid "Credit Advance"
+msgstr "Anticipo de crédito"
+
+#. module: tl_account_credit_advance
+msgid "Register Bank Advance"
+msgstr "Registrar anticipo"
+
+#. module: tl_account_credit_advance
+msgid "Settle Matured Effects"
+msgstr "Liquidar vencimientos"
+
+#. module: tl_account_credit_advance
+msgid "Register Charge-back"
+msgstr "Registrar impago"
+
+#. module: tl_account_credit_advance
+msgid "Financed Remittances"
+msgstr "Remesas anticipadas"
+
+#. module: tl_account_credit_advance
+msgid "Advanced Effects"
+msgstr "Efectos anticipados"
+
+#. module: tl_account_credit_advance
+msgid "Matured Effects"
+msgstr "Efectos vencidos"
+
+#. module: tl_account_credit_advance
+msgid "Unpaid Effects"
+msgstr "Efectos impagados"
+
+#. module: tl_account_credit_advance
+msgid "Pending Advance"
+msgstr "Pendiente de anticipar"
+
+#. module: tl_account_credit_advance
+msgid "Assigned Receivables Account"
+msgstr "Cuenta de créditos cedidos"
+
+#. module: tl_account_credit_advance
+msgid "Advance Debt Account"
+msgstr "Cuenta de deuda por anticipo"
+
+#. module: tl_account_credit_advance
+msgid "Interest Account"
+msgstr "Cuenta de intereses"
+
+#. module: tl_account_credit_advance
+msgid "Commission Account"
+msgstr "Cuenta de comisiones"
+
+#. module: tl_account_credit_advance
+msgid "Unpaid Effects Account"
+msgstr "Cuenta de efectos impagados"
+
+#. module: tl_account_credit_advance
+msgid "Charge-back Expenses Account"
+msgstr "Cuenta de gastos de devolución"
+
+#. module: tl_account_credit_advance
+msgid "Expense Account"
+msgstr "Cuenta de gastos"
+
+#. module: tl_account_credit_advance
+msgid "Bank Journal"
+msgstr "Diario del banco"
+
+#. module: tl_account_credit_advance
+msgid "Settlement Journal"
+msgstr "Diario de vencimientos"
+
+#. module: tl_account_credit_advance
+msgid "Facility Limit"
+msgstr "Límite de la póliza"
+
+#. module: tl_account_credit_advance
+msgid "Drawn Amount"
+msgstr "Importe dispuesto"
+
+#. module: tl_account_credit_advance
+msgid "Annual Interest Rate (%)"
+msgstr "Tipo de interés anual (%)"
+
+#. module: tl_account_credit_advance
+msgid "Commission (%)"
+msgstr "Comisión (%)"
+
+#. module: tl_account_credit_advance
+msgid "Minimum Commission per Effect"
+msgstr "Comisión mínima por efecto"
+
+#. module: tl_account_credit_advance
+msgid "Extra Days"
+msgstr "Días de valoración"
+
+#. module: tl_account_credit_advance
+msgid "Day Count Basis"
+msgstr "Base de cálculo de días"
+
+#. module: tl_account_credit_advance
+msgid "Nominal Amount"
+msgstr "Importe nominal"
+
+#. module: tl_account_credit_advance
+msgid "Net Amount"
+msgstr "Importe líquido"
+
+#. module: tl_account_credit_advance
+msgid "Net Advanced"
+msgstr "Líquido anticipado"
+
+#. module: tl_account_credit_advance
+msgid "Interest"
+msgstr "Intereses"
+
+#. module: tl_account_credit_advance
+msgid "Commission"
+msgstr "Comisiones"
+
+#. module: tl_account_credit_advance
+msgid "Other Expenses"
+msgstr "Otros gastos"
+
+#. module: tl_account_credit_advance
+msgid "Charge-back Fees"
+msgstr "Gastos de devolución"
+
+#. module: tl_account_credit_advance
+msgid "Value Date"
+msgstr "Fecha valor"
+
+#. module: tl_account_credit_advance
+msgid "Maturity Date"
+msgstr "Fecha de vencimiento"
+
+#. module: tl_account_credit_advance
+msgid "Advance Date"
+msgstr "Fecha del anticipo"
+
+#. module: tl_account_credit_advance
+msgid "Bank Reference"
+msgstr "Referencia bancaria"
+
+#. module: tl_account_credit_advance
+msgid "Advance Entry"
+msgstr "Asiento de anticipo"
+
+#. module: tl_account_credit_advance
+msgid "Settlement Entry"
+msgstr "Asiento de vencimiento"
+
+#. module: tl_account_credit_advance
+msgid "Charge-back Entry"
+msgstr "Asiento de impago"
+
+#. module: tl_account_credit_advance
+msgid "Credit Advance Entry Type"
+msgstr "Tipo de asiento de anticipo"
+
+#. module: tl_account_credit_advance
+msgid "Effect Status"
+msgstr "Estado del efecto"
+
+#. module: tl_account_credit_advance
+msgid "Advance Status"
+msgstr "Estado del anticipo"
+
+#. module: tl_account_credit_advance
+msgid "Effects"
+msgstr "Efectos"
+
+#. module: tl_account_credit_advance
+msgid "Remittance"
+msgstr "Remesa"
+
+#. module: tl_account_credit_advance
+msgid "Remittances"
+msgstr "Remesas"
+
+#. module: tl_account_credit_advance
+msgid "Payment Modes"
+msgstr "Modos de pago"
+
+#. module: tl_account_credit_advance
+msgid "Claim the Debt On"
+msgstr "Reclamar la deuda en"
+
+#. module: tl_account_credit_advance
+msgid "Unpaid effects account"
+msgstr "Cuenta de efectos impagados"
+
+#. module: tl_account_credit_advance
+msgid "Ordinary customer account"
+msgstr "Cuenta ordinaria del cliente"
+
+#. module: tl_account_credit_advance
+msgid "Assigned"
+msgstr "Cedido"
+
+#. module: tl_account_credit_advance
+msgid "Advanced"
+msgstr "Anticipado"
+
+#. module: tl_account_credit_advance
+msgid "Settled"
+msgstr "Liquidado"
+
+#. module: tl_account_credit_advance
+msgid "Unpaid"
+msgstr "Impagado"
+
+#. module: tl_account_credit_advance
+msgid "Not advanced"
+msgstr "Sin anticipar"
+
+#. module: tl_account_credit_advance
+msgid "Partially settled"
+msgstr "Parcialmente liquidado"
+
+#. module: tl_account_credit_advance
+msgid "Closed"
+msgstr "Cerrado"
+
+#. module: tl_account_credit_advance
+msgid "Bank Advance"
+msgstr "Anticipo bancario"
+
+#. module: tl_account_credit_advance
+msgid "Maturity Settlement"
+msgstr "Liquidación de vencimiento"
+
+#. module: tl_account_credit_advance
+msgid "Charge-back"
+msgstr "Impago"
+
+#. module: tl_account_credit_advance
+msgid "Settle at Maturity"
+msgstr "Liquidar al vencimiento"
+
+#. module: tl_account_credit_advance
+msgid "Register Advance"
+msgstr "Registrar anticipo"
+
+#. module: tl_account_credit_advance
+msgid "Settle"
+msgstr "Liquidar"
+
+#. module: tl_account_credit_advance
+msgid "Drawn"
+msgstr "Dispuesto"
+
+#. module: tl_account_credit_advance
+msgid "Accounting"
+msgstr "Contabilidad"
+
+#. module: tl_account_credit_advance
+msgid "Financial Conditions"
+msgstr "Condiciones económicas"
+
+#. module: tl_account_credit_advance
+msgid "Receivables"
+msgstr "Créditos"
+
+#. module: tl_account_credit_advance
+msgid "Financing"
+msgstr "Financiación"
+
+#. module: tl_account_credit_advance
+msgid "Limit"
+msgstr "Límite"
+
+#. module: tl_account_credit_advance
+msgid "This remittance has already been advanced."
+msgstr "Esta remesa ya ha sido anticipada."
+
+#. module: tl_account_credit_advance
+msgid "Set the expense account for the charge-back fees."
+msgstr "Indique la cuenta de gastos para los gastos de devolución."
+
+#. module: tl_account_credit_advance
+msgid ""
+"The interest and expenses exceed the nominal amount of the remittance."
+msgstr "Los intereses y gastos superan el importe nominal de la remesa."
+
+#. module: tl_account_credit_advance
+msgid ""
+"All the selected effects must belong to the same credit advance line."
+msgstr ""
+"Todos los efectos seleccionados deben pertenecer a la misma línea de anticipo."
+
+#. module: tl_account_credit_advance
+msgid ""
+"Register the advance only once the remittance has been sent to the bank "
+"(status 'File Uploaded')."
+msgstr ""
+"Registre el anticipo sólo cuando la remesa se haya enviado al banco (estado "
+"'Fichero subido')."
+
+#. module: tl_account_credit_advance
+msgid "Unpaid effects"
+msgstr "Efectos impagados"
+
+#. module: tl_account_credit_advance
+msgid "Charge-back of unpaid effects"
+msgstr "Devolución de efectos impagados"
+
+#. module: tl_account_credit_advance
+msgid "Settlement of matured effects"
+msgstr "Liquidación de efectos vencidos"
+
+#. module: tl_account_credit_advance
+msgid "Outstanding Receipts Account"
+msgstr "Cuenta transitoria de cobros"
+
+#. module: tl_account_credit_advance
+msgid "Interest and Commission Settlement"
+msgstr "Liquidación de intereses y comisiones"
+
+#. module: tl_account_credit_advance
+msgid "Deducted from the advance"
+msgstr "Descontados del anticipo"
+
+#. module: tl_account_credit_advance
+msgid "Charged separately"
+msgstr "Cobrados aparte"
+
+#. module: tl_account_credit_advance
+msgid "Schedule the Settlement Entry"
+msgstr "Programar el asiento de vencimiento"
+
+#. module: tl_account_credit_advance
+msgid "Recourse Days"
+msgstr "Días de recurso"
+
+#. module: tl_account_credit_advance
+msgid "Settle matured effects now"
+msgstr "Liquidar vencidos ahora"
+
+#. module: tl_account_credit_advance
+msgid "Maturity of advanced effects"
+msgstr "Vencimiento de efectos anticipados"
+
+#. module: tl_account_credit_advance
+msgid "Advanced Effect"
+msgstr "Efecto anticipado"

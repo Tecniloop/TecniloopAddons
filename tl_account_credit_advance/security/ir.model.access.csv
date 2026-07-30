@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_credit_advance_line_manager,credit.advance.line manager,model_credit_advance_line,account_payment_order.group_account_payment,1,1,1,1
+access_credit_advance_line_user,credit.advance.line user,model_credit_advance_line,account.group_account_invoice,1,0,0,0
+access_credit_advance_line_readonly,credit.advance.line readonly,model_credit_advance_line,account.group_account_readonly,1,0,0,0
+access_credit_advance_funding,credit.advance.funding,model_credit_advance_funding,account_payment_order.group_account_payment,1,1,1,1
+access_credit_advance_settle,credit.advance.settle,model_credit_advance_settle,account_payment_order.group_account_payment,1,1,1,1
+access_credit_advance_unpaid,credit.advance.unpaid,model_credit_advance_unpaid,account_payment_order.group_account_payment,1,1,1,1

@@ -259,6 +259,12 @@ class ProductTemplate(models.Model):
 
         self.write(vals)
 
+        blog_articles = data.get('shopify_blog_articles') or []
+        if blog_articles and hasattr(self, '_sitemap_sync_blog_articles'):
+            self._sitemap_sync_blog_articles(
+                connector, source, blog_articles, source_description
+            )
+
         if self._is_munich_sitemap_product():
             variants = connector._normalise_ean_variants(data.get('ean_variants') or [])
             labelled = [

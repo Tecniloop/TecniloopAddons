@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="credit_advance_line_form" model="ir.ui.view">
+        <field name="name">credit.advance.line.form</field>
+        <field name="model">credit.advance.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            class="oe_stat_button"
+                            name="action_view_orders"
+                            type="object"
+                            icon="fa-list-alt"
+                        >
+                            <field
+                                string="Remittances"
+                                name="order_count"
+                                widget="statinfo"
+                            />
+                        </button>
+                        <button
+                            class="oe_stat_button"
+                            name="action_view_effects"
+                            type="object"
+                            icon="fa-money"
+                        >
+                            <div class="o_stat_info">
+                                <field name="drawn_amount" class="o_stat_value" />
+                                <span class="o_stat_text">Drawn</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget
+                        name="web_ribbon"
+                        title="Archived"
+                        bg_color="text-bg-danger"
+                        invisible="active"
+                    />
+                    <div class="oe_title">
+                        <label for="name" />
+                        <h1><field name="name" placeholder="e.g. Discount line BBVA" /></h1>
+                    </div>
+                    <field name="active" invisible="1" />
+                    <group>
+                        <group name="main">
+                            <field name="partner_id" />
+                            <field name="journal_id" />
+                            <field name="settlement_journal_id" />
+                            <field name="company_id" groups="base.group_multi_company" />
+                            <field name="currency_id" invisible="1" />
+                        </group>
+                        <group name="limit" string="Limit">
+                            <field name="limit_amount" />
+                            <field name="drawn_amount" />
+                            <field name="available_amount" />
+                            <field name="unpaid_amount" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="accounts" string="Accounting">
+                            <group>
+                                <group name="accounts-left" string="Receivables">
+                                    <field name="account_assigned_id" />
+                                    <field name="account_unpaid_id" />
+                                </group>
+                                <group name="accounts-right" string="Financing">
+                                    <field name="account_debt_id" />
+                                    <field name="outstanding_account_id" />
+                                    <field name="account_interest_id" />
+                                    <field name="account_commission_id" />
+                                    <field name="account_unpaid_expense_id" />
+                                </group>
+                            </group>
+                            <div class="text-muted">
+                                Spanish general chart of accounts: 4311 assigned
+                                receivables, 4315 unpaid effects, 5208 debt for
+                                discounted effects, 665 interest, 626 bank services.
+                                The outstanding receipts account is the transit
+                                account the advance and the charge-backs are booked
+                                against, so they can be matched against the bank
+                                statement.
+                            </div>
+                        </page>
+                        <page name="settlement" string="Maturity">
+                            <group>
+                                <group name="auto_settle">
+                                    <field name="recourse_days" />
+                                    <field name="schedule_settlement" />
+                                </group>
+                                <group name="auto_settle_action">
+                                    <button
+                                        name="action_settle_matured_effects"
+                                        type="object"
+                                        string="Settle matured effects now"
+                                        class="btn-primary"
+                                    />
+                                </group>
+                            </group>
+                            <div class="text-muted">
+                                An effect is released once its maturity date plus
+                                the recourse days have passed without a charge-back:
+                                until then the bank can still give it back, so both
+                                the debt and the risk of the customer are real.
+                                With the settlement entry scheduled, it is written
+                                in draft when the advance is registered and posts
+                                itself on that date through the standard Odoo
+                                scheduled action; a charge-back before then removes
+                                the effect from it automatically.
+                            </div>
+                        </page>
+                        <page name="conditions" string="Financial Conditions">
+                            <group>
+                                <group name="rates">
+                                    <field name="interest_rate" />
+                                    <field name="day_basis" />
+                                    <field name="interest_extra_days" />
+                                </group>
+                                <group name="commissions">
+                                    <field name="commission_rate" />
+                                    <field name="commission_min" />
+                                </group>
+                                <group name="expense_handling" colspan="2">
+                                    <field name="expense_settlement" widget="radio" />
+                                    <field
+                                        name="analytic_distribution"
+                                        widget="analytic_distribution"
+                                        groups="analytic.group_analytic_accounting"
+                                    />
+                                    <field name="analytic_precision" invisible="1" />
+                                </group>
+                            </group>
+                        </page>
+                        <page name="modes" string="Payment Modes">
+                            <field name="payment_mode_ids" readonly="1">
+                                <list>
+                                    <field name="name" />
+                                    <field name="payment_method_id" />
+                                    <field name="company_id" groups="base.group_multi_company" />
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="credit_advance_line_tree" model="ir.ui.view">
+        <field name="name">credit.advance.line.list</field>
+        <field name="model">credit.advance.line</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" decoration-bf="1" />
+                <field name="partner_id" />
+                <field name="journal_id" />
+                <field name="limit_amount" />
+                <field name="drawn_amount" sum="Drawn" />
+                <field name="available_amount" />
+                <field name="unpaid_amount" optional="show" />
+                <field name="company_id" groups="base.group_multi_company" />
+                <field name="currency_id" column_invisible="1" />
+            </list>
+        </field>
+    </record>
+
+    <record id="credit_advance_line_search" model="ir.ui.view">
+        <field name="name">credit.advance.line.search</field>
+        <field name="model">credit.advance.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="partner_id" />
+                <field name="journal_id" />
+                <filter
+                    name="archived"
+                    string="Archived"
+                    domain="[('active', '=', False)]"
+                />
+                <group name="groupby">
+                    <filter
+                        name="partner_groupby"
+                        string="Bank"
+                        context="{'group_by': 'partner_id'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="credit_advance_line_action" model="ir.actions.act_window">
+        <field name="name">Credit Advance Lines</field>
+        <field name="res_model">credit.advance.line</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Set up a credit advance line</p>
+            <p>
+                A credit advance line is the facility your bank grants you to get
+                the money of your customer invoices before their due date.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="account_payment_mode_form_credit_advance" model="ir.ui.view">
+        <field name="name">account.payment.mode.form.credit.advance</field>
+        <field name="model">account.payment.mode</field>
+        <field
+            name="inherit_id"
+            ref="l10n_es_account_banking_sepa_fsdd.view_payment_mode_form_add_charge_financed"
+        />
+        <field name="arch" type="xml">
+            <field name="charge_financed" position="after">
+                <field
+                    name="credit_advance"
+                    invisible="payment_type != 'inbound'"
+                />
+                <field
+                    name="credit_advance_line_id"
+                    invisible="not credit_advance"
+                    required="credit_advance"
+                />
+            </field>
+        </field>
+    </record>
+</odoo>

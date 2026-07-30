@@ -25,6 +25,16 @@
                             <field name="sitemap_last_sync"/>
                         </group>
                     </group>
+                    <separator string="Recetas y artículos relacionados"/>
+                    <field name="sitemap_blog_post_ids" nolabel="1" readonly="1">
+                        <list create="0" edit="0" delete="0">
+                            <field name="name"/>
+                            <field name="blog_id"/>
+                            <field name="website_published" optional="show"/>
+                            <field name="sitemap_source_url" widget="url" optional="hide"/>
+                            <field name="sitemap_last_sync" optional="hide"/>
+                        </list>
+                    </field>
                     <separator string="EAN/GTIN recuperados por variante"/>
                     <field name="sitemap_ean_ids" nolabel="1" readonly="1">
                         <list create="0" edit="0" delete="0">

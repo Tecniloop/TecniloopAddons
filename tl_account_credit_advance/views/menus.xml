@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <menuitem
+        id="credit_advance_menu"
+        name="Credit Advances"
+        parent="account.menu_finance_receivables"
+        sequence="19"
+    />
+    <menuitem
+        id="credit_advance_order_menu"
+        action="credit_advance_order_action"
+        parent="credit_advance_menu"
+        sequence="10"
+    />
+    <menuitem
+        id="credit_advance_effect_menu"
+        action="credit_advance_effect_action"
+        parent="credit_advance_menu"
+        sequence="20"
+    />
+    <menuitem
+        id="credit_advance_line_menu"
+        action="credit_advance_line_action"
+        parent="credit_advance_menu"
+        sequence="30"
+        groups="account.group_account_manager"
+    />
+</odoo>
