@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="credit_advance_settle_form" model="ir.ui.view">
+        <field name="name">credit.advance.settle.form</field>
+        <field name="model">credit.advance.settle</field>
+        <field name="arch" type="xml">
+            <form>
+                <p class="text-muted">
+                    Select the effects whose maturity date has passed without
+                    incident. The debt with the bank is cancelled against the
+                    assigned receivables, and both sides are reconciled.
+                </p>
+                <group>
+                    <group name="left">
+                        <field name="credit_advance_line_id" readonly="1" />
+                        <field name="order_id" invisible="not order_id" readonly="1" />
+                        <field name="journal_id" />
+                        <field name="date" />
+                        <field name="company_id" invisible="1" />
+                        <field name="currency_id" invisible="1" />
+                    </group>
+                    <group name="right">
+                        <field name="total_amount" />
+                    </group>
+                </group>
+                <field name="payment_ids" widget="many2many">
+                    <list>
+                        <field name="name" />
+                        <field name="partner_id" />
+                        <field name="credit_advance_maturity_date" />
+                        <field name="credit_advance_amount" />
+                        <field name="company_currency_id" column_invisible="1" />
+                    </list>
+                </field>
+                <footer>
+                    <button
+                        name="action_confirm"
+                        type="object"
+                        string="Settle"
+                        class="btn-primary"
+                        data-hotkey="q"
+                    />
+                    <button
+                        string="Cancel"
+                        class="btn-secondary"
+                        special="cancel"
+                        data-hotkey="x"
+                    />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

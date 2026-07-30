@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="credit_advance_funding_form" model="ir.ui.view">
+        <field name="name">credit.advance.funding.form</field>
+        <field name="model">credit.advance.funding</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="expense_settlement" invisible="1" />
+                <p class="text-muted" invisible="expense_settlement == 'separate'">
+                    Enter the settlement note received from the bank. The nominal
+                    amount is recognised as a financial debt, the difference is
+                    booked as interest and commission, and the net amount is
+                    credited to the outstanding receipts account.
+                </p>
+                <p class="text-muted" invisible="expense_settlement != 'separate'">
+                    This bank credits the whole nominal amount and charges its
+                    interest and commission separately, so leave the amounts below
+                    at zero: the net amount then matches the statement line, and
+                    the charges are booked when their own line is reconciled. Fill
+                    them in only if the bank did deduct something this time.
+                </p>
+                <group>
+                    <group name="left">
+                        <field name="order_id" />
+                        <field name="credit_advance_line_id" />
+                        <field name="journal_id" />
+                        <field name="date" />
+                        <field name="reference" />
+                        <field name="company_id" invisible="1" />
+                        <field name="currency_id" invisible="1" />
+                    </group>
+                    <group name="right">
+                        <field name="nominal_amount" />
+                        <field name="interest_amount" />
+                        <field name="commission_amount" />
+                        <field name="other_expenses" />
+                        <field name="net_amount" class="oe_subtotal_footer_separator" />
+                    </group>
+                </group>
+                <footer>
+                    <button
+                        name="action_confirm"
+                        type="object"
+                        string="Register Advance"
+                        class="btn-primary"
+                        data-hotkey="q"
+                    />
+                    <button
+                        string="Cancel"
+                        class="btn-secondary"
+                        special="cancel"
+                        data-hotkey="x"
+                    />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_account_payment_form_credit_advance_return" model="ir.ui.view">
+        <field name="name">account.payment.form.credit.advance.return</field>
+        <field name="model">account.payment</field>
+        <field
+            name="inherit_id"
+            ref="tl_account_credit_advance.view_account_payment_form_credit_advance"
+        />
+        <field name="arch" type="xml">
+            <button name="action_credit_advance_unpaid" position="attributes">
+                <attribute
+                    name="invisible"
+                >credit_advance_state not in ('assigned', 'advanced') or credit_advance_unpaid_method != 'wizard'</attribute>
+            </button>
+            <button name="action_credit_advance_unpaid" position="after">
+                <button
+                    name="action_credit_advance_payment_return"
+                    type="object"
+                    string="Register Payment Return"
+                    invisible="credit_advance_state not in ('assigned', 'advanced') or credit_advance_unpaid_method != 'return'"
+                />
+            </button>
+            <field name="credit_advance_state" position="after">
+                <field name="credit_advance_unpaid_method" invisible="1" />
+            </field>
+        </field>
+    </record>
+
+    <record id="credit_advance_line_form_return" model="ir.ui.view">
+        <field name="name">credit.advance.line.form.return</field>
+        <field name="model">credit.advance.line</field>
+        <field
+            name="inherit_id"
+            ref="tl_account_credit_advance.credit_advance_line_form"
+        />
+        <field name="arch" type="xml">
+            <field name="settlement_journal_id" position="after">
+                <field name="unpaid_method" />
+            </field>
+        </field>
+    </record>
+</odoo>

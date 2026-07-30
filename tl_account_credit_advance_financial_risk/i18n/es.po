@@ -1,0 +1,149 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* tl_account_credit_advance_financial_risk
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Advanced Effects"
+msgstr "Efectos anticipados"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Unpaid Effects"
+msgstr "Efectos impagados"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Include Advanced Effects"
+msgstr "Incluir efectos anticipados"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Include Unpaid Effects"
+msgstr "Incluir efectos impagados"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Limit Advanced Effects"
+msgstr "Límite efectos anticipados"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Limit Unpaid Effects"
+msgstr "Límite efectos impagados"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "With Recourse"
+msgstr "Con recurso"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Risk Check on Confirmation"
+msgstr "Comprobación de riesgo al confirmar"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "No check"
+msgstr "Sin comprobación"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Log a warning"
+msgstr "Avisar"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Block the remittance"
+msgstr "Bloquear la remesa"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid ""
+"Financial risk exceeded for the following customers of this remittance: %s"
+msgstr ""
+"Riesgo financiero excedido para los siguientes clientes de esta remesa: %s"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Limit per Customer"
+msgstr "Límite por cliente"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Limit per Customer (%)"
+msgstr "Límite por cliente (%)"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Cap by Customer Credit Limit"
+msgstr "Limitar por el límite de crédito del cliente"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Concentration Limit per Customer"
+msgstr "Límite de concentración por cliente"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Risk by Credit Advance Line"
+msgstr "Riesgo por línea de anticipo"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Breakdown by credit advance line"
+msgstr "Desglose por línea de anticipo"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "By Customer"
+msgstr "Por cliente"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Assigned and Advanced"
+msgstr "Cedidos y anticipados"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Charged Back"
+msgstr "Devueltos"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Overdue"
+msgstr "Vencidos"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Credit Advance Line"
+msgstr "Línea de anticipo"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Effect Status"
+msgstr "Estado del efecto"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Maturity Date"
+msgstr "Fecha de vencimiento"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Warn on Customers with Unpaid Effects"
+msgstr "Avisar con clientes con efectos devueltos"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Unpaid Effects Threshold"
+msgstr "Importe mínimo de efectos devueltos"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Unpaid credit advance effects"
+msgstr "Efectos de anticipo devueltos"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Warn above"
+msgstr "Avisar a partir de"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "This customer has %(amount)s of effects charged back by the bank.\n"
+msgstr "Este cliente tiene %(amount)s en efectos devueltos por el banco.\n"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Financial risk exceeded: %s"
+msgstr "Riesgo financiero excedido: %s"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "Over the limit of the credit advance line:"
+msgstr "Por encima del límite de la línea de anticipo:"
+
+#. module: tl_account_credit_advance_financial_risk
+msgid "%(partner)s: %(total)s assigned against a limit of %(limit)s"
+msgstr "%(partner)s: %(total)s cedidos frente a un límite de %(limit)s"

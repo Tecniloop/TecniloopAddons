@@ -1,0 +1,79 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* tl_account_credit_advance_payment_return
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: tl_account_credit_advance_payment_return
+msgid "Credit Advance Line"
+msgstr "Línea de anticipo"
+
+#. module: tl_account_credit_advance_payment_return
+msgid "Credit Advance Entry"
+msgstr "Asiento de anticipo"
+
+#. module: tl_account_credit_advance_payment_return
+msgid "Advanced Effect"
+msgstr "Efecto anticipado"
+
+#. module: tl_account_credit_advance_payment_return
+msgid "Charge-back Handling"
+msgstr "Tratamiento de impagos"
+
+#. module: tl_account_credit_advance_payment_return
+msgid "Payment return"
+msgstr "Devolución de pago"
+
+#. module: tl_account_credit_advance_payment_return
+msgid "Charge-back wizard"
+msgstr "Asistente de impago"
+
+#. module: tl_account_credit_advance_payment_return
+msgid "Register Payment Return"
+msgstr "Registrar devolución"
+
+#. module: tl_account_credit_advance_payment_return
+msgid "Unpaid effects %s"
+msgstr "Efectos impagados %s"
+
+#. module: tl_account_credit_advance_payment_return
+msgid "Unpaid effect %(payment)s - %(partner)s"
+msgstr "Efecto impagado %(payment)s - %(partner)s"
+
+#. module: tl_account_credit_advance_payment_return
+msgid "Only effects that are assigned or advanced can be returned."
+msgstr "Sólo se pueden devolver efectos cedidos o anticipados."
+
+#. module: tl_account_credit_advance_payment_return
+msgid ""
+"Select effects of a single credit advance line: the return cancels the debt "
+"of one facility."
+msgstr ""
+"Seleccione efectos de una sola línea de anticipo: la devolución cancela la "
+"deuda de una única póliza."
+
+#. module: tl_account_credit_advance_payment_return
+msgid ""
+"The payment return %s mixes effects of several credit advance lines. Create "
+"one return per facility."
+msgstr ""
+"La devolución %s mezcla efectos de varias líneas de anticipo. Cree una "
+"devolución por póliza."
+
+#. module: tl_account_credit_advance_payment_return
+msgid ""
+"The payment return %s mixes advanced effects with ordinary payments. Create "
+"separate returns for each."
+msgstr ""
+"La devolución %s mezcla efectos anticipados con cobros ordinarios. Cree "
+"devoluciones separadas para cada caso."

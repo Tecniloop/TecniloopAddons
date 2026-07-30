@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="credit_advance_line_form_risk" model="ir.ui.view">
+        <field name="name">credit.advance.line.form.risk</field>
+        <field name="model">credit.advance.line</field>
+        <field
+            name="inherit_id"
+            ref="tl_account_credit_advance.credit_advance_line_form"
+        />
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    class="oe_stat_button"
+                    name="action_view_partner_breakdown"
+                    type="object"
+                    icon="fa-users"
+                    string="By Customer"
+                />
+            </xpath>
+            <group name="limit" position="inside">
+                <field name="with_recourse" />
+                <field name="partner_risk_check" />
+            </group>
+            <group name="limit" position="after">
+                <group
+                    name="partner_limit"
+                    string="Concentration Limit per Customer"
+                    colspan="2"
+                >
+                    <field name="partner_limit_amount" />
+                    <field name="partner_limit_percent" />
+                    <field name="partner_limit_use_credit_limit" />
+                    <div colspan="2" class="text-muted">
+                        The most restrictive of the configured caps applies. It is
+                        checked when the remittance is confirmed, according to the
+                        risk check option above.
+                    </div>
+                </group>
+            </group>
+        </field>
+    </record>
+</odoo>

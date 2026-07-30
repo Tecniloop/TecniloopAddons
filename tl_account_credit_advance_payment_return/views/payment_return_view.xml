@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="payment_return_form_view_credit_advance" model="ir.ui.view">
+        <field name="name">payment.return.form.credit.advance</field>
+        <field name="model">payment.return</field>
+        <field
+            name="inherit_id"
+            ref="account_payment_return.payment_return_form_view"
+        />
+        <field name="arch" type="xml">
+            <sheet position="inside">
+                <div class="oe_button_box" name="button_box">
+                    <button
+                        class="oe_stat_button"
+                        name="action_view_credit_advance_move"
+                        type="object"
+                        icon="fa-university"
+                        string="Credit Advance Entry"
+                        invisible="not credit_advance_move_id"
+                    />
+                </div>
+            </sheet>
+            <field name="total_amount" position="after">
+                <field
+                    name="credit_advance_line_id"
+                    invisible="not credit_advance_line_id"
+                />
+                <field name="credit_advance_move_id" invisible="1" />
+            </field>
+            <xpath expr="//field[@name='line_ids']/list/field[@name='amount']" position="before">
+                <field
+                    name="credit_advance_payment_id"
+                    optional="show"
+                    readonly="1"
+                />
+            </xpath>
+        </field>
+    </record>
+
+    <record id="payment_return_tree_view_credit_advance" model="ir.ui.view">
+        <field name="name">payment.return.list.credit.advance</field>
+        <field name="model">payment.return</field>
+        <field
+            name="inherit_id"
+            ref="account_payment_return.payment_return_tree_view"
+        />
+        <field name="arch" type="xml">
+            <field name="journal_id" position="after">
+                <field name="credit_advance_line_id" optional="show" />
+            </field>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="res_partner_view_risk_credit_advance" model="ir.ui.view">
+        <field name="name">res.partner.risk.credit.advance</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="account_financial_risk.res_partner_view_risk" />
+        <field name="arch" type="xml">
+            <xpath
+                expr="//button[@context=&quot;{'open_risk_field': 'risk_account_amount_unpaid'}&quot;]"
+                position="after"
+            >
+                <field
+                    name="risk_credit_advance_include"
+                    readonly="not risk_allow_edit"
+                />
+                <button
+                    name="open_risk_pivot_info"
+                    type="object"
+                    class="btn-link pt-0"
+                    context="{'open_risk_field': 'risk_credit_advance'}"
+                >
+                    <field
+                        name="risk_credit_advance"
+                        nolabel="1"
+                        widget="monetary"
+                        options="{'currency_field': 'risk_currency_id'}"
+                    />
+                </button>
+                <field
+                    name="risk_credit_advance_unpaid_include"
+                    readonly="not risk_allow_edit"
+                />
+                <button
+                    name="open_risk_pivot_info"
+                    type="object"
+                    class="btn-link pt-0"
+                    context="{'open_risk_field': 'risk_credit_advance_unpaid'}"
+                >
+                    <field
+                        name="risk_credit_advance_unpaid"
+                        nolabel="1"
+                        widget="monetary"
+                        options="{'currency_field': 'risk_currency_id'}"
+                    />
+                </button>
+            </xpath>
+            <xpath
+                expr="//field[@name='risk_account_amount_unpaid_limit']"
+                position="after"
+            >
+                <field
+                    name="risk_credit_advance_limit"
+                    readonly="not risk_allow_edit"
+                    widget="monetary"
+                    options="{'currency_field': 'risk_currency_id'}"
+                />
+                <field
+                    name="risk_credit_advance_unpaid_limit"
+                    readonly="not risk_allow_edit"
+                    widget="monetary"
+                    options="{'currency_field': 'risk_currency_id'}"
+                />
+            </xpath>
+            <xpath expr="//field[@name='risk_total']" position="after">
+                <button
+                    name="action_view_credit_advance_risk"
+                    type="object"
+                    class="btn-link"
+                    colspan="3"
+                    icon="fa-bank"
+                    string="Breakdown by credit advance line"
+                    invisible="not risk_credit_advance and not risk_credit_advance_unpaid"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>
