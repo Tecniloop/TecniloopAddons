@@ -1,0 +1,1012 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="sh_product_social_sharing_ws_product_details" inherit_id="website_sale.product" name="Product Social Sharing">
+        <xpath expr="//div[@id='o_wsale_product_details_content']/form/div[contains(@class, 'o_wsale_product_details_content_section_cta')]" position="after">
+           
+            <!-- PRODUCT SOCIAL SHARING -->
+            <t t-if="website.sh_prod_social_is_prod_social_sharing">
+                <div class="sh_prod_social_prod_details_social_share_main_div">
+                    <!-- STYLE 1 -->
+                    <t t-if="website.sh_prod_social_sharing_style == 'style_1'">
+                        <section class="js_cls_sh_product_social_sharing_wrapper" id="sh_socialbtn_design_1">
+                            <div>
+                                <h5>Share:</h5>
+                                <ul class="social-network social-circle links">
+     
+                                    <li t-if="website.sh_prod_social_sharing_facebook">
+                                        <a
+	                                        t-att-data_social_href="'http://www.facebook.com/sharer/sharer.php?u='"
+	                                        href="#" class="icoFacebook link" title="Facebook">
+                                        	<i class="fa fa-facebook"></i>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_twitter">
+                                        <a
+	                                        t-att-data_social_href="'https://twitter.com/intent/tweet?text='"
+	                                        href="#" class="icoTwitter link" title="Twitter">
+	                                        <i class="fa fa-twitter"></i>
+                                       	</a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_linkedin">
+                                        <a
+                                        	t-att-data_social_href="'https://www.linkedin.com/feed/?shareActive=true&amp;text='"
+                                        	href='#' class="icoLinkedin link" title="LinkedIn">
+                                        	<i class="fa fa-linkedin"></i>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_whatsapp">
+                                        <a
+                                        	t-att-data_social_href="'https://wa.me/?text='"
+                                        	href="#" class="icoWhatsapp link" title="Whatsapp">
+                                        	<i class="fa fa-whatsapp"></i>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_email">
+                                        <a
+                                        	t-att-data_social_href="'mailto:?subject=%s&amp;body=' %(product.name)"
+                                        	href='#' class="icoEnvelope link" title="E-mail">
+                                        	<i class="fa fa-envelope"></i>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_pinterest">
+                                        <a
+                                        	t-att-data_social_href="'https://pinterest.com/pin/create/button/?url=%s&amp;description=' %(product.name)"
+                                        	href='#' class="icoPinterest link" title="Pinterest">
+                                            <i class="fa fa-pinterest-p"></i>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_reddit">
+                                        <a 
+                                        	t-att-data_social_href="'http://reddit.com/submit?title=%s&amp;url=' %(product.name)"
+                                       		href="#" class="icoReddit link" title="Reddit">
+                                       		<i class="fa fa-reddit-alien"></i>
+                                       	</a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_hacker_news">
+                                        <a
+                                        	t-att-data_social_href="'http://news.ycombinator.com/submitlink?t=%s&amp;u=' %(product.name)"
+                                        	href="#" class="icoHacker link" title="HackerNews">
+                                        	<i class="fa fa-hacker-news"></i>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_digg">
+                                        <a
+                                        	t-att-data_social_href="'https://digg.com/submit?title=%s&amp;url=' %(product.name)"
+                                        	href="#" class="icoDigg link" title="Digg">
+                                        	<i class="fa fa-digg"></i>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_tumblr">
+                                        <a
+                                        	t-att-data_social_href="'http://tumblr.com/widgets/share/tool?canonicalUrl='"
+                                        	href="#" class="icoTumblr link" title="Tumblr">
+                                        	<i class="fa fa-tumblr"></i>
+                                        </a>
+                                    </li>
+                                    
+                                </ul>
+                            </div>
+                        </section>
+                    </t>
+
+                    <!-- STYLE 2 -->
+                    <t t-if="website.sh_prod_social_sharing_style == 'style_2'">
+                        <section class='js_cls_sh_product_social_sharing_wrapper' id="sh_socialbtn_design_2">
+                            <h5>Share:</h5>
+                            <ul class="social-network links">
+                                <li t-if="website.sh_prod_social_sharing_facebook">
+                                        <a
+	                                        t-att-data_social_href="'http://www.facebook.com/sharer/sharer.php?u='"
+	                                        href="#" class="icon-button icoFacebook link" title="Facebook">
+                                        	<i class="fa fa-facebook"></i><span/>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_twitter">
+                                        <a
+	                                        t-att-data_social_href="'https://twitter.com/intent/tweet?text='"
+	                                        href="#" class="icon-button icoTwitter link" title="Twitter">
+	                                        <i class="fa fa-twitter"></i><span/>
+                                       	</a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_linkedin">
+                                        <a
+                                        	t-att-data_social_href="'https://www.linkedin.com/feed/?shareActive=true&amp;text='"
+                                        	href='#' class="icon-button icoLinkedin link" title="LinkedIn">
+                                        	<i class="fa fa-linkedin"></i><span/>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_whatsapp">
+                                        <a
+                                        	t-att-data_social_href="'https://wa.me/?text='"
+                                        	href="#" class="icon-button icoWhatsapp link" title="Whatsapp">
+                                        	<i class="fa fa-whatsapp"></i><span/>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_email">
+                                        <a
+                                        	t-att-data_social_href="'mailto:?subject=%s&amp;body=' %(product.name)"
+                                        	href='#' class="icon-button icoEnvelope link" title="E-mail">
+                                        	<i class="fa fa-envelope"></i><span/>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_pinterest">
+                                        <a
+                                        	t-att-data_social_href="'https://pinterest.com/pin/create/button/?url=%s&amp;description=' %(product.name)"
+                                        	href='#' class="icon-button icoPinterest link" title="Pinterest">
+                                            <i class="fa fa-pinterest-p"></i><span/>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_reddit">
+                                        <a 
+                                        	t-att-data_social_href="'http://reddit.com/submit?title=%s&amp;url=' %(product.name)"
+                                       		href="#" class="icon-button icoReddit link" title="Reddit">
+                                       		<i class="fa fa-reddit-alien"></i><span/>
+                                       	</a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_hacker_news">
+                                        <a
+                                        	t-att-data_social_href="'http://news.ycombinator.com/submitlink?t=%s&amp;u=' %(product.name)"
+                                        	href="#" class="icon-button icoHacker link" title="HackerNews">
+                                        	<i class="fa fa-hacker-news"></i><span/>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_digg">
+                                        <a
+                                        	t-att-data_social_href="'https://digg.com/submit?title=%s&amp;url=' %(product.name)"
+                                        	href="#" class="icon-button icoDigg link" title="Digg">
+                                        	<i class="fa fa-digg"></i><span/>
+                                        </a>
+                                    </li>
+
+                                    <li t-if="website.sh_prod_social_sharing_tumblr">
+                                        <a
+                                        	t-att-data_social_href="'http://tumblr.com/widgets/share/tool?canonicalUrl='"
+                                        	href="#" class="icon-button icoTumblr link" title="Tumblr">
+                                        	<i class="fa fa-tumblr"></i><span/>
+                                        </a>
+                                    </li>
+                                    
+                                    
+
+                            </ul>
+                        </section>
+                    </t>
+
+                    <!-- STYLE 3 -->
+                    <t t-if="website.sh_prod_social_sharing_style == 'style_3'">
+                        <section class='js_cls_sh_product_social_sharing_wrapper' id="sh_socialbtn_design_3">
+                            <span><h5>Share:</h5></span>
+                            <div class="row links">
+                                <div class="col">
+                                    <div t-if="website.sh_prod_social_sharing_facebook" class="facebook">
+                                    	<a
+	                                        t-att-data_social_href="'http://www.facebook.com/sharer/sharer.php?u='"
+	                                        href="#" class="icon-button icoFacebook link" title="Facebook">
+                                        	<i class="fa fa-facebook"></i>
+                                        	<span class="facebooktext">Facebook</span>
+                                        </a>
+                                        
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_twitter" class="twitter">
+                                        <a
+	                                        t-att-data_social_href="'https://twitter.com/intent/tweet?text='"
+	                                        href="#" class="icon-button icoTwitter link" title="Twitter">
+	                                        <i class="fa fa-twitter"></i>
+	                                        <span class="twittertext">Twitter</span>
+                                       	</a>
+                                        
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_linkedin" class="linkedin">
+                                        <a
+                                        	t-att-data_social_href="'https://www.linkedin.com/feed/?shareActive=true&amp;text='"
+                                        	href='#' class="icon-button icoLinkedin link" title="LinkedIn">
+                                        	<i class="fa fa-linkedin"></i>
+                                        	<span class="linkedintext">linkedin</span>
+                                        </a>
+                                        
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_whatsapp" class="whatsapp">
+                                        <a
+                                        	t-att-data_social_href="'https://wa.me/?text='"
+                                        	href="#" class="icon-button icoWhatsapp link" title="Whatsapp">
+                                        	<i class="fa fa-whatsapp"></i>
+                                        	<span class="whatsapptext">Whatsapp</span>
+                                        </a>
+                                        
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_email" class="envelope">
+                                        <a
+                                        	t-att-data_social_href="'mailto:?subject=%s&amp;body=' %(product.name)"
+                                        	href='#' class="icon-button icoEnvelope link" title="E-mail">
+                                        	<i class="fa fa-envelope"></i>
+                                        	<span class="envelopetext">E-mail </span>
+                                        </a>
+                                        
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_pinterest" class="pinterest">
+                                        <a
+                                        	t-att-data_social_href="'https://pinterest.com/pin/create/button/?url=%s&amp;description=' %(product.name)"
+                                        	href='#' class="icon-button icoPinterest link" title="Pinterest">
+                                            <i class="fa fa-pinterest-p"></i>
+                                            <span class="pinteresttext">Pinterest</span>
+                                        </a>
+                                        
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_reddit" class="reddit-alien">
+                                        <a 
+                                        	t-att-data_social_href="'http://reddit.com/submit?title=%s&amp;url=' %(product.name)"
+                                       		href="#" class="icon-button icoReddit link" title="Reddit">
+                                       		<i class="fa fa-reddit-alien"></i>
+                                       		<span class="reddit-alientext">Reddit</span>
+                                       	</a>
+                                        
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_hacker_news" class="hacker-news">
+                                        <a
+                                        	t-att-data_social_href="'http://news.ycombinator.com/submitlink?t=%s&amp;u=' %(product.name)"
+                                        	href="#" class="icon-button icoHacker link" title="HackerNews">
+                                        	<i class="fa fa-hacker-news"></i>
+                                        	<span class="hacker-newstext">Hacker News</span>
+                                        </a>
+                                        
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_digg" class="digg">
+                                        <a
+                                        	t-att-data_social_href="'https://digg.com/submit?title=%s&amp;url=' %(product.name)"
+                                        	href="#" class="icon-button icoDigg link" title="Digg">
+                                        	<i class="fa fa-digg"></i>
+                                        	<span class="diggtext">Digg </span>
+                                        </a>
+                                        
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_tumblr" class="tumblr">
+                                        <a
+                                        	t-att-data_social_href="'http://tumblr.com/widgets/share/tool?canonicalUrl='"
+                                        	href="#" class="icon-button icoTumblr link" title="Tumblr">
+                                        	<i class="fa fa-tumblr"></i>
+                                        	<span class="tumblrtext">Tumblr </span>
+                                        </a>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </t>
+
+                    <!-- STYLE 4 -->
+                    <t t-if="website.sh_prod_social_sharing_style == 'style_4'">
+                        <section class='js_cls_sh_product_social_sharing_wrapper' id="sh_socialbtn_design_4">
+                            <h5>Share:</h5>
+                            <ul id="js_id_sh_prod_social_sharing_main_ul" class='links'>
+                                <li t-if="website.sh_prod_social_sharing_facebook">
+                                	<a
+								        t-att-data_social_href="'http://www.facebook.com/sharer/sharer.php?u='"
+								        href="#" class="facebook link" title="Facebook">
+								        <i class="fa fa-facebook-official"></i>
+								        <span>Facebook</span>
+								    </a>
+                                </li>
+
+                                <li t-if="website.sh_prod_social_sharing_twitter">
+                                   	<a
+								        t-att-data_social_href="'https://twitter.com/intent/tweet?text='"
+								        href="#" class="twitter link" title="Twitter">
+								        <i class="fa fa-twitter"></i>
+								        <span>Twitter</span>
+								    </a>
+                                </li>
+
+                                <li t-if="website.sh_prod_social_sharing_linkedin">
+                                    <a
+								        t-att-data_social_href="'https://www.linkedin.com/feed/?shareActive=true&amp;text='"
+								        href='#' class="linkedin link" title="LinkedIn">
+								        <i class="fa fa-linkedin"></i>
+								        <span>Linkedin</span>
+								    </a>
+                                </li>
+
+                                <li t-if="website.sh_prod_social_sharing_whatsapp">
+                                    <a
+								        t-att-data_social_href="'https://wa.me/?text='"
+								        href="#" class="whatsapp link" title="Whatsapp">
+								        <i class="fa fa-whatsapp"></i>
+								        <span>Whatsapp</span>
+								    </a>
+                                </li>
+
+                                <li t-if="website.sh_prod_social_sharing_email">
+                                    <a
+								        t-att-data_social_href="'mailto:?subject=%s&amp;body=' %(product.name)"
+								        href='#' class="envelope link" title="E-mail">
+								        <i class="fa fa-envelope"></i>
+								        <span>E-mail</span>
+								    </a>
+                                </li>
+
+                                <li t-if="website.sh_prod_social_sharing_pinterest">
+                                    <a
+								        t-att-data_social_href="'https://pinterest.com/pin/create/button/?url=%s&amp;description=' %(product.name)"
+								        href='#' class="pinterest link" title="Pinterest">
+								        <i class="fa fa-pinterest-p"></i>
+								        <span>Pinterest</span>
+								    </a>
+                                </li>
+
+                                <li t-if="website.sh_prod_social_sharing_reddit">
+                                	<a 
+								        t-att-data_social_href="'http://reddit.com/submit?title=%s&amp;url=' %(product.name)"
+								        href="#" class="reddit-alien link" title="Reddit">
+								        <i class="fa fa-reddit-alien"></i>
+								        <span>Reddit</span>
+								    </a>
+                                </li>
+
+                                <li t-if="website.sh_prod_social_sharing_hacker_news">
+                                	<a
+								        t-att-data_social_href="'http://news.ycombinator.com/submitlink?t=%s&amp;u=' %(product.name)"
+								        href="#" class="hacker-news link" title="HackerNews">
+								        <i class="fa fa-hacker-news"></i>
+								        <span>Hacker News</span>
+								    </a>
+                                </li>
+
+                                <li t-if="website.sh_prod_social_sharing_digg">
+                                    <a
+								        t-att-data_social_href="'https://digg.com/submit?title=%s&amp;url=' %(product.name)"
+								        href="#" class="digg link" title="Digg">
+								        <i class="fa fa-digg"></i>
+								        <span>Digg</span>
+								    </a>
+                                </li>
+
+                                <li t-if="website.sh_prod_social_sharing_tumblr">
+                                    <a
+								        t-att-data_social_href="'http://tumblr.com/widgets/share/tool?canonicalUrl='"
+								        href="#" class="tumblr link" title="Tumblr">
+								        <i class="fa fa-tumblr"></i>
+								        <span>Tumblr</span>
+								    </a>
+                                </li>
+
+                                <div id="sh_prod_social_sharing_show_more_div">
+                                    <a href="#" id="js_id_sh_prod_social_sharing_show_more_a">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+
+                                    <a href="#" id="js_id_sh_prod_social_sharing_show_less_a">
+                                        <i class="fa fa-minus"></i>
+                                    </a>
+                                </div>
+                            </ul>
+                        </section>
+                    </t>
+
+                    <!-- STYLE 5 -->
+                    <t t-if="website.sh_prod_social_sharing_style == 'style_5'">
+                        <!--socialbtn design-5-->
+                        <section class='js_cls_sh_product_social_sharing_wrapper' id="sh_socialbtn_design_5">
+                            <h5>Share:</h5>
+                            <div class="row links">
+                                <div class="col">
+                                    <div t-if="website.sh_prod_social_sharing_facebook" class="fb_share_style_3">
+                                         <a
+									        t-att-data_social_href="'http://www.facebook.com/sharer/sharer.php?u='"
+									        href="#" title="Facebook" class='link'>
+									        <i class="fa fa-facebook"></i>
+									    </a>
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_twitter" class="twi_share_style_3">
+                                        <a
+									        t-att-data_social_href="'https://twitter.com/intent/tweet?text='"
+									        href="#" title="Twitter" class='link'>
+									        <i class="fa fa-twitter"></i>
+									    </a>
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_linkedin" class="in_share_style_3">
+                                        <a
+									        t-att-data_social_href="'https://www.linkedin.com/feed/?shareActive=true&amp;text='"
+									        href='#' title="LinkedIn" class='link'>
+									        <i class="fa fa-linkedin"></i>
+									    </a>
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_whatsapp" class="wp_share_style_3">
+                                        <a
+									        t-att-data_social_href="'https://wa.me/?text='"
+									        href="#" title="Whatsapp" class='link'>
+									        <i class="fa fa-whatsapp"></i>
+									    </a>
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_email" class="mail_share_style_3">
+                                        <a
+									        t-att-data_social_href="'mailto:?subject=%s&amp;body=' %(product.name)"
+									        href='#' title="E-mail" class='link'>
+									        <i class="fa fa-envelope"></i>
+									    </a>
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_pinterest" class="pin_share_style_3">
+                                        <a
+									        t-att-data_social_href="'https://pinterest.com/pin/create/button/?url=%s&amp;description=' %(product.name)"
+									        href='#' title="Pinterest" class='link'>
+									        <i class="fa fa-pinterest-p"></i>
+									    </a>
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_reddit" class="redali_share_style_3">
+                                        <a 
+									        t-att-data_social_href="'http://reddit.com/submit?title=%s&amp;url=' %(product.name)"
+									        href="#" title="Reddit" class='link'>
+									        <i class="fa fa-reddit-alien"></i>
+									    </a>
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_hacker_news" class="heknew_share_style_3">
+                                        <a
+									        t-att-data_social_href="'http://news.ycombinator.com/submitlink?t=%s&amp;u=' %(product.name)"
+									        href="#" title="HackerNews" class='link'>
+									        <i class="fa fa-hacker-news"></i>
+									    </a>
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_digg" class="digg_share_style_3">
+                                        <a
+									        t-att-data_social_href="'https://digg.com/submit?title=%s&amp;url=' %(product.name)"
+									        href="#" title="Digg" class='link'>
+									        <i class="fa fa-digg"></i>
+									    </a>
+                                    </div>
+
+                                    <div t-if="website.sh_prod_social_sharing_tumblr" class="tumblr_share_style_3">
+                                        <a
+									        t-att-data_social_href="'http://tumblr.com/widgets/share/tool?canonicalUrl='"
+									        href="#" title="Tumblr" class='link'>
+									        <i class="fa fa-tumblr"></i>
+									    </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </t>
+
+                    <!-- STYLE 6 -->
+                    <t t-if="website.sh_prod_social_sharing_style == 'style_6'">
+                        <section class='js_cls_sh_product_social_sharing_wrapper' id="sh_socialbtn_design_6">
+                            <div>
+                                <h5>Share:</h5>
+                                <ul class="social-network social-circle links">
+                                    <li t-if="website.sh_prod_social_sharing_facebook">
+									    <a
+									        t-att-data_social_href="'http://www.facebook.com/sharer/sharer.php?u='"
+									        href="#" title="Facebook" class="facebook icon-link fill link">
+									        <i class="fa fa-facebook"></i>
+									    </a>
+									</li>
+									
+									<li t-if="website.sh_prod_social_sharing_twitter">
+									    <a
+									        t-att-data_social_href="'https://twitter.com/intent/tweet?text='"
+									        href="#" title="Twitter" class="twitter icon-link fill link">
+									        <i class="fa fa-twitter"></i>
+									    </a>
+									</li>
+									
+									<li t-if="website.sh_prod_social_sharing_linkedin">
+									    <a
+									        t-att-data_social_href="'https://www.linkedin.com/feed/?shareActive=true&amp;text='"
+									        href='#' title="LinkedIn" class="linkedin icon-link fill link">
+									        <i class="fa fa-linkedin"></i>
+									    </a>
+									</li>
+									
+									<li t-if="website.sh_prod_social_sharing_whatsapp">
+									    <a
+									        t-att-data_social_href="'https://wa.me/?text='"
+									        href="#" title="Whatsapp" class="whatsapp icon-link fill link">
+									        <i class="fa fa-whatsapp"></i>
+									    </a>
+									</li>
+									
+									<li t-if="website.sh_prod_social_sharing_email">
+									    <a
+									        t-att-data_social_href="'mailto:?subject=%s&amp;body=' %(product.name)"
+									        href='#' title="E-mail" class="envelope icon-link fill link">
+									        <i class="fa fa-envelope"></i>
+									    </a>
+									</li>
+									
+									<li t-if="website.sh_prod_social_sharing_pinterest">
+									    <a
+									        t-att-data_social_href="'https://pinterest.com/pin/create/button/?url=%s&amp;description=' %(product.name)"
+									        href='#' title="Pinterest" class="pinterest icon-link fill link">
+									        <i class="fa fa-pinterest-p"></i>
+									    </a>
+									</li>
+									
+									<li t-if="website.sh_prod_social_sharing_reddit">
+									    <a 
+									        t-att-data_social_href="'http://reddit.com/submit?title=%s&amp;url=' %(product.name)"
+									        href="#" title="Reddit" class="reddit icon-link fill link">
+									        <i class="fa fa-reddit-alien"></i>
+									    </a>
+									</li>
+									
+									<li t-if="website.sh_prod_social_sharing_hacker_news">
+									    <a
+									        t-att-data_social_href="'http://news.ycombinator.com/submitlink?t=%s&amp;u=' %(product.name)"
+									        href="#" title="HackerNews" class="hacker icon-link fill link">
+									        <i class="fa fa-hacker-news"></i>
+									    </a>
+									</li>
+									
+									<li t-if="website.sh_prod_social_sharing_digg">
+									    <a
+									        t-att-data_social_href="'https://digg.com/submit?title=%s&amp;url=' %(product.name)"
+									        href="#" title="Digg" class="digg icon-link fill link">
+									        <i class="fa fa-digg"></i>
+									    </a>
+									</li>
+									
+									<li t-if="website.sh_prod_social_sharing_tumblr">
+									    <a
+									        t-att-data_social_href="'http://tumblr.com/widgets/share/tool?canonicalUrl='"
+									        href="#" title="Tumblr" class="tumblr icon-link fill link">
+									        <i class="fa fa-tumblr"></i>
+									    </a>
+									</li>
+                                </ul>
+                            </div>
+                        </section>
+                    </t>
+
+                    <!-- STYLE 7 -->
+                    <t t-if="website.sh_prod_social_sharing_style == 'style_7'">
+                        <!--social btn design-7-->
+                        <section class='js_cls_sh_product_social_sharing_wrapper' id="sh_socialbtn_design_7">
+                            <div>
+                                <h5>Share:</h5>
+                                <div class="row links">
+                                    <a
+								        t-if="website.sh_prod_social_sharing_facebook"
+								        t-att-data_social_href="'http://www.facebook.com/sharer/sharer.php?u='"
+								        href="#" title="Facebook" class='link'>
+								        <i class="fa fa-facebook"></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_twitter"
+								        t-att-data_social_href="'https://twitter.com/intent/tweet?text='"
+								        href="#" title="Twitter" class='link'>
+								        <i class="fa fa-twitter"></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_linkedin"
+								        t-att-data_social_href="'https://www.linkedin.com/feed/?shareActive=true&amp;text='"
+								        href='#' title="LinkedIn" class='link'>
+								        <i class="fa fa-linkedin"></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_whatsapp"
+								        t-att-data_social_href="'https://wa.me/?text='"
+								        href="#" title="Whatsapp" class='link'>
+								        <i class="fa fa-whatsapp"></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_email"
+								        t-att-data_social_href="'mailto:?subject=%s&amp;body=' %(product.name)"
+								        href='#' title="E-mail" class='link'>
+								        <i class="fa fa-envelope"></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_pinterest"
+								        t-att-data_social_href="'https://pinterest.com/pin/create/button/?url=%s&amp;description=' %(product.name)"
+								        href='#' title="Pinterest" class='link'>
+								        <i class="fa fa-pinterest"></i>
+								    </a>
+								    <a 
+								        t-if="website.sh_prod_social_sharing_reddit"
+								        t-att-data_social_href="'http://reddit.com/submit?title=%s&amp;url=' %(product.name)"
+								        href="#" title="Reddit" class='link'>
+								        <i class="fa fa-reddit-alien"></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_hacker_news"
+								        t-att-data_social_href="'http://news.ycombinator.com/submitlink?t=%s&amp;u=' %(product.name)"
+								        href="#" title="HackerNews" class='link'>
+								        <i class="fa fa-hacker-news"></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_digg"
+								        t-att-data_social_href="'https://digg.com/submit?title=%s&amp;url=' %(product.name)"
+								        href="#" title="Digg" class='link'>
+								        <i class="fa fa-digg"></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_tumblr"
+								        t-att-data_social_href="'http://tumblr.com/widgets/share/tool?canonicalUrl='"
+								        href="#" title="Tumblr" class='link'>
+								        <i class="fa fa-tumblr"></i>
+								    </a>
+                                </div>
+                            </div>
+                        </section>
+                    </t>
+
+                    <!-- STYLE 8 -->
+                    <t t-if="website.sh_prod_social_sharing_style == 'style_8'">
+                        <!--social btn design-8-->
+                        <section class='js_cls_sh_product_social_sharing_wrapper' id="sh_socialbtn_design_8">
+                            <div>
+                                <h5>Share:</h5>
+                                <div class="row links" id="js_id_sh_prod_social_sharing_main_div">
+                                    <a
+								        t-if="website.sh_prod_social_sharing_facebook"
+								        t-att-data_social_href="'http://www.facebook.com/sharer/sharer.php?u='"
+								        href="#" title="Facebook" class='link'>
+								        <i class="fa fa-facebook"><span>Facebook</span></i>
+								    </a>
+                                    <a
+								        t-if="website.sh_prod_social_sharing_twitter"
+								        t-att-data_social_href="'https://twitter.com/intent/tweet?text='"
+								        href="#" title="Twitter" class='link'>
+								        <i class="fa fa-twitter"><span>Twitter</span></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_linkedin"
+								        t-att-data_social_href="'https://www.linkedin.com/feed/?shareActive=true&amp;text='"
+								        href='#' title="LinkedIn" class='link'>
+								        <i class="fa fa-linkedin"><span>Linkedin</span></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_whatsapp"
+								        t-att-data_social_href="'https://wa.me/?text='"
+								        href="#" title="Whatsapp" class='link'>
+								        <i class="fa fa-whatsapp"><span>Whatsapp</span></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_email"
+								        t-att-data_social_href="'mailto:?subject=%s&amp;body=' %(product.name)"
+								        href='#' title="E-mail" class='link'>
+								        <i class="fa fa-envelope"><span>E-mail</span></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_pinterest"
+								        t-att-data_social_href="'https://pinterest.com/pin/create/button/?url=%s&amp;description=' %(product.name)"
+								        href='#' title="Pinterest" class='link'>
+								        <i class="fa fa-pinterest"><span>Pinterest</span></i>
+								    </a>
+								    <a 
+								        t-if="website.sh_prod_social_sharing_reddit"
+								        t-att-data_social_href="'http://reddit.com/submit?title=%s&amp;url=' %(product.name)"
+								        href="#" title="Reddit" class='link'>
+								        <i class="fa fa-reddit-alien"><span>Reddit</span></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_hacker_news"
+								        t-att-data_social_href="'http://news.ycombinator.com/submitlink?t=%s&amp;u=' %(product.name)"
+								        href="#" title="HackerNews" class='link'>
+								        <i class="fa fa-hacker-news"><span>Hacker</span></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_digg"
+								        t-att-data_social_href="'https://digg.com/submit?title=%s&amp;url=' %(product.name)"
+								        href="#" title="Digg" class='link'>
+								        <i class="fa fa-digg"><span>Digg</span></i>
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_tumblr"
+								        t-att-data_social_href="'http://tumblr.com/widgets/share/tool?canonicalUrl='"
+								        href="#" title="Tumblr" class='link'>
+								        <i class="fa fa-tumblr"><span>Tumblr</span></i>
+								    </a>
+
+                                    <div id="sh_prod_social_sharing_show_more_div">
+                                        <a href="#" id="js_id_sh_prod_social_sharing_show_more_a">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+
+                                        <a href="#" id="js_id_sh_prod_social_sharing_show_less_a">
+                                            <i class="fa fa-minus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </t>
+
+                    <!-- STYLE 9 -->
+                    <t t-if="website.sh_prod_social_sharing_style == 'style_9'">
+                        <!--social btn design-9-->
+                        <section class='js_cls_sh_product_social_sharing_wrapper' id="sh_socialbtn_design_9">
+                            <div>
+                                <h5>Share:</h5>
+                                <div class="row links" id="js_id_sh_prod_social_sharing_main_div">
+                                    <a
+								        t-if="website.sh_prod_social_sharing_facebook"
+								        t-att-data_social_href="'http://www.facebook.com/sharer/sharer.php?u='"
+								        href="#" title="Facebook" class='link'>
+								        <i class="fa fa-facebook"><span>Facebook</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_twitter"
+								        t-att-data_social_href="'https://twitter.com/intent/tweet?text='"
+								        href="#" title="Twitter" class='link'>
+								        <i class="fa fa-twitter"><span>Twitter</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_linkedin"
+								        t-att-data_social_href="'https://www.linkedin.com/feed/?shareActive=true&amp;text='"
+								        href='#' title="LinkedIn" class='link'>
+								        <i class="fa fa-linkedin"><span>Linkedin</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_whatsapp"
+								        t-att-data_social_href="'https://wa.me/?text='"
+								        href="#" title="Whatsapp" class='link'>
+								        <i class="fa fa-whatsapp"><span>Whatsapp</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_email"
+								        t-att-data_social_href="'mailto:?subject=%s&amp;body=' %(product.name)"
+								        href='#' title="E-mail" class='link'>
+								        <i class="fa fa-envelope"><span>E-mail</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_pinterest"
+								        t-att-data_social_href="'https://pinterest.com/pin/create/button/?url=%s&amp;description=' %(product.name)"
+								        href='#' title="Pinterest" class='link'>
+								        <i class="fa fa-pinterest"><span>Pinterest</span></i>
+								        
+								    </a>
+								    <a 
+								        t-if="website.sh_prod_social_sharing_reddit"
+								        t-att-data_social_href="'http://reddit.com/submit?title=%s&amp;url=' %(product.name)"
+								        href="#" title="Reddit" class='link'>
+								        <i class="fa fa-reddit-alien"><span>Reddit</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_hacker_news"
+								        t-att-data_social_href="'http://news.ycombinator.com/submitlink?t=%s&amp;u=' %(product.name)"
+								        href="#" title="HackerNews" class='link'>
+								        <i class="fa fa-hacker-news"><span>Hacker</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_digg"
+								        t-att-data_social_href="'https://digg.com/submit?title=%s&amp;url=' %(product.name)"
+								        href="#" title="Digg" class='link'>
+								        <i class="fa fa-digg"><span>Digg</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_tumblr"
+								        t-att-data_social_href="'http://tumblr.com/widgets/share/tool?canonicalUrl='"
+								        href="#" title="Tumblr" class='link'>
+								        <i class="fa fa-tumblr"><span>Tumblr</span></i>
+								
+								    </a>
+
+                                    <div id="sh_prod_social_sharing_show_more_div">
+                                        <a href="#" id="js_id_sh_prod_social_sharing_show_more_a">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+
+                                        <a href="#" id="js_id_sh_prod_social_sharing_show_less_a">
+                                            <i class="fa fa-minus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </t>
+
+                    <!-- STYLE 10 -->
+                    <t t-if="website.sh_prod_social_sharing_style == 'style_10'">
+                        <!--social btn design-10-->
+                        <section class='js_cls_sh_product_social_sharing_wrapper' id="sh_socialbtn_design_10">
+                            <div>
+                                <h5>Share:</h5>
+                                <div class="row links" id="js_id_sh_prod_social_sharing_main_div">
+                                    <a
+								        t-if="website.sh_prod_social_sharing_facebook"
+								        t-att-data_social_href="'http://www.facebook.com/sharer/sharer.php?u='"
+								        href="#" title="Facebook" class='link'>
+								        <i class="fa fa-facebook"><span>Facebook</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_twitter"
+								        t-att-data_social_href="'https://twitter.com/intent/tweet?text='"
+								        href="#" title="Twitter" class='link'>
+								        <i class="fa fa-twitter"><span>Twitter</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_linkedin"
+								        t-att-data_social_href="'https://www.linkedin.com/feed/?shareActive=true&amp;text='"
+								        href='#' title="LinkedIn" class='link'>
+								        <i class="fa fa-linkedin"><span>Linkedin</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_whatsapp"
+								        t-att-data_social_href="'https://wa.me/?text='"
+								        href="#" title="Whatsapp" class='link'>
+								        <i class="fa fa-whatsapp"><span>Whatsapp</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_email"
+								        t-att-data_social_href="'mailto:?subject=%s&amp;body=' %(product.name)"
+								        href='#' title="E-mail" class='link'>
+								        <i class="fa fa-envelope"><span>E-mail</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_pinterest"
+								        t-att-data_social_href="'https://pinterest.com/pin/create/button/?url=%s&amp;description=' %(product.name)"
+								        href='#' title="Pinterest" class='link'>
+								        <i class="fa fa-pinterest"><span>Pinterest</span></i>
+								        
+								    </a>
+								    <a 
+								        t-if="website.sh_prod_social_sharing_reddit"
+								        t-att-data_social_href="'http://reddit.com/submit?title=%s&amp;url=' %(product.name)"
+								        href="#" title="Reddit" class='link'>
+								        <i class="fa fa-reddit-alien"><span>Reddit</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_hacker_news"
+								        t-att-data_social_href="'http://news.ycombinator.com/submitlink?t=%s&amp;u=' %(product.name)"
+								        href="#" title="HackerNews" class='link'>
+								        <i class="fa fa-hacker-news"><span>Hacker</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_digg"
+								        t-att-data_social_href="'https://digg.com/submit?title=%s&amp;url=' %(product.name)"
+								        href="#" title="Digg" class='link'>
+								        <i class="fa fa-digg"><span>Digg</span></i>
+								        
+								    </a>
+								    <a
+								        t-if="website.sh_prod_social_sharing_tumblr"
+								        t-att-data_social_href="'http://tumblr.com/widgets/share/tool?canonicalUrl='"
+								        href="#" title="Tumblr" class='link'>
+								        <i class="fa fa-tumblr"><span>Tumblr</span></i>
+								
+								    </a>
+
+                                    <div id="sh_prod_social_sharing_show_more_div">
+                                        <a href="#" id="js_id_sh_prod_social_sharing_show_more_a">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+
+                                        <a href="#" id="js_id_sh_prod_social_sharing_show_less_a">
+                                            <i class="fa fa-minus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </t>
+
+                    <!-- STYLE 11 -->
+                    <t t-if="website.sh_prod_social_sharing_style == 'style_11'">
+                        <!--social btn design-11-->
+                        <section class='js_cls_sh_product_social_sharing_wrapper' id="sh_socialbtn_design_11">
+                            <h5>Share :</h5>
+                            <div class="share_icons">
+                                <a
+							        t-if="website.sh_prod_social_sharing_facebook"
+							        t-att-data_social_href="'http://www.facebook.com/sharer/sharer.php?u='"
+							        href="#" title="Facebook" class='link'>
+							        <i class="fa fa-facebook"></i>
+							        
+							    </a>
+							    <a
+							        t-if="website.sh_prod_social_sharing_twitter"
+							        t-att-data_social_href="'https://twitter.com/intent/tweet?text='"
+							        href="#" title="Twitter" class='link'>
+							        <i class="fa fa-twitter"></i>
+							        
+							    </a>
+							    <a
+							        t-if="website.sh_prod_social_sharing_linkedin"
+							        t-att-data_social_href="'https://www.linkedin.com/feed/?shareActive=true&amp;text='"
+							        href='#' title="LinkedIn" class='link'>
+							        <i class="fa fa-linkedin"></i>
+							        
+							    </a>
+							    <a
+							        t-if="website.sh_prod_social_sharing_whatsapp"
+							        t-att-data_social_href="'https://wa.me/?text='"
+							        href="#" title="Whatsapp" class='link'>
+							        <i class="fa fa-whatsapp"></i>
+							        
+							    </a>
+							    <a
+							        t-if="website.sh_prod_social_sharing_email"
+							        t-att-data_social_href="'mailto:?subject=%s&amp;body=' %(product.name)"
+							        href='#' title="E-mail" class='link'>
+							        <i class="fa fa-envelope"></i>
+							        
+							    </a>
+							    <a
+							        t-if="website.sh_prod_social_sharing_pinterest"
+							        t-att-data_social_href="'https://pinterest.com/pin/create/button/?url=%s&amp;description=' %(product.name)"
+							        href='#' title="Pinterest" class='link'>
+							        <i class="fa fa-pinterest"></i>
+							        
+							    </a>
+							    <a 
+							        t-if="website.sh_prod_social_sharing_reddit"
+							        t-att-data_social_href="'http://reddit.com/submit?title=%s&amp;url=' %(product.name)"
+							        href="#" title="Reddit" class='link'>
+							        <i class="fa fa-reddit-alien"></i>
+							        
+							    </a>
+							    <a
+							        t-if="website.sh_prod_social_sharing_hacker_news"
+							        t-att-data_social_href="'http://news.ycombinator.com/submitlink?t=%s&amp;u=' %(product.name)"
+							        href="#" title="HackerNews" class='link'>
+							        <i class="fa fa-hacker-news"></i>
+							        
+							    </a>
+							    <a
+							        t-if="website.sh_prod_social_sharing_digg"
+							        t-att-data_social_href="'https://digg.com/submit?title=%s&amp;url=' %(product.name)"
+							        href="#" title="Digg" class='link'>
+							        <i class="fa fa-digg"></i>
+							        
+							    </a>
+							    <a
+							        t-if="website.sh_prod_social_sharing_tumblr"
+							        t-att-data_social_href="'http://tumblr.com/widgets/share/tool?canonicalUrl='"
+							        href="#" title="Tumblr" class='link'>
+							        <i class="fa fa-tumblr"></i>
+							
+							    </a>
+                            </div>
+                        </section>
+                    </t>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>

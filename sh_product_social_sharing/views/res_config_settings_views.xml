@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sh_prod_social_sharing_res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.sh.prod.social.sharing</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="website_sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <setting id="website_tax_inclusion_setting" position="after">
+                <setting
+                    id="sh_product_social_sharing_setting"
+                    string="Product Social Sharing"
+                    help="Allow visitors to share product pages on selected social networks."
+                >
+                    <field name="sh_prod_social_is_prod_social_sharing"/>
+                    <span
+                        class="fa fa-lg fa-globe ms-2"
+                        title="Values set here are website-specific."
+                        groups="website.group_multi_website"
+                    />
+                    <div
+                        class="content-group mt16"
+                        invisible="not sh_prod_social_is_prod_social_sharing"
+                    >
+                        <div class="row mt8">
+                            <label
+                                for="sh_prod_social_sharing_style"
+                                class="col-lg-4 o_light_label"
+                            />
+                            <field name="sh_prod_social_sharing_style"/>
+                        </div>
+                        <div class="row mt8">
+                            <span class="col-lg-4 o_light_label">Social Networks</span>
+                            <div class="col-lg-8">
+                                <div><field name="sh_prod_social_sharing_facebook"/> Facebook</div>
+                                <div><field name="sh_prod_social_sharing_twitter"/> Twitter / X</div>
+                                <div><field name="sh_prod_social_sharing_linkedin"/> LinkedIn</div>
+                                <div><field name="sh_prod_social_sharing_whatsapp"/> WhatsApp</div>
+                                <div><field name="sh_prod_social_sharing_email"/> Email</div>
+                                <div><field name="sh_prod_social_sharing_pinterest"/> Pinterest</div>
+                                <div><field name="sh_prod_social_sharing_reddit"/> Reddit</div>
+                                <div><field name="sh_prod_social_sharing_hacker_news"/> Hacker News</div>
+                                <div><field name="sh_prod_social_sharing_digg"/> Digg</div>
+                                <div><field name="sh_prod_social_sharing_tumblr"/> Tumblr</div>
+                            </div>
+                        </div>
+                    </div>
+                </setting>
+            </setting>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,396 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* sh_product_social_sharing
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 14.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-10-19 06:35+0000\n"
+"PO-Revision-Date: 2020-10-19 06:35+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-digg\"/><span>Digg</span>"
+msgstr "<i class = \“fa fa-digg \”/> <span> digg </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-digg\"><span>Digg</span></i>"
+msgstr "<i class =“fa fa-digg \”> <span> digg </ span> </ i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-envelope\"/><span>E-mail</span>"
+msgstr "<i class = \“fa fa-envelope \”/> <span>电子邮件</ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-envelope\"><span>E-mail</span></i>"
+msgstr "<i class =“fa fa-envelope \”> <span>电子邮件</ span> </ i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-facebook\"><span>Facebook</span></i>"
+msgstr "<i class =“fa facebook \”> <span> facebook </ span> </ i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-facebook-official\"/><span>Facebook</span>"
+msgstr "<i class = \“fa facebook-官方\”/> <span> facebook </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-hacker-news\"/><span>Hacker News</span>"
+msgstr "<i class = \“fa fa-hacker-news \”/> <span>黑客新闻</ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-hacker-news\"><span>Hacker</span></i>"
+msgstr "<i class = \“fa fa-hacker-news \”> <span>黑客</ span> </ i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-linkedin\"/><span>Linkedin</span>"
+msgstr "<i class = \“fa fa-linkedin \”/> <span> linkedin </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-linkedin\"><span>Linkedin</span></i>"
+msgstr "<i class = \“fa fa-linkedin \”> <span> linkedin </ span> </ i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-pinterest\"/><span>Pinterest</span>"
+msgstr "<i class = \“fa fa-pinterest \”/> <span> pinterest </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-pinterest\"><span>Pinterest</span></i>"
+msgstr "<i class = \“fa fa-pinterest \”> <span> pinterest </ span> </ i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-reddit-alien\"/><span>Reddit</span>"
+msgstr "<i class = \“fa fa-reddit-alien \”/> <span> reddit </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-reddit-alien\"><span>Reddit</span></i>"
+msgstr "<i class =“fa fa-reddit-alien \”> <span> reddit </ span> </ i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-tumblr\"/><span>Tumblr</span>"
+msgstr "<i class = \“fa fa-tumblr \> <span> tumblr </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-tumblr\"><span>Tumblr</span></i>"
+msgstr "<i class = \“fa fa-tumblr \”> <span> tumblr </ span> </ i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-twitter\"/><span>Twitter</span>"
+msgstr "<i class = \“fa fa-twitter \”/> <span> twitter </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-twitter\"><span>Twitter</span></i>"
+msgstr "<i class = \“fa fa-twitter \”> <span> twitter </ span> </ i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-whatsapp\"/><span>Whatsapp</span>"
+msgstr "<i class = \“fa fa-whatsapp \”/> <span> whatsapp </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-whatsapp\"><span>Whatsapp</span></i>"
+msgstr "<i class =“fa fa-whatsapp \”> <span> whatsapp </ span> </ i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"diggtext\">Digg </span>"
+msgstr "<span class = \“diggtext \”> digg </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"envelopetext\">E-mail </span>"
+msgstr "<span class = \“信封extext”>电子邮件</ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_prod_social_sharing_res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_website_form
+msgid ""
+"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+"specific.\" groups=\"website.group_multi_website\"/>"
+msgstr ""
+"<span class=\"fa fa-lg fa-globe\" title=\"此处设置的值是网站-"
+"具体的.\" groups=\"website.group_multi_website\"/>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"facebooktext\">Facebook</span>"
+msgstr "<span class = \“facebooktext \”> Facebook </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"hacker-newstext\">Hacker News</span>"
+msgstr "<span class = \“hacker-newstext \”>黑客新闻</ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"linkedintext\">linkedin</span>"
+msgstr "<span class = \“linkedintext \”> linkedin </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"pinteresttext\">Pinterest</span>"
+msgstr "<span class = \“pinteresttext \”> pinterest </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"reddit-alientext\">Reddit</span>"
+msgstr "<span class = \“reddit-alientext \”> reddit </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"tumblrtext\">Tumblr </span>"
+msgstr "<span class = \“tumblrtext \”> tumblr </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"twittertext\">Twitter</span>"
+msgstr "<span class = \“TwitterText \”> Twitter </ span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"whatsapptext\">Whatsapp</span>"
+msgstr "<span class = \“whatsapptext \”> whatsapp </ span>"
+
+#. module: sh_product_social_sharing
+#: model:ir.model,name:sh_product_social_sharing.model_res_config_settings
+msgid "Config Settings"
+msgstr "配置设置"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_digg
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_digg
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Digg"
+msgstr "掘客"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__display_name
+msgid "Display Name"
+msgstr "显示名称"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "E-mail"
+msgstr "电子邮件"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_email
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_email
+msgid "Email"
+msgstr "电子邮件"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_facebook
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_facebook
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Facebook"
+msgstr "Facebook"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_hacker_news
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_hacker_news
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Hacker News"
+msgstr "黑客新闻"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "HackerNews"
+msgstr "哈克尼斯"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__id
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__id
+msgid "ID"
+msgstr "ID"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_is_prod_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_is_prod_social_sharing
+msgid "Is Product Share On Social Media?"
+msgstr "是社交媒体的产品股票吗？"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings____last_update
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website____last_update
+msgid "Last Modified on"
+msgstr "最后修改了"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_linkedin
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_linkedin
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "LinkedIn"
+msgstr "linkedin"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Linkedin"
+msgstr "linkedin"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_pinterest
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_pinterest
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Pinterest"
+msgstr "Pinterest."
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_prod_social_sharing_res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_website_form
+msgid "Product Social Sharing"
+msgstr "产品社交分享"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_reddit
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_reddit
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Reddit"
+msgstr "reddit."
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Share :"
+msgstr "分享 ："
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_prod_social_sharing_res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_website_form
+msgid "Share Products On Social Media"
+msgstr "在社交媒体上分享产品"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Share:"
+msgstr "分享："
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_style
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_style
+msgid "Style"
+msgstr "风格"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_1
+msgid "Style 1"
+msgstr "风格1"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_10
+msgid "Style 10"
+msgstr "风格10."
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_11
+msgid "Style 11"
+msgstr "风格11."
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_2
+msgid "Style 2"
+msgstr "风格2"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_3
+msgid "Style 3"
+msgstr "风格3."
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_4
+msgid "Style 4"
+msgstr "风格4."
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_5
+msgid "Style 5"
+msgstr "风格5."
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_6
+msgid "Style 6"
+msgstr "风格6."
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_7
+msgid "Style 7"
+msgstr "风格7."
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_8
+msgid "Style 8"
+msgstr "风格8."
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_9
+msgid "Style 9"
+msgstr "风格9."
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_tumblr
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_tumblr
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Tumblr"
+msgstr "tumblr."
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_twitter
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_twitter
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Twitter"
+msgstr "推特"
+
+#. module: sh_product_social_sharing
+#: model:ir.model,name:sh_product_social_sharing.model_website
+msgid "Website"
+msgstr "网站"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_whatsapp
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_whatsapp
+msgid "WhatsApp"
+msgstr "whatsapp."
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Whatsapp"
+msgstr "whatsapp."
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "digg"
+msgstr "掘客"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "envelope"
+msgstr "信封"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "tumblr"
+msgstr "tumblr."

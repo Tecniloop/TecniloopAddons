@@ -1,0 +1,572 @@
+/*social btn design_1*/
+#sh_socialbtn_design_1{padding: 20px 0px;}
+#sh_socialbtn_design_1 h5{margin-left: 5px;font-weight: bold;}
+#sh_socialbtn_design_1 h3.title{padding: 20px 0px;font-size: 30px;text-align: center;}
+#sh_socialbtn_design_1 ul li{display: inline-block;}
+#sh_socialbtn_design_1 ul li span{font-size: 20px;}
+#sh_socialbtn_design_1 ul.social-network {list-style: none;display: inline;justify-content: center;text-align: center;padding: 0px;margin: 0px;}
+#sh_socialbtn_design_1 ul.social-network li {display: inline;margin: 0 2px;}
+#sh_socialbtn_design_1 .social-network a.icoYt:hover {background-color: #e52d27 ;}
+#sh_socialbtn_design_1 .social-network a.icoFacebook:hover {background-color:#3B5998;}
+#sh_socialbtn_design_1 .social-network a.icoTwitter:hover {background-color:#2caae1;}
+#sh_socialbtn_design_1 .social-network a.icoLinkedin:hover {background-color:#007bb6;}
+#sh_socialbtn_design_1 .social-network a.icoWhatsapp:hover {background-color:#24d046;}
+#sh_socialbtn_design_1 .social-network a.icoEnvelope:hover {background-color:#de4e43;}
+#sh_socialbtn_design_1 .social-network a.icoPinterest:hover {background-color:#cb2027;}
+#sh_socialbtn_design_1 .social-network a.icoReddit:hover {background-color:#ff4502;}
+#sh_socialbtn_design_1 .social-network a.icoHacker:hover {background-color:#fe6500;}
+#sh_socialbtn_design_1 .social-circle li a {display:inline-block;position:relative;margin:0 auto 0 auto;-moz-border-radius:50%;-webkit-border-radius:50%;border-radius:50%;text-align:center;width: 32px;height: 32px;font-size:15px;background-color: #1f2027;margin-top: 10px;}
+#sh_socialbtn_design_1 .social-circle li i {margin:0;line-height:32px;text-align: center;}
+#sh_socialbtn_design_1 .social-circle li a:hover i,#sh_socialbtn_design_1 .triggeredHover {-moz-transform: rotate(360deg);-webkit-transform: rotate(360deg);-ms--transform: rotate(360deg);transform: rotate(360deg);-webkit-transition: all 3.2s;-moz-transition: all 0.2s;-o-transition: all 0.2s;-ms-transition: all 0.2s;transition: all 0.8s;}
+#sh_socialbtn_design_1 .social-circle i {color: #fff;-webkit-transition: all 0.8s;-moz-transition: all 0.8s;-o-transition: all 0.8s;-ms-transition: all 0.8s;transition: all 0.8s;}
+@media (max-width: 375px){
+	#sh_socialbtn_design_1 ul li span{font-size: 13px;width: 100%;display: block;}
+	#sh_socialbtn_design_1 ul.social-network {list-style: none;display: inline-block;justify-content: center;text-align: center;}
+	#sh_socialbtn_design_1 ul.social-network li {display: inline-block;margin: 0 0px;}
+	#sh_socialbtn_design_1 .social-circle li a {display:inline-block;position:relative;margin:0 auto 0 auto;-moz-border-radius:50%;-webkit-border-radius:50%;border-radius:50%;text-align:center;width: 20px;height: 20px;font-size:10px;background-color: #1f2027;}
+	#sh_socialbtn_design_1 .social-circle li i {margin:0;line-height:18px;text-align: center;}
+}
+@media (max-width: 360px){
+	#sh_socialbtn_design_1 ul li span{font-size: 13px;width: 100%;display: block;}
+	#sh_socialbtn_design_1 ul.social-network {list-style: none;display: inline-block;justify-content: center;text-align: center;}
+	#sh_socialbtn_design_1 ul.social-network li {display: inline-block;margin: 0 0px;}
+	#sh_socialbtn_design_1 .social-circle li a {display:inline-block;position:relative;margin:0 auto 0 auto;-moz-border-radius:50%;-webkit-border-radius:50%;border-radius:50%;text-align:center;width: 20px;height: 20px;font-size:10px;background-color: #1f2027;}
+	#sh_socialbtn_design_1 .social-circle li i {margin:0;line-height:18px;text-align: center;}
+}
+@media (max-width: 414px){
+	#sh_socialbtn_design_1 ul li span{font-size: 13px;width: 100%;display: block;}
+	#sh_socialbtn_design_1 ul.social-network {list-style: none;display: inline-block;justify-content: center;text-align: center;}
+	#sh_socialbtn_design_1 ul.social-network li {display: inline-block;margin: 0 0px;}
+	#sh_socialbtn_design_1 .social-circle li a {display:inline-block;position:relative;margin:0 auto 0 auto;-moz-border-radius:50%;-webkit-border-radius:50%;border-radius:50%;text-align:center;width: 20px;height: 20px;font-size:10px;background-color: #1f2027;}
+	#sh_socialbtn_design_1 .social-circle li i {margin:0;line-height:18px;text-align: center;}
+}
+@media (max-width: 320px){
+	#sh_socialbtn_design_1 ul li span{font-size: 13px;width: 100%;display: block;margin-bottom: 5px;}
+	#sh_socialbtn_design_1 ul.social-network {list-style: none;display: block;}
+	#sh_socialbtn_design_1 ul.social-network li {margin: 0 2px;}
+	#sh_socialbtn_design_1 .social-circle li a {position:relative;margin:0 auto;-moz-border-radius:50%;-webkit-border-radius:50%;border-radius:50%;text-align:center;width: 30px;height: 30px;font-size:15px;background-color: #1f2027;}
+	#sh_socialbtn_design_1 .social-circle li i {margin:0;line-height:29px;text-align: center;font-size: 13px;}
+}
+
+
+/*social btn design_2*/
+
+#sh_socialbtn_design_2{padding: 20px 0px;}
+#sh_socialbtn_design_2 h3.title{padding: 20px 0px;font-size: 30px;text-align: center;}
+#sh_socialbtn_design_2 h5{margin-left: 1px;font-weight: bold;}
+#sh_socialbtn_design_2 ul li b{font-size: 1.3rem;line-height: 2.6rem;}
+#sh_socialbtn_design_2 ul.social-network {list-style: none;display: inline-block;padding: 0px;margin: 0px;}
+#sh_socialbtn_design_2 ul.social-network li {display: inline-block;margin: 0 2px;}
+#sh_socialbtn_design_2 .icon-button {background-color: white;border-radius: 2.6rem;cursor: pointer;display: inline-block;font-size: 1.2rem;height: 2.6rem;line-height: 2.6rem;margin: 0 0px;position: relative;text-align: center;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;width: 2.0rem;}
+/* Circle */
+#sh_socialbtn_design_2 .icon-button span {border-radius: 0;display: block;height: 0;left: 50%;margin: 0;position: absolute;top: 50%;-webkit-transition: all 0.3s;-moz-transition: all 0.3s;-o-transition: all 0.3s;transition: all 0.3s;width: 0;}
+#sh_socialbtn_design_2 .icon-button:hover span {width: 2.6rem;height: 2.6rem;border-radius: 2.6rem;margin: -1.3rem;}
+/* Icons */
+#sh_socialbtn_design_2 .icon-button i {background: none;color: white;height: 2.6rem;left: 0;line-height: 2.6rem;position: absolute;top: 0;-webkit-transition: all 0.3s;-moz-transition: all 0.3s;-o-transition: all 0.3s;transition: all 0.3s;width: 2.0rem;z-index: 10;}
+#sh_socialbtn_design_2 .social-network a.icoYt span {background-color: #e52d27 ;}
+#sh_socialbtn_design_2 .social-network a.icoFacebook span {background-color:#3B5998;}
+#sh_socialbtn_design_2 .social-network a.icoTwitter span {background-color:#2caae1;}
+#sh_socialbtn_design_2 .social-network a.icoLinkedin span {background-color:#007bb6;}
+#sh_socialbtn_design_2 .social-network a.icoWhatsapp span {background-color:#24d046;}
+#sh_socialbtn_design_2 .social-network a.icoEnvelope span {background-color:#de4e43;}
+#sh_socialbtn_design_2 .social-network a.icoPinterest span {background-color:#cb2027;}
+#sh_socialbtn_design_2 .social-network a.icoReddit span {background-color:#ff4502;}
+#sh_socialbtn_design_2 .social-network a.icoDigg span {background-color:#414141;}
+#sh_socialbtn_design_2 .social-network a.icoTumblr span {background-color:#314358;}
+#sh_socialbtn_design_2 .social-network a.icoHacker span{background-color:#fe6500;}
+
+#sh_socialbtn_design_2 .icon-button .fa-twitter {color: #2caae1;}
+#sh_socialbtn_design_2 .icon-button .fa-facebook {color: #3B5998;}
+#sh_socialbtn_design_2 .icon-button .fa-whatsapp {color: #24d046;}
+#sh_socialbtn_design_2 .icon-button .fa-tumblr {color: #314358;}
+#sh_socialbtn_design_2 .icon-button .fa-youtube {color: #e52d27;}
+#sh_socialbtn_design_2 .icon-button .fa-pinterest-p {color: #cb2027;}
+#sh_socialbtn_design_2 .icon-button .fa-linkedin {color: #007bb6;}
+#sh_socialbtn_design_2 .icon-button .fa-envelope {color: #de4e43;}
+#sh_socialbtn_design_2 .icon-button .fa-reddit-alien {color: #ff4502;}
+#sh_socialbtn_design_2 .icon-button .fa-digg {color: #414141;}
+#sh_socialbtn_design_2 .icon-button .fa-hacker-news {color: #fe6500;}
+
+#sh_socialbtn_design_2 .icon-button:hover .fa-twitter,
+#sh_socialbtn_design_2 .icon-button:hover .fa-facebook,
+#sh_socialbtn_design_2 .icon-button:hover .fa-whatsapp,
+#sh_socialbtn_design_2 .icon-button:hover .fa-tumblr,
+#sh_socialbtn_design_2 .icon-button:hover .fa-youtube,
+#sh_socialbtn_design_2 .icon-button:hover .fa-pinterest-p,
+#sh_socialbtn_design_2 .icon-button:hover .fa-linkedin,
+#sh_socialbtn_design_2 .icon-button:hover .fa-envelope,
+#sh_socialbtn_design_2 .icon-button:hover .fa-reddit-alien,
+#sh_socialbtn_design_2 .icon-button:hover .fa-digg,
+#sh_socialbtn_design_2 .icon-button:hover .fa-hacker-news {color: white;}
+@media(max-width: 375px){
+	#sh_socialbtn_design_2 ul{text-align: center;}
+	#sh_socialbtn_design_2 .icon-button {background-color: white;border-radius: 2.6rem;cursor: pointer;display: inline-block;font-size: 1.2rem;height: 2.6rem;line-height: 2.6rem;margin: 0 0px;position: relative;text-align: center;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;width: 3rem;}
+	#sh_socialbtn_design_2 .icon-button i {background: none;color: white;height: 2.6rem;left: 0;line-height: 2.6rem;position: absolute;top: 0;-webkit-transition: all 0.3s;-moz-transition: all 0.3s;-o-transition: all 0.3s;transition: all 0.3s;width: 3rem;z-index: 10;}
+}
+@media(max-width: 414px){
+	#sh_socialbtn_design_2 ul{text-align: center;}
+	#sh_socialbtn_design_2 .icon-button {background-color: white;border-radius: 2.6rem;cursor: pointer;display: inline-block;font-size: 1.2rem;height: 2.6rem;line-height: 2.6rem;margin: 0 0px;position: relative;text-align: center;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;width: 3rem;}
+	#sh_socialbtn_design_2 .icon-button i {background: none;color: white;height: 2.6rem;left: 0;line-height: 2.6rem;position: absolute;top: 0;-webkit-transition: all 0.3s;-moz-transition: all 0.3s;-o-transition: all 0.3s;transition: all 0.3s;width: 3rem;z-index: 10;}
+}
+@media(max-width: 320px){
+	#sh_socialbtn_design_2 .icon-button {background-color: white;border-radius: 2.6rem;cursor: pointer;display: inline-block;font-size: 1.2rem;height: 2.6rem;line-height: 2.6rem;margin: 0 0px;position: relative;text-align: center;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;width: 2.4rem;}
+	#sh_socialbtn_design_2 .icon-button i {background: none;color: white;height: 2.6rem;left: 0;line-height: 2.6rem;position: absolute;top: 0;-webkit-transition: all 0.3s;-moz-transition: all 0.3s;-o-transition: all 0.3s;transition: all 0.3s;width: 2.4rem;z-index: 10;}
+}
+
+
+
+
+/*socialbtn design-3*/
+#sh_socialbtn_design_3 i{color:gray;}
+#sh_socialbtn_design_3 h3.title{padding: 20px 0px;font-size: 30px;text-align: center;}
+#sh_socialbtn_design_3{margin: 20px 0px 30px 0px;}
+#sh_socialbtn_design_3 h5{margin-left: 1px;font-weight: bold;font-size: 20px;padding-bottom: 0px;}
+#sh_socialbtn_design_3 span{font-size: 18px;font-weight: bold;}
+#sh_socialbtn_design_3 .facebook,
+#sh_socialbtn_design_3 .twitter,
+#sh_socialbtn_design_3 .whatsapp,
+#sh_socialbtn_design_3 .linkedin,
+#sh_socialbtn_design_3 .pinterest,
+#sh_socialbtn_design_3 .envelope,
+#sh_socialbtn_design_3 .digg,
+#sh_socialbtn_design_3 .tumblr,
+#sh_socialbtn_design_3 .reddit-alien,
+#sh_socialbtn_design_3 .hacker-news{width:40px;height:40px;position: relative;display: inline-block;font-size: 22px;text-align: center;border:1px gray solid;border-radius:50%;cursor: pointer;padding-top: 2px;margin:0 3px;padding-top:0;line-height: 40px;margin-top: 10px;}
+#sh_socialbtn_design_3 .facebook .facebooktext{visibility: hidden;width: 80px;background-color: black;color: #fff;text-align: center;border-radius: 2px;padding: 5px 0;position: absolute;z-index: 1;top: 135%;left: 81%;margin-left: -54px;font-size: 15px;}
+#sh_socialbtn_design_3 .facebook .facebooktext::after {content: "";position: absolute;bottom: 100%;left: 50%;margin-left: -5px;border-width: 8px;border-style: solid;border-color: transparent transparent black transparent;}
+#sh_socialbtn_design_3 .facebook:hover .fa-facebook,#sh_socialbtn_design_3 .hacker-news:hover .fa-hacker-news,#sh_socialbtn_design_3 .reddit-alien:hover .fa-reddit-alien,#sh_socialbtn_design_3 .tumblr:hover .fa-tumblr,#sh_socialbtn_design_3 .digg:hover .fa-digg,#sh_socialbtn_design_3 .envelope:hover .fa-envelope,#sh_socialbtn_design_3 .pinterest:hover .fa-pinterest,#sh_socialbtn_design_3 .linkedin:hover .fa-linkedin,#sh_socialbtn_design_3 .twitter:hover .fa-twitter,#sh_socialbtn_design_3 .twitter:hover .twittertext{color: white;}
+#sh_socialbtn_design_3 .facebook:hover,#sh_socialbtn_design_3 .hacker-news:hover,#sh_socialbtn_design_3 .reddit-alien:hover,#sh_socialbtn_design_3 .tumblr:hover,#sh_socialbtn_design_3 .digg:hover,#sh_socialbtn_design_3 .envelope:hover,#sh_socialbtn_design_3 .pinterest:hover,#sh_socialbtn_design_3 .linkedin:hover,#sh_socialbtn_design_3 .whatsapp:hover,#sh_socialbtn_design_3 .twitter:hover{background: black;}
+#sh_socialbtn_design_3 .facebook:hover .facebooktext,#sh_socialbtn_design_3 .hacker-news:hover .hacker-newstext,#sh_socialbtn_design_3 .reddit-alien:hover .reddit-alientext,#sh_socialbtn_design_3 .tumblr:hover .tumblrtext,#sh_socialbtn_design_3 .digg:hover .diggtext,#sh_socialbtn_design_3 .envelope:hover .envelopetext,#sh_socialbtn_design_3 .pinterest:hover .pinteresttext,#sh_socialbtn_design_3 .linkedin:hover .linkedintext,#sh_socialbtn_design_3 .whatsapp:hover .whatsapptext,#sh_socialbtn_design_3 .twitter:hover .twittertext {visibility: visible;}
+#sh_socialbtn_design_3 .twitter .twittertext{visibility: hidden;width: 80px;background-color: black;color: #fff;text-align: center;border-radius: 2px;padding: 5px 0;position: absolute;z-index: 1;top: 135%;left: 81%;margin-left: -54px;font-size: 15px;}
+#sh_socialbtn_design_3 .twitter .twittertext::after {content: "";position: absolute;bottom: 100%;left: 50%;margin-left: -5px;border-width: 8px;border-style: solid;border-color: transparent transparent black transparent;}
+#sh_socialbtn_design_3 .whatsapp .whatsapptext{visibility: hidden;width: 80px;background-color: black;color: #fff;text-align: center;border-radius: 2px;padding: 5px 0;position: absolute;z-index: 1;top: 135%;left: 80%;margin-left: -54px;font-size: 15px;}
+#sh_socialbtn_design_3 .whatsapp .whatsapptext::after {content: "";position: absolute;bottom: 100%;left: 50%;margin-left: -5px;border-width: 8px;border-style: solid;border-color: transparent transparent black transparent;}
+#sh_socialbtn_design_3 .linkedin .linkedintext{visibility: hidden;width: 80px;background-color: black;color: #fff;text-align: center;border-radius: 2px;padding: 5px 0;position: absolute;z-index: 1;top: 135%;left: 80%;margin-left: -54px;font-size: 15px;}
+#sh_socialbtn_design_3 .linkedin .linkedintext::after {content: "";position: absolute;bottom: 100%;left: 50%;margin-left: -5px;border-width: 8px;border-style: solid;border-color: transparent transparent black transparent;}
+#sh_socialbtn_design_3 .pinterest .pinteresttext{visibility: hidden;width: 80px;background-color: black;color: #fff;text-align: center;border-radius: 2px;padding: 5px 0;position: absolute;z-index: 1;top: 135%;left: 80%;margin-left: -54px;font-size: 15px;}
+#sh_socialbtn_design_3 .pinterest .pinteresttext::after {content: "";position: absolute;bottom: 100%;left: 50%;margin-left: -5px;border-width: 8px;border-style: solid;border-color: transparent transparent black transparent;}
+#sh_socialbtn_design_3 .envelope .envelopetext{visibility: hidden;width: 80px;background-color: black;color: #fff;text-align: center;border-radius: 2px;padding: 5px 0;position: absolute;z-index: 1;top: 135%;left: 110%;margin-left: -65px;font-size: 15px;}
+#sh_socialbtn_design_3 .envelope .envelopetext::after {content: "";position: absolute;bottom: 100%;left: 50%;margin-left: -5px;border-width: 8px;border-style: solid;border-color: transparent transparent black transparent;}
+#sh_socialbtn_design_3 .digg .diggtext{visibility: hidden;width: 80px;background-color: black;color: #fff;text-align: center;border-radius: 2px;padding: 5px 0;position: absolute;z-index: 1;top: 135%;left: 110%;margin-left: -65px;font-size: 15px;}
+#sh_socialbtn_design_3 .digg .diggtext::after {content: "";position: absolute;bottom: 100%;left: 50%;margin-left: -5px;border-width: 8px;border-style: solid;border-color: transparent transparent black transparent;}
+#sh_socialbtn_design_3 .tumblr .tumblrtext{visibility: hidden;width: 80px;background-color: black;color: #fff;text-align: center;border-radius: 2px;padding: 5px 0;position: absolute;z-index: 1;top: 135%;left: 110%;margin-left: -65px;font-size: 15px;}
+#sh_socialbtn_design_3 .tumblr .tumblrtext::after {content: "";position: absolute;bottom: 100%;left: 50%;margin-left: -5px;border-width: 8px;border-style: solid;border-color: transparent transparent black transparent;}
+#sh_socialbtn_design_3 .reddit-alien .reddit-alientext{visibility: hidden;width: 80px;background-color: black;color: #fff;text-align: center;border-radius: 2px;padding: 5px 0;position: absolute;z-index: 1;top: 135%;left: 81%;margin-left: -55px;font-size: 15px;}
+#sh_socialbtn_design_3 .reddit-alien .reddit-alientext::after {content: "";position: absolute;bottom: 100%;left: 50%;margin-left: -5px;border-width: 8px;border-style: solid;border-color: transparent transparent black transparent;}		
+#sh_socialbtn_design_3 .hacker-news .hacker-newstext{visibility: hidden;width: 80px;background-color: black;color: #fff;text-align: center;border-radius: 2px;padding: 5px 0;position: absolute;z-index: 1;top: 135%;left: 70%;margin-left: -51px;font-size: 15px;}
+#sh_socialbtn_design_3 .hacker-news .hacker-newstext::after {content: "";position: absolute;bottom: 100%;left: 50%;margin-left: -5px;border-width: 8px;border-style: solid;border-color: transparent transparent black transparent;}		
+@media (max-width: 767px){
+	#sh_socialbtn_design_3 .facebook,
+	#sh_socialbtn_design_3 .twitter,
+	#sh_socialbtn_design_3 .whatsapp,
+	#sh_socialbtn_design_3 .linkedin,
+	#sh_socialbtn_design_3 .pinterest,
+	#sh_socialbtn_design_3 .envelope,
+	#sh_socialbtn_design_3 .digg,
+	#sh_socialbtn_design_3 .tumblr,
+	#sh_socialbtn_design_3 .reddit-alien,
+	#sh_socialbtn_design_3 .hacker-news{width:30px;height:30px;position: relative;display: inline-block;font-size: 16px;text-align: center;border:1px gray solid;border-radius:50%;cursor: pointer;padding-top: 2px;margin:0 3px;line-height: 26px !important;}
+}
+@media (max-width: 375px){
+	#sh_socialbtn_design_3 .row{justify-content: center;text-align: center;}
+	#sh_socialbtn_design_3 .facebook,
+	#sh_socialbtn_design_3 .twitter,
+	#sh_socialbtn_design_3 .whatsapp,
+	#sh_socialbtn_design_3 .linkedin,
+	#sh_socialbtn_design_3 .pinterest,
+	#sh_socialbtn_design_3 .envelope,
+	#sh_socialbtn_design_3 .digg,
+	#sh_socialbtn_design_3 .tumblr,
+	#sh_socialbtn_design_3 .reddit-alien,
+	#sh_socialbtn_design_3 .hacker-news{width:40px;height:40px;position: relative;display: inline-block;font-size: 22px;text-align: center;border:1px gray solid;border-radius:50%;cursor: pointer;padding-top: 2px;margin:5px;}
+}
+@media (max-width: 414px){
+	#sh_socialbtn_design_3 .facebook,
+	#sh_socialbtn_design_3 .twitter,
+	#sh_socialbtn_design_3 .whatsapp,
+	#sh_socialbtn_design_3 .linkedin,
+	#sh_socialbtn_design_3 .pinterest,
+	#sh_socialbtn_design_3 .envelope,
+	#sh_socialbtn_design_3 .digg,
+	#sh_socialbtn_design_3 .tumblr,
+	#sh_socialbtn_design_3 .reddit-alien,
+	#sh_socialbtn_design_3 .hacker-news{width:40px;height:40px;position: relative;display: inline-block;font-size: 22px;text-align: center;border:1px gray solid;border-radius:50%;cursor: pointer;padding-top: 2px;margin:5px;line-height: 35px !important;}
+	#sh_socialbtn_design_3 .row{justify-content: center;text-align: center;}
+}
+
+
+/*social btn design-4*/
+#sh_socialbtn_design_4 {margin: 10px 0px;}
+#sh_socialbtn_design_4 .col{padding: 5px;}
+#sh_socialbtn_design_4 ul{padding: 0px;margin: 0px;}
+#sh_socialbtn_design_4 ul li{list-style-type: none;display: inline-block;}
+#sh_socialbtn_design_4 ul li a{text-decoration: none;color: #fff;display: block !important;width: auto !important;height: 40px !important;margin-bottom: 5px;}
+#sh_socialbtn_design_4 ul li i{padding-right: 8px;}
+#sh_socialbtn_design_4 ul li span{font-weight: bold;}
+#sh_socialbtn_design_4 h3.title{padding: 20px 0px;font-size: 30px;text-align: center;}
+#sh_socialbtn_design_4 h4{font-weight: bold;}
+#sh_socialbtn_design_4 h5{margin-left: 0px;font-weight: bold;font-size: 20px;padding-bottom: 10px;}
+#sh_socialbtn_design_4 .facebook,
+#sh_socialbtn_design_4 .whatsapp,
+#sh_socialbtn_design_4 .pinterest,
+#sh_socialbtn_design_4 .plus,
+#sh_socialbtn_design_4 .twitter,
+#sh_socialbtn_design_4 .envelope,
+#sh_socialbtn_design_4 .reddit-alien,
+#sh_socialbtn_design_4 .hacker-news{width: 100%;background:gray;cursor: pointer;padding: 0px 12px;font-size: 15px;display: inline-block;  line-height: 40px; }
+
+#sh_socialbtn_design_4 ul li a.linkedin{background: #0271ae;padding: 0px 12px; line-height: 40px; }
+#sh_socialbtn_design_4 ul li a.digg{background: #2a2a2a;padding: 0px 12px; line-height: 40px; }
+#sh_socialbtn_design_4 ul li a.tumblr{background: #000;padding: 0px 12px; line-height: 40px; }
+#sh_socialbtn_design_4 br{display: none;}
+
+
+#sh_socialbtn_design_4 .facebook{background:#3b5998;	}
+#sh_socialbtn_design_4 .facebook:hover{background:#21499D;	}
+#sh_socialbtn_design_4 .twitter{background:#00acee;	}
+#sh_socialbtn_design_4 .twitter:hover{background:#03A2DF;	}
+#sh_socialbtn_design_4 .whatsapp{background:#4FCE5D;	}
+#sh_socialbtn_design_4 .whatsapp:hover{background:#1ECC31;	}
+#sh_socialbtn_design_4 .pinterest{background:#c8232c;	}
+#sh_socialbtn_design_4 .pinterest:hover{background:#c8232c;	}
+#sh_socialbtn_design_4 .facebook a,
+#sh_socialbtn_design_4 .whatsapp a,
+#sh_socialbtn_design_4 .twitter a,
+#sh_socialbtn_design_4 .pinterest a,
+#sh_socialbtn_design_4 .linkedin a{color:white;text-decoration:none; }
+#sh_socialbtn_design_4 .facebook a i,
+#sh_socialbtn_design_4 .whatsapp a i,
+#sh_socialbtn_design_4 .twitter a i,
+#sh_socialbtn_design_4 .pinterest a i,
+#sh_socialbtn_design_4 .linkedin a i{margin-right:15px;color:white;}
+#sh_socialbtn_design_4 .plus{width:40px;height:42px;text-align: center;background: lightgray;cursor: pointer;}
+#sh_socialbtn_design_4 .plus a i{color:black;margin-top: 10px;font-size: 20px;}
+#sh_socialbtn_design_4 .ul{margin-top :2px;margin: 0px;}
+#sh_socialbtn_design_4 .ul li{text-decoration: none;list-style-type: none;display: inline-block;color: white;    vertical-align: middle;}
+#sh_socialbtn_design_4 .ul .linkedin{background: #0e76a8;width:250px;padding: 9px 20px;cursor: pointer;}
+#sh_socialbtn_design_4 .ul .linkedin:hover{background: #0C6793;}
+#sh_socialbtn_design_4 .ul .envelope{background: #db4a39;width:250px;padding: 9px 20px;cursor: pointer;}
+#sh_socialbtn_design_4 .ul .envelope:hover{background:#C42816;}
+#sh_socialbtn_design_4 .ul .envelope a{color:white;text-decoration:none; }
+#sh_socialbtn_design_4 .ul .envelope a i{margin-right:15px;color:white;}
+#sh_socialbtn_design_4 .ul .reddit-alien{background: #0077D6;width:250px;padding: 9px 20px;cursor: pointer;}
+#sh_socialbtn_design_4 .ul .reddit-alien:hover{background:#046BBD;}
+#sh_socialbtn_design_4 .ul .reddit-alien a{color:white;text-decoration:none; }
+#sh_socialbtn_design_4 .ul .reddit-alien a i{margin-right:15px;color:white;}
+#sh_socialbtn_design_4 .ul .hacker-news{background: #ff6600;width:250px;padding: 9px 20px;cursor: pointer;}
+#sh_socialbtn_design_4 .ul .hacker-news:hover{background: #B74D06;}
+#sh_socialbtn_design_4 .ul .hacker-news a{color:white;text-decoration:none; }
+#sh_socialbtn_design_4 .ul .hacker-news a i{margin-right:15px;color:white;}
+
+#sh_socialbtn_design_4 a.reddit-alien{width: 100%;background: #ff4502;cursor: pointer;padding: 0px 12px;font-size: 15px;display: inline-block;line-height: 40px;}
+#sh_socialbtn_design_4 a.envelope{background: #de4e43;}
+#sh_socialbtn_design_4 .hacker-news{background: #fe6500;}
+#sh_socialbtn_design_4 a.digg{background: #414141;}
+#sh_socialbtn_design_4 a.tumblr{background: #314358;}
+
+#sh_socialbtn_design_4 #sh_prod_social_sharing_show_more_div{display: inline-block;padding: 0 12px;background: #333;line-height: 40px;}
+#sh_socialbtn_design_4 #sh_prod_social_sharing_show_more_div a{color: #fff;display: block;}
+
+
+
+
+
+
+/*socialbtn design-5*/
+#sh_socialbtn_design_5 h3.title{padding: 20px 0px;font-size: 30px;text-align: center;}
+#sh_socialbtn_design_5 h5{margin-left: 5px;font-weight: bold;font-size: 20px;margin: 10px 0 0;}
+#sh_socialbtn_design_5 .fb_share_style_3,
+#sh_socialbtn_design_5 .in_share_style_3,
+#sh_socialbtn_design_5 .wp_share_style_3,
+#sh_socialbtn_design_5 .twi_share_style_3,
+#sh_socialbtn_design_5 .pin_share_style_3,
+#sh_socialbtn_design_5 .gp_share_style_3,
+#sh_socialbtn_design_5 .mail_share_style_3,
+#sh_socialbtn_design_5 .redali_share_style_3,
+#sh_socialbtn_design_5 .heknew_share_style_3,
+#sh_socialbtn_design_5 .digg_share_style_3,
+#sh_socialbtn_design_5 .tumblr_share_style_3{width:35px;height:35px;border:1px gray solid;border-radius: 5px;display: inline-block;margin:0px 2px;cursor: pointer;margin-top:1px;transition: 0.6s;}
+#sh_socialbtn_design_5 .fb_share_style_3:hover{background:#3b5998;border-color:#3b5998;}
+#sh_socialbtn_design_5 .fb_share_style_3:hover a i{color:white;}
+#sh_socialbtn_design_5 .in_share_style_3:hover{background:#0e76a8;border-color:#0e76a8;}
+#sh_socialbtn_design_5 .in_share_style_3:hover a i{color:white;}
+#sh_socialbtn_design_5 .wp_share_style_3:hover{background:#4FCE5D;border-color:#4FCE5D;}
+#sh_socialbtn_design_5 .wp_share_style_3:hover a i{color:white;}
+#sh_socialbtn_design_5 .twi_share_style_3:hover{background:#03A2DF;border-color:#03A2DF;}
+#sh_socialbtn_design_5 .twi_share_style_3:hover a i{color:white;}
+#sh_socialbtn_design_5 .pin_share_style_3:hover{background:#c8232c;border-color:#c8232c;}
+#sh_socialbtn_design_5 .pin_share_style_3:hover a i{color:white;}
+#sh_socialbtn_design_5 .digg_share_style_3:hover{background:#414141;border-color:#414141;}
+#sh_socialbtn_design_5 .digg_share_style_3:hover a i{color:white;}
+#sh_socialbtn_design_5 .gp_share_style_3:hover{background:#db4a39;border-color:#db4a39;}
+#sh_socialbtn_design_5 .gp_share_style_3:hover a i{color:white;}
+#sh_socialbtn_design_5 .mail_share_style_3:hover{background:#B23121;border-color:#B23121;}
+#sh_socialbtn_design_5 .mail_share_style_3:hover a i{color:white;}
+#sh_socialbtn_design_5 .redali_share_style_3:hover{background:#ff4502;border-color:#ff4502;}
+#sh_socialbtn_design_5 .redali_share_style_3:hover a i{color:white;}
+#sh_socialbtn_design_5 .heknew_share_style_3:hover{background:#ff6600;border-color:#ff6600;}
+#sh_socialbtn_design_5 .heknew_share_style_3:hover a i{color:white;}
+#sh_socialbtn_design_5 .tumblr_share_style_3:hover{background:#34526f;border-color:#34526f;}
+#sh_socialbtn_design_5 .tumblr_share_style_3:hover a i{color:white;}
+#sh_socialbtn_design_5 .fb_share_style_3 a i,
+#sh_socialbtn_design_5 .in_share_style_3 a i,
+#sh_socialbtn_design_5 .wp_share_style_3 a i,
+#sh_socialbtn_design_5 .twi_share_style_3 a i,
+#sh_socialbtn_design_5 .pin_share_style_3 a i,
+#sh_socialbtn_design_5 .gp_share_style_3 a i,
+#sh_socialbtn_design_5 .mail_share_style_3 a i,
+#sh_socialbtn_design_5 .redali_share_style_3 a i,
+#sh_socialbtn_design_5 .heknew_share_style_3 a i,
+#sh_socialbtn_design_5 .digg_share_style_3 a i,
+#sh_socialbtn_design_5 .tumblr_share_style_3 a i{position: relative;top: 45%;left:50%;transform: translate(-45%,-50%);font-size: 18px;color:gray;}
+@media (max-width: 767px){
+#sh_socialbtn_design_5 .fb_share_style_3 a i,
+#sh_socialbtn_design_5 .in_share_style_3 a i,
+#sh_socialbtn_design_5 .wp_share_style_3 a i,
+#sh_socialbtn_design_5 .twi_share_style_3 a i,
+#sh_socialbtn_design_5 .gp_share_style_3 a i{position: relative;top: 45%;left:50%;transform: translate(-45%,-50%) !important;font-size: 18px;}
+#sh_socialbtn_design_5 .tumblr_share_style_3 a i,
+#sh_socialbtn_design_5 .redali_share_style_3 a i,
+#sh_socialbtn_design_5 .heknew_share_style_3 a i,
+#sh_socialbtn_design_5 .digg_share_style_3 a i,
+#sh_socialbtn_design_5 .pin_share_style_3 a i,
+#sh_socialbtn_design_5 .mail_share_style_3 a i{position: relative;top: 40%;left:45%;transform: translate(-40%,-45%) !important;font-size: 18px;}
+
+}
+@media (max-width: 375px){
+	#sh_socialbtn_design_5 a{text-align: center;}
+}
+
+
+/*socialbtn design-6*/
+#sh_socialbtn_design_6{padding: 20px 0px;}
+#sh_socialbtn_design_6 h5{margin-left: 0px;font-weight: bold;font-size: 20px;margin-bottom: 0px;}
+#sh_socialbtn_design_6 h3.title{padding: 20px 0px;font-size: 30px;text-align: center;}
+#sh_socialbtn_design_6 ul li{display: inline-block;list-style-type: none;margin-top: 10px;}
+#sh_socialbtn_design_6 ul li a{text-decoration: none;color: #fff;}
+#sh_socialbtn_design_6 ul{padding: 0px;margin: 0px;}
+#sh_socialbtn_design_6 .icon-link {width: 30px;height: 30px;line-height: 30px;text-align: center;vertical-align: middle;display: inline-block;cursor: pointer;outline: none;margin: 1px;box-sizing:content-box;}
+#sh_socialbtn_design_6 .facebook{background: #3b5998;border:2px solid #3b5998;}
+#sh_socialbtn_design_6 .twitter{background: #00aced;border:2px solid #00aced;}
+#sh_socialbtn_design_6 .linkedin{background: #007bb6;border:2px solid #007bb6;}
+#sh_socialbtn_design_6 .whatsapp{background: #24d046;border:2px solid #24d046;}
+#sh_socialbtn_design_6 .envelope{background: #de4e43;border:2px solid #de4e43;}
+#sh_socialbtn_design_6 .pinterest{background: #b81621;border:2px solid #b81621;}
+#sh_socialbtn_design_6 .reddit{background: #8bbbe3;border:2px solid #8bbbe3;}
+#sh_socialbtn_design_6 .digg{background: #414141;border:2px solid #414141;}
+#sh_socialbtn_design_6 .tumblr{background: #314358;border:2px solid #314358;}
+#sh_socialbtn_design_6 .hacker {background: #fe6500;border:2px solid #fe6500;}  
+#sh_socialbtn_design_6 .icon-link:hover {transition: background-color 150ms ease-in-out;height: 30px;line-height: 30px;width: 30px;background-color: #fff;}
+#sh_socialbtn_design_6 .fa {line-height:30px - 2px * 2;}
+#sh_socialbtn_design_6 .facebook:hover i{color: #3b5998;}
+#sh_socialbtn_design_6 .twitter:hover i{color: #00aced;}
+#sh_socialbtn_design_6 .linkedin:hover i{color: #007bb6;}
+#sh_socialbtn_design_6 .whatsapp:hover i{color: #24d046;}
+#sh_socialbtn_design_6 .envelope:hover i{color: #de4e43;}
+#sh_socialbtn_design_6 .pinterest:hover i{color: #b81621;}
+#sh_socialbtn_design_6 .reddit:hover i{color: #8bbbe3;}
+#sh_socialbtn_design_6 .digg:hover i{color: #414141;}
+#sh_socialbtn_design_6 .tumblr:hover i{color: #314358;}
+#sh_socialbtn_design_6 .hacker:hover i{color: #fe6500;}
+@media (max-width: 375px){
+	#sh_socialbtn_design_6 .icon-link{width: 22px;height: 22px;line-height: 22px;}
+}
+@media (max-width: 414px){
+	#sh_socialbtn_design_6 .icon-link{width: 23px;height: 23px;line-height: 23px;}
+}  
+@media (max-width: 320px){
+	#sh_socialbtn_design_6 .icon-link{width: 30px;height: 30px;line-height: 30px;margin: 3px;}
+} 
+@media (max-width: 360px){
+	#sh_socialbtn_design_6 .icon-link{width: 35px;height: 35px;line-height: 35px;margin: 3px;}
+}   
+
+
+/*social btn design-7*/
+#sh_socialbtn_design_7{padding: 20px 0px;}
+#sh_socialbtn_design_7 .row{padding-left: 15px;}
+#sh_socialbtn_design_7 h5{margin-left: 0px;font-weight: bold;font-size: 20px;padding-bottom: 0px;}
+#sh_socialbtn_design_7 h3.title{padding: 20px 0px;font-size: 30px;text-align: center;}
+#sh_socialbtn_design_7 a i{padding: 10px 18px;color:white;font-size: 15px;margin-top: 10px;}
+#sh_socialbtn_design_7 a .fa-facebook{background:#3b5998;border-bottom:5px #244A9B solid;}
+#sh_socialbtn_design_7 a .fa-whatsapp{background:#4FCE5D;border-bottom:5px #40B04C solid;}
+#sh_socialbtn_design_7 a .fa-instagram{background:url('../images/insta.png');background-size: cover;background-position: center; border-bottom:5px #DD2125 solid;}
+#sh_socialbtn_design_7 a .fa-twitter{background:#00acee; border-bottom:5px #0592C8 solid;}
+#sh_socialbtn_design_7 a .fa-linkedin{background:#0077b5; border-bottom:5px #056394 solid;}
+#sh_socialbtn_design_7 a .fa-pinterest{background:#c8232c; border-bottom:5px #B0111A solid;}
+#sh_socialbtn_design_7 a .fa-google-plus{background:#db4a39; border-bottom:5px #B93E30 solid;padding: 10px 17px;}
+#sh_socialbtn_design_7 a .fa-telegram{background:#0088cc; border-bottom:5px #0271A8 solid;}
+#sh_socialbtn_design_7 a .fa-reddit-alien{background:#0077D6; border-bottom:5px #065FA6 solid;}
+#sh_socialbtn_design_7 a .fa-hacker-news{background:#ff6600; border-bottom:5px #D15706 solid;}
+#sh_socialbtn_design_7 a i.fa-envelope{background: #d64c3f;border-bottom: 5px #ad3b31 solid;}
+#sh_socialbtn_design_7 a i.fa-digg{background: #424242;border-bottom: 5px solid #000;}
+#sh_socialbtn_design_7 a i.fa-tumblr{background: #001935;border-bottom: 5px solid #000;}
+
+
+@media (max-width: 375px){
+	#sh_socialbtn_design_7 .row{justify-content: center;padding-left: 0px;}
+}
+@media (max-width: 414px){
+	#sh_socialbtn_design_7 .row{justify-content: center;padding-left: 0px;}
+}
+
+
+/*social btn design-8*/
+#sh_socialbtn_design_8{padding: 20px 0px;}
+#sh_socialbtn_design_8 .pt-2{padding-top: 8px;}
+#sh_socialbtn_design_8 h5{margin-left: 0px;font-weight: bold;font-size: 20px;padding-bottom: 0px;}
+#sh_socialbtn_design_8 .row{padding-left: 15px;padding-top: 0px;} 
+#sh_socialbtn_design_8 h3.title{padding: 20px 0px;font-size: 30px;text-align: center;}
+#sh_socialbtn_design_8 a:hover{text-decoration: none;}
+#sh_socialbtn_design_8 a .fa-plus{padding:10px 20px;background: lightgray;color:black;border-bottom:5px gray solid;}
+#sh_socialbtn_design_8 a i{padding:10px 15px;color:#fff;font-size: 16px;margin-top: 5px;}
+#sh_socialbtn_design_8 a i span{padding-left: 9px;font-size: 15px;font-weight: bold;}
+#sh_socialbtn_design_8 a .fa-facebook{background:#3b5998;border-bottom:5px #244A9B solid;}
+#sh_socialbtn_design_8 a .fa-facebook:hover{background:#1F4596;border-bottom:5px #1F4596 solid;transition: all 0.8s;}
+#sh_socialbtn_design_8 a .fa-whatsapp{background:#4FCE5D;border-bottom:5px #40B04C solid;}
+#sh_socialbtn_design_8 a .fa-whatsapp:hover{background:#25BA35;border-bottom:5px #25BA35 solid;transition: all 0.8s;}
+#sh_socialbtn_design_8 a .fa-twitter{background:#00acee; border-bottom:5px #0592C8 solid;}
+#sh_socialbtn_design_8 a .fa-twitter:hover{background:#0792C8; border-bottom:5px #0792C8 solid;transition: all 0.8s;}
+#sh_socialbtn_design_8 a .fa-linkedin{background:#0077b5; border-bottom:5px #056394 solid;}
+#sh_socialbtn_design_8 a .fa-linkedin:hover{background:#046192; border-bottom:5px #046192 solid;transition: all 0.8s;}
+#sh_socialbtn_design_8 a .fa-pinterest{background:#c8232c; border-bottom:5px #B0111A solid;display: block !important;}
+#sh_socialbtn_design_8 a .fa-pinterest:hover{background:#A8171F; border-bottom:5px #A8171F solid;transition: all 0.8s;}
+#sh_socialbtn_design_8 a .fa-google-plus{background:#db4a39; border-bottom:5px #B93E30 solid;padding: 10px 17px;}
+#sh_socialbtn_design_8 a .fa-google-plus:hover{background:#B02C1C; border-bottom:5px #B02C1C solid;transition: all 0.8s;}
+#sh_socialbtn_design_8 a .fa-telegram{background:#0088cc; border-bottom:5px #0271A8 solid;}
+#sh_socialbtn_design_8 a .fa-telegram:hover{background:#046B9F; border-bottom:5px #046B9F solid;transition: all 0.8s;}
+#sh_socialbtn_design_8 a .fa-reddit-alien{background:#0077D6; border-bottom:5px #065FA6 solid; display: block !important;}
+#sh_socialbtn_design_8 a .fa-reddit-alien:hover{background:#0564AF; border-bottom:5px #0564AF solid;transition: all 0.8s;}
+#sh_socialbtn_design_8 a .fa-hacker-news{background:#ff6600; border-bottom:5px #D15706 solid;display: block !important;}
+#sh_socialbtn_design_8 a .fa-hacker-news:hover{background:#CD5403; border-bottom:5px #CD5403 solid;transition: all 0.8s;}
+
+#sh_socialbtn_design_8 a .fa-envelope{background: #d64c3f;border-bottom: 5px solid #be4237;}
+
+#sh_socialbtn_design_8 a i.fa-digg{background: #424242;border-bottom: 5px solid #000;}
+#sh_socialbtn_design_8 a i.fa-tumblr{background: #001935;border-bottom: 5px solid #000;}
+#sh_socialbtn_design_8 a i.fa-minus{background: #333;border-bottom: 5px #000000 solid;color: #fff;}
+#sh_socialbtn_design_8 a .fa-plus{border: 0;background: #333;border-bottom: 5px #000000 solid;color: #fff;}
+
+
+@media(max-width: 999px){
+	#sh_socialbtn_design_8 a i{padding:5px 10px;font-size: 22px;}
+	#sh_socialbtn_design_8 a .fa-plus{padding:5px 10px;}
+	#sh_socialbtn_design_8 a .fa-google-plus{padding: 5px 17px;}
+}
+@media (max-width: 375px){
+	#sh_socialbtn_design_8 .row{justify-content: center;padding-left: 0px;}
+}
+
+
+
+
+/*social btn design-9*/
+#sh_socialbtn_design_9{padding: 20px 0px;}
+#sh_socialbtn_design_9 .pt-2{padding-top: 8px;}
+#sh_socialbtn_design_9 h5{margin-left: 0px;font-weight: bold;font-size: 20px;margin-bottom: 10px;}
+#sh_socialbtn_design_9 .row{padding-left: 12px;padding-top: 0px;}
+#sh_socialbtn_design_9 h3.title{padding: 20px 0px;font-size: 30px;text-align: center;}
+#sh_socialbtn_design_9 a .fa-plus{padding: 0px;color:black;margin:0 2px;}
+#sh_socialbtn_design_9 a i.fa-minus{padding: 0px;color:black;margin:0 2px;}
+
+#sh_socialbtn_design_9 a i{padding:10px 15px;color:#fff;font-size: 16px;margin: 0 !important;margin-right: 3px !important;margin-top: 3px !important;}
+#sh_socialbtn_design_9 a i span{padding-left: 9px;font-size: 15px;font-weight: bold;line-height: 18px;}
+#sh_socialbtn_design_9 a .fa-facebook{background:#3b5998;margin:0 2px;}
+#sh_socialbtn_design_9 a .fa-facebook:hover{background:#1F4596;	transition: all 0.5s;}
+#sh_socialbtn_design_9 a .fa-whatsapp{background:#4FCE5D;margin:0 2px;}
+#sh_socialbtn_design_9 a .fa-whatsapp:hover{background:#25BA35;transition: all 0.5s;}
+#sh_socialbtn_design_9 a .fa-twitter{background:#00acee; margin:0 2px;}
+#sh_socialbtn_design_9 a .fa-twitter:hover{background:#0792C8; transition: all 0.5s;}
+#sh_socialbtn_design_9 a .fa-linkedin{background:#0077b5; margin:0 2px;}
+#sh_socialbtn_design_9 a .fa-linkedin:hover{background:#046192; transition: all 0.5s;}
+#sh_socialbtn_design_9 a .fa-pinterest{background:#c8232c; margin:0 2px;}
+#sh_socialbtn_design_9 a .fa-pinterest:hover{background:#A8171F; transition: all 0.5s;}
+#sh_socialbtn_design_9 a .fa-google-plus{background:#db4a39;	padding: 10px 15px;margin:0 5px;}
+#sh_socialbtn_design_9 a .fa-google-plus:hover{background:#B02C1C;transition: all 0.5s;}
+#sh_socialbtn_design_9 a .fa-telegram{background:#0088cc; margin:0 2px;padding:10px 21px;}
+#sh_socialbtn_design_9 a .fa-telegram:hover{background:#046B9F;	transition: all 0.5s;}
+#sh_socialbtn_design_9 a .fa-reddit-alien{background:#0077D6; margin:0 2px;padding:10px 22px;}
+#sh_socialbtn_design_9 a .fa-reddit-alien:hover{background:#0564AF;	transition: all 0.5s;}
+#sh_socialbtn_design_9 a .fa-hacker-news{background:#ff6600; margin:0 2px;}
+#sh_socialbtn_design_9 a .fa-hacker-news:hover{background:#CD5403;transition: all 0.5s;}
+
+#sh_socialbtn_design_9 a .fa-envelope{background: #d64c3f;}
+
+#sh_socialbtn_design_9 a i.fa-digg{background: #424242;}
+#sh_socialbtn_design_9 a i.fa-tumblr{background: #001935;}
+
+#sh_socialbtn_design_9 #sh_prod_social_sharing_show_more_div{padding: 7px 15px;background: #333;margin-right: 3px !important;margin-top: 3px !important;}
+#sh_socialbtn_design_9 #sh_prod_social_sharing_show_more_div a .fa-plus{color: #fff;}
+#sh_socialbtn_design_9 #sh_prod_social_sharing_show_more_div a .fa-minus{color: #fff;}
+
+
+@media (max-width: 375px){
+	#sh_socialbtn_design_9 .row{justify-content: center;}
+}
+
+
+
+/*social btn design-10*/
+#sh_socialbtn_design_10{padding: 20px 0px;}
+#sh_socialbtn_design_10 .pt-2{padding-top: 8px;}
+#sh_socialbtn_design_10 h5{margin-left: 0px;font-weight: bold;font-size: 20px;padding-bottom: 0px;}
+#sh_socialbtn_design_10 .row{padding-left: 10px;padding-top: 0px;}
+#sh_socialbtn_design_10 h3.title{padding: 20px 0px;font-size: 30px;text-align: center;}
+#sh_socialbtn_design_10 a .fa-plus{color: black;margin: 0 5px;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px grey;padding: 10px 18px;}
+#sh_socialbtn_design_10 a i{padding:10px 15px;color:#fff;font-size: 16px;margin-top: 10px !important;}
+#sh_socialbtn_design_10 a i span{padding-left: 9px;font-size: 15px;font-weight: bold;line-height: 18px;}
+#sh_socialbtn_design_10 a .fa-facebook{color:#3b5998;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px gray;margin:0 5px;}
+#sh_socialbtn_design_10 a .fa-facebook:hover{background:#1F4596;color:#fff;transition: all 0.5s;}
+#sh_socialbtn_design_10 a .fa-whatsapp{color:#4FCE5D;margin:0 5px;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px gray;padding: 10px 18px;}
+#sh_socialbtn_design_10 a .fa-whatsapp:hover{background:#4FCE5D;color:#fff;	transition: all 0.5s;}
+#sh_socialbtn_design_10 a .fa-twitter{color:#00acee; margin:0 5px;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px gray;}
+#sh_socialbtn_design_10 a .fa-twitter:hover{background:#00acee;color:#fff;	transition: all 0.5s;}
+#sh_socialbtn_design_10 a .fa-linkedin{color:#0077b5; margin:0 5px;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px gray;}
+#sh_socialbtn_design_10 a .fa-linkedin:hover{background:#0077b5;color:#fff;	transition: all 0.5s;}
+#sh_socialbtn_design_10 a .fa-pinterest{color:#c8232c; margin:0 5px;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px gray;}
+#sh_socialbtn_design_10 a .fa-pinterest:hover{background:#c8232c;color:#fff;	transition: all 0.5s;}
+#sh_socialbtn_design_10 a .fa-google-plus{color:#db4a39;padding: 10px 15px;margin:0 5px;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px gray;}
+#sh_socialbtn_design_10 a .fa-google-plus:hover{background:#db4a39;	color:#fff;	transition: all 0.5s;}
+#sh_socialbtn_design_10 a .fa-telegram{color:#0088cc; margin:0 5px;padding:10px 18px;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px gray;}
+#sh_socialbtn_design_10 a .fa-telegram:hover{background:#0088cc;transition: all 0.5s;color:#fff;}
+#sh_socialbtn_design_10 a .fa-reddit-alien{color:#0077D6; margin:0 5px;padding:10px 22px;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px gray;}
+#sh_socialbtn_design_10 a .fa-reddit-alien:hover{background:#0077D6;transition: all 0.5s;color:#fff;}
+#sh_socialbtn_design_10 a .fa-hacker-news{color:#ff6600; margin:0 5px;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px gray;}
+#sh_socialbtn_design_10 a .fa-hacker-news:hover{background:#ff6600;transition: all 0.5s;color:#fff;}
+
+#sh_socialbtn_design_10 a i.fa-envelope{color: #d64c3f;background: #fff;border-radius: 50px; box-shadow: 1px 1px 3px grey;margin: 0 5px;transition: all .4s;}
+#sh_socialbtn_design_10 a i.fa-digg{color: #414141;background: #fff;border-radius: 50px; box-shadow: 1px 1px 3px grey;margin: 0 5px;transition: all .4s;}
+#sh_socialbtn_design_10 a i.fa-tumblr{color: #314358;background: #fff;border-radius: 50px; box-shadow: 1px 1px 3px grey;margin: 0 5px;transition: all .4s;}
+#sh_socialbtn_design_10 a i.fa-tumblr:hover{background: #314358;color: #fff;}
+#sh_socialbtn_design_10 a i.fa-digg:hover{color: #fff;background: #414141;}
+#sh_socialbtn_design_10 a i.fa-envelope:hover{color: #fff;background: #d64c3f;}
+#sh_socialbtn_design_10 a i.fa-minus{color: #000;margin: 0 5px;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px grey;padding: 10px 18px;}
+
+@media (max-width: 375px){
+	#sh_socialbtn_design_10 .row{justify-content: center;}
+	#sh_socialbtn_design_10 a .fa-facebook{color:#3b5998;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px gray;margin:0 3px;}
+}
+@media (max-width: 360px){
+	#sh_socialbtn_design_10 .row{justify-content: center;}
+	#sh_socialbtn_design_10 a .fa-facebook{color:#3b5998;background: #fff;border-radius: 50px;box-shadow: 1px 1px 3px gray;margin:0 3px;}
+}
+
+
+
+/*social btn design-11*/
+#sh_socialbtn_design_11{padding: 20px 0px;}
+#sh_socialbtn_design_11 h5{margin-left: 0px;font-weight: bold;font-size: 20px;margin: 0;}
+#sh_socialbtn_design_11 .row{padding-left: 10px;padding-top: 0px;}
+#sh_socialbtn_design_11 h3.title{padding: 20px 0px;font-size: 30px;text-align: center;}
+#sh_socialbtn_design_11 .share_icons{text-align: left;margin-top: 0px;}
+#sh_socialbtn_design_11 .share_icons span{font-weight: bold;padding-right: 10px;font-size: 18px;}
+#sh_socialbtn_design_11 .share_icons a{display: inline-block;width: 40px;height: 40px;margin-right: 5px;padding-top: 0px;border-radius:20px;box-shadow: inset 0 0 0 40px #000;color: #fff;line-height: 40px;text-align: center;margin-top: 5px;transition: all 0.3s ease;}
+#sh_socialbtn_design_11 .share_icons a:hover{box-shadow: inset 0 0 0 3px #000;transition: all 0.3s ease;color: #000;}
+
+
+
+
+
+
+
+

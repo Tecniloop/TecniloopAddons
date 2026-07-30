@@ -1,0 +1,396 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* sh_product_social_sharing
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 14.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-10-19 06:35+0000\n"
+"PO-Revision-Date: 2020-10-19 06:35+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-digg\"/><span>Digg</span>"
+msgstr "<i class=\"fa fa-digg\"/><span>يسو</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-digg\"><span>Digg</span></i>"
+msgstr "<i class=\"fa fa-digg\"><span>يسو</span></i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-envelope\"/><span>E-mail</span>"
+msgstr "<i class=\"fa fa-envelope\"/><span>البريد الإلكتروني</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-envelope\"><span>E-mail</span></i>"
+msgstr "<i class=\"fa fa-envelope\"><span>البريد الإلكتروني</span></i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-facebook\"><span>Facebook</span></i>"
+msgstr "<i class=\"fa fa-facebook\"><span>موقع التواصل الاجتماعي الفيسبوك</span></i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-facebook-official\"/><span>Facebook</span>"
+msgstr "<i class=\"fa fa-facebook-official\"/><span>موقع التواصل الاجتماعي الفيسبوك</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-hacker-news\"/><span>Hacker News</span>"
+msgstr "<i class=\"fa fa-hacker-news\"/><span>هاكر الأخبار</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-hacker-news\"><span>Hacker</span></i>"
+msgstr "<i class=\"fa fa-hacker-news\"><span>القراصنة</span></i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-linkedin\"/><span>Linkedin</span>"
+msgstr "<i class=\"fa fa-linkedin\"/><span>تابعني على</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-linkedin\"><span>Linkedin</span></i>"
+msgstr "<i class=\"fa fa-linkedin\"><span>تابعني على</span></i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-pinterest\"/><span>Pinterest</span>"
+msgstr "<i class=\"fa fa-pinterest\"/><span>موقع Pinterest</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-pinterest\"><span>Pinterest</span></i>"
+msgstr "<i class=\"fa fa-pinterest\"><span>موقع Pinterest</span></i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-reddit-alien\"/><span>Reddit</span>"
+msgstr "<i class=\"fa fa-reddit-alien\"/><span>رديت</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-reddit-alien\"><span>Reddit</span></i>"
+msgstr "<i class=\"fa fa-reddit-alien\"><span>رديت</span></i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-tumblr\"/><span>Tumblr</span>"
+msgstr "<i class=\"fa fa-tumblr\"/><span>نعرفكم</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-tumblr\"><span>Tumblr</span></i>"
+msgstr "<i class=\"fa fa-tumblr\"><span>نعرفكم</span></i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-twitter\"/><span>Twitter</span>"
+msgstr "<i class=\"fa fa-twitter\"/><span>تويترv</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-twitter\"><span>Twitter</span></i>"
+msgstr "<i class=\"fa fa-twitter\"><span>تويتر</span></i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-whatsapp\"/><span>Whatsapp</span>"
+msgstr "<i class=\"fa fa-whatsapp\"/><span>ال WhatsApp</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<i class=\"fa fa-whatsapp\"><span>Whatsapp</span></i>"
+msgstr "<i class=\"fa fa-whatsapp\"><span>ال WhatsApp</span></i>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"diggtext\">Digg </span>"
+msgstr "<span class=\"diggtext\">يسو </span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"envelopetext\">E-mail </span>"
+msgstr "<span class=\"envelopetext\">البريد الإلكتروني </span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_prod_social_sharing_res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_website_form
+msgid ""
+"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+"specific.\" groups=\"website.group_multi_website\"/>"
+msgstr ""
+"<span class=\"fa fa-lg fa-globe\" title=\"Values set here are website-"
+"specific.\" groups=\"website.group_multi_website\"/>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"facebooktext\">Facebook</span>"
+msgstr "<span class=\"facebooktext\">موقع التواصل الاجتماعي الفيسبوك</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"hacker-newstext\">Hacker News</span>"
+msgstr "<span class=\"hacker-newstext\">هاكر الأخبار</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"linkedintext\">linkedin</span>"
+msgstr "<span class=\"linkedintext\">تابعني على</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"pinteresttext\">Pinterest</span>"
+msgstr "<span class=\"pinteresttext\">موقع Pinterest</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"reddit-alientext\">Reddit</span>"
+msgstr "<span class=\"reddit-alientext\">رديت</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"tumblrtext\">Tumblr </span>"
+msgstr "<span class=\"tumblrtext\">نعرفكم </span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"twittertext\">Twitter</span>"
+msgstr "<span class=\"twittertext\">تويتر</span>"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "<span class=\"whatsapptext\">Whatsapp</span>"
+msgstr "<span class=\"whatsapptext\">ال WhatsApp</span>"
+
+#. module: sh_product_social_sharing
+#: model:ir.model,name:sh_product_social_sharing.model_res_config_settings
+msgid "Config Settings"
+msgstr "إعدادات التكوين"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_digg
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_digg
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Digg"
+msgstr "اسم العرض"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__display_name
+msgid "Display Name"
+msgstr "البريد الإلكتروني"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "E-mail"
+msgstr "البريد الإلكتروني"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_email
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_email
+msgid "Email"
+msgstr "موقع التواصل الاجتماعي الفيسبوك"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_facebook
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_facebook
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Facebook"
+msgstr "موقع التواصل الاجتماعي الفيسبوك"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_hacker_news
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_hacker_news
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Hacker News"
+msgstr "HackerNews"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "HackerNews"
+msgstr "HackerNews"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__id
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__id
+msgid "ID"
+msgstr "هوية شخصية"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_is_prod_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_is_prod_social_sharing
+msgid "Is Product Share On Social Media?"
+msgstr "هو المنتج حصة في وسائل الإعلام الاجتماعية؟"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings____last_update
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website____last_update
+msgid "Last Modified on"
+msgstr "آخر تعديل ل"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_linkedin
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_linkedin
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "LinkedIn"
+msgstr "ينكدين"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Linkedin"
+msgstr "تابعني على"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_pinterest
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_pinterest
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Pinterest"
+msgstr "موقع Pinterest"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_prod_social_sharing_res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_website_form
+msgid "Product Social Sharing"
+msgstr "المنتج تقاسم الاجتماعية"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_reddit
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_reddit
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Reddit"
+msgstr "رديت"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Share :"
+msgstr "شارك :"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_prod_social_sharing_res_config_settings_view_form
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_website_form
+msgid "Share Products On Social Media"
+msgstr "حصة المنتجات على وسائل الاعلام الاجتماعية"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Share:"
+msgstr "شارك:"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_style
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_style
+msgid "Style"
+msgstr "أسلوب"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_1
+msgid "Style 1"
+msgstr "أسلوب 1"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_10
+msgid "Style 10"
+msgstr "أسلوب 10"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_11
+msgid "Style 11"
+msgstr "أسلوب 11"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_2
+msgid "Style 2"
+msgstr "أسلوب 2"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_3
+msgid "Style 3"
+msgstr "أسلوب 3"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_4
+msgid "Style 4"
+msgstr "أسلوب 4"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_5
+msgid "Style 5"
+msgstr "أسلوب 5"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_6
+msgid "Style 6"
+msgstr "أسلوب 6"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_7
+msgid "Style 7"
+msgstr "أسلوب 7"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_8
+msgid "Style 8"
+msgstr "أسلوب 8"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields.selection,name:sh_product_social_sharing.selection__website__sh_prod_social_sharing_style__style_9
+msgid "Style 9"
+msgstr "أسلوب 9"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_tumblr
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_tumblr
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Tumblr"
+msgstr ""
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_twitter
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_twitter
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Twitter"
+msgstr "تويتر"
+
+#. module: sh_product_social_sharing
+#: model:ir.model,name:sh_product_social_sharing.model_website
+msgid "Website"
+msgstr "موقع الكتروني"
+
+#. module: sh_product_social_sharing
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_res_config_settings__sh_prod_social_sharing_whatsapp
+#: model:ir.model.fields,field_description:sh_product_social_sharing.field_website__sh_prod_social_sharing_whatsapp
+msgid "WhatsApp"
+msgstr "موقع الكتروني"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "Whatsapp"
+msgstr "ال WhatsApp"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "digg"
+msgstr "يسو"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "envelope"
+msgstr "ظرف"
+
+#. module: sh_product_social_sharing
+#: model_terms:ir.ui.view,arch_db:sh_product_social_sharing.sh_product_social_sharing_ws_product_details
+msgid "tumblr"
+msgstr "نعرفكم"
