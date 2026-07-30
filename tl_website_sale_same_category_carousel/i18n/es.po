@@ -1,0 +1,30 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#   * tl_website_sale_same_category_carousel
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. module: tl_website_sale_same_category_carousel
+#: model_terms:ir.ui.view,arch_db:tl_website_sale_same_category_carousel.s_same_category_products
+msgid "Related products"
+msgstr "Productos relacionados"
+
+#. module: tl_website_sale_same_category_carousel
+#: model_terms:ir.ui.view,arch_db:tl_website_sale_same_category_carousel.s_same_category_products
+msgid "More products from the same category"
+msgstr "Más productos de la misma categoría"
+
+#. module: tl_website_sale_same_category_carousel
+#: model_terms:ir.ui.view,arch_db:tl_website_sale_same_category_carousel.s_same_category_products
+msgid "See all"
+msgstr "Ver todos"
+
+#. module: tl_website_sale_same_category_carousel
+#: model_terms:ir.ui.view,arch_db:tl_website_sale_same_category_carousel.s_same_category_products
+msgid "This block is only displayed on a product page when other published products share an eCommerce category."
+msgstr "Este bloque solo se muestra en una ficha de producto cuando existen otros productos publicados que comparten una categoría de comercio electrónico."

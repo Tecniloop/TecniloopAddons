@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!--
+        Reuse Odoo's standard product carousel design controls while removing
+        data-source controls which would break the same-category purpose.
+    -->
+    <t
+        t-name="tl_website_sale_same_category_carousel.SameCategoryProductsOption"
+        t-inherit="website_sale.DynamicSnippetProductsOption"
+        t-inherit-mode="primary"
+    >
+        <xpath expr="//BuilderRow[*[@id=&quot;'filter_opt'&quot;]]" position="replace"/>
+        <xpath expr="//BuilderRow[BuilderSelect[@id=&quot;'product_category_opt'&quot;]]" position="replace"/>
+        <xpath expr="//BuilderRow[BuilderMany2Many[@id=&quot;'product_tag_opt'&quot;]]" position="replace"/>
+        <xpath expr="//BuilderRow[BuilderTextInput[@id=&quot;'product_names_opt'&quot;]]" position="replace"/>
+    </t>
+</templates>

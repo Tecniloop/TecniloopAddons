@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- New independent snippet. It reuses Odoo's standard dynamic product card template. -->
+    <template id="s_same_category_products" name="Products from the Same Category">
+        <t
+            t-set="default_design_classes"
+            t-value="request and request.env['website'].get_current_website().shop_opt_products_design_classes or ''"
+        />
+        <t
+            t-if="'o_wsale_products_opt_layout_catalog' not in default_design_classes"
+            t-set="default_design_classes"
+            t-value="'o_wsale_products_opt_name_color_regular
+                o_wsale_products_opt_thumb_cover o_wsale_products_opt_img_secondary_show
+                o_wsale_products_opt_img_hover_zoom_out_light o_wsale_products_opt_cc1
+                o_wsale_products_opt_rounded_2 o_wsale_products_opt_layout_catalog
+                o_wsale_products_opt_design_thumbs o_wsale_products_opt_has_description
+                o_wsale_products_opt_name_size_body o_wsale_products_opt_actions_onhover
+                o_wsale_products_opt_wishlist_fixed o_wsale_products_opt_actions_theme
+                o_wsale_products_opt_has_cta'"
+        />
+        <section
+            data-snippet="s_same_category_products"
+            t-attf-class="s_same_category_products oe_website_sale #{default_design_classes} s_dynamic o_dynamic_snippet_empty pt64 pb64"
+            data-custom-template-data="{}"
+            data-product-category-id="all"
+            data-number-of-records="12"
+            data-number-of-elements="4"
+            data-number-of-elements-small-devices="2"
+            data-row-per-slide="1"
+            data-carousel-interval="5000"
+            t-att-data-filter-id="request.env.ref('website_sale.dynamic_filter_newest_products').id"
+            data-template-key="website_sale.dynamic_filter_template_product_product_products_item"
+        >
+            <div class="s_dynamic_snippet_container container">
+                <div class="row s_nb_column_fixed">
+                    <section class="s_dynamic_snippet_holder d-none px-4 placeholder-glow">
+                        <div class="row">
+                            <span class="placeholder col-3 rounded"/>
+                            <span class="placeholder col-2 offset-7 rounded"/>
+                            <span class="placeholder mt-3 col-6 rounded"/>
+                        </div>
+                        <div class="row mt-4">
+                            <span class="placeholder col-12 rounded" style="height: 250px;"/>
+                        </div>
+                    </section>
+                    <section class="s_dynamic_snippet_title oe_unremovable oe_unmovable justify-content-between d-flex flex-column flex-md-row mb-lg-0 pb-3 pb-md-0 s_col_no_resize">
+                        <div>
+                            <h2 class="h3">Related products</h2>
+                            <p class="lead">More products from the same category</p>
+                        </div>
+                        <div>
+                            <a title="See All" href="/shop">
+                                See all<span class="fa fa-long-arrow-right ms-2"/>
+                            </a>
+                        </div>
+                    </section>
+                    <section class="s_dynamic_snippet_content oe_unremovable oe_unmovable o_not_editable col s_col_no_resize">
+                        <div class="css_non_editable_mode_hidden">
+                            <div class="missing_option_warning alert alert-info fade show d-none d-print-none rounded-0">
+                                This block is only displayed on a product page when other published products share an eCommerce category.
+                                <br/>
+                            </div>
+                        </div>
+                        <div class="dynamic_snippet_template">
+                            <t t-call="website_sale.s_dynamic_snippet_products_preview_data"/>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- Add the block after Odoo's standard Products snippet; no existing hook is replaced. -->
+    <template id="snippets" inherit_id="website_sale.snippets" name="Same category product snippet">
+        <xpath expr="//t[@t-snippet='website_sale.s_dynamic_snippet_products']" position="after">
+            <t
+                t-snippet="tl_website_sale_same_category_carousel.s_same_category_products"
+                string="Products from the Same Category"
+                label="Dynamic Content"
+                group="catalog"
+            />
+        </xpath>
+    </template>
+</odoo>

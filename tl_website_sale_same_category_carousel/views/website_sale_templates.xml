@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Expose the current product and every directly assigned eCommerce category
+        to the isolated frontend interaction. Existing website_sale snippets are
+        not altered or replaced.
+    -->
+    <template
+        id="website_sale_product_same_category_data"
+        inherit_id="website_sale.product"
+        name="Same category carousel product data"
+    >
+        <xpath expr="//section[@id='product_detail']" position="attributes">
+            <attribute name="t-att-data-same-category-product-template-id">product.id</attribute>
+            <attribute name="t-att-data-same-category-public-category-ids">','.join(str(category_id) for category_id in product.public_categ_ids.ids)</attribute>
+        </xpath>
+    </template>
+</odoo>
