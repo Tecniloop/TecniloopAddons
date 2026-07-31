@@ -283,9 +283,10 @@ class ProductTemplate(models.Model):
             if duplicate_lines:
                 duplicate_lines.unlink()
 
-            try:
-                stored = json.loads(self.sitemap_attributes_json or '{}')
-            except (TypeError, ValueError, json.JSONDecodeError):
+            stored = connector._safe_json_loads(
+                self.sitemap_attributes_json, {}
+            )
+            if not isinstance(stored, dict):
                 stored = {}
             if isinstance(stored, dict):
                 stored = {

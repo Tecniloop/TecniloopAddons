@@ -1209,3 +1209,10 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 - Reutiliza la importación Shopify de productos, variantes, EAN, imágenes, colecciones y recetas de Tupperware.
 - Mantiene las URLs españolas en la raíz `/products/...` y evita forzar el prefijo incorrecto `/es/products/...`.
 - Incluye una fuente de demostración llamada **Tupperware España**.
+
+
+## 19.0.1.122.0
+
+- Corrige la importación de Tupperware cuando campos JSON de staging contienen `False`/`True`.
+- Usa el lector JSON seguro para Collections y atributos históricos.
+- Añade la ubicación final del traceback al mensaje de error de staging para facilitar el diagnóstico.

@@ -6,6 +6,7 @@ import json
 import logging
 import re
 import time
+import traceback
 from datetime import datetime
 from urllib.parse import unquote, urljoin, urlparse
 
@@ -2218,11 +2219,10 @@ class SitemapImportService(models.AbstractModel):
                 # la categoría principal para no eliminar categorías manuales.
                 resolver = getattr(self, 'resolve_product_collection_categories', None)
                 if resolver and 'sitemap_collection_categ_ids' in Product._fields:
-                    try:
-                        raw_collections = json.loads(
-                            staging_row.shopify_collections_json or '[]'
-                        )
-                    except (TypeError, ValueError, json.JSONDecodeError):
+                    raw_collections = self._safe_json_loads(
+                        staging_row.shopify_collections_json, []
+                    )
+                    if not isinstance(raw_collections, list):
                         raw_collections = []
                     collection_categories = resolver(source, raw_collections)
                     previous_collections = (
@@ -2376,8 +2376,13 @@ class SitemapImportService(models.AbstractModel):
                 return self._import_staging_row_inner(staging_row, source, image_urls)
         except Exception as exc:
             _logger.exception('Sitemap import: error aislado importando %s', staging_row.url)
+            trace_lines = traceback.format_exc().strip().splitlines()
+            trace_tail = ' | '.join(trace_lines[-6:])
+            diagnostic = '%s: %s' % (exc.__class__.__name__, exc)
+            if trace_tail:
+                diagnostic = '%s | %s' % (diagnostic, trace_tail)
             staging_row.write({
                 'state': 'error',
-                'error_message': ('%s: %s' % (exc.__class__.__name__, exc))[:4000],
+                'error_message': diagnostic[:4000],
             })
             return 'error'
