@@ -1509,4 +1509,17 @@
         <field name="auto_archive_discontinued">0</field>
         <field name="brand_id" ref="product_brand_tupperware_com" />
     </record>
+    <record id="sitemap_import_source_tupperware_espana" model="sitemap.import.source">
+        <field name="name">Tupperware España</field>
+        <field name="connector_model">sitemap.connector.tupperware_espana</field>
+        <field name="sitemap_index_url">https://tupperware-espana.es/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">0</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">40</field>
+        <field name="products_per_run">40</field>
+        <field name="max_images_per_product">12</field>
+        <field name="auto_archive_discontinued">0</field>
+        <field name="brand_id" ref="product_brand_tupperware_com" />
+    </record>
 </odoo>

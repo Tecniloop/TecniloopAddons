@@ -101,6 +101,7 @@ CONNECTOR_SELECTION = [
     ('sitemap.connector.munichsports_es', 'MUNICH Sports España'),
     ('sitemap.connector.autentishoes_es', 'Autenti Shoes España'),
     ('sitemap.connector.tupperware_com', 'Tupperware en español'),
+    ('sitemap.connector.tupperware_espana', 'Tupperware España'),
 ]
 
 

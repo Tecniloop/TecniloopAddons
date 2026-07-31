@@ -1202,3 +1202,10 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 - Permite filtrar por escala (`G`, `H0`, `TT`, `N`).
 - Conserva el sitemap únicamente como respaldo si las categorías no devuelven productos.
 - Las fichas continúan procesándose mediante trabajos independientes de `queue_job`, por lo que una ficha inválida no bloquea el resto del catálogo.
+
+## 19.0.1.121.0
+
+- Añadido el conector **Tupperware España** para `https://tupperware-espana.es/robots.txt`.
+- Reutiliza la importación Shopify de productos, variantes, EAN, imágenes, colecciones y recetas de Tupperware.
+- Mantiene las URLs españolas en la raíz `/products/...` y evita forzar el prefijo incorrecto `/es/products/...`.
+- Incluye una fuente de demostración llamada **Tupperware España**.

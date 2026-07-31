@@ -73,4 +73,5 @@ from . import connector_aneste_datank_es
 from . import connector_noch_de
 
 from . import connector_tupperware_com
+from . import connector_tupperware_espana
 from . import shopify_blog
