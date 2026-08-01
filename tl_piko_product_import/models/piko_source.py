@@ -147,10 +147,9 @@ class TlPikoSource(models.Model):
     last_run = fields.Datetime(readonly=True)
     last_error = fields.Text(readonly=True)
 
-    _sql_constraints = [
-        ("name_company_uniq", "unique(name, company_id)",
-         "El nombre de la fuente debe ser único."),
-    ]
+    _name_company_uniq = models.Constraint(
+        "unique(name, company_id)", "El nombre de la fuente debe ser único."
+    )
 
     # ------------------------------------------------------------------
     def _compute_counts(self):

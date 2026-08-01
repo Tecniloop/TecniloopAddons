@@ -74,9 +74,10 @@ class TlPikoProduct(models.Model):
     scraped_on = fields.Datetime(readonly=True)
     imported_on = fields.Datetime(readonly=True)
 
-    _sql_constraints = [
-        ("url_source_uniq", "unique(source_id, url)", "Esa URL ya existe en la fuente."),
-    ]
+    # Odoo 19: models.Constraint sustituye a _sql_constraints
+    _url_source_uniq = models.Constraint(
+        "unique(source_id, url)", "Esa URL ya existe en la fuente."
+    )
 
     # ==================================================================
     # Cola

@@ -3,7 +3,7 @@
 Importador de productos por **scraping HTML** para Odoo 19, pensado para tiendas
 sin API pública (caso de partida: `piko-shop.de`, sistema propietario sin API).
 
-Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.1.2.0
+Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.1.2.1
 
 ## Arquitectura
 
@@ -130,3 +130,11 @@ Todo el trabajo pesado vive en crons; el worker HTTP solo escribe estado.
 Hace falta al menos un worker de cron (`--max-cron-threads >= 1`; con 2 la cola
 y el descubrimiento avanzan en paralelo). En modo `--dev` con un solo hilo el
 disparo funciona igual, solo que en serie.
+
+
+## Notas de compatibilidad Odoo 19
+
+- `res.groups.category_id` ya no existe: la categoría se define en un registro
+  `res.groups.privilege` y el grupo la referencia con `privilege_id`.
+- `res.users.groups_id` pasa a `group_ids` (el módulo no asigna grupos por XML).
+- `_sql_constraints` dejó de aplicarse: las restricciones usan `models.Constraint`.
