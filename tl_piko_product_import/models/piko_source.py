@@ -32,6 +32,11 @@ class TlPikoSource(models.Model):
     lang_code = fields.Char(
         "Idioma del sitio", default="de", help="Prefijo de idioma en las URLs (de, en...)"
     )
+    extra_params = fields.Char(
+        "Parámetros de consulta",
+        help="Se añaden a cada petición, p.ej. 'lang=en'. Las URLs almacenadas "
+             "quedan limpias; el parámetro solo se aplica al descargar.",
+    )
     currency_id = fields.Many2one(
         "res.currency", default=lambda self: self.env.company.currency_id, required=True
     )
@@ -326,19 +331,49 @@ class TlPikoCategory(models.Model):
     active = fields.Boolean(default=True)
     source_id = fields.Many2one("tl.piko.source", required=True, ondelete="cascade")
     url = fields.Char(required=True, help="URL de la página de categoría.")
-    page_pattern = fields.Char(
-        "Patrón de paginación",
-        help="URL de página N usando {page}. Vacío = una sola página.\n"
-             "Ej.: https://www.piko-shop.de/de/praesenz/search/l-{page}/o-artikelnr_asc.html",
+    paginated = fields.Boolean(
+        "Paginar", default=False,
+        help="Genera las URLs de página siguiendo el esquema de la tienda."
     )
-    page_count = fields.Integer("Nº de páginas", default=1)
+    page_size = fields.Selection(
+        [("18", "18"), ("50", "50"), ("100", "100")],
+        "Artículos por página", default="100",
+    )
+    order_key = fields.Char("Orden", default="artikelnr_asc")
+    page_count = fields.Integer(
+        "Páginas máx.", default=1,
+        help="Tope de páginas a recorrer. El rastreo se detiene antes si una "
+             "página no aporta URLs nuevas."
+    )
+    page_pattern = fields.Char(
+        "Patrón manual",
+        help="Sobrescribe el esquema automático. Usa {page} (base 0) o "
+             "{page1} (base 1).",
+    )
 
     def _page_urls(self):
+        """URLs de las páginas de la categoría.
+
+        Esquema de piko-shop.de (verificado):
+          página 1 -> /en/warengruppe/<slug>-<id>/l-100/o-artikelnr_asc.html
+          página N -> .../l-100/o-artikelnr_asc/p-{N-1}.html   (p es base 0)
+        """
         self.ensure_one()
         base = urljoin(self.source_id.base_url, self.url)
-        if not self.page_pattern or self.page_count <= 1:
+        if self.page_pattern:
+            return [
+                urljoin(
+                    self.source_id.base_url,
+                    self.page_pattern.format(page=page, page1=page + 1),
+                )
+                for page in range(max(1, self.page_count))
+            ]
+        if not self.paginated or self.page_count <= 1:
             return [base]
-        return [
-            urljoin(self.source_id.base_url, self.page_pattern.format(page=page))
-            for page in range(1, self.page_count + 1)
-        ]
+        stem = base[:-5] if base.endswith(".html") else base.rstrip("/")
+        prefix = "%s/l-%s/o-%s" % (stem, self.page_size or "100",
+                                   self.order_key or "artikelnr_asc")
+        urls = ["%s.html" % prefix]
+        urls += ["%s/p-%s.html" % (prefix, page)
+                 for page in range(1, self.page_count)]
+        return urls

@@ -1,39 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Fuente preconfigurada para el webshop de PIKO en inglés.
+         Entrada: https://www.piko-shop.de/en.html?lang=en
+         Se instala ARCHIVADA: revisa selectores y límites antes de activarla.
+
+         Las categorías raíz de cada escala listan también los artículos de sus
+         subcategorías (H0 Scale = 2.548 artículos), así que con cuatro raíces
+         se cubre el catálogo completo con muchas menos peticiones que
+         recorriendo las ~70 hojas del menú. -->
     <record id="source_piko_shop" model="tl.piko.source">
-        <field name="name">PIKO Webshop (piko-shop.de)</field>
+        <field name="name">PIKO Webshop EN (piko-shop.de)</field>
         <field name="base_url">https://www.piko-shop.de</field>
-        <field name="lang_code">de</field>
+        <field name="lang_code">en</field>
+        <field name="extra_params">lang=en</field>
         <field name="discovery_mode">category</field>
-        <field name="product_url_regex">/artikel/</field>
+        <field name="product_url_regex">/en/artikel/[^/]+-\d+\.html</field>
         <field name="request_delay">2.0</field>
-        <field name="max_products">100</field>
+        <field name="max_products">0</field>
+        <field name="max_attempts">3</field>
+        <field name="retry_backoff_minutes">10</field>
+        <field name="auto_import" eval="True"/>
         <field name="update_price" eval="False"/>
         <field name="update_name" eval="False"/>
         <field name="active" eval="False"/>
     </record>
 
+    <!-- Escalas: paginadas a 100 art./página, orden por nº de artículo.
+         page_count va holgado; el rastreo corta solo cuando una página deja de
+         aportar URLs nuevas. Recuento del sitio a 08/2026 entre paréntesis. -->
     <record id="category_piko_h0" model="tl.piko.category">
-        <field name="name">H0 Scale</field>
+        <field name="name">H0 Scale (2548)</field>
+        <field name="sequence">10</field>
         <field name="source_id" ref="source_piko_shop"/>
-        <field name="url">/de/warengruppe/h0-spur-20.html</field>
+        <field name="url">/en/warengruppe/h0-scale-20.html</field>
+        <field name="paginated" eval="True"/>
+        <field name="page_size">100</field>
+        <field name="page_count">32</field>
     </record>
 
     <record id="category_piko_g" model="tl.piko.category">
-        <field name="name">G Scale</field>
+        <field name="name">G Scale (660)</field>
+        <field name="sequence">20</field>
         <field name="source_id" ref="source_piko_shop"/>
-        <field name="url">/de/warengruppe/g-spur-4.html</field>
+        <field name="url">/en/warengruppe/g-scale-4.html</field>
+        <field name="paginated" eval="True"/>
+        <field name="page_size">100</field>
+        <field name="page_count">10</field>
     </record>
 
     <record id="category_piko_tt" model="tl.piko.category">
-        <field name="name">TT Scale</field>
+        <field name="name">TT Scale (335)</field>
+        <field name="sequence">30</field>
         <field name="source_id" ref="source_piko_shop"/>
-        <field name="url">/de/warengruppe/tt-spur-42.html</field>
+        <field name="url">/en/warengruppe/tt-scale-42.html</field>
+        <field name="paginated" eval="True"/>
+        <field name="page_size">100</field>
+        <field name="page_count">6</field>
     </record>
 
     <record id="category_piko_n" model="tl.piko.category">
-        <field name="name">N Scale</field>
+        <field name="name">N Scale (251)</field>
+        <field name="sequence">40</field>
         <field name="source_id" ref="source_piko_shop"/>
-        <field name="url">/de/warengruppe/n-spur-50.html</field>
+        <field name="url">/en/warengruppe/n-scale-50.html</field>
+        <field name="paginated" eval="True"/>
+        <field name="page_size">100</field>
+        <field name="page_count">5</field>
+    </record>
+
+    <record id="category_piko_new_2026" model="tl.piko.category">
+        <field name="name">New 2026</field>
+        <field name="sequence">50</field>
+        <field name="source_id" ref="source_piko_shop"/>
+        <field name="url">/en/warengruppe/new-2026-428.html</field>
+        <field name="paginated" eval="True"/>
+        <field name="page_size">100</field>
+        <field name="page_count">6</field>
+    </record>
+
+    <record id="category_piko_fanshop" model="tl.piko.category">
+        <field name="name">Fanshop</field>
+        <field name="sequence">60</field>
+        <field name="source_id" ref="source_piko_shop"/>
+        <field name="url">/en/warengruppe/fanshop-267.html</field>
+        <field name="paginated" eval="True"/>
+        <field name="page_size">100</field>
+        <field name="page_count">4</field>
+    </record>
+
+    <!-- Semillas de novedades: sin paginar, útiles para pasadas incrementales -->
+    <record id="category_piko_home_en" model="tl.piko.category">
+        <field name="name">Home EN (novedades)</field>
+        <field name="sequence">70</field>
+        <field name="source_id" ref="source_piko_shop"/>
+        <field name="url">/en.html</field>
+    </record>
+
+    <record id="category_piko_now_available" model="tl.piko.category">
+        <field name="name">New in our shop</field>
+        <field name="sequence">80</field>
+        <field name="source_id" ref="source_piko_shop"/>
+        <field name="url">/en/now-available.html</field>
     </record>
 </odoo>

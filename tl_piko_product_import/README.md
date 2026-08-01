@@ -3,7 +3,7 @@
 Importador de productos por **scraping HTML** para Odoo 19, pensado para tiendas
 sin API pública (caso de partida: `piko-shop.de`, sistema propietario sin API).
 
-Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.1.2.1
+Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.1.4.0
 
 ## Arquitectura
 
@@ -138,3 +138,33 @@ disparo funciona igual, solo que en serie.
   `res.groups.privilege` y el grupo la referencia con `privilege_id`.
 - `res.users.groups_id` pasa a `group_ids` (el módulo no asigna grupos por XML).
 - `_sql_constraints` dejó de aplicarse: las restricciones usan `models.Constraint`.
+
+
+## Fuente preconfigurada: PIKO Webshop EN (19.0.1.3.0)
+
+Entrada `https://www.piko-shop.de/en.html?lang=en`. Se instala **archivada**.
+
+- `base_url` = `https://www.piko-shop.de`, `lang_code` = `en`.
+- `extra_params` = `lang=en`: el campo nuevo añade parámetros fijos a **cada**
+  petición (también a las imágenes), sin ensuciar las URLs guardadas en el
+  staging, que se quedan canónicas.
+- `product_url_regex` = `/en/artikel/[^/]+-\d+\.html`, que excluye páginas sin
+  id de artículo como `/en/artikel/ersatzteil.html`.
+- 74 categorías del menú real del sitio en inglés (G, H0, TT, N, New 2026,
+  Fanshop), más la home EN y *New in our shop* como semillas de novedades.
+
+### Paginación (verificada 08/2026)
+
+    página 1 -> /en/warengruppe/<slug>-<id>/l-100/o-artikelnr_asc.html
+    página N -> .../l-100/o-artikelnr_asc/p-{N-1}.html      (p es base 0)
+
+La categoría marca `paginated`, `page_size` (18/50/100), `order_key` y
+`page_count`; `page_pattern` sigue disponible como override con `{page}`
+(base 0) o `{page1}`. El rastreo corta en cuanto una página no aporta URLs
+**nuevas**, así que `page_count` es solo un tope de seguridad y no importa que
+vaya holgado.
+
+Las categorías raíz de escala listan también los artículos de sus
+subcategorías, de modo que la fuente rastrea solo H0 / G / TT / N (más New 2026
+y Fanshop): ~40 peticiones de listado para ~3.800 fichas, frente a las ~70
+hojas del menú.

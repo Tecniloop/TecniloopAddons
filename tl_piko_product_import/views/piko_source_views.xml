@@ -51,6 +51,7 @@
                         <group string="Origen">
                             <field name="base_url" widget="url"/>
                             <field name="lang_code"/>
+                            <field name="extra_params" placeholder="lang=en"/>
                             <field name="currency_id" groups="base.group_multi_currency"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
@@ -78,8 +79,11 @@
                                     <field name="sequence" widget="handle"/>
                                     <field name="name"/>
                                     <field name="url"/>
-                                    <field name="page_pattern"/>
-                                    <field name="page_count"/>
+                                    <field name="paginated"/>
+                                    <field name="page_size" invisible="not paginated"/>
+                                    <field name="order_key" invisible="not paginated"/>
+                                    <field name="page_count" invisible="not paginated"/>
+                                    <field name="page_pattern" optional="hide"/>
                                 </list>
                             </field>
                         </page>

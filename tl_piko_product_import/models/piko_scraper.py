@@ -4,7 +4,7 @@ import json
 import logging
 import re
 import time
-from urllib.parse import urljoin, urlparse
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
 from urllib.robotparser import RobotFileParser
 
 from odoo import _, api, models
@@ -94,8 +94,20 @@ class TlPikoScraper(models.AbstractModel):
         return rp.can_fetch(source.user_agent or "*", url)
 
     @api.model
+    def _prepare_url(self, source, url):
+        """Añade los parámetros fijos de la fuente (p.ej. lang=en)."""
+        if not source.extra_params:
+            return url
+        parts = urlparse(url)
+        query = dict(parse_qsl(parts.query, keep_blank_values=True))
+        query.update(dict(parse_qsl(source.extra_params.lstrip("?"),
+                                    keep_blank_values=True)))
+        return urlunparse(parts._replace(query=urlencode(query)))
+
+    @api.model
     def http_get(self, source, url):
         """Devuelve el texto de `url` respetando robots, delay y reintentos."""
+        url = self._prepare_url(source, url)
         if not self._robots_allows(source, url):
             raise UserError(_("robots.txt no permite acceder a %s") % url)
         session = source._get_session()
@@ -121,6 +133,7 @@ class TlPikoScraper(models.AbstractModel):
 
     @api.model
     def http_get_binary(self, source, url):
+        url = self._prepare_url(source, url)
         if not self._robots_allows(source, url):
             return None
         session = source._get_session()
@@ -188,22 +201,25 @@ class TlPikoScraper(models.AbstractModel):
     def _discover_categories(self, source):
         """Rastrea las URLs de categoría configuradas y saca los enlaces de ficha."""
         urls = []
+        seen = set()
         for category in source.category_ids.filtered("active"):
-            page_urls = category._page_urls()
-            for page_url in page_urls:
+            for page_url in category._page_urls():
                 content = self.http_get(source, page_url)
                 if not content:
-                    continue
+                    break
                 tree = lxml_html.fromstring(content)
                 tree.make_links_absolute(source.base_url)
-                found = [
-                    a.get("href")
+                found = {
+                    a.get("href").split("#")[0]
                     for a in tree.xpath("//a[@href]")
                     if self._is_product_url(source, a.get("href") or "")
-                ]
-                if not found:
-                    break  # página vacía -> fin de la paginación
-                urls += found
+                }
+                fresh = found - seen
+                if not fresh:
+                    # página vacía o repetición de la última: fin de la paginación
+                    break
+                seen |= fresh
+                urls += sorted(fresh)
         return urls
 
     # ------------------------------------------------------------------
