@@ -111,9 +111,9 @@
                 <filter name="f_queued" string="En cola" domain="[('state', '=', 'queued')]"/>
                 <filter name="f_error" string="Con error" domain="[('state', '=', 'error')]"/>
                 <filter name="f_retry" string="Esperando reintento"
-                        domain="[('state', '=', 'queued'), ('next_attempt_date', '&gt;', context_today().strftime('%Y-%m-%d %H:%M:%S'))]"/>
+                        domain="[('state', '=', 'queued'), ('next_attempt_date', '!=', False)]"/>
                 <filter name="f_nolink" string="Sin producto" domain="[('product_tmpl_id', '=', False)]"/>
-                <group expand="0" string="Agrupar por">
+                <group>
                     <filter name="g_source" string="Fuente" context="{'group_by': 'source_id'}"/>
                     <filter name="g_state" string="Estado" context="{'group_by': 'state'}"/>
                 </group>
