@@ -2,6 +2,7 @@
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 import base64
 import hashlib
+import json
 import logging
 import time
 
@@ -45,12 +46,16 @@ class TlPikoProduct(models.Model):
     description = fields.Text()
     image_url = fields.Char()
     categ_path = fields.Char("Ruta de categoría")
+    categ_external_ids = fields.Char(
+        "Ids de categoría de origen", help="Ids del sitio, p.ej. 20/373/376/306."
+    )
     attribute_value_ids = fields.Many2many(
         "product.attribute.value",
         string="Características detectadas",
         help="Resultado de las reglas de extracción. Editable antes de importar.",
     )
     raw_json = fields.Text("JSON-LD original", readonly=True)
+    spec_json = fields.Text("Tabla de características", readonly=True)
     checksum = fields.Char(readonly=True, help="Hash del contenido, para detectar cambios.")
 
     state = fields.Selection(
@@ -275,6 +280,109 @@ class TlPikoProduct(models.Model):
             line.attribute_value_ids = [(6, 0, values.ids)]
         return True
 
+    def _spec_dict(self):
+        """Tabla de características con las claves en minúsculas."""
+        self.ensure_one()
+        if not self.spec_json:
+            return {}
+        try:
+            data = json.loads(self.spec_json)
+        except ValueError:
+            return {}
+        return {str(k).strip().rstrip(":").lower(): v for k, v in data.items()}
+
+    def _spec_value(self, label):
+        self.ensure_one()
+        if not label:
+            return ""
+        return self._spec_dict().get(label.strip().rstrip(":").lower(), "")
+
+    # ------------------------------------------------------------------
+    # Categorías
+    # ------------------------------------------------------------------
+    def _crumbs(self):
+        """[(nombre, id externo), ...] a partir de la ruta rastreada."""
+        self.ensure_one()
+        names = [n.strip() for n in (self.categ_path or "").split("/") if n.strip()]
+        ids = [i.strip() for i in (self.categ_external_ids or "").split("/") if i.strip()]
+        if ids and len(ids) == len(names):
+            return list(zip(names, ids))
+        return [(name, False) for name in names]
+
+    def _get_or_create_chain(self, model, crumbs, root=None, only_leaf=False):
+        """Crea/recupera la cadena de categorías y devuelve el recordset.
+
+        Empareja primero por id externo del sitio y, si no, por nombre dentro
+        del mismo padre: así renombrar en PIKO no duplica el árbol.
+        """
+        self.ensure_one()
+        Category = self.env[model]
+        parent = root or Category.browse()
+        chain = Category.browse()
+        for name, external_id in crumbs:
+            domain = [("parent_id", "=", parent.id or False)]
+            category = Category.browse()
+            if external_id:
+                category = Category.search(
+                    [("piko_external_id", "=", external_id)], limit=1
+                )
+            if not category:
+                category = Category.search(domain + [("name", "=", name)], limit=1)
+            if not category:
+                category = Category.create(
+                    {
+                        "name": name,
+                        "parent_id": parent.id or False,
+                        "piko_external_id": external_id or False,
+                    }
+                )
+            elif external_id and not category.piko_external_id:
+                category.piko_external_id = external_id
+            chain |= category
+            parent = category
+        if only_leaf:
+            return chain[-1:] if chain else chain
+        return chain
+
+    def _get_product_categ(self):
+        """Categoría contable según el modo de la fuente."""
+        self.ensure_one()
+        source = self.source_id
+        root = source.product_categ_id
+        crumbs = self._crumbs()
+        if source.categ_mode == "fixed" or not crumbs:
+            return root
+        if source.categ_mode == "first":
+            crumbs = crumbs[:1]
+        chain = self._get_or_create_chain("product.category", crumbs, root=root)
+        return chain[-1:] or root
+
+    def _get_public_categs(self):
+        """Categorías de eCommerce (vacío si website_sale no está instalado)."""
+        self.ensure_one()
+        source = self.source_id
+        if source.public_categ_mode == "none":
+            return None
+        if "product.public.category" not in self.env:
+            return None
+        crumbs = self._crumbs()
+        if not crumbs:
+            return None
+        return self._get_or_create_chain(
+            "product.public.category", crumbs,
+            only_leaf=source.public_categ_mode == "leaf",
+        )
+
+    def _sync_public_categories(self, product):
+        """Añade sin quitar: las categorías puestas a mano se respetan."""
+        self.ensure_one()
+        categories = self._get_public_categs()
+        if not categories:
+            return
+        product.write(
+            {"public_categ_ids": [(4, category.id) for category in categories]}
+        )
+
     def _sync_template_attributes(self, product):
         """Vuelca las características como líneas de atributo `no_variant`."""
         self.ensure_one()
@@ -331,7 +439,8 @@ class TlPikoProduct(models.Model):
                 {
                     "name": self.name or self.default_code or self.url,
                     "type": source.product_type,
-                    "categ_id": source.product_categ_id.id or False,
+                    "categ_id": (self._get_product_categ().id
+                                 or source.product_categ_id.id or False),
                     "default_code": self.default_code or False,
                     "sale_ok": True,
                     "purchase_ok": True,
@@ -352,6 +461,10 @@ class TlPikoProduct(models.Model):
                 vals["barcode"] = self.barcode
             if not product.default_code and self.default_code:
                 vals["default_code"] = self.default_code
+            if source.update_categ:
+                categ = self._get_product_categ()
+                if categ:
+                    vals["categ_id"] = categ.id
         if source.update_description and self.description:
             vals["description_sale"] = self.description
         vals.update(
@@ -384,6 +497,7 @@ class TlPikoProduct(models.Model):
         else:
             product = self.env["product.template"].create(vals)
         self._sync_template_attributes(product)
+        self._sync_public_categories(product)
         self._import_image(product)
         self.write(
             {

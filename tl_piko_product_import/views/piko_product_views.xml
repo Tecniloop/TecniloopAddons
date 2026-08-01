@@ -77,6 +77,7 @@
                     </div>
                     <group string="Características detectadas">
                         <field name="categ_path" readonly="1"/>
+                        <field name="categ_external_ids" readonly="1"/>
                         <field name="attribute_value_ids" widget="many2many_tags" nolabel="1" colspan="2"/>
                         <button name="action_apply_rules" type="object" string="Reaplicar reglas"
                                 class="btn-link" icon="fa-magic"/>
@@ -87,6 +88,9 @@
                         </page>
                         <page string="Imagen">
                             <field name="image_url" widget="url"/>
+                        </page>
+                        <page string="Características de origen">
+                            <field name="spec_json" readonly="1"/>
                         </page>
                         <page string="Datos originales" groups="base.group_no_one">
                             <field name="raw_json"/>

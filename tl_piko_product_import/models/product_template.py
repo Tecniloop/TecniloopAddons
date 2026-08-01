@@ -22,3 +22,22 @@ class ProductTemplate(models.Model):
     def action_open_piko_url(self):
         self.ensure_one()
         return {"type": "ir.actions.act_url", "url": self.piko_url, "target": "new"}
+
+
+class ProductCategory(models.Model):
+    _inherit = "product.category"
+
+    piko_external_id = fields.Char(
+        "Id de categoría de origen", copy=False, index=True,
+        help="Id de la categoría en la tienda rastreada; evita duplicar el "
+             "árbol si allí renombran una categoría.",
+    )
+
+
+class ProductPublicCategory(models.Model):
+    # Solo se registra si website_sale está instalado.
+    _inherit = "product.public.category"
+
+    piko_external_id = fields.Char(
+        "Id de categoría de origen", copy=False, index=True
+    )

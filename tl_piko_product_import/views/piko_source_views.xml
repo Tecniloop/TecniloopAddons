@@ -92,6 +92,10 @@
                                 <group string="Creación">
                                     <field name="create_products"/>
                                     <field name="product_categ_id"/>
+                                    <field name="categ_mode"/>
+                                    <field name="update_categ"
+                                           invisible="categ_mode == 'fixed'"/>
+                                    <field name="public_categ_mode"/>
                                     <field name="product_type"/>
                                     <field name="import_images"/>
                                     <field name="apply_attribute_rules"/>
@@ -125,6 +129,7 @@
                                     <field name="attribute_id"/>
                                     <field name="field_source"/>
                                     <field name="regex"/>
+                                    <field name="spec_label"/>
                                     <field name="value_mode"/>
                                     <field name="value_name"/>
                                 </list>

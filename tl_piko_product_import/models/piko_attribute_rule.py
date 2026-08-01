@@ -40,19 +40,29 @@ class TlPikoAttributeRule(models.Model):
             ("description", "Descripción"),
             ("url", "URL"),
             ("categ_path", "Ruta de categoría"),
+            ("spec", "Fila de la tabla de características"),
             ("all", "Todo el texto"),
         ],
         default="name",
         required=True,
     )
+    spec_label = fields.Char(
+        "Etiqueta de la fila",
+        help="Etiqueta tal cual aparece en la ficha, p.ej. 'Type of current'. "
+             "No distingue mayúsculas ni los dos puntos finales.",
+    )
     regex = fields.Char(
-        required=True,
         help="Expresión regular Python. Se evalúa sin distinguir mayúsculas "
-             "salvo que actives 'Sensible a mayúsculas'.",
+             "salvo que actives 'Sensible a mayúsculas'. Con el modo 'Valor de "
+             "la fila' no se usa.",
     )
     case_sensitive = fields.Boolean(default=False)
     value_mode = fields.Selection(
-        [("fixed", "Valor fijo"), ("capture", "Grupo capturado")],
+        [
+            ("fixed", "Valor fijo"),
+            ("capture", "Grupo capturado"),
+            ("value", "Valor de la fila"),
+        ],
         default="fixed",
         required=True,
     )
@@ -83,9 +93,19 @@ class TlPikoAttributeRule(models.Model):
         help="Si acierta, no se evalúan más reglas del mismo atributo.",
     )
 
-    @api.constrains("regex")
+    @api.constrains("regex", "value_mode", "spec_label")
     def _check_regex(self):
         for rule in self:
+            if rule.value_mode == "value":
+                if not rule.spec_label:
+                    raise ValidationError(
+                        _("La regla '%s' necesita una etiqueta de fila.", rule.name)
+                    )
+                continue
+            if not rule.regex:
+                raise ValidationError(
+                    _("La regla '%s' necesita una expresión regular.", rule.name)
+                )
             try:
                 re.compile(rule.regex)
             except re.error as exc:
@@ -121,6 +141,8 @@ class TlPikoAttributeRule(models.Model):
     # ------------------------------------------------------------------
     def _get_text(self, line):
         self.ensure_one()
+        if self.field_source == "spec":
+            return line._spec_value(self.spec_label)
         if self.field_source == "all":
             parts = [line.name, line.default_code, line.description, line.categ_path]
             return " ".join(p for p in parts if p)
@@ -143,6 +165,9 @@ class TlPikoAttributeRule(models.Model):
         text = self._get_text(line)
         if not text:
             return []
+        if self.value_mode == "value":
+            value = self._normalize(text)
+            return [value] if value else []
         flags = 0 if self.case_sensitive else re.IGNORECASE
         try:
             pattern = re.compile(self.regex, flags)

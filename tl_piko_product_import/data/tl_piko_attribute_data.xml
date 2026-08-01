@@ -35,7 +35,122 @@
         <field name="create_variant">no_variant</field>
     </record>
 
+
+    <record id="attr_decoder_builtin" model="product.attribute">
+        <field name="name">Decoder incorporado</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+    <record id="attr_age" model="product.attribute">
+        <field name="name">Edad recomendada</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+
+    <!-- ============================================================
+         Reglas sobre la TABLA DE CARACTERÍSTICAS de la ficha.
+         Secuencia 5: se evalúan antes que las reglas sobre el título,
+         que quedan como respaldo para fichas sin tabla.
+         Las etiquetas están en inglés y los valores en alemán.
+         ============================================================ -->
+    <record id="rule_spec_current" model="tl.piko.attribute.rule">
+        <field name="name">Corriente (tabla)</field>
+        <field name="sequence">5</field>
+        <field name="attribute_id" ref="attr_current"/>
+        <field name="field_source">spec</field>
+        <field name="spec_label">Type of current</field>
+        <field name="value_mode">value</field>
+        <field name="value_mapping">Gleichstrom = DC (2 carriles)
+DC = DC (2 carriles)
+Wechselstrom = AC (3 carriles)
+AC = AC (3 carriles)
+AC, decoder-equipped for normal and DCC operation = AC (3 carriles)</field>
+    </record>
+
+    <record id="rule_spec_sound" model="tl.piko.attribute.rule">
+        <field name="name">Sonido (tabla)</field>
+        <field name="sequence">5</field>
+        <field name="attribute_id" ref="attr_sound"/>
+        <field name="field_source">spec</field>
+        <field name="spec_label">Sound yes/no</field>
+        <field name="value_mode">value</field>
+        <field name="value_mapping">ja = Con sonido
+yes = Con sonido
+nein = Sin sonido
+no = Sin sonido</field>
+    </record>
+
+    <record id="rule_spec_era" model="tl.piko.attribute.rule">
+        <field name="name">Época (tabla)</field>
+        <field name="sequence">5</field>
+        <field name="attribute_id" ref="attr_epoch"/>
+        <field name="field_source">spec</field>
+        <field name="spec_label">Era</field>
+        <field name="value_mode">value</field>
+        <field name="value_mapping">I = Ep. I
+II = Ep. II
+III = Ep. III
+IV = Ep. IV
+V = Ep. V
+VI = Ep. VI</field>
+    </record>
+
+    <record id="rule_spec_railway" model="tl.piko.attribute.rule">
+        <field name="name">Administración ferroviaria (tabla)</field>
+        <field name="sequence">5</field>
+        <field name="attribute_id" ref="attr_railway"/>
+        <field name="field_source">spec</field>
+        <field name="spec_label">Railway administration</field>
+        <field name="value_mode">value</field>
+        <field name="value_mapping">OEBB = ÖBB
+ČD = CD
+ČD Cargo = CD Cargo
+MÁV = MAV
+RZD = RZhD
+Privatbahhn = Privatbahn
+private railway company = Privatbahn</field>
+    </record>
+
+    <record id="rule_spec_interface" model="tl.piko.attribute.rule">
+        <field name="name">Interfaz digital (tabla)</field>
+        <field name="sequence">5</field>
+        <field name="attribute_id" ref="attr_decoder"/>
+        <field name="field_source">spec</field>
+        <field name="spec_label">Digital interface</field>
+        <field name="value_mode">value</field>
+        <field name="value_mapping">nicht vorhanden = Sin interfaz
+not available = Sin interfaz
+built-in = Decoder de fábrica
+NEM 658 PluX22 = PluX22
+NEM 658 PluX16 = PluX16
+NEM 662 Next18 = Next18
+NEM 652 = NEM 652 (8 pines)
+NEM 652 including decoder = NEM 652 (8 pines)
+NEM 651 = NEM 651 (6 pines)</field>
+    </record>
+
+    <record id="rule_spec_builtin_decoder" model="tl.piko.attribute.rule">
+        <field name="name">Decoder incorporado (tabla)</field>
+        <field name="sequence">5</field>
+        <field name="attribute_id" ref="attr_decoder_builtin"/>
+        <field name="field_source">spec</field>
+        <field name="spec_label">Built-in decoder</field>
+        <field name="value_mode">value</field>
+    </record>
+
+    <record id="rule_spec_age" model="tl.piko.attribute.rule">
+        <field name="name">Edad recomendada (tabla)</field>
+        <field name="sequence">5</field>
+        <field name="attribute_id" ref="attr_age"/>
+        <field name="field_source">spec</field>
+        <field name="spec_label">Age recommendation</field>
+        <field name="value_mode">value</field>
+        <field name="value_mapping">ab 3 Jahren = 3+
+ab 6 Jahren = 6+
+ab 8 Jahren = 8+
+ab 14 Jahren = 14+</field>
+    </record>
+
     <!-- ===================== Reglas de extracción ===================== -->
+    <!-- Respaldo sobre el título, para fichas sin tabla de características -->
     <!-- Escala: prefijos del nombre y, como respaldo, la ruta de categoría -->
     <record id="rule_scale_g" model="tl.piko.attribute.rule">
         <field name="name">Escala G (prefijo)</field>

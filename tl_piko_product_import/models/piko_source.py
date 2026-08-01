@@ -135,9 +135,38 @@ class TlPikoSource(models.Model):
         "tl.piko.attribute.rule", "source_id", string="Reglas propias"
     )
     product_categ_id = fields.Many2one(
-        "product.category", default=lambda self: self.env.ref(
+        "product.category", string="Categoría raíz",
+        default=lambda self: self.env.ref(
             "product.product_category_all", raise_if_not_found=False
-        )
+        ),
+        help="Categoría fija, o raíz bajo la que se crea el árbol importado.",
+    )
+    categ_mode = fields.Selection(
+        [
+            ("fixed", "Siempre la categoría raíz"),
+            ("first", "Primer nivel del breadcrumb"),
+            ("leaf", "Último nivel del breadcrumb"),
+        ],
+        "Categoría de producto",
+        default="fixed",
+        required=True,
+        help="`categ_id` es único por producto y arrastra cuentas contables: "
+             "lo habitual es dejarlo grueso (fijo o primer nivel).",
+    )
+    update_categ = fields.Boolean(
+        "Recalcular en productos existentes", default=False,
+        help="Por defecto la categoría contable solo se fija al crear."
+    )
+    public_categ_mode = fields.Selection(
+        [
+            ("none", "No importar"),
+            ("path", "Ruta completa (crea la jerarquía)"),
+            ("leaf", "Solo la última"),
+        ],
+        "Categorías de eCommerce",
+        default="path",
+        required=True,
+        help="Requiere website_sale. Nunca elimina categorías puestas a mano.",
     )
     product_type = fields.Selection(
         [("consu", "Bienes"), ("service", "Servicio")], default="consu", required=True

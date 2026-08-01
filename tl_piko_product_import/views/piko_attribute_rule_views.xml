@@ -9,6 +9,7 @@
                 <field name="name"/>
                 <field name="attribute_id"/>
                 <field name="field_source"/>
+                <field name="spec_label" optional="show"/>
                 <field name="regex"/>
                 <field name="value_mode"/>
                 <field name="value_name"/>
@@ -34,7 +35,11 @@
                         <group string="Origen">
                             <field name="source_id" placeholder="Todas las fuentes"/>
                             <field name="field_source"/>
-                            <field name="regex"/>
+                            <field name="spec_label" invisible="field_source != 'spec'"
+                                   required="field_source == 'spec'"
+                                   placeholder="Type of current"/>
+                            <field name="regex" invisible="value_mode == 'value'"
+                                   required="value_mode != 'value'"/>
                             <field name="case_sensitive"/>
                             <field name="multi"/>
                         </group>
@@ -50,7 +55,7 @@
                             <field name="active"/>
                         </group>
                     </group>
-                    <field name="value_mapping" invisible="value_mode != 'capture'"
+                    <field name="value_mapping" invisible="value_mode == 'fixed'"
                            placeholder="capturado = Valor final"/>
                     <div class="alert alert-info" role="alert">
                         El atributo se fuerza a <b>no_variant</b>: estas reglas nunca

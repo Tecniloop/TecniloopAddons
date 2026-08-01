@@ -27,6 +27,7 @@ RE_URL_ID = re.compile(r"-(\d+)\.html?$", re.I)
 # index.php?vw_type=artikel&vw_id=30320&vw_name=detail (URLs legacy)
 RE_LEGACY_ID = re.compile(r"vw_id=(\d+)", re.I)
 RE_EAN = re.compile(r"\b(\d{8}|\d{12,14})\b")
+RE_PRICE = re.compile(r"(\d{1,3}(?:\.\d{3})*,\d{2})\s*(?:€|EUR)")
 RE_SKU_LABEL = re.compile(
     r"(?:artikelnummer|artikel-nr\.?|art\.?\s*nr\.?|item\s*number|sku)\s*[:.]?\s*"
     r"([A-Za-z0-9][A-Za-z0-9._/\-]{2,30})",
@@ -249,7 +250,12 @@ class TlPikoScraper(models.AbstractModel):
                     vals[key] = meta[0].strip()
         # 3) Selectores XPath configurables en la fuente
         vals.update(self._parse_xpath(source, tree))
-        # 4) Heurísticas de texto (referencia y EAN)
+        # 4) Tabla de características: más fiable que cualquier heurística
+        specs = self._parse_spec_table(tree)
+        if specs:
+            vals["spec_json"] = json.dumps(specs, ensure_ascii=False)[:60000]
+            vals.update(self._spec_to_vals(specs))
+        # 5) Heurísticas de texto, solo para lo que siga faltando
         text = " ".join(tree.xpath("//body//text()"))
         text = re.sub(r"\s+", " ", text)
         if not vals.get("default_code"):
@@ -257,9 +263,12 @@ class TlPikoScraper(models.AbstractModel):
             if match:
                 vals["default_code"] = match.group(1).strip(" .:")
         if not vals.get("barcode"):
-            for candidate in RE_EAN.findall(text):
-                if len(candidate) in (8, 12, 13, 14):
-                    vals["barcode"] = candidate
+            candidates = RE_EAN.findall(text)
+            # 13 primero: un nº WEEE ("DE 24216800") también encaja como EAN-8
+            for length in (13, 14, 12, 8):
+                match = next((c for c in candidates if len(c) == length), None)
+                if match:
+                    vals["barcode"] = match
                     break
         if not vals.get("name"):
             title = tree.xpath("//h1//text()") or tree.xpath("//title/text()")
@@ -268,9 +277,13 @@ class TlPikoScraper(models.AbstractModel):
             desc = tree.xpath("//meta[@name='description']/@content")
             vals["description"] = desc and desc[0].strip() or False
         if not vals.get("categ_path"):
-            vals["categ_path"] = self._parse_breadcrumb(tree)
+            path, categ_ids = self._parse_breadcrumb(tree, vals.get("name"))
+            vals["categ_path"] = path
+            vals["categ_external_ids"] = categ_ids
         if vals.get("image_url"):
             vals["image_url"] = urljoin(source.base_url, vals["image_url"])
+        if not vals.get("price"):
+            vals["price"] = self._price_from_text(tree)
         vals["price"] = self._parse_price(vals.get("price"))
         vals["name"] = self._clean(vals.get("name"))
         return vals
@@ -332,9 +345,73 @@ class TlPikoScraper(models.AbstractModel):
                 yield from self._iter_jsonld(data["@graph"])
             yield data
 
+    # Etiquetas de la ficha que alimentan campos propios del producto.
+    # Las páginas /en/ traen las etiquetas en inglés y los valores en alemán.
+    SPEC_FIELD_LABELS = {
+        "default_code": ("item number", "artikelnummer", "artikel-nr.", "sku"),
+        "barcode": ("ean", "gtin", "ean-code"),
+        "brand": ("manufacturer", "hersteller", "marke"),
+    }
+
     @api.model
-    def _parse_breadcrumb(self, tree):
-        """Ruta de categoría: BreadcrumbList (JSON-LD), microdatos o .breadcrumb."""
+    def _parse_spec_table(self, tree):
+        """Extrae la tabla de características como {etiqueta: valor}.
+
+        Acepta tablas de dos columnas y listas de definición. Se queda con la
+        primera aparición de cada etiqueta y descarta filas sin valor.
+        """
+        specs = {}
+
+        def add(label, value):
+            label = (self._clean(label) or "").rstrip(":").strip()
+            value = self._clean(value)
+            if label and value and label.lower() not in specs:
+                specs[label] = value
+
+        for row in tree.xpath("//table//tr"):
+            cells = row.xpath("./td | ./th")
+            if len(cells) == 2:
+                add(cells[0].text_content(), cells[1].text_content())
+        for dl in tree.xpath("//dl"):
+            terms = dl.xpath("./dt")
+            definitions = dl.xpath("./dd")
+            for term, definition in zip(terms, definitions):
+                add(term.text_content(), definition.text_content())
+        return specs
+
+    @api.model
+    def _spec_to_vals(self, specs):
+        """Campos base que se pueden tomar directamente de la tabla."""
+        lowered = {k.lower(): v for k, v in specs.items()}
+        vals = {}
+        for field, labels in self.SPEC_FIELD_LABELS.items():
+            for label in labels:
+                if label in lowered:
+                    vals[field] = lowered[label]
+                    break
+        return vals
+
+    @api.model
+    def _parse_breadcrumb(self, tree, product_name=None):
+        """Devuelve (ruta, ids externos) de la migaja de pan.
+
+        1) BreadcrumbList en JSON-LD.
+        2) Contenedor con clase 'breadcrumb'.
+        3) Heurística: el bloque más pequeño que contiene entre 1 y 8 enlaces de
+           categoría. Descarta el megamenú (decenas de enlaces) y prefiere el
+           bloque que además menciona el nombre del producto.
+        """
+        crumbs = self._breadcrumb_from_jsonld(tree)
+        if not crumbs:
+            crumbs = self._breadcrumb_from_html(tree, product_name)
+        if not crumbs:
+            return False, False
+        names = [name for name, _cid in crumbs]
+        ids = [cid for _name, cid in crumbs if cid]
+        return " / ".join(names), "/".join(ids) if ids else False
+
+    @api.model
+    def _breadcrumb_from_jsonld(self, tree):
         for node in tree.xpath("//script[@type='application/ld+json']/text()"):
             try:
                 data = json.loads(node)
@@ -343,23 +420,70 @@ class TlPikoScraper(models.AbstractModel):
             for item in self._iter_jsonld(data):
                 if item.get("@type") != "BreadcrumbList":
                     continue
-                names = []
+                crumbs = []
                 for element in item.get("itemListElement") or []:
                     target = element.get("item") or {}
-                    name = element.get("name") or (
-                        target.get("name") if isinstance(target, dict) else None
-                    )
-                    if name:
-                        names.append(str(name).strip())
-                if names:
-                    return " / ".join(names)
-        nodes = tree.xpath(
-            "//*[contains(@class,'breadcrumb')]//a//text()"
-            " | //*[@itemtype='http://schema.org/BreadcrumbList']//a//text()"
-        )
-        parts = [self._clean(n) for n in nodes]
-        parts = [p for p in parts if p]
-        return " / ".join(parts) if parts else False
+                    if isinstance(target, dict):
+                        url = target.get("@id") or target.get("url") or ""
+                        name = element.get("name") or target.get("name")
+                    else:
+                        url, name = str(target), element.get("name")
+                    categ_id = self._categ_id(url)
+                    # Solo los nodos de categoría: descarta la home (la raíz del
+                    # sitio) y el último elemento, que es el propio artículo.
+                    if name and categ_id:
+                        crumbs.append((self._clean(name), categ_id))
+                if crumbs:
+                    return self._clean_crumbs(crumbs)
+        return []
+
+    @api.model
+    def _breadcrumb_from_html(self, tree, product_name=None):
+        containers = tree.xpath(
+            "//*[contains(@class,'breadcrumb') or contains(@class,'Breadcrumb')]"
+        ) or tree.xpath("//nav | //ol | //ul")
+        best = None
+        for node in containers:
+            links = [
+                a for a in node.xpath(".//a[@href]")
+                if "/warengruppe/" in (a.get("href") or "")
+            ]
+            total_links = len(node.xpath(".//a[@href]"))
+            if not links or total_links > 12:
+                continue  # el megamenú tiene decenas de enlaces
+            crumbs = [
+                (self._clean(a.text_content()), self._categ_id(a.get("href")))
+                for a in links
+            ]
+            crumbs = self._clean_crumbs(crumbs)
+            if not crumbs:
+                continue
+            text = " ".join(node.itertext())
+            score = (0 if product_name and product_name[:30] in text else 1,
+                     total_links)
+            if best is None or score < best[0]:
+                best = (score, crumbs)
+        return best[1] if best else []
+
+    @api.model
+    def _clean_crumbs(self, crumbs):
+        """Quita Home/Back y repeticiones conservando el orden."""
+        skip = {"home", "back", "startseite", "zurück", "zurueck", "inicio"}
+        seen, out = set(), []
+        for name, cid in crumbs:
+            if not name or name.lower().strip(" /") in skip:
+                continue
+            key = cid or name.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append((name, cid))
+        return out
+
+    @api.model
+    def _categ_id(self, url):
+        match = re.search(r"/warengruppe/[^/]*?-(\d+)\.html", url or "")
+        return match.group(1) if match else False
 
     @api.model
     def _parse_xpath(self, source, tree):
@@ -403,6 +527,23 @@ class TlPikoScraper(models.AbstractModel):
         if not value:
             return False
         return re.sub(r"\s+", " ", str(value)).strip() or False
+
+    @api.model
+    def _price_from_text(self, tree):
+        """Primer importe en euros que aparece tras el título del producto."""
+        nodes = tree.xpath("//h1")
+        start = nodes[0] if nodes else tree
+        collected = []
+        for element in start.itersiblings():
+            collected.append(" ".join(element.itertext()))
+        parent = start.getparent()
+        while parent is not None and len(" ".join(collected)) < 400:
+            for element in parent.itersiblings():
+                collected.append(" ".join(element.itertext()))
+            parent = parent.getparent()
+        text = re.sub(r"\s+", " ", " ".join(collected))
+        match = RE_PRICE.search(text)
+        return match.group(1) if match else 0.0
 
     @api.model
     def _parse_price(self, value):

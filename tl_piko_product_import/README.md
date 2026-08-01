@@ -3,7 +3,7 @@
 Importador de productos por **scraping HTML** para Odoo 19, pensado para tiendas
 sin API pública (caso de partida: `piko-shop.de`, sistema propietario sin API).
 
-Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.1.4.0
+Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.3.0.0
 
 ## Arquitectura
 
@@ -168,3 +168,84 @@ Las categorías raíz de escala listan también los artículos de sus
 subcategorías, de modo que la fuente rastrea solo H0 / G / TT / N (más New 2026
 y Fanshop): ~40 peticiones de listado para ~3.800 fichas, frente a las ~70
 hojas del menú.
+
+
+## Categorías (19.0.2.0.0)
+
+El breadcrumb de la ficha trae la ruta completa con los ids del sitio:
+
+    Home / H0 Scale / Locos DC / Expert DC / Electric locos
+              20         373       376          306
+
+Se guarda en la línea como `categ_path` + `categ_external_ids` y se vuelca a dos
+sitios distintos, porque son cosas distintas:
+
+| Destino | Campo | Modo en la fuente |
+| --- | --- | --- |
+| Contable | `categ_id` (una sola) | `categ_mode`: fija / primer nivel / último nivel |
+| eCommerce | `public_categ_ids` (varias) | `public_categ_mode`: no importar / ruta completa / solo la última |
+
+Por defecto: `categ_id` **fija** (la raíz de la fuente) y **ruta completa** en
+categorías web. Es lo sensato: `categ_id` arrastra cuentas contables y reglas de
+abastecimiento, así que conviene dejarlo grueso; la navegación de la tienda es
+donde el árbol de 70 nodos tiene sentido.
+
+Reglas:
+
+- El árbol se crea bajo la categoría raíz de la fuente, con `parent_id` encadenado.
+- Emparejamiento por `piko_external_id` (el id del sitio) y, si no, por nombre
+  dentro del mismo padre: si PIKO renombra una categoría, no se duplica el árbol.
+- `public_categ_ids` se **añade**, nunca se reemplaza: las categorías puestas a
+  mano sobreviven a las sincronizaciones.
+- `categ_id` solo se fija al crear, salvo que actives `update_categ`.
+
+Extracción del breadcrumb: JSON-LD `BreadcrumbList` → contenedor con clase
+`breadcrumb` → heurística que descarta el megamenú (>12 enlaces) y prefiere el
+bloque que menciona el nombre del producto. Se filtran «Home» y el «Back»
+duplicado.
+
+El sitio **sí publica JSON-LD** (`BreadcrumbList` y `WebPage`), aunque no sea
+visible al extraer la página como texto. Dos particularidades de su
+`BreadcrumbList`: el nombre va dentro de `item`, no en el `ListItem`, y la lista
+incluye la home y el propio artículo. Por eso solo se conservan los nodos cuya
+URL es `/warengruppe/<slug>-<id>.html`.
+
+Otros arreglos de esta versión, salidos de leer una ficha real:
+
+- **Precio de respaldo**: si ningún JSON-LD `Product` ni XPath aporta precio, se
+  busca el primer importe en euros posterior al `<h1>`.
+- **EAN**: se prefiere una coincidencia de 13 dígitos, porque el nº WEEE
+  (`DE 24216800`) también encajaba como EAN-8 y ganaba por posición.
+
+
+## Tabla de características (19.0.3.0.0)
+
+Las fichas traen una tabla *Features* de dos columnas. Se parsea entera
+(`tl.piko.product.spec_json`) y es ahora la fuente preferente:
+
+- **Campos base directos**: `Item number` → referencia, `EAN` → código de
+  barras, `Manufacturer` → marca. Sin regex ni ambigüedad con el nº WEEE.
+- **Atributos**: la regla admite `field_source = spec` con una `spec_label` y el
+  modo `value` («Valor de la fila»), que toma el valor tal cual y lo pasa por la
+  tabla de normalización. Las reglas de tabla van en secuencia 5, antes que las
+  del título, que quedan como respaldo para fichas sin tabla.
+
+Ojo con el idioma: en las páginas `/en/` las **etiquetas** están en inglés pero
+los **valores** vienen en alemán (`Gleichstrom`, `ja`, `ab 14 Jahren`), de ahí la
+normalización en cada regla.
+
+Contraste sobre la ficha 21002 (BR E 410):
+
+| Atributo | Con tabla | Solo título |
+| --- | --- | --- |
+| Corriente | DC (2 carriles) | DC (2 carriles) |
+| Sonido | Con sonido | **Sin sonido** (mal) |
+| Época | Ep. III | Ep. III |
+| Interfaz digital | PluX22 | — |
+| Decoder incorporado | PluX22 Sounddecoder | — |
+| Edad recomendada | 14+ | — |
+
+Atributos nuevos: *Decoder incorporado* y *Edad recomendada*. Los numéricos de
+la tabla (`Measurement`, `Minimum radius`, `Number of Traction Tyres`) se
+guardan en `spec_json` pero no se convierten en atributos, porque generarían un
+valor distinto por medida.
