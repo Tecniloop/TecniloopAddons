@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_tl_piko_root"
+              name="Importación web"
+              groups="tl_piko_product_import.group_tl_piko_manager"
+              sequence="90"/>
+
+    <menuitem id="menu_tl_piko_source"
+              name="Fuentes"
+              parent="menu_tl_piko_root"
+              action="action_tl_piko_source"
+              sequence="10"/>
+
+    <menuitem id="menu_tl_piko_product"
+              name="Productos rastreados"
+              parent="menu_tl_piko_root"
+              action="action_tl_piko_product"
+              sequence="20"/>
+
+    <menuitem id="menu_tl_piko_rules"
+              name="Reglas de características"
+              parent="menu_tl_piko_root"
+              action="action_tl_piko_attribute_rule"
+              sequence="25"/>
+
+    <menuitem id="menu_tl_piko_wizard"
+              name="Importar por URL"
+              parent="menu_tl_piko_root"
+              action="action_tl_piko_import_wizard"
+              sequence="30"/>
+</odoo>

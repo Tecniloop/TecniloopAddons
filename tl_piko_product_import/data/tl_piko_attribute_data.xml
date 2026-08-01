@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============ Atributos técnicos (nunca generan variantes) ============ -->
+    <record id="attr_scale" model="product.attribute">
+        <field name="name">Escala</field>
+        <field name="create_variant">no_variant</field>
+        <field name="display_type">radio</field>
+    </record>
+    <record id="attr_epoch" model="product.attribute">
+        <field name="name">Época</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+    <record id="attr_railway" model="product.attribute">
+        <field name="name">Administración ferroviaria</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+    <record id="attr_current" model="product.attribute">
+        <field name="name">Corriente</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+    <record id="attr_sound" model="product.attribute">
+        <field name="name">Sonido</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+    <record id="attr_decoder" model="product.attribute">
+        <field name="name">Interfaz digital</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+    <record id="attr_traction" model="product.attribute">
+        <field name="name">Tipo de tracción</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+    <record id="attr_range" model="product.attribute">
+        <field name="name">Gama</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+
+    <!-- ===================== Reglas de extracción ===================== -->
+    <!-- Escala: prefijos del nombre y, como respaldo, la ruta de categoría -->
+    <record id="rule_scale_g" model="tl.piko.attribute.rule">
+        <field name="name">Escala G (prefijo)</field>
+        <field name="sequence">10</field>
+        <field name="attribute_id" ref="attr_scale"/>
+        <field name="regex">(?:^|:\s*|\s)G[- ](?:Dampflok|Diesellok|E-Lok|E-Triebzug|US|Zement|Schiebe|Nieder|Container|Rungenwg|Tankwg|Schüttgut|Sound|Offener|Umbauwagen|HSB|DR|DB)</field>
+        <field name="value_name">G (1:22,5)</field>
+    </record>
+    <record id="rule_scale_tt" model="tl.piko.attribute.rule">
+        <field name="name">Escala TT (prefijo)</field>
+        <field name="sequence">11</field>
+        <field name="attribute_id" ref="attr_scale"/>
+        <field name="regex">(?:^|:\s*|\s)TT[- ]</field>
+        <field name="value_name">TT (1:120)</field>
+    </record>
+    <record id="rule_scale_n" model="tl.piko.attribute.rule">
+        <field name="name">Escala N (prefijo)</field>
+        <field name="sequence">12</field>
+        <field name="attribute_id" ref="attr_scale"/>
+        <field name="regex">(?:^|:\s*|\s)N[- ](?:E-Lok|Diesellok|Dampflok|Triebwg|Schienenbus|Elektrotriebwagen|Personenwagen|Schüttgutwagen|2er)</field>
+        <field name="value_name">N (1:160)</field>
+    </record>
+    <record id="rule_scale_categ" model="tl.piko.attribute.rule">
+        <field name="name">Escala (ruta de categoría)</field>
+        <field name="sequence">15</field>
+        <field name="attribute_id" ref="attr_scale"/>
+        <field name="field_source">categ_path</field>
+        <field name="regex">\b(G|H0|TT|N)[ -](?:Scale|Spur)\b</field>
+        <field name="value_mode">capture</field>
+        <field name="value_mapping">G = G (1:22,5)
+H0 = H0 (1:87)
+TT = TT (1:120)
+N = N (1:160)</field>
+    </record>
+    <record id="rule_scale_h0" model="tl.piko.attribute.rule">
+        <field name="name">Escala H0 (por defecto)</field>
+        <field name="sequence">90</field>
+        <field name="attribute_id" ref="attr_scale"/>
+        <field name="regex">.</field>
+        <field name="value_name">H0 (1:87)</field>
+    </record>
+
+    <!-- Época: numeral romano al final del nombre -->
+    <record id="rule_epoch" model="tl.piko.attribute.rule">
+        <field name="name">Época</field>
+        <field name="attribute_id" ref="attr_epoch"/>
+        <field name="regex">\b(I{1,3}|IV|V|VI)\b(?!\w)</field>
+        <field name="value_mode">capture</field>
+        <field name="case_sensitive">1</field>
+        <field name="match_position">last</field>
+        <field name="value_mapping">I = Ep. I
+II = Ep. II
+III = Ep. III
+IV = Ep. IV
+V = Ep. V
+VI = Ep. VI</field>
+    </record>
+
+    <!-- Administración ferroviaria -->
+    <record id="rule_railway" model="tl.piko.attribute.rule">
+        <field name="name">Administración ferroviaria</field>
+        <field name="attribute_id" ref="attr_railway"/>
+        <field name="regex">\b(DB AG|DBAG|DB|DR|DRB|DRG|PKP IC|PKP|ÖBB|OEBB|SBB|CD Cargo|CD|ČD|MAV|MÁV|NS|SNCF|SNCB|FS|ZSSK|RENFE|RZhD|RZD|HSB|Privatbahn)\b</field>
+        <field name="value_mode">capture</field>
+        <field name="case_sensitive">1</field>
+        <field name="value_mapping">DBAG = DB AG
+OEBB = ÖBB
+ČD = CD
+MÁV = MAV
+RZD = RZhD
+PKP IC = PKP</field>
+    </record>
+
+    <!-- Corriente: AC/DC vía ruta de categoría o marcadores del nombre -->
+    <record id="rule_current_ac" model="tl.piko.attribute.rule">
+        <field name="name">Corriente alterna (AC)</field>
+        <field name="sequence">10</field>
+        <field name="attribute_id" ref="attr_current"/>
+        <field name="field_source">all</field>
+        <field name="regex">\b(?:AC|Wechselstrom|Märklin)\b</field>
+        <field name="value_name">AC (3 carriles)</field>
+    </record>
+    <record id="rule_current_dc" model="tl.piko.attribute.rule">
+        <field name="name">Corriente continua (DC)</field>
+        <field name="sequence">20</field>
+        <field name="attribute_id" ref="attr_current"/>
+        <field name="field_source">all</field>
+        <field name="regex">\b(?:DC|Gleichstrom)\b</field>
+        <field name="value_name">DC (2 carriles)</field>
+    </record>
+
+    <!-- Sonido -->
+    <record id="rule_sound_yes" model="tl.piko.attribute.rule">
+        <field name="name">Con sonido</field>
+        <field name="sequence">10</field>
+        <field name="attribute_id" ref="attr_sound"/>
+        <field name="regex">(?:/\s*Sound|\bSound\b|Sound-Decoder|Digitalsound)</field>
+        <field name="value_name">Con sonido</field>
+    </record>
+    <record id="rule_sound_no" model="tl.piko.attribute.rule">
+        <field name="name">Sin sonido</field>
+        <field name="sequence">80</field>
+        <field name="attribute_id" ref="attr_sound"/>
+        <field name="regex">.</field>
+        <field name="value_name">Sin sonido</field>
+    </record>
+
+    <!-- Interfaz digital (puede haber varias) -->
+    <record id="rule_decoder" model="tl.piko.attribute.rule">
+        <field name="name">Interfaz digital</field>
+        <field name="attribute_id" ref="attr_decoder"/>
+        <field name="regex">\b(PluX22|PluX16|PluX12|Next18|21MTC|NEM ?652|NEM ?651|8pol\.?|6pol\.?)</field>
+        <field name="value_mode">capture</field>
+        <field name="multi">1</field>
+        <field name="value_mapping">8pol = NEM 652 (8 pines)
+8pol. = NEM 652 (8 pines)
+6pol = NEM 651 (6 pines)
+6pol. = NEM 651 (6 pines)
+NEM652 = NEM 652 (8 pines)
+NEM651 = NEM 651 (6 pines)</field>
+    </record>
+
+    <!-- Tipo de tracción / material -->
+    <record id="rule_traction" model="tl.piko.attribute.rule">
+        <field name="name">Tipo de tracción</field>
+        <field name="attribute_id" ref="attr_traction"/>
+        <field name="regex">\b(Dampflok|Diesellok|E-Lok|Elektrolok|E-Triebzug|Elektrotriebwagen|Triebwg\.?|Triebwagen|Schienenbus|Steam loco|Diesel loco|Electric loco)\b</field>
+        <field name="value_mode">capture</field>
+        <field name="value_mapping">Dampflok = Locomotora de vapor
+Steam loco = Locomotora de vapor
+Diesellok = Locomotora diésel
+Diesel loco = Locomotora diésel
+E-Lok = Locomotora eléctrica
+Elektrolok = Locomotora eléctrica
+Electric loco = Locomotora eléctrica
+E-Triebzug = Automotor eléctrico
+Elektrotriebwagen = Automotor eléctrico
+Triebwg. = Automotor
+Triebwg = Automotor
+Triebwagen = Automotor
+Schienenbus = Automotor ligero</field>
+    </record>
+
+    <!-- Gama comercial -->
+    <record id="rule_range" model="tl.piko.attribute.rule">
+        <field name="name">Gama</field>
+        <field name="field_source">all</field>
+        <field name="attribute_id" ref="attr_range"/>
+        <field name="regex">\b(Expert plus|Expert|Hobby|Classic nostalgie|myTrain|SmartControl)\b</field>
+        <field name="value_mode">capture</field>
+    </record>
+</odoo>

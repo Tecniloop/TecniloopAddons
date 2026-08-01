@@ -1,0 +1,32 @@
+{
+    "name": "PIKO Product Import (Web Scraping)",
+    "summary": "Importador de productos por scraping de tiendas web sin API "
+               "(piko-shop.de y similares), con staging previo",
+    "version": "19.0.1.2.0",
+    "category": "Sales/Sales",
+    "author": "Tecniloop",
+    "website": "https://www.tecniloop.com",
+    "license": "LGPL-3",
+    "depends": [
+        "product",
+        "mail",
+    ],
+    "data": [
+        "security/security.xml",
+        "security/ir.model.access.csv",
+        "data/ir_cron.xml",
+        "data/tl_piko_source_data.xml",
+        "data/tl_piko_attribute_data.xml",
+        "views/piko_source_views.xml",
+        "views/piko_product_views.xml",
+        "views/piko_attribute_rule_views.xml",
+        "wizard/piko_import_wizard_views.xml",
+        "views/product_template_views.xml",
+        "views/menus.xml",
+    ],
+    "external_dependencies": {
+        "python": ["requests", "lxml"],
+    },
+    "installable": True,
+    "application": False,
+}

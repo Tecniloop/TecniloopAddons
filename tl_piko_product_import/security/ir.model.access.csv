@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tl_piko_source_manager,tl.piko.source manager,model_tl_piko_source,group_tl_piko_manager,1,1,1,1
+access_tl_piko_category_manager,tl.piko.category manager,model_tl_piko_category,group_tl_piko_manager,1,1,1,1
+access_tl_piko_product_manager,tl.piko.product manager,model_tl_piko_product,group_tl_piko_manager,1,1,1,1
+access_tl_piko_import_wizard,tl.piko.import.wizard,model_tl_piko_import_wizard,group_tl_piko_manager,1,1,1,1
+access_tl_piko_product_user,tl.piko.product read,model_tl_piko_product,base.group_user,1,0,0,0
+access_tl_piko_attribute_rule_manager,tl.piko.attribute.rule manager,model_tl_piko_attribute_rule,group_tl_piko_manager,1,1,1,1

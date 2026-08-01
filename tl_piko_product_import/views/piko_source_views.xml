@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tl_piko_source_list" model="ir.ui.view">
+        <field name="name">tl.piko.source.list</field>
+        <field name="model">tl.piko.source</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="base_url"/>
+                <field name="discovery_mode"/>
+                <field name="line_count"/>
+                <field name="imported_count"/>
+                <field name="error_count" decoration-danger="error_count &gt; 0"/>
+                <field name="last_run"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tl_piko_source_form" model="ir.ui.view">
+        <field name="name">tl.piko.source.form</field>
+        <field name="model">tl.piko.source</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_enqueue" type="object" class="btn-primary"
+                            string="Ejecutar en segundo plano"
+                            invisible="queue_state in ('queued', 'running')"/>
+                    <button name="action_enqueue_lines" type="object"
+                            string="Reencolar pendientes y errores"/>
+                    <button name="action_test_connection" type="object" string="Probar conexión"/>
+                    <button name="action_apply_rules" type="object" string="Reaplicar reglas"/>
+                    <field name="queue_state" widget="statusbar"
+                           statusbar_visible="idle,queued,running,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_lines" type="object" class="oe_stat_button" icon="fa-list">
+                            <field name="line_count" widget="statinfo" string="Líneas"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archivado" bg_color="text-bg-danger"
+                            invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="p.ej. PIKO Webshop"/></h1>
+                    </div>
+                    <field name="active" invisible="1"/>
+                    <group>
+                        <group string="Origen">
+                            <field name="base_url" widget="url"/>
+                            <field name="lang_code"/>
+                            <field name="currency_id" groups="base.group_multi_currency"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Estado">
+                            <field name="last_run"/>
+                            <field name="queued_count"/>
+                            <field name="imported_count"/>
+                            <field name="error_count"/>
+                            <field name="last_error" readonly="1" invisible="not last_error"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Descubrimiento" name="discovery">
+                            <group>
+                                <field name="discovery_mode" widget="radio"/>
+                                <field name="sitemap_url" invisible="discovery_mode != 'sitemap'"
+                                       placeholder="https://.../sitemap.xml"/>
+                                <field name="product_url_regex"/>
+                                <field name="max_products"/>
+                            </group>
+                            <field name="url_list" invisible="discovery_mode != 'manual'"
+                                   placeholder="Una URL de ficha por línea"/>
+                            <field name="category_ids" invisible="discovery_mode != 'category'">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="url"/>
+                                    <field name="page_pattern"/>
+                                    <field name="page_count"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Reglas de importación" name="rules">
+                            <group>
+                                <group string="Creación">
+                                    <field name="create_products"/>
+                                    <field name="product_categ_id"/>
+                                    <field name="product_type"/>
+                                    <field name="import_images"/>
+                                    <field name="apply_attribute_rules"/>
+                                    <field name="update_attributes"
+                                           invisible="not apply_attribute_rules"/>
+                                </group>
+                                <group string="Actualización">
+                                    <field name="update_existing"/>
+                                    <field name="update_name" invisible="not update_existing"/>
+                                    <field name="update_description" invisible="not update_existing"/>
+                                    <field name="update_price" invisible="not update_existing"/>
+                                    <field name="update_barcode" invisible="not update_existing"/>
+                                </group>
+                            </group>
+                            <div class="text-muted">
+                                Los productos marcados como <b>No sobrescribir</b> o con
+                                <b>Precio fijado manualmente</b> quedan siempre excluidos.
+                            </div>
+                        </page>
+                        <page string="Características" name="attributes">
+                            <div class="alert alert-info" role="alert">
+                                Reglas regex que convierten el texto de la ficha en
+                                atributos <b>no_variant</b>. Las reglas sin fuente
+                                asignada aplican a todas.
+                            </div>
+                            <field name="attribute_rule_ids"
+                                   context="{'default_source_id': id}">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="attribute_id"/>
+                                    <field name="field_source"/>
+                                    <field name="regex"/>
+                                    <field name="value_mode"/>
+                                    <field name="value_name"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Selectores (avanzado)" name="selectors">
+                            <div class="alert alert-info" role="alert">
+                                Se intenta primero JSON-LD (schema.org) y Open Graph.
+                                Rellena estos XPath solo si la tienda no publica datos estructurados.
+                            </div>
+                            <group>
+                                <field name="xpath_name" placeholder="//h1[@class='product-title']"/>
+                                <field name="xpath_sku"/>
+                                <field name="xpath_price"/>
+                                <field name="xpath_barcode"/>
+                                <field name="xpath_description"/>
+                                <field name="xpath_image" placeholder="//img[@id='main-image']/@src"/>
+                            </group>
+                        </page>
+                        <page string="Cola" name="queue">
+                            <div class="alert alert-info" role="alert">
+                                Todo el trabajo HTTP se ejecuta en el cron
+                                (<code>ir.cron._trigger()</code>), nunca en el worker web.
+                                Los botones solo encolan.
+                            </div>
+                            <group>
+                                <group>
+                                    <field name="auto_import"/>
+                                    <field name="max_attempts"/>
+                                    <field name="retry_backoff_minutes"/>
+                                </group>
+                                <group>
+                                    <field name="queue_state" readonly="1"/>
+                                    <field name="queued_count"/>
+                                    <field name="error_count"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="HTTP" name="http">
+                            <group>
+                                <group>
+                                    <field name="user_agent"/>
+                                    <field name="respect_robots"/>
+                                </group>
+                                <group>
+                                    <field name="request_delay"/>
+                                    <field name="timeout"/>
+                                    <field name="max_retries"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tl_piko_source" model="ir.actions.act_window">
+        <field name="name">Fuentes de scraping</field>
+        <field name="res_model">tl.piko.source</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

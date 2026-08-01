@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tl_piko_product_list" model="ir.ui.view">
+        <field name="name">tl.piko.product.list</field>
+        <field name="model">tl.piko.product</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'error'"
+                  decoration-success="state == 'imported'"
+                  decoration-muted="state == 'skipped'">
+                <field name="source_id" optional="hide"/>
+                <field name="default_code"/>
+                <field name="name"/>
+                <field name="barcode" optional="show"/>
+                <field name="price" optional="show"/>
+                <field name="availability" optional="hide"/>
+                <field name="attribute_value_ids" widget="many2many_tags" optional="show"/>
+                <field name="product_tmpl_id" optional="show"/>
+                <field name="scraped_on" optional="hide"/>
+                <field name="attempt_count" optional="hide"/>
+                <field name="next_attempt_date" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'queued'"/>
+                <button name="action_enqueue" type="object" icon="fa-play" title="Encolar"
+                        invisible="state == 'queued'"/>
+                <button name="action_retry" type="object" icon="fa-refresh" title="Reintentar"
+                        invisible="state != 'error'"/>
+                <button name="action_import" type="object" icon="fa-download" title="Importar"
+                        invisible="state != 'parsed'"/>
+                <button name="action_open_url" type="object" icon="fa-external-link" title="Abrir ficha"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tl_piko_product_form" model="ir.ui.view">
+        <field name="name">tl.piko.product.form</field>
+        <field name="model">tl.piko.product</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_enqueue" type="object" string="Encolar" class="btn-primary"
+                            invisible="state == 'queued'"/>
+                    <button name="action_scrape" type="object" string="Rastrear ahora"
+                            help="Síncrono: úsalo solo para depurar."/>
+                    <button name="action_retry" type="object" string="Reintentar"
+                            invisible="state != 'error'"/>
+                    <button name="action_import" type="object" string="Importar"
+                            invisible="state not in ('parsed', 'skipped')"/>
+                    <button name="action_reset" type="object" string="Reiniciar"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nombre del producto"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="source_id"/>
+                            <field name="url" widget="url"/>
+                            <field name="external_id"/>
+                            <field name="default_code"/>
+                            <field name="barcode"/>
+                        </group>
+                        <group>
+                            <field name="price"/>
+                            <field name="currency_name"/>
+                            <field name="brand"/>
+                            <field name="availability"/>
+                            <field name="product_tmpl_id"/>
+                            <field name="attempt_count"/>
+                            <field name="next_attempt_date"/>
+                            <field name="scraped_on"/>
+                            <field name="imported_on"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-danger" role="alert" invisible="state != 'error'">
+                        <field name="error_message" readonly="1" nolabel="1"/>
+                    </div>
+                    <group string="Características detectadas">
+                        <field name="categ_path" readonly="1"/>
+                        <field name="attribute_value_ids" widget="many2many_tags" nolabel="1" colspan="2"/>
+                        <button name="action_apply_rules" type="object" string="Reaplicar reglas"
+                                class="btn-link" icon="fa-magic"/>
+                    </group>
+                    <notebook>
+                        <page string="Descripción">
+                            <field name="description"/>
+                        </page>
+                        <page string="Imagen">
+                            <field name="image_url" widget="url"/>
+                        </page>
+                        <page string="Datos originales" groups="base.group_no_one">
+                            <field name="raw_json"/>
+                            <field name="checksum"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tl_piko_product_search" model="ir.ui.view">
+        <field name="name">tl.piko.product.search</field>
+        <field name="model">tl.piko.product</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" filter_domain="['|', ('name', 'ilike', self), ('default_code', 'ilike', self)]"/>
+                <field name="barcode"/>
+                <field name="source_id"/>
+                <filter name="f_draft" string="Pendientes" domain="[('state', '=', 'draft')]"/>
+                <filter name="f_parsed" string="Parseados" domain="[('state', '=', 'parsed')]"/>
+                <filter name="f_queued" string="En cola" domain="[('state', '=', 'queued')]"/>
+                <filter name="f_error" string="Con error" domain="[('state', '=', 'error')]"/>
+                <filter name="f_retry" string="Esperando reintento"
+                        domain="[('state', '=', 'queued'), ('next_attempt_date', '&gt;', context_today().strftime('%Y-%m-%d %H:%M:%S'))]"/>
+                <filter name="f_nolink" string="Sin producto" domain="[('product_tmpl_id', '=', False)]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="g_source" string="Fuente" context="{'group_by': 'source_id'}"/>
+                    <filter name="g_state" string="Estado" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tl_piko_product" model="ir.actions.act_window">
+        <field name="name">Productos rastreados</field>
+        <field name="res_model">tl.piko.product</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_g_state': 1}</field>
+    </record>
+</odoo>

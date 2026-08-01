@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_template_form_tl_piko" model="ir.ui.view">
+        <field name="name">product.template.form.tl.piko</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Origen web" name="tl_piko" groups="tl_piko_product_import.group_tl_piko_manager"
+                      invisible="not piko_source_id">
+                    <group>
+                        <group>
+                            <field name="piko_source_id" readonly="1"/>
+                            <field name="piko_external_id" readonly="1"/>
+                            <field name="piko_last_sync" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="piko_url" widget="url" readonly="1"/>
+                            <field name="piko_price_locked"/>
+                            <field name="piko_no_overwrite"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

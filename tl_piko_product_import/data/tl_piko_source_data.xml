@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="source_piko_shop" model="tl.piko.source">
+        <field name="name">PIKO Webshop (piko-shop.de)</field>
+        <field name="base_url">https://www.piko-shop.de</field>
+        <field name="lang_code">de</field>
+        <field name="discovery_mode">category</field>
+        <field name="product_url_regex">/artikel/</field>
+        <field name="request_delay">2.0</field>
+        <field name="max_products">100</field>
+        <field name="update_price" eval="False"/>
+        <field name="update_name" eval="False"/>
+        <field name="active" eval="False"/>
+    </record>
+
+    <record id="category_piko_h0" model="tl.piko.category">
+        <field name="name">H0 Scale</field>
+        <field name="source_id" ref="source_piko_shop"/>
+        <field name="url">/de/warengruppe/h0-spur-20.html</field>
+    </record>
+
+    <record id="category_piko_g" model="tl.piko.category">
+        <field name="name">G Scale</field>
+        <field name="source_id" ref="source_piko_shop"/>
+        <field name="url">/de/warengruppe/g-spur-4.html</field>
+    </record>
+
+    <record id="category_piko_tt" model="tl.piko.category">
+        <field name="name">TT Scale</field>
+        <field name="source_id" ref="source_piko_shop"/>
+        <field name="url">/de/warengruppe/tt-spur-42.html</field>
+    </record>
+
+    <record id="category_piko_n" model="tl.piko.category">
+        <field name="name">N Scale</field>
+        <field name="source_id" ref="source_piko_shop"/>
+        <field name="url">/de/warengruppe/n-spur-50.html</field>
+    </record>
+</odoo>
