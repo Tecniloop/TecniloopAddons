@@ -304,16 +304,33 @@ class TlPikoSource(models.Model):
                   ", ".join(archived.mapped("name")))
             )
         self.write({"queue_state": "queued", "last_error": False})
-        self.category_ids.write({"next_page": 0, "discovery_state": "pending"})
+        self.category_ids.write({
+            "next_page": 0, "discovery_state": "pending", "last_page_hash": False,
+        })
+        total = 0
         for source in self:
-            source._enqueue_discovery()
-            source.message_post(body=_("Descubrimiento encolado en queue_job."))
+            creados = source._enqueue_discovery()
+            total += creados
+            source.message_post(
+                body=_("Descubrimiento encolado: %s jobs creados.", creados)
+            )
+        if not total:
+            # Nunca dejar la fuente "en cola" sin trabajo real detrás: es el
+            # fallo silencioso que más cuesta diagnosticar.
+            self.write({"queue_state": "failed",
+                        "last_error": _("No se creó ningún job.")})
+            raise UserError(
+                _("No se ha creado ningún job. Revisa que la fuente tenga "
+                  "categorías activas sin recorrer, o usa 'Reiniciar "
+                  "descubrimiento'.")
+            )
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
                 "title": _("PIKO Import"),
-                "message": _("Trabajo encolado: se ejecutará en segundo plano."),
+                "message": _("%s jobs encolados. Míralos en Trabajos en cola.",
+                             total),
                 "type": "success",
             },
         }
@@ -345,8 +362,17 @@ class TlPikoSource(models.Model):
     # Jobs
     # ==================================================================
     def _enqueue_discovery(self):
-        """Un job por categoría pendiente (o uno solo si no hay categorías)."""
+        """Un job por categoría pendiente (o uno solo si no hay categorías).
+
+        Devuelve el nº de jobs creados; cero significa que no había nada que
+        hacer y quien llama debe avisar en vez de dejarlo "en cola".
+        """
         self.ensure_one()
+        if not hasattr(self, "with_delay"):
+            raise UserError(
+                _("queue_job no está activo. Añade 'queue_job' a "
+                  "server_wide_modules en odoo.conf y reinicia.")
+            )
         if self.discovery_mode == "category":
             categories = self.category_ids.filtered(
                 lambda c: c.active and c.discovery_state != "done"
@@ -564,6 +590,17 @@ class TlPikoSource(models.Model):
                 lambda l: l.state in ("parsed", "imported")
             ).action_apply_rules()
         return True
+
+    def action_view_jobs(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window",
+            "name": _("Trabajos en cola"),
+            "res_model": "queue.job",
+            "view_mode": "list,form",
+            "domain": [("model_name", "in",
+                        ("tl.piko.source", "tl.piko.product"))],
+        }
 
     def action_view_lines(self):
         self.ensure_one()
