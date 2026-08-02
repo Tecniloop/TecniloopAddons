@@ -784,6 +784,7 @@ luces y funciones digitales. El archivado automático queda desactivado.
 
 - Fuente principal: `https://www.roco.cc/res/`, respetando las reglas publicadas en `robots.txt`.
 - Descubrimiento paginado desde `/res/productos.html`, con fichas españolas bajo `/res/productos/.../<referencia>-<slug>.html`.
+- La referencia se descubre en el catálogo español, pero la ficha se localiza y descarga siempre desde el escaparate inglés `/ren/products/`. Esto evita los bucles de redirección que ROCO genera en algunos slugs españoles con caracteres UTF-8, como `ñ`.
 - Importa referencia, nombre, categorías, descripciones, precio oficial EUR, imágenes, GTIN publicado y atributos ferroviarios (escala, época, sistema digital, sonido e iluminación).
 - El archivado automático queda desactivado para evitar bajas erróneas ante filtros de disponibilidad o bloqueos temporales del catálogo.
 
