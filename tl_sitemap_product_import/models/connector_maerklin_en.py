@@ -697,30 +697,221 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
                     segments.append(translated)
         return segments or ['Productos Märklin']
 
+    @staticmethod
+    def _article_number_from_value(value):
+        """Devuelve un número de artículo inequívoco desde un valor estructurado."""
+        text = str(value or '').strip()
+        if not text:
+            return False
+        match = re.search(r'(?<!\d)(\d{3,8})(?!\d)', text)
+        return match.group(1) if match else False
+
+    @classmethod
+    def _product_node_article_numbers(cls, node):
+        """Identificadores publicados por un nodo JSON-LD de tipo Product."""
+        if not isinstance(node, dict):
+            return set()
+        values = []
+        for field in (
+            'sku', 'mpn', 'productID', 'productId', 'url', '@id',
+        ):
+            value = node.get(field)
+            if isinstance(value, dict):
+                values.extend(value.values())
+            elif isinstance(value, (list, tuple, set)):
+                values.extend(value)
+            else:
+                values.append(value)
+        for prop in node.get('additionalProperty') or []:
+            if not isinstance(prop, dict):
+                continue
+            name = cls._normalise_text(prop.get('name')).casefold()
+            if any(token in name for token in ('article', 'artikel', 'sku', 'item')):
+                values.append(prop.get('value'))
+        return {
+            article
+            for article in (cls._article_number_from_value(value) for value in values)
+            if article
+        }
+
+    @classmethod
+    def _product_json_node_for_article(cls, payloads, article_no):
+        """Selecciona el Product JSON-LD de la ficha, no uno recomendado.
+
+        Märklin puede publicar varios nodos ``Product`` en la misma respuesta.
+        El primero no tiene por qué ser el artículo principal, por lo que se
+        prioriza el nodo cuyo SKU/MPN/URL coincide con la referencia solicitada.
+        Si hay varios nodos y ninguno identifica el artículo, se evita elegir
+        uno arbitrariamente y se continúa con el H1/metadatos de la ficha.
+        """
+        product_nodes = []
+        for payload in payloads:
+            for node in cls._walk_dicts(payload):
+                raw_type = node.get('@type') if isinstance(node, dict) else False
+                types = raw_type if isinstance(raw_type, list) else [raw_type]
+                if any(str(item or '').casefold() == 'product' for item in types):
+                    product_nodes.append(node)
+                    if article_no in cls._product_node_article_numbers(node):
+                        return node
+        return product_nodes[0] if len(product_nodes) == 1 else {}
+
+    @classmethod
+    def _page_article_number(cls, tree, lines, product_node, requested_article):
+        """Obtiene la referencia principal sin leer productos relacionados."""
+        structured = cls._product_node_article_numbers(product_node)
+        if requested_article in structured:
+            return requested_article
+        if len(structured) == 1:
+            return next(iter(structured))
+
+        candidates = tree.xpath(
+            '//main//*[@itemprop="sku"]/@content | '
+            '//main//*[@itemprop="sku"]/text() | '
+            '//main//*[@data-article-number]/@data-article-number | '
+            '//main//*[@data-product-number]/@data-product-number | '
+            '//main//*[@data-product-code]/@data-product-code | '
+            '//meta[@property="product:retailer_item_id" or '
+            '@name="product:retailer_item_id"]/@content'
+        )
+        parsed = [cls._article_number_from_value(value) for value in candidates]
+        if requested_article in parsed:
+            return requested_article
+        parsed = [value for value in parsed if value]
+        if len(set(parsed)) == 1:
+            return parsed[0]
+
+        # Último respaldo: solo se acepta la referencia solicitada cuando está
+        # inmediatamente junto al rótulo principal. No se devuelve una referencia
+        # distinta, porque podría proceder de "Recommended for you".
+        labels = {'article no.', 'article no', 'artikel-nr.', 'artikel-nr'}
+        for index, line in enumerate(lines):
+            folded = cls._normalise_text(line).casefold().strip(' :')
+            if folded not in labels and not any(folded.startswith(label + ':') for label in labels):
+                continue
+            window = ' '.join(lines[index:index + 4])
+            if re.search(rf'(?<!\d){re.escape(requested_article)}(?!\d)', window):
+                return requested_article
+        return False
+
+    @staticmethod
+    def _article_from_response_url(value):
+        """Extrae la referencia de una URL final, incluso desde marklin.com."""
+        path = urlsplit(str(value or '')).path
+        match = re.search(
+            r'/(?:en/)?products/details/article/(?P<code>\d+)(?:/|$)',
+            path,
+            re.IGNORECASE,
+        )
+        return match.group('code') if match else False
+
+    def _identity_fallback_urls(self, requested_article):
+        """Alternativas oficiales usadas solo si la respuesta no es del artículo."""
+        if self._HOST == 'www.maerklin.de':
+            return [
+                f'https://www.marklin.com/products/details/article/{requested_article}',
+            ]
+        return []
+
+    def _response_product_context(self, response, requested_article):
+        tree = lxml_html.fromstring(getattr(response, 'text', None) or response.content)
+        lines = self._visible_lines(tree)
+        payloads = self._json_payloads(tree)
+        product_node = self._product_json_node_for_article(payloads, requested_article)
+        page_article = self._page_article_number(
+            tree, lines, product_node, requested_article,
+        )
+        return {
+            'response': response,
+            'tree': tree,
+            'lines': lines,
+            'product_node': product_node,
+            'page_article': page_article,
+            'response_article': self._article_from_response_url(response.url),
+        }
+
+    @staticmethod
+    def _context_matches_article(context, requested_article):
+        page_article = context.get('page_article')
+        response_article = context.get('response_article')
+        if page_article and page_article != requested_article:
+            return False
+        if response_article and response_article != requested_article:
+            return page_article == requested_article
+        return True
+
     def fetch_preview(self, source, url):
         requested = self._canonical_url(url)
         if not self._product_match(requested):
             raise ValueError('La URL no corresponde a una ficha de producto Märklin.')
 
+        requested_article = self._product_key(requested)
         session = self._get_session(source)
-        response = self._http_get(session, requested, source)
-        tree = lxml_html.fromstring(getattr(response, 'text', None) or response.content)
+        candidate_urls = [requested] + self._identity_fallback_urls(requested_article)
+        errors = []
+        context = False
 
-        canonical_values = tree.xpath('//link[@rel="canonical"]/@href')
-        canonical = self._canonical_url(canonical_values[0] if canonical_values else response.url)
-        if not self._product_match(canonical):
-            # Algunas páginas mantienen el artículo solicitado aunque su canonical
-            # omita el segmento de idioma o el contexto final.
-            canonical = requested
-        if self._product_key(canonical) != self._product_key(requested):
-            raise ValueError(
-                f'Märklin redirigió el artículo {self._product_key(requested)} a '
-                f'{self._product_key(canonical)}.'
+        for candidate_url in candidate_urls:
+            try:
+                candidate_response = self._http_get(session, candidate_url, source)
+                candidate_context = self._response_product_context(
+                    candidate_response, requested_article,
+                )
+            except Exception as exc:
+                errors.append(
+                    f'{candidate_url} -> {type(exc).__name__}: {exc}'
+                )
+                continue
+
+            if self._context_matches_article(candidate_context, requested_article):
+                context = candidate_context
+                if candidate_url != requested:
+                    _logger.warning(
+                        'Märklin: la ficha %s se ha recuperado desde la alternativa '
+                        'oficial %s.', requested_article, candidate_url,
+                    )
+                break
+
+            response_article = candidate_context.get('response_article') or '?'
+            page_article = candidate_context.get('page_article') or '?'
+            errors.append(
+                f'{candidate_url} -> URL final artículo {response_article}; '
+                f'contenido artículo {page_article}'
             )
 
-        lines = self._visible_lines(tree)
-        payloads = self._json_payloads(tree)
-        product_node = self._product_json_node(payloads)
+        if not context:
+            raise ValueError(
+                f'Märklin no devolvió la ficha correcta para el artículo '
+                f'{requested_article}. Intentos: {" | ".join(errors)}'
+            )
+
+        response = context['response']
+        tree = context['tree']
+        lines = context['lines']
+        product_node = context['product_node']
+        page_article = context['page_article']
+        response_article = context['response_article']
+
+        if response_article and response_article != requested_article:
+            _logger.warning(
+                'Märklin: response.url apunta a %s, pero el contenido identifica '
+                'correctamente el artículo solicitado %s; se conserva la URL original.',
+                response_article, requested_article,
+            )
+
+        canonical_values = tree.xpath('//link[@rel="canonical"]/@href')
+        for canonical_value in canonical_values:
+            canonical_candidate = self._canonical_url(canonical_value)
+            canonical_article = self._product_key(canonical_candidate)
+            if canonical_article and canonical_article != requested_article:
+                _logger.warning(
+                    'Märklin: se ignora canonical del artículo %s al procesar %s.',
+                    canonical_article, requested_article,
+                )
+                break
+
+        # La URL canónica funcional del importador es la solicitada y validada.
+        canonical = requested
+        page_base_url = response.url or requested
 
         name = self._normalise_text(product_node.get('name')) if isinstance(product_node, dict) else ''
         if not name:
@@ -732,14 +923,7 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
         if not name:
             raise ValueError('La ficha de Märklin no publica un nombre reconocible.')
 
-        article_no = self._product_key(canonical)
-        page_article = self._line_value(lines, ('Article No.', 'Article No'))
-        if page_article:
-            match = re.search(r'\b(\d+)\b', page_article)
-            if match and match.group(1) != article_no:
-                raise ValueError(
-                    f'La ficha recibida corresponde al artículo {match.group(1)}, no a {article_no}.'
-                )
+        article_no = requested_article
 
         price, currency, price_available = self._maerklin_price(
             tree, lines, product_node, name,
@@ -758,7 +942,7 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
                 attributes['Funciones digitales'] = clean_functions[:40]
 
         category_segments = self._category_path(attributes, name)
-        images = self._images_from_product(tree, product_node, canonical, name, article_no)
+        images = self._images_from_product(tree, product_node, page_base_url, name, article_no)
         ean_variants = self._ean_variants_from_html_content(response.content)
 
         return {
@@ -775,7 +959,7 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
             'attributes': attributes,
             'main_image_url': images[0] if images else False,
             'image_urls': images,
-            'attachments': self._download_attachments(tree, canonical),
+            'attachments': self._download_attachments(tree, page_base_url),
             'canonical_url': canonical,
             'ean_variants': ean_variants,
             # La capa común seguirá inspeccionando JSON y atributos HTML para
