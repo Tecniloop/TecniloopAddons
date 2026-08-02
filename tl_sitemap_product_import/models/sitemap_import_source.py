@@ -132,6 +132,11 @@ class SitemapImportSource(models.Model):
         string='Retraso entre peticiones (segundos)', default=1.0,
         help='Tiempo de espera entre cada petición HTTP para no sobrecargar el servidor de origen.')
     request_timeout = fields.Integer(string='Timeout de petición (segundos)', default=20)
+    diagnostic_mode = fields.Boolean(
+        string='Diagnóstico detallado', default=False,
+        help='Guarda en staging la fase, URL final, código HTTP, extracto de respuesta y traceback completo. Útil para conectores como PIKO.'
+    )
+
     http_retry_count = fields.Integer(
         string='Reintentos HTTP', default=3,
         help='Número de reintentos ante HTTP 429/5xx, timeout o fallo temporal de red.')

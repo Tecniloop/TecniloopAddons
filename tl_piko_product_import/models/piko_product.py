@@ -15,7 +15,7 @@ _logger = logging.getLogger(__name__)
 # lugar de arriesgar un corte por `limit_time_real_cron`.
 CRON_TIME_BUDGET = 240.0
 QUEUE_CRON_XMLID = "tl_piko_product_import.ir_cron_tl_piko_queue"
-QUEUE_LOCK_KEY = 8271041  # clave de advisory lock de la cola de líneas
+QUEUE_BATCH_SIZE = 20
 
 
 class TlPikoProduct(models.Model):
@@ -120,18 +120,27 @@ class TlPikoProduct(models.Model):
         ]
 
     @api.model
-    def _acquire_queue_lock(self):
-        """Advisory lock de sesión: evita que dos crons procesen a la vez.
+    def _lock_batch(self, limit=None):
+        """Reserva un lote con FOR UPDATE SKIP LOCKED.
 
-        De sesión y no de transacción, porque commiteamos por lote y un lock
-        transaccional se liberaría en el primer commit.
+        El bloqueo es de fila y vive dentro de la transacción, así que se
+        libera solo en el commit del lote y NO puede quedar huérfano si el
+        worker muere. Varios crons pueden trabajar en paralelo sin pisarse:
+        cada uno se salta las filas que otro tenga tomadas.
         """
-        self.env.cr.execute("SELECT pg_try_advisory_lock(%s)", (QUEUE_LOCK_KEY,))
-        return self.env.cr.fetchone()[0]
-
-    @api.model
-    def _release_queue_lock(self):
-        self.env.cr.execute("SELECT pg_advisory_unlock(%s)", (QUEUE_LOCK_KEY,))
+        self.env.cr.execute(
+            """
+            SELECT id FROM tl_piko_product
+             WHERE state = 'queued'
+               AND (next_attempt_date IS NULL
+                    OR next_attempt_date <= (now() AT TIME ZONE 'UTC'))
+             ORDER BY next_attempt_date NULLS FIRST, id
+             LIMIT %s
+             FOR UPDATE SKIP LOCKED
+            """,
+            (limit or QUEUE_BATCH_SIZE,),
+        )
+        return self.browse([row[0] for row in self.env.cr.fetchall()])
 
     @api.model
     def _commit_batch(self, processed, remaining):
@@ -148,26 +157,40 @@ class TlPikoProduct(models.Model):
     @api.model
     def _cron_process_queue(self):
         """Procesa la cola por lotes y se redispara si queda trabajo."""
-        if not self._acquire_queue_lock():
-            _logger.info("Cola PIKO ya en curso en otro worker; salgo.")
-            return False
         started = time.monotonic()
         processed = 0
-        try:
-            while time.monotonic() - started < CRON_TIME_BUDGET:
-                lines = self.search(self._queue_domain(), limit=20)
-                if not lines:
+        while time.monotonic() - started < CRON_TIME_BUDGET:
+            lines = self._lock_batch()
+            if not lines:
+                break
+            _logger.info("Cola PIKO: lote de %s líneas.", len(lines))
+            batch_sources = lines.source_id
+            batch_done = 0
+            for line in lines:
+                if time.monotonic() - started >= CRON_TIME_BUDGET:
                     break
-                for line in lines:
-                    if time.monotonic() - started >= CRON_TIME_BUDGET:
-                        break
-                    line._process_one()
-                    processed += 1
-                remaining = self.search_count(self._queue_domain())
-                self._commit_batch(processed, remaining)
-        finally:
-            self._release_queue_lock()
+                line._process_one()
+                processed += 1
+                batch_done += 1
+            remaining = self.search_count(self._queue_domain())
+            for source in batch_sources:
+                source.log(
+                    _("Lote terminado: %(done)s procesadas, %(left)s en cola.",
+                      done=batch_done, left=remaining)
+                )
+                source.flush_log(_("Rastreo"))
+            # el commit cierra el lote y libera las filas bloqueadas
+            self._commit_batch(processed, remaining)
 
+        if not processed:
+            waiting_total = self.search_count([("state", "=", "queued")])
+            _logger.info(
+                "Cola PIKO: nada que procesar (en cola: %s, listas ahora: %s). "
+                "Si hay líneas en cola pero ninguna lista, están esperando su "
+                "reintento.", waiting_total,
+                self.search_count(self._queue_domain()),
+            )
+        self.env["tl.piko.source"].flush_all_logs(_("Rastreo"))
         pending_now = self.search(self._queue_domain(), limit=1)
         if pending_now:
             self._trigger_queue()  # queda trabajo listo: nueva pasada inmediata
@@ -196,11 +219,40 @@ class TlPikoProduct(models.Model):
                 self._do_scrape()
                 if source.auto_import and self.state == "parsed":
                     self._do_import()
+            source.log(self._log_summary(), level="detail")
         except Exception as exc:  # noqa: BLE001
             self.invalidate_recordset()
             self._register_failure(str(exc))
             _logger.warning("Línea %s fallida: %s", self.url, exc)
+            source.log(
+                _("ERROR %(ref)s (intento %(n)s): %(err)s",
+                  ref=self.default_code or self.url, n=self.attempt_count, err=exc)
+            )
         return True
+
+    def _log_summary(self):
+        """Una línea legible con lo que se ha hecho con esta ficha."""
+        self.ensure_one()
+        estado = {
+            "parsed": _("rastreado"),
+            "imported": _("importado"),
+            "skipped": _("omitido"),
+        }.get(self.state, self.state)
+        detalles = []
+        if self.price:
+            detalles.append(_("%s €") % self.price)
+        if self.barcode:
+            detalles.append(_("EAN %s") % self.barcode)
+        if self.attribute_value_ids:
+            detalles.append(_("%s caract.") % len(self.attribute_value_ids))
+        if self.categ_path:
+            detalles.append(self.categ_path)
+        if self.product_tmpl_id:
+            detalles.append(_("producto #%s") % self.product_tmpl_id.id)
+        return "%s %s: %s — %s" % (
+            "OK", self.default_code or self.url.rsplit("/", 1)[-1],
+            estado, " · ".join(detalles) or _("sin datos adicionales"),
+        )
 
     def _register_failure(self, message):
         """Backoff exponencial hasta agotar los intentos de la fuente."""

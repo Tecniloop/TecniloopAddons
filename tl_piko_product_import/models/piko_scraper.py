@@ -112,6 +112,7 @@ class TlPikoScraper(models.AbstractModel):
         if not self._robots_allows(source, url):
             raise UserError(_("robots.txt no permite acceder a %s") % url)
         session = source._get_session()
+        source.log(_("GET %s", url), level="debug")
         last_error = None
         for attempt in range(max(1, source.max_retries)):
             if source.request_delay:
@@ -130,6 +131,8 @@ class TlPikoScraper(models.AbstractModel):
             except Exception as exc:  # noqa: BLE001
                 last_error = str(exc)
                 _logger.warning("GET %s falló (intento %s): %s", url, attempt + 1, exc)
+                source.log(_("Reintento %(n)s de %(url)s: %(err)s",
+                             n=attempt + 1, url=url, err=exc), level="detail")
         raise UserError(_("No se pudo descargar %(url)s: %(err)s", url=url, err=last_error))
 
     @api.model
@@ -216,6 +219,12 @@ class TlPikoScraper(models.AbstractModel):
                     if self._is_product_url(source, a.get("href") or "")
                 }
                 fresh = found - seen
+                source.log(
+                    _("%(cat)s · %(url)s -> %(found)s enlaces, %(fresh)s nuevos",
+                      cat=category.name, url=page_url.rsplit("/", 1)[-1],
+                      found=len(found), fresh=len(fresh)),
+                    level="detail",
+                )
                 if not fresh:
                     # página vacía o repetición de la última: fin de la paginación
                     break

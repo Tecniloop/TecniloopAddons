@@ -453,16 +453,35 @@ class SitemapConnectorPikoEn(models.AbstractModel):
                     attrs[label].append(value)
         return attrs
 
+    @staticmethod
+    def _response_summary(response):
+        return 'status=%s requested=%s final=%s content_type=%s bytes=%s' % (
+            getattr(response, 'status_code', '?'),
+            getattr(getattr(response, 'request', None), 'url', '?'),
+            getattr(response, 'url', '?'),
+            (getattr(response, 'headers', {}) or {}).get('Content-Type', ''),
+            len(getattr(response, 'content', b'') or b''),
+        )
+
     def fetch_preview(self, source, url):
         session = self._get_session(source)
+        _logger.info('PIKO preview START url=%s source=%s', url, source.display_name)
         response = self._http_get(session, url, source)
-        tree = lxml_html.fromstring(response.content)
+        _logger.info('PIKO preview HTTP %s', self._response_summary(response))
+        if not response.content:
+            raise ValueError('PIKO devolvió una respuesta vacía. %s' % self._response_summary(response))
+        try:
+            tree = lxml_html.fromstring(response.content)
+        except Exception as exc:
+            snippet = (response.text or '')[:1000]
+            raise ValueError('PIKO devolvió HTML no analizable. %s | inicio=%r' % (
+                self._response_summary(response), snippet)) from exc
         canonical_values = tree.xpath('//link[@rel="canonical"]/@href')
         canonical = self._canonical_url(canonical_values[0] if canonical_values else response.url)
         if not self._product_match(canonical):
             canonical = self._canonical_url(url)
         if not self._product_match(canonical):
-            raise ValueError('La URL de PIKO ya no corresponde a una ficha bajo /en/artikel/.')
+            raise ValueError('La URL de PIKO ya no corresponde a una ficha bajo /en/artikel/. %s' % self._response_summary(response))
 
         products = self._json_ld_products(tree)
         product = products[0] if products else {}
@@ -470,7 +489,7 @@ class SitemapConnectorPikoEn(models.AbstractModel):
         if not name:
             name = self._clean(self._meta(tree, 'og:title'))
         if not name:
-            raise ValueError('La ficha PIKO no publica un nombre reconocible.')
+            raise ValueError('La ficha PIKO no publica un nombre reconocible. %s' % self._response_summary(response))
 
         page_text = self._clean(' '.join(tree.xpath('//body//text()')))
         code = self._clean(product.get('sku')) if product else ''
@@ -478,7 +497,7 @@ class SitemapConnectorPikoEn(models.AbstractModel):
             match = self._ITEM_RE.search(page_text)
             code = match.group(1) if match else ''
         if not code:
-            raise ValueError('La ficha PIKO no publica un número de artículo reconocible.')
+            raise ValueError('La ficha PIKO no publica un número de artículo reconocible. %s' % self._response_summary(response))
 
         price, currency = self._price(tree, product)
         short_description, full_description = self._descriptions(tree, product)

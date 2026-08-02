@@ -2,7 +2,7 @@ import html
 import json
 import logging
 import re
-from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, quote, unquote, urlencode, urljoin, urlparse, urlsplit, urlunsplit
 
 from lxml import html as lxml_html
 
@@ -259,10 +259,76 @@ class SitemapConnectorRocoEs(models.AbstractModel):
                 values.append(value)
         return values
 
-    def fetch_preview(self, source, url):
+
+    @classmethod
+    def _url_candidates(cls, value):
+        """Devuelve variantes seguras de una URL histórica de ROCO.
+
+        Algunas fichas antiguas contienen caracteres UTF-8 escapados y han
+        cambiado de jerarquía. Se prueban formas equivalentes sin parámetros,
+        con y sin ``www``.
+        """
+        canonical = cls._canonical_url(value)
+        if not canonical:
+            return []
+        parts = urlsplit(canonical)
+        decoded_path = unquote(parts.path)
+        encoded_path = quote(decoded_path, safe="/%-._~")
+        result = []
+        for host in ('www.roco.cc', 'roco.cc'):
+            for path in (parts.path, decoded_path, encoded_path):
+                candidate = urlunsplit(('https', host, path, '', ''))
+                if candidate not in result:
+                    result.append(candidate)
+        return result
+
+    def _find_current_product_url(self, source, code):
+        """Busca la ficha actual de un artículo por su referencia Magento."""
+        if not code:
+            return False
         session = self._get_session(source)
-        response = self._http_get(session, url, source)
-        tree = lxml_html.fromstring(response.content)
+        search_urls = (
+            'https://www.roco.cc/res/catalogsearch/result/?q=' + quote(str(code)),
+            'https://www.roco.cc/res/productos.html?q=' + quote(str(code)),
+        )
+        for search_url in search_urls:
+            try:
+                response = self._http_get(session, search_url, source)
+                tree = lxml_html.fromstring(response.content)
+                links = self._product_links(tree, response.url)
+                exact = [url for url in links if self._product_key(url) == str(code)]
+                if exact:
+                    return exact[0]
+            except Exception as exc:
+                _logger.info('ROCO: búsqueda de referencia %s falló en %s: %s', code, search_url, exc)
+        return False
+
+    def _fetch_product_response(self, source, url):
+        session = self._get_session(source)
+        failures = []
+        code = self._product_key(url)
+        candidates = self._url_candidates(url)
+        current = self._find_current_product_url(source, code)
+        if current and current not in candidates:
+            candidates.insert(0, current)
+        for candidate in candidates:
+            try:
+                response = self._http_get(session, candidate, source)
+                tree = lxml_html.fromstring(response.content)
+                page_text = self._clean(' '.join(tree.xpath('//body//text()')))
+                title = self._clean(' '.join(tree.xpath('//h1//text()')))
+                if response.status_code == 200 and title and (not code or code in page_text):
+                    return response, tree
+                failures.append('%s -> HTTP %s, h1=%r' % (candidate, response.status_code, title[:120]))
+            except Exception as exc:
+                failures.append('%s -> %s: %s' % (candidate, exc.__class__.__name__, exc))
+        raise ValueError(
+            'ROCO no devolvió una ficha válida para el artículo %s. Intentos: %s'
+            % (code or '?', ' | '.join(failures[-8:]))
+        )
+
+    def fetch_preview(self, source, url):
+        response, tree = self._fetch_product_response(source, url)
         canonical_values = tree.xpath('//link[@rel="canonical"]/@href')
         canonical = self._canonical_url(canonical_values[0] if canonical_values else response.url)
         match = self._product_match(canonical) or self._product_match(url)
@@ -291,6 +357,16 @@ class SitemapConnectorRocoEs(models.AbstractModel):
             normal = self._normalise_gtin(value) if value else False
             if normal:
                 ean_variants.append({'ean': normal, 'sku': code, 'label': name, 'external_variant_id': code})
+        if not ean_variants:
+            page_text = self._clean(' '.join(tree.xpath('//body//text()')))
+            ean_match = re.search(r'(?i)\bEAN\s*[:#]?\s*(\d{8,14})\b', page_text)
+            if ean_match:
+                normal = self._normalise_gtin(ean_match.group(1))
+                if normal:
+                    ean_variants.append({
+                        'ean': normal, 'sku': code, 'label': name,
+                        'external_variant_id': code,
+                    })
         ean_variants = self._normalise_ean_variants(ean_variants)
         return {
             'name': name,

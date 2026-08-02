@@ -1,7 +1,10 @@
 # Copyright Tecniloop
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 import logging
+from collections import defaultdict
 from urllib.parse import urljoin
+
+from markupsafe import Markup
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
@@ -9,6 +12,12 @@ from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
 
 SOURCE_CRON_XMLID = "tl_piko_product_import.ir_cron_tl_piko_sources"
+LOG_LEVELS = {"off": 0, "summary": 1, "detail": 2, "debug": 3}
+# Buffer en memoria por (bd, fuente). Se vuelca al chatter en un único mensaje
+# por lote: un message_post por línea inundaría el chatter y multiplicaría los
+# INSERT. Al vivir en memoria, sobrevive al rollback de un savepoint fallido.
+_LOG_BUFFER = defaultdict(list)
+LOG_FLUSH_AT = 200
 SOURCE_LOCK_NAMESPACE = 8271042
 
 
@@ -77,6 +86,21 @@ class TlPikoSource(models.Model):
     respect_robots = fields.Boolean("Respetar robots.txt", default=True)
     max_products = fields.Integer(
         "Límite por descubrimiento", default=200, help="0 = sin límite."
+    )
+
+    # --- Registro -------------------------------------------------------
+    log_level = fields.Selection(
+        [
+            ("off", "Silencioso"),
+            ("summary", "Resumen"),
+            ("detail", "Detallado (una línea por ficha)"),
+            ("debug", "Depuración (cada petición HTTP)"),
+        ],
+        "Detalle del registro",
+        default="summary",
+        required=True,
+        help="Todo se escribe siempre en el log del servidor; esto controla "
+             "qué se publica además en el chatter.",
     )
 
     # --- Cola -----------------------------------------------------------
@@ -215,6 +239,48 @@ class TlPikoSource(models.Model):
         return self.env.cr.fetchone()[0]
 
     # ==================================================================
+    # Registro
+    # ==================================================================
+    def log(self, message, level="summary"):
+        """Apunta una línea de actividad (siempre al log, según nivel al chatter)."""
+        self.ensure_one()
+        _logger.info("[%s] %s", self.display_name, message)
+        if LOG_LEVELS.get(self.log_level, 1) < LOG_LEVELS.get(level, 1):
+            return
+        key = (self.env.cr.dbname, self.id)
+        _LOG_BUFFER[key].append((fields.Datetime.now(), message))
+        if len(_LOG_BUFFER[key]) >= LOG_FLUSH_AT:
+            self.flush_log(_("Registro parcial"))
+
+    def flush_log(self, title=None):
+        """Vuelca el buffer al chatter como un único mensaje."""
+        self.ensure_one()
+        entries = _LOG_BUFFER.pop((self.env.cr.dbname, self.id), [])
+        if not entries:
+            return False
+        rows = Markup("").join(
+            Markup("<li><code>%s</code> %s</li>") % (
+                moment.strftime("%H:%M:%S"), message
+            )
+            for moment, message in entries
+        )
+        body = Markup("<p><b>%s</b></p><ul>%s</ul>") % (
+            title or _("Actividad"), rows
+        )
+        self.message_post(body=body)
+        return True
+
+    @api.model
+    def flush_all_logs(self, title=None):
+        """Vuelca lo que quede en el buffer de cualquier fuente de esta BD."""
+        dbname = self.env.cr.dbname
+        ids = [sid for db, sid in list(_LOG_BUFFER) if db == dbname]
+        for source in self.browse(ids).exists():
+            source.flush_log(title)
+        for key in [k for k in list(_LOG_BUFFER) if k[0] == dbname]:
+            _LOG_BUFFER.pop(key, None)
+
+    # ==================================================================
     # Encolado (lo que hacen los botones: nada de HTTP aquí)
     # ==================================================================
     def action_enqueue(self):
@@ -272,6 +338,8 @@ class TlPikoSource(models.Model):
             try:
                 with self.env.cr.savepoint():
                     source.queue_state = "running"
+                    source.log(_("Inicio del descubrimiento (%s categorías activas).",
+                                 len(source.category_ids.filtered("active"))))
                     created = source._discover_and_queue()
                     source.write(
                         {
@@ -280,13 +348,14 @@ class TlPikoSource(models.Model):
                             "last_error": False,
                         }
                     )
-                    source.message_post(
-                        body=_("Descubrimiento completado: %s líneas nuevas.", created)
-                    )
+                    source.log(_("Descubrimiento completado: %s líneas nuevas en cola.",
+                                 created))
             except Exception as exc:  # noqa: BLE001
                 _logger.exception("Fallo en la fuente %s", source.display_name)
                 source.invalidate_recordset()
                 source.write({"queue_state": "failed", "last_error": str(exc)})
+                source.log(_("ERROR en el descubrimiento: %s", exc))
+            source.flush_log(_("Descubrimiento"))
             self.env.cr.commit()  # cada fuente es una unidad de trabajo
         return True
 
@@ -310,9 +379,14 @@ class TlPikoSource(models.Model):
             for url in urls
             if url not in existing
         ]
+        self.log(
+            _("Descubiertas %(total)s URLs, %(new)s nuevas, %(known)s ya conocidas.",
+              total=len(urls), new=len(new_vals), known=len(urls) - len(new_vals))
+        )
         lines = Line.create(new_vals) if new_vals else Line
         if lines:
             Line._trigger_queue()
+            self.log(_("Cola despertada."), level="detail")
         return len(lines)
 
     @api.model
@@ -330,6 +404,31 @@ class TlPikoSource(models.Model):
         return True
 
     # ------------------------------------------------------------------
+    def action_debug_process_one(self):
+        """Diagnóstico: procesa UNA línea en primer plano y muestra el error.
+
+        Sirve para distinguir "el cron no corre" de "el rastreo falla": si esto
+        funciona pero la cola no avanza, el problema es el planificador.
+        """
+        self.ensure_one()
+        line = self.env["tl.piko.product"].search(
+            [("source_id", "=", self.id), ("state", "in", ("queued", "draft", "error"))],
+            limit=1,
+        )
+        if not line:
+            raise UserError(_("No hay ninguna línea pendiente en esta fuente."))
+        line._process_one()
+        self.flush_log(_("Diagnóstico"))
+        message = _("Línea %(url)s -> estado %(state)s. %(error)s",
+                    url=line.url, state=line.state, error=line.error_message or "")
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {"title": _("PIKO Import"), "message": message,
+                       "type": "warning" if line.error_message else "success",
+                       "sticky": True},
+        }
+
     def action_apply_rules(self):
         """Reaplica las reglas a las líneas ya parseadas (sin HTTP)."""
         for source in self:

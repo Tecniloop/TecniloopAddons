@@ -3,7 +3,7 @@
 Importador de productos por **scraping HTML** para Odoo 19, pensado para tiendas
 sin API pública (caso de partida: `piko-shop.de`, sistema propietario sin API).
 
-Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.3.0.0
+Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.4.0.0
 
 ## Arquitectura
 
@@ -249,3 +249,32 @@ Atributos nuevos: *Decoder incorporado* y *Edad recomendada*. Los numéricos de
 la tabla (`Measurement`, `Minimum radius`, `Number of Traction Tyres`) se
 guardan en `spec_json` pero no se convierten en atributos, porque generarían un
 valor distinto por medida.
+
+
+## Registro de actividad (19.0.4.0.0)
+
+Campo `log_level` en la fuente:
+
+| Nivel | Qué se publica en el chatter |
+| --- | --- |
+| Silencioso | nada (solo log del servidor) |
+| Resumen | inicio/fin de descubrimiento, cierre de cada lote y **todos los errores** |
+| Detallado | además, una línea por ficha y por página de categoría |
+| Depuración | además, cada petición HTTP |
+
+Todo se escribe siempre en el log del servidor con el prefijo `[<fuente>]`; el
+nivel solo decide qué llega al chatter.
+
+Las entradas se acumulan en un buffer en memoria y se vuelcan **como un único
+mensaje por lote** (o cada 200 entradas). Un `message_post` por ficha llenaría
+el chatter de miles de mensajes y multiplicaría los INSERT en `mail_message`.
+El buffer, además, sobrevive al rollback del savepoint de una línea fallida, así
+que el error queda registrado aunque su transacción se deshaga.
+
+Ejemplo de línea de ficha (nivel detallado):
+
+    OK 21002: importado — 325.0 € · EAN 4015615210023 · 8 caract. · H0 Scale / Locos DC / Expert DC / Electric locos · producto #4271
+
+Las líneas de staging **no** llevan chatter propio, a propósito: `mail.thread`
+sobre miles de registros es coste de escritura y de almacenamiento que no
+compensa cuando el registro agregado vive en la fuente.

@@ -30,6 +30,9 @@
                     <button name="action_enqueue_lines" type="object"
                             string="Reencolar pendientes y errores"/>
                     <button name="action_test_connection" type="object" string="Probar conexión"/>
+                    <button name="action_debug_process_one" type="object"
+                            string="Procesar 1 línea (diagnóstico)"
+                            groups="base.group_no_one"/>
                     <button name="action_apply_rules" type="object" string="Reaplicar reglas"/>
                     <field name="queue_state" widget="statusbar"
                            statusbar_visible="idle,queued,running,done"/>
@@ -158,6 +161,7 @@
                             <group>
                                 <group>
                                     <field name="auto_import"/>
+                                    <field name="log_level"/>
                                     <field name="max_attempts"/>
                                     <field name="retry_backoff_minutes"/>
                                 </group>

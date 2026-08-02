@@ -1216,3 +1216,12 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 - Corrige la importación de Tupperware cuando campos JSON de staging contienen `False`/`True`.
 - Usa el lector JSON seguro para Collections y atributos históricos.
 - Añade la ubicación final del traceback al mensaje de error de staging para facilitar el diagnóstico.
+
+
+## 19.0.1.123.0
+- Corrige Tupperware España: `blog.post.cover_properties` ya no recibe `False`; se usa JSON vacío válido (`{}`), evitando `json.loads(False)` durante la importación de recetas.
+
+
+## 19.0.1.124.0
+- Diagnóstico detallado para PIKO y staging: fase, intento, HTTP, URL final, extracto y traceback.
+- Persistencia de la excepción original antes de reintentos de queue_job.

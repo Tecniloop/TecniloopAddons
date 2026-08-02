@@ -207,7 +207,7 @@ class ProductTemplate(models.Model):
             )
             safe_vals = {}
             if 'cover_properties' in post._fields:
-                safe_vals['cover_properties'] = False
+                safe_vals['cover_properties'] = '{}'
             if 'website_meta_og_img' in post._fields:
                 safe_vals['website_meta_og_img'] = False
             if safe_vals:
@@ -260,7 +260,7 @@ class ProductTemplate(models.Model):
             # external Shopify/CDN URLs. The image is downloaded after the
             # post exists and referenced through Odoo's own /web/image route.
             if 'cover_properties' in BlogPost._fields:
-                vals['cover_properties'] = False
+                vals['cover_properties'] = '{}'
             if 'website_meta_og_img' in BlogPost._fields:
                 vals['website_meta_og_img'] = False
             if post:

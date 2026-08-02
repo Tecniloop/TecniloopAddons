@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 import requests
 
@@ -90,6 +91,12 @@ class SitemapProductStaging(models.Model):
 
     product_tmpl_id = fields.Many2one('product.template', string='Producto Odoo enlazado', readonly=True)
     error_message = fields.Text(string='Mensaje de error')
+    diagnostic_phase = fields.Char(string='Fase del diagnóstico', readonly=True, copy=False)
+    diagnostic_attempt = fields.Integer(string='Intento diagnosticado', readonly=True, copy=False)
+    diagnostic_http_status = fields.Integer(string='HTTP diagnóstico', readonly=True, copy=False)
+    diagnostic_final_url = fields.Char(string='URL final diagnóstico', readonly=True, copy=False)
+    diagnostic_response_excerpt = fields.Text(string='Respuesta diagnóstico', readonly=True, copy=False)
+    diagnostic_traceback = fields.Text(string='Traceback diagnóstico', readonly=True, copy=False)
     preview_attempt_count = fields.Integer(
         string='Intentos de vista previa', readonly=True, default=0,
         help='Número de veces que se ha intentado procesar esta URL.')
@@ -109,6 +116,38 @@ class SitemapProductStaging(models.Model):
     def _queue_identity(self, phase):
         self.ensure_one()
         return f"sitemap_product_{phase}_{self.id}"
+
+    def _diagnostic_values(self, exc, phase):
+        self.ensure_one()
+        response = getattr(exc, 'response', None)
+        status = getattr(response, 'status_code', None) or 0
+        final_url = getattr(response, 'url', None) or self.url
+        excerpt = ''
+        if response is not None:
+            try:
+                excerpt = (response.text or '')[:3000]
+            except Exception:
+                try:
+                    excerpt = (response.content or b'')[:3000].decode('utf-8', errors='replace')
+                except Exception:
+                    excerpt = ''
+        trace = traceback.format_exc()
+        if trace.strip() == 'NoneType: None':
+            trace = '%s: %s' % (exc.__class__.__name__, exc)
+        summary = (
+            '[fase=%s intento=%s connector=%s http=%s url=%s] %s: %s'
+            % (phase, self.preview_attempt_count or 0, self.source_id.connector_model,
+               status or '-', final_url, exc.__class__.__name__, exc)
+        )
+        return {
+            'diagnostic_phase': phase,
+            'diagnostic_attempt': self.preview_attempt_count or 0,
+            'diagnostic_http_status': status,
+            'diagnostic_final_url': final_url,
+            'diagnostic_response_excerpt': excerpt,
+            'diagnostic_traceback': trace[:30000],
+            'error_message': summary[:4000],
+        }
 
     @staticmethod
     def _retryable_exception(exc):
@@ -149,35 +188,52 @@ class SitemapProductStaging(models.Model):
             'state': 'previewing',
             'last_job_date': fields.Datetime.now(),
             'error_message': False,
+            'diagnostic_phase': 'preview:start',
+            'diagnostic_attempt': row.preview_attempt_count + 1,
+            'diagnostic_http_status': 0,
+            'diagnostic_final_url': row.url,
+            'diagnostic_response_excerpt': False,
+            'diagnostic_traceback': False,
         })
         service = row.env[row.source_id.connector_model]
         try:
-            service.refresh_staging_row(
+            preview_ok = service.refresh_staging_row(
                 row,
                 row.source_id,
                 image_map={},
                 force=row.batch_id.force_update,
             )
+            if not preview_ok or row.state == 'error':
+                raise ValueError(
+                    row.error_message
+                    or _('La vista previa terminó sin datos de producto válidos.')
+                )
             if row.state == 'error' and any(
                 token in (row.error_message or '')
                 for token in ('HTTP 429', 'HTTP 500', 'HTTP 502', 'HTTP 503', 'HTTP 504', 'Timeout', 'ConnectionError')
             ):
                 row.write({'state': 'queued_preview'})
                 raise RetryableJobError(row.error_message or _('Error HTTP temporal.'))
-        except RetryableJobError:
+        except RetryableJobError as exc:
+            vals = row._diagnostic_values(exc, 'preview:retry')
+            vals.update({'state': 'queued_preview', 'last_attempt_date': fields.Datetime.now()})
+            row.write(vals)
+            _logger.exception('PIKO/Sitemap retry preview row=%s url=%s', row.id, row.url)
             raise
         except Exception as exc:
+            vals = row._diagnostic_values(exc, 'preview:exception')
+            vals['last_attempt_date'] = fields.Datetime.now()
             if row._retryable_exception(exc):
-                row.write({'state': 'queued_preview', 'error_message': str(exc)[:4000]})
-                raise RetryableJobError(str(exc)) from exc
-            row.write({
-                'state': 'error',
-                'error_message': ('%s: %s' % (exc.__class__.__name__, exc))[:4000],
-                'last_attempt_date': fields.Datetime.now(),
-            })
+                vals['state'] = 'queued_preview'
+                row.write(vals)
+                _logger.exception('PIKO/Sitemap transient preview row=%s url=%s', row.id, row.url)
+                raise RetryableJobError(vals['error_message']) from exc
+            vals['state'] = 'error'
+            row.write(vals)
+            _logger.exception('PIKO/Sitemap fatal preview row=%s url=%s', row.id, row.url)
             raise
         row.batch_id._update_queue_completion()
-        return True
+        return 'preview_ready:%s:%s' % (row.id, row.name or row.url)
 
     def action_import_selected(self):
         jobs = 0
@@ -263,13 +319,15 @@ class SitemapProductStaging(models.Model):
             if result == 'error':
                 raise ValueError(row.error_message or _('Error importando el producto.'))
         except Exception as exc:
+            vals = row._diagnostic_values(exc, 'import:exception')
             if row._retryable_exception(exc):
-                row.write({'state': 'queued_import', 'error_message': str(exc)[:4000]})
-                raise RetryableJobError(str(exc)) from exc
-            row.write({
-                'state': 'error',
-                'error_message': ('%s: %s' % (exc.__class__.__name__, exc))[:4000],
-            })
+                vals['state'] = 'queued_import'
+                row.write(vals)
+                _logger.exception('PIKO/Sitemap transient import row=%s url=%s', row.id, row.url)
+                raise RetryableJobError(vals['error_message']) from exc
+            vals['state'] = 'error'
+            row.write(vals)
+            _logger.exception('PIKO/Sitemap fatal import row=%s url=%s', row.id, row.url)
             raise
         row.batch_id._update_queue_completion()
         return result

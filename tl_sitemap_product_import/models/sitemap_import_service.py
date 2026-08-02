@@ -2009,7 +2009,7 @@ class SitemapImportService(models.AbstractModel):
                 and staging_row.sitemap_lastmod \
                 and staging_row.product_tmpl_id.sitemap_lastmod >= staging_row.sitemap_lastmod:
             staging_row.write({'state': 'skipped', 'preview_date': fields.Datetime.now()})
-            return
+            return True
 
         staging_row.write({
             'preview_attempt_count': staging_row.preview_attempt_count + 1,
@@ -2045,7 +2045,7 @@ class SitemapImportService(models.AbstractModel):
                 'error_message': diagnostic[:4000],
                 'preview_date': fields.Datetime.now(),
             })
-            return
+            return False
 
         dimensions = self._normalise_dimensions(data)
         packaging_dimensions = self._normalise_packaging_dimensions(data)
@@ -2100,6 +2100,7 @@ class SitemapImportService(models.AbstractModel):
             self.import_staging_row(staging_row, source, (image_map or {}).get(staging_row.url, []))
         else:
             staging_row.write({'state': 'preview_ready'})
+        return staging_row.state in ('preview_ready', 'imported', 'updated', 'skipped')
 
     def _import_staging_row_inner(self, staging_row, source, image_urls):
         """Crea o actualiza el product.template a partir de los datos YA guardados en la fila
