@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Canal con capacidad 1: los jobs de esta fuente se ejecutan de uno en
-         uno. Es la forma limpia de ser cortés con el servidor de origen, en
-         lugar de depender solo del retardo entre peticiones. -->
+    <!-- El canal solo declara nombre y padre: la CAPACIDAD no es un campo del
+         modelo, se configura en odoo.conf.
+             [queue_job]
+             channels = root:1,root.piko:1
+         Con capacidad 1 los jobs de scraping se ejecutan de uno en uno, que es
+         la forma correcta de ser cortés con el servidor de origen. -->
     <record id="channel_piko" model="queue.job.channel">
         <field name="name">piko</field>
         <field name="parent_id" ref="queue_job.channel_root"/>
-        <field name="capacity">1</field>
     </record>
 
     <record id="job_function_discover_page" model="queue.job.function">

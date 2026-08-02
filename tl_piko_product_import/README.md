@@ -333,9 +333,15 @@ arreglar.
 
 ### Canal
 
-`root.piko` con **capacidad 1**: los jobs de scraping se ejecutan de uno en uno.
-Es la forma correcta de ser cortés con el servidor de origen, mejor que confiar
-solo en `request_delay`.
+`root.piko`, declarado como registro `queue.job.channel` (solo nombre y padre:
+la capacidad **no** es un campo del modelo). La capacidad va en `odoo.conf`:
+
+    [queue_job]
+    channels = root:1,root.piko:1
+
+Con capacidad 1 los jobs de scraping se ejecutan de uno en uno, que es la forma
+correcta de ser cortés con el servidor de origen, mejor que confiar solo en
+`request_delay`.
 
 ### Duplicados
 
