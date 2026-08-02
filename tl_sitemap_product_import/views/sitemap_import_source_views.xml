@@ -24,6 +24,7 @@
                             <field name="user_agent"/>
                             <field name="request_delay"/>
                             <field name="request_timeout"/>
+                            <field name="diagnostic_mode"/>
                             <field name="http_retry_count"/>
                             <field name="http_retry_backoff" invisible="http_retry_count == 0"/>
                         </group>

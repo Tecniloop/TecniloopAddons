@@ -108,6 +108,14 @@
                     <field name="preview_attempt_count"/>
                             <field name="last_attempt_date"/>
                             <field name="error_message" invisible="not error_message"/>
+                            <group string="Diagnóstico detallado" invisible="not diagnostic_traceback">
+                                <field name="diagnostic_phase"/>
+                                <field name="diagnostic_attempt"/>
+                                <field name="diagnostic_http_status"/>
+                                <field name="diagnostic_final_url" widget="url"/>
+                                <field name="diagnostic_response_excerpt"/>
+                                <field name="diagnostic_traceback"/>
+                            </group>
                 <group string="Cola de trabajos"><field name="preview_job_uuid" readonly="1"/><field name="import_job_uuid" readonly="1"/><field name="last_job_date" readonly="1"/></group></sheet>
             </form>
         </field>

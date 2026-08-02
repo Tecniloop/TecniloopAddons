@@ -1,6 +1,6 @@
 {
     'name': 'Importación de productos por sitemap',
-    'version': '19.0.1.122.0',
+    'version': '19.0.1.125.0',
     'category': 'Sales/Sales',
     'summary': 'Importa y actualiza productos desde el sitemap público de una o varias tiendas online',
     'description': """
