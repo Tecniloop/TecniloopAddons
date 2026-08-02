@@ -1,25 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- El canal solo declara nombre y padre: la CAPACIDAD no es un campo del
-         modelo, se configura en odoo.conf.
+    <!-- Dos subcanales: si descubrimiento y fichas comparten canal, la cadena
+         de páginas (más prioritaria) monopoliza la capacidad y ninguna ficha
+         llega a ejecutarse hasta que termina el catálogo entero.
+         La CAPACIDAD no es un campo del modelo, va en odoo.conf:
              [queue_job]
-             channels = root:1,root.piko:1
-         Con capacidad 1 los jobs de scraping se ejecutan de uno en uno, que es
-         la forma correcta de ser cortés con el servidor de origen. -->
+             channels = root:1,root.piko.discovery:1,root.piko.lines:2 -->
     <record id="channel_piko" model="queue.job.channel">
         <field name="name">piko</field>
         <field name="parent_id" ref="queue_job.channel_root"/>
     </record>
 
+    <record id="channel_piko_discovery" model="queue.job.channel">
+        <field name="name">discovery</field>
+        <field name="parent_id" ref="channel_piko"/>
+    </record>
+
+    <record id="channel_piko_lines" model="queue.job.channel">
+        <field name="name">lines</field>
+        <field name="parent_id" ref="channel_piko"/>
+    </record>
+
     <record id="job_function_discover_page" model="queue.job.function">
         <field name="model_id" ref="model_tl_piko_source"/>
         <field name="method">_job_discover_page</field>
-        <field name="channel_id" ref="channel_piko"/>
+        <field name="channel_id" ref="channel_piko_discovery"/>
     </record>
 
     <record id="job_function_process_line" model="queue.job.function">
         <field name="model_id" ref="model_tl_piko_product"/>
         <field name="method">_job_process_line</field>
-        <field name="channel_id" ref="channel_piko"/>
+        <field name="channel_id" ref="channel_piko_lines"/>
     </record>
 </odoo>

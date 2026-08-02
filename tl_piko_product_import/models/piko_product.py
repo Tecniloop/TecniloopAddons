@@ -81,6 +81,51 @@ class TlPikoProduct(models.Model):
     )
 
     # ==================================================================
+    # Alta idempotente
+    # ==================================================================
+    @api.model
+    def create_from_urls(self, source, urls):
+        """Crea las líneas que falten, tolerando carreras entre jobs.
+
+        Comprobar antes con un `search` no sirve: dos jobs de la misma página
+        pueden pasar la comprobación a la vez y chocar contra el índice único.
+        Aquí se intenta el alta en bloque y, si choca, se reintenta línea a
+        línea dentro de un savepoint, quedándose con las que sí son nuevas.
+        """
+        scraper = self.env["tl.piko.scraper"]
+        conocidas = set(
+            self.search([("source_id", "=", source.id),
+                         ("url", "in", list(urls))]).mapped("url")
+        )
+        pendientes = [url for url in urls if url not in conocidas]
+        if not pendientes:
+            return self.browse()
+
+        def vals(url):
+            return {
+                "source_id": source.id,
+                "url": url,
+                "external_id": scraper._external_id(url),
+            }
+
+        try:
+            with self.env.cr.savepoint():
+                return self.create([vals(url) for url in pendientes])
+        except Exception:  # noqa: BLE001  (IntegrityError por carrera)
+            _logger.info(
+                "Alta en bloque con colisión en %s: reintento línea a línea.",
+                source.display_name,
+            )
+        creadas = self.browse()
+        for url in pendientes:
+            try:
+                with self.env.cr.savepoint():
+                    creadas |= self.create(vals(url))
+            except Exception:  # noqa: BLE001
+                continue  # otra ejecución se nos adelantó: no es un error
+        return creadas
+
+    # ==================================================================
     # Encolado en queue_job
     # ==================================================================
     def action_enqueue(self):
@@ -101,6 +146,9 @@ class TlPikoProduct(models.Model):
                 description=_("Rastrear %s") % (line.default_code or line.url),
                 identity_key=identity_exact,
                 max_retries=line.source_id.max_attempts or 3,
+                # misma prioridad que el descubrimiento: van por canales
+                # distintos, así que no compiten entre sí
+                priority=5,
             )._job_process_line()
             line.job_uuid = job.uuid
         return True

@@ -333,11 +333,14 @@ arreglar.
 
 ### Canal
 
-`root.piko`, declarado como registro `queue.job.channel` (solo nombre y padre:
-la capacidad **no** es un campo del modelo). La capacidad va en `odoo.conf`:
+Dos subcanales bajo `root.piko`: **`discovery`** para los jobs de página y
+**`lines`** para los de ficha. Compartir canal no funciona: la cadena de páginas
+ocupa la capacidad y ninguna ficha se ejecuta hasta terminar el catálogo entero.
+
+La capacidad **no** es un campo del modelo; va en `odoo.conf`:
 
     [queue_job]
-    channels = root:1,root.piko:1
+    channels = root:1,root.piko.discovery:1,root.piko.lines:2
 
 Con capacidad 1 los jobs de scraping se ejecutan de uno en uno, que es la forma
 correcta de ser cortés con el servidor de origen, mejor que confiar solo en

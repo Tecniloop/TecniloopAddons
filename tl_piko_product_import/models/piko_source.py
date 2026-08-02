@@ -430,19 +430,7 @@ class TlPikoSource(models.Model):
         if not urls or current == previous:
             return self._finish_category(category, _("fin de la paginación"))
 
-        existing = set(
-            Line.search([("source_id", "=", self.id),
-                         ("url", "in", list(urls))]).mapped("url")
-        )
-        nuevas = [url for url in urls if url not in existing]
-        lines = Line.create([
-            {
-                "source_id": self.id,
-                "url": url,
-                "external_id": scraper._external_id(url),
-            }
-            for url in nuevas
-        ]) if nuevas else Line
+        lines = Line.create_from_urls(self, urls)
         # En tandas: 100 fichas de golpe son 100 INSERT en queue_job dentro de
         # esta misma petición, y el presupuesto del worker ya va justo.
         for inicio in range(0, len(lines), 25):
@@ -456,7 +444,7 @@ class TlPikoSource(models.Model):
         self.log(
             _("%(cat)s pág. %(page)s: %(found)s fichas, %(new)s nuevas encoladas.",
               cat=category.name if category else self.name, page=page_index + 1,
-              found=len(urls), new=len(nuevas))
+              found=len(urls), new=len(lines))
         )
         self.flush_log(_("Descubrimiento"))
 
@@ -469,7 +457,7 @@ class TlPikoSource(models.Model):
             )._job_discover_page(category.id, page_index + 1)
         else:
             self.queue_state = "done"
-        return _("%s fichas encoladas") % len(nuevas)
+        return _("%s fichas encoladas") % len(lines)
 
     def _finish_category(self, category, motivo):
         self.ensure_one()
