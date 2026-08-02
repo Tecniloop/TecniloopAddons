@@ -1,17 +1,20 @@
 # Copyright Tecniloop
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
 import logging
+import time
 from collections import defaultdict
 from urllib.parse import urljoin
 
 from markupsafe import Markup
+
+from odoo.addons.queue_job.exception import RetryableJobError
+from odoo.addons.queue_job.job import identity_exact
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
-SOURCE_CRON_XMLID = "tl_piko_product_import.ir_cron_tl_piko_sources"
 LOG_LEVELS = {"off": 0, "summary": 1, "detail": 2, "debug": 3}
 # Buffer en memoria por (bd, fuente). Se vuelca al chatter en un único mensaje
 # por lote: un message_post por línea inundaría el chatter y multiplicaría los
@@ -79,7 +82,10 @@ class TlPikoSource(models.Model):
         default=1.5,
         help="Cortesía con el servidor de origen. No lo bajes de 1s en producción.",
     )
-    timeout = fields.Integer(default=30)
+    timeout = fields.Integer(
+        default=60,
+        help="El listado de piko-shop.de tarda ~30 s por página; 30 se queda corto.",
+    )
     max_retries = fields.Integer(
         "Reintentos HTTP", default=3, help="Reintentos inmediatos dentro de una petición."
     )
@@ -233,7 +239,13 @@ class TlPikoSource(models.Model):
         return SOURCE_LOCK_NAMESPACE + self.id
 
     def _try_lock(self):
-        """Advisory lock transaccional por fuente."""
+        """Advisory lock transaccional por fuente.
+
+        Sin uso en el flujo de cron desde que el descubrimiento commitea por
+        página (un lock de transacción se soltaría en el primer commit). La
+        serialización la da `ir.cron`, que no ejecuta dos veces el mismo cron a
+        la vez. Se conserva por si hace falta en llamadas puntuales.
+        """
         self.ensure_one()
         self.env.cr.execute("SELECT pg_try_advisory_xact_lock(%s)", (self._lock_key(),))
         return self.env.cr.fetchone()[0]
@@ -284,13 +296,18 @@ class TlPikoSource(models.Model):
     # Encolado (lo que hacen los botones: nada de HTTP aquí)
     # ==================================================================
     def action_enqueue(self):
-        """Encola el descubrimiento de la fuente y despierta al cron."""
+        """Encola un job de descubrimiento por categoría."""
+        archived = self.filtered(lambda s: not s.active)
+        if archived:
+            raise UserError(
+                _("La fuente %s está archivada. Actívala antes de encolarla.",
+                  ", ".join(archived.mapped("name")))
+            )
         self.write({"queue_state": "queued", "last_error": False})
-        cron = self.env.ref(SOURCE_CRON_XMLID, raise_if_not_found=False)
-        if cron:
-            cron.sudo()._trigger()
+        self.category_ids.write({"next_page": 0, "discovery_state": "pending"})
         for source in self:
-            source.message_post(body=_("Descubrimiento encolado."))
+            source._enqueue_discovery()
+            source.message_post(body=_("Descubrimiento encolado en queue_job."))
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
@@ -325,69 +342,159 @@ class TlPikoSource(models.Model):
         }
 
     # ==================================================================
-    # Trabajo en cron
+    # Jobs
     # ==================================================================
-    @api.model
-    def _cron_run_sources(self):
-        """Descubre URLs de las fuentes encoladas y encola sus líneas."""
-        sources = self.search([("queue_state", "=", "queued"), ("active", "=", True)])
-        for source in sources:
-            if not source._try_lock():
-                _logger.info("Fuente %s bloqueada por otro worker.", source.display_name)
-                continue
-            try:
-                with self.env.cr.savepoint():
-                    source.queue_state = "running"
-                    source.log(_("Inicio del descubrimiento (%s categorías activas).",
-                                 len(source.category_ids.filtered("active"))))
-                    created = source._discover_and_queue()
-                    source.write(
-                        {
-                            "queue_state": "done",
-                            "last_run": fields.Datetime.now(),
-                            "last_error": False,
-                        }
-                    )
-                    source.log(_("Descubrimiento completado: %s líneas nuevas en cola.",
-                                 created))
-            except Exception as exc:  # noqa: BLE001
-                _logger.exception("Fallo en la fuente %s", source.display_name)
-                source.invalidate_recordset()
-                source.write({"queue_state": "failed", "last_error": str(exc)})
-                source.log(_("ERROR en el descubrimiento: %s", exc))
-            source.flush_log(_("Descubrimiento"))
-            self.env.cr.commit()  # cada fuente es una unidad de trabajo
-        return True
+    def _enqueue_discovery(self):
+        """Un job por categoría pendiente (o uno solo si no hay categorías)."""
+        self.ensure_one()
+        if self.discovery_mode == "category":
+            categories = self.category_ids.filtered(
+                lambda c: c.active and c.discovery_state != "done"
+            )
+            for category in categories:
+                self.with_delay(
+                    description=_("Descubrir %s") % category.name,
+                    identity_key=identity_exact,
+                    priority=5,
+                )._job_discover_page(category.id, category.next_page)
+            return len(categories)
+        self.with_delay(
+            description=_("Descubrir %s") % self.name,
+            identity_key=identity_exact,
+            priority=5,
+        )._job_discover_page(False, 0)
+        return 1
 
-    def _discover_and_queue(self):
-        """Descubre URLs, crea las líneas que falten y las pone en cola."""
+    def _job_discover_page(self, category_id, page_index):
+        """JOB: rastrea UNA página de listado y encadena la siguiente.
+
+        Una página por job (~30 s) en lugar de un catálogo por ejecución: cada
+        unidad cabe de sobra en `limit_time_real` y el avance queda guardado.
+        """
         self.ensure_one()
         Line = self.env["tl.piko.product"]
         scraper = self.env["tl.piko.scraper"]
-        urls = scraper.discover(self, limit=self.max_products or None)
+        category = self.env["tl.piko.category"].browse(category_id).exists()
+        self.queue_state = "running"
+
+        try:
+            if category:
+                page_urls = category._page_urls()
+                if page_index >= len(page_urls):
+                    return self._finish_category(category, _("sin más páginas"))
+                urls = scraper.urls_from_listing(self, page_urls[page_index])
+            else:
+                urls = scraper.discover(self)
+        except Exception as exc:  # noqa: BLE001
+            if Line._is_transient(exc):
+                raise RetryableJobError(
+                    _("Listado no disponible: %s") % exc,
+                    seconds=300,
+                    ignore_retry=False,
+                ) from exc
+            raise
+
+        previous = category.last_page_hash if category else False
+        current = str(hash(frozenset(urls)))
+        if not urls or current == previous:
+            return self._finish_category(category, _("fin de la paginación"))
+
         existing = set(
-            Line.search([("source_id", "=", self.id)]).mapped("url")
+            Line.search([("source_id", "=", self.id),
+                         ("url", "in", list(urls))]).mapped("url")
         )
-        new_vals = [
+        nuevas = [url for url in urls if url not in existing]
+        lines = Line.create([
             {
                 "source_id": self.id,
                 "url": url,
                 "external_id": scraper._external_id(url),
-                "state": "queued",
-                "next_attempt_date": fields.Datetime.now(),
             }
-            for url in urls
-            if url not in existing
-        ]
+            for url in nuevas
+        ]) if nuevas else Line
+        lines.action_enqueue()
+
+        if category:
+            category.write({
+                "next_page": page_index + 1,
+                "last_page_hash": current,
+            })
         self.log(
-            _("Descubiertas %(total)s URLs, %(new)s nuevas, %(known)s ya conocidas.",
-              total=len(urls), new=len(new_vals), known=len(urls) - len(new_vals))
+            _("%(cat)s pág. %(page)s: %(found)s fichas, %(new)s nuevas encoladas.",
+              cat=category.name if category else self.name, page=page_index + 1,
+              found=len(urls), new=len(nuevas))
         )
-        lines = Line.create(new_vals) if new_vals else Line
-        if lines:
-            Line._trigger_queue()
-            self.log(_("Cola despertada."), level="detail")
-        return len(lines)
+        self.flush_log(_("Descubrimiento"))
+
+        if category:
+            self.with_delay(
+                description=_("Descubrir %(cat)s pág. %(page)s",
+                              cat=category.name, page=page_index + 2),
+                identity_key=identity_exact,
+                priority=5,
+            )._job_discover_page(category.id, page_index + 1)
+        else:
+            self.queue_state = "done"
+        return _("%s fichas encoladas") % len(nuevas)
+
+    def _finish_category(self, category, motivo):
+        self.ensure_one()
+        if category:
+            category.discovery_state = "done"
+            self.log(_("%(cat)s: %(motivo)s.", cat=category.name, motivo=motivo))
+        pendientes = self.category_ids.filtered(
+            lambda c: c.active and c.discovery_state != "done"
+        )
+        if not pendientes:
+            self.write({"queue_state": "done", "last_run": fields.Datetime.now()})
+            self.log(_("Descubrimiento completado."))
+        self.flush_log(_("Descubrimiento"))
+        return motivo
+
+    @api.model
+    def _cron_scheduled_sync(self, source_ids=None):
+        """Cron planificado: encola el descubrimiento de las fuentes activas."""
+        domain = [("active", "=", True)]
+        if source_ids:
+            domain.append(("id", "in", source_ids))
+        for source in self.search(domain):
+            source.category_ids.write({"discovery_state": "pending", "next_page": 0})
+            source.queue_state = "queued"
+            source._enqueue_discovery()
+        return True
+
+    @api.model
+    def _cron_requeue_stuck(self, minutes=120):
+        """Red de seguridad: reencola líneas en cola sin job vivo.
+
+        Si el jobrunner se cae mientras hay jobs en vuelo, esas líneas se
+        quedarían en 'queued' para siempre.
+        """
+        limit = fields.Datetime.subtract(fields.Datetime.now(), minutes=minutes)
+        lines = self.env["tl.piko.product"].search(
+            [("state", "=", "queued"), ("write_date", "<", limit)]
+        )
+        vivos = set(
+            self.env["queue.job"].search(
+                [("uuid", "in", lines.mapped("job_uuid")),
+                 ("state", "in", ("pending", "enqueued", "started"))]
+            ).mapped("uuid")
+        )
+        huerfanas = lines.filtered(lambda l: l.job_uuid not in vivos)
+        if huerfanas:
+            _logger.warning("Reencolando %s líneas sin job vivo.", len(huerfanas))
+            huerfanas.action_enqueue()
+        return len(huerfanas)
+
+    def action_reset_discovery(self):
+        """Vuelve a empezar el descubrimiento desde la primera página."""
+        self.category_ids.write({
+            "next_page": 0, "discovery_state": "pending", "last_page_hash": False,
+        })
+        for source in self:
+            source.log(_("Progreso del descubrimiento reiniciado."))
+            source.flush_log(_("Descubrimiento"))
+        return True
 
     @api.model
     def _cron_scheduled_sync(self, source_ids=None):
@@ -411,13 +518,34 @@ class TlPikoSource(models.Model):
         funciona pero la cola no avanza, el problema es el planificador.
         """
         self.ensure_one()
-        line = self.env["tl.piko.product"].search(
+        Line = self.env["tl.piko.product"]
+        line = Line.search(
             [("source_id", "=", self.id), ("state", "in", ("queued", "draft", "error"))],
             limit=1,
         )
         if not line:
-            raise UserError(_("No hay ninguna línea pendiente en esta fuente."))
-        line._process_one()
+            # Sin líneas no hay nada que diagnosticar en la cola: el problema
+            # está antes, en el descubrimiento. Lo probamos aquí mismo.
+            self.log(_("Sin líneas pendientes: probando el descubrimiento."))
+            urls = self.env["tl.piko.scraper"].discover(self, limit=5)
+            self.log(_("El descubrimiento devuelve %s URLs (se prueban 5).",
+                       len(urls)))
+            if not urls:
+                self.flush_log(_("Diagnóstico"))
+                raise UserError(
+                    _("El descubrimiento no encuentra ninguna URL de producto. "
+                      "Revisa las categorías, el regex de ficha y robots.txt; "
+                      "el chatter tiene el detalle de las peticiones.")
+                )
+            scraper = self.env["tl.piko.scraper"]
+            line = Line.create(
+                {
+                    "source_id": self.id,
+                    "url": urls[0],
+                    "external_id": scraper._external_id(urls[0]),
+                }
+            )
+        line._job_process_line()
         self.flush_log(_("Diagnóstico"))
         message = _("Línea %(url)s -> estado %(state)s. %(error)s",
                     url=line.url, state=line.state, error=line.error_message or "")
@@ -472,6 +600,18 @@ class TlPikoCategory(models.Model):
         "Páginas máx.", default=1,
         help="Tope de páginas a recorrer. El rastreo se detiene antes si una "
              "página no aporta URLs nuevas."
+    )
+    next_page = fields.Integer(
+        "Próxima página", default=0, readonly=True, copy=False,
+        help="Índice por el que continuará el descubrimiento.",
+    )
+    discovery_state = fields.Selection(
+        [("pending", "Pendiente"), ("done", "Recorrida")],
+        default="pending", readonly=True, copy=False,
+    )
+    last_page_hash = fields.Char(
+        "Huella de la última página", readonly=True, copy=False,
+        help="Detecta que la tienda repite la última página al pasarse de rango.",
     )
     page_pattern = fields.Char(
         "Patrón manual",

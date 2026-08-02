@@ -4,26 +4,21 @@ import base64
 import hashlib
 import json
 import logging
-import time
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
-_logger = logging.getLogger(__name__)
+from odoo.addons.queue_job.exception import RetryableJobError
+from odoo.addons.queue_job.job import identity_exact
 
-# Presupuesto por pasada de cron: si se agota, la cola se auto-redispara en
-# lugar de arriesgar un corte por `limit_time_real_cron`.
-CRON_TIME_BUDGET = 240.0
-QUEUE_CRON_XMLID = "tl_piko_product_import.ir_cron_tl_piko_queue"
-QUEUE_BATCH_SIZE = 20
+_logger = logging.getLogger(__name__)
 
 
 class TlPikoProduct(models.Model):
-    """Staging + cola de trabajo.
+    """Staging de fichas rastreadas.
 
-    El trabajo pesado (HTTP) nunca se ejecuta en el worker HTTP: los botones
-    solo encolan y despiertan el cron con `_trigger()`, que es el mecanismo de
-    tareas asíncronas del propio core, sin necesidad de queue_job.
+    Cada ficha es un job de queue_job: la unidad de trabajo es pequeña
+    (~30 s), reintentable y visible en la vista de Trabajos en cola.
     """
 
     _name = "tl.piko.product"
@@ -72,6 +67,7 @@ class TlPikoProduct(models.Model):
         required=True,
     )
     error_message = fields.Text(readonly=True)
+    job_uuid = fields.Char("Job", readonly=True, copy=False, index=True)
     attempt_count = fields.Integer("Intentos", default=0, readonly=True)
     next_attempt_date = fields.Datetime("Próximo intento", index=True, readonly=True)
     last_attempt_date = fields.Datetime(readonly=True)
@@ -85,150 +81,67 @@ class TlPikoProduct(models.Model):
     )
 
     # ==================================================================
-    # Cola
+    # Encolado en queue_job
     # ==================================================================
     def action_enqueue(self):
-        """Marca las líneas para procesar y despierta al cron."""
-        self.write(
-            {
-                "state": "queued",
-                "next_attempt_date": fields.Datetime.now(),
-                "error_message": False,
-            }
-        )
-        self._trigger_queue()
+        """Crea un job por ficha.
+
+        `identity_exact` impide duplicar el job de una línea que ya esté
+        pendiente: pulsar dos veces no rastrea dos veces.
+        """
+        for line in self:
+            line.write(
+                {
+                    "state": "queued",
+                    "error_message": False,
+                    "next_attempt_date": fields.Datetime.now(),
+                }
+            )
+            job = line.with_delay(
+                description=_("Rastrear %s") % (line.default_code or line.url),
+                identity_key=identity_exact,
+                max_retries=line.source_id.max_attempts or 3,
+            )._job_process_line()
+            line.job_uuid = job.uuid
         return True
 
     def action_retry(self):
-        """Reintenta desde cero (reinicia el contador de intentos)."""
         self.write({"attempt_count": 0})
         return self.action_enqueue()
 
-    @api.model
-    def _trigger_queue(self, at=None):
-        cron = self.env.ref(QUEUE_CRON_XMLID, raise_if_not_found=False)
-        if cron:
-            cron.sudo()._trigger(at=at)
+    def _job_process_line(self):
+        """JOB: rastrea e importa una ficha.
 
-    @api.model
-    def _queue_domain(self):
-        return [
-            ("state", "=", "queued"),
-            "|",
-            ("next_attempt_date", "=", False),
-            ("next_attempt_date", "<=", fields.Datetime.now()),
-        ]
-
-    @api.model
-    def _lock_batch(self, limit=None):
-        """Reserva un lote con FOR UPDATE SKIP LOCKED.
-
-        El bloqueo es de fila y vive dentro de la transacción, así que se
-        libera solo en el commit del lote y NO puede quedar huérfano si el
-        worker muere. Varios crons pueden trabajar en paralelo sin pisarse:
-        cada uno se salta las filas que otro tenga tomadas.
-        """
-        self.env.cr.execute(
-            """
-            SELECT id FROM tl_piko_product
-             WHERE state = 'queued'
-               AND (next_attempt_date IS NULL
-                    OR next_attempt_date <= (now() AT TIME ZONE 'UTC'))
-             ORDER BY next_attempt_date NULLS FIRST, id
-             LIMIT %s
-             FOR UPDATE SKIP LOCKED
-            """,
-            (limit or QUEUE_BATCH_SIZE,),
-        )
-        return self.browse([row[0] for row in self.env.cr.fetchall()])
-
-    @api.model
-    def _commit_batch(self, processed, remaining):
-        """Commit por lote, usando el runner de crons si está disponible."""
-        cron = self.env["ir.cron"]
-        if hasattr(cron, "_commit_progress"):
-            try:
-                cron._commit_progress(processed=processed, remaining=remaining)
-                return
-            except Exception:  # noqa: BLE001  (la firma varía entre versiones)
-                _logger.debug("_commit_progress no utilizable; commit directo.")
-        self.env.cr.commit()
-
-    @api.model
-    def _cron_process_queue(self):
-        """Procesa la cola por lotes y se redispara si queda trabajo."""
-        started = time.monotonic()
-        processed = 0
-        while time.monotonic() - started < CRON_TIME_BUDGET:
-            lines = self._lock_batch()
-            if not lines:
-                break
-            _logger.info("Cola PIKO: lote de %s líneas.", len(lines))
-            batch_sources = lines.source_id
-            batch_done = 0
-            for line in lines:
-                if time.monotonic() - started >= CRON_TIME_BUDGET:
-                    break
-                line._process_one()
-                processed += 1
-                batch_done += 1
-            remaining = self.search_count(self._queue_domain())
-            for source in batch_sources:
-                source.log(
-                    _("Lote terminado: %(done)s procesadas, %(left)s en cola.",
-                      done=batch_done, left=remaining)
-                )
-                source.flush_log(_("Rastreo"))
-            # el commit cierra el lote y libera las filas bloqueadas
-            self._commit_batch(processed, remaining)
-
-        if not processed:
-            waiting_total = self.search_count([("state", "=", "queued")])
-            _logger.info(
-                "Cola PIKO: nada que procesar (en cola: %s, listas ahora: %s). "
-                "Si hay líneas en cola pero ninguna lista, están esperando su "
-                "reintento.", waiting_total,
-                self.search_count(self._queue_domain()),
-            )
-        self.env["tl.piko.source"].flush_all_logs(_("Rastreo"))
-        pending_now = self.search(self._queue_domain(), limit=1)
-        if pending_now:
-            self._trigger_queue()  # queda trabajo listo: nueva pasada inmediata
-        else:
-            waiting = self.search(
-                [("state", "=", "queued"), ("next_attempt_date", "!=", False)],
-                order="next_attempt_date asc",
-                limit=1,
-            )
-            if waiting:
-                self._trigger_queue(at=waiting.next_attempt_date)  # backoff
-        _logger.info("Cola PIKO: %s líneas procesadas en esta pasada.", processed)
-        return True
-
-    # ------------------------------------------------------------------
-    def _process_one(self):
-        """Rastrea (y opcionalmente importa) una línea de forma aislada.
-
-        El savepoint evita que un fallo aborte la transacción del lote entero:
-        así se registra el error y se sigue con la siguiente línea.
+        Los fallos de red se relanzan como RetryableJobError para que
+        queue_job los reintente con su propio patrón; los fallos de datos
+        marcan la línea en error y no se reintentan.
         """
         self.ensure_one()
         source = self.source_id
         try:
-            with self.env.cr.savepoint():
-                self._do_scrape()
-                if source.auto_import and self.state == "parsed":
-                    self._do_import()
-            source.log(self._log_summary(), level="detail")
+            self._do_scrape()
+            if source.auto_import and self.state == "parsed":
+                self._do_import()
+        except RetryableJobError:
+            raise
         except Exception as exc:  # noqa: BLE001
-            self.invalidate_recordset()
+            if self._is_transient(exc):
+                delay = (source.retry_backoff_minutes or 10) * 60
+                self.write({"attempt_count": self.attempt_count + 1,
+                            "error_message": str(exc)})
+                raise RetryableJobError(
+                    _("Error temporal en %(url)s: %(err)s", url=self.url, err=exc),
+                    seconds=delay,
+                    ignore_retry=False,
+                ) from exc
             self._register_failure(str(exc))
-            _logger.warning("Línea %s fallida: %s", self.url, exc)
-            source.log(
-                _("ERROR %(ref)s (intento %(n)s): %(err)s",
-                  ref=self.default_code or self.url, n=self.attempt_count, err=exc)
-            )
-        return True
+            source.log(_("ERROR %(ref)s: %(err)s",
+                         ref=self.default_code or self.url, err=exc))
+            source.flush_log(_("Rastreo"))
+            return _("Error: %s") % exc
+        source.log(self._log_summary(), level="detail")
+        source.flush_log(_("Rastreo"))
+        return self._log_summary()
 
     def _log_summary(self):
         """Una línea legible con lo que se ha hecho con esta ficha."""
@@ -249,34 +162,31 @@ class TlPikoProduct(models.Model):
             detalles.append(self.categ_path)
         if self.product_tmpl_id:
             detalles.append(_("producto #%s") % self.product_tmpl_id.id)
-        return "%s %s: %s — %s" % (
-            "OK", self.default_code or self.url.rsplit("/", 1)[-1],
-            estado, " · ".join(detalles) or _("sin datos adicionales"),
+        return "OK %s: %s — %s" % (
+            self.default_code or self.url.rsplit("/", 1)[-1], estado,
+            " · ".join(detalles) or _("sin datos adicionales"),
         )
 
+    @api.model
+    def _is_transient(self, exc):
+        """Distingue "el servidor no responde" de "esta ficha no sirve"."""
+        text = str(exc).lower()
+        marcas = ("timeout", "timed out", "connection", "temporarily",
+                  "503", "502", "504", "429", "reset by peer", "ssl")
+        return any(marca in text for marca in marcas)
+
     def _register_failure(self, message):
-        """Backoff exponencial hasta agotar los intentos de la fuente."""
+        """Fallo definitivo: sin reintento (de eso se encarga queue_job)."""
         self.ensure_one()
-        source = self.source_id
-        attempts = self.attempt_count + 1
-        vals = {
-            "attempt_count": attempts,
-            "last_attempt_date": fields.Datetime.now(),
-            "error_message": message,
-        }
-        if attempts < (source.max_attempts or 3):
-            delay = (source.retry_backoff_minutes or 10) * (2 ** (attempts - 1))
-            vals.update(
-                {
-                    "state": "queued",
-                    "next_attempt_date": fields.Datetime.add(
-                        fields.Datetime.now(), minutes=delay
-                    ),
-                }
-            )
-        else:
-            vals.update({"state": "error", "next_attempt_date": False})
-        self.write(vals)
+        self.write(
+            {
+                "attempt_count": self.attempt_count + 1,
+                "last_attempt_date": fields.Datetime.now(),
+                "error_message": message,
+                "state": "error",
+                "next_attempt_date": False,
+            }
+        )
 
     # ==================================================================
     # Trabajo real
@@ -321,6 +231,7 @@ class TlPikoProduct(models.Model):
             except Exception as exc:  # noqa: BLE001
                 line.invalidate_recordset()
                 line._register_failure(str(exc))
+                line.source_id.flush_log(_("Diagnóstico"))
         return True
 
     # ------------------------------------------------------------------

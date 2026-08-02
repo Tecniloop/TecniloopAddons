@@ -29,6 +29,9 @@
                             invisible="queue_state in ('queued', 'running')"/>
                     <button name="action_enqueue_lines" type="object"
                             string="Reencolar pendientes y errores"/>
+                    <button name="action_reset_discovery" type="object"
+                            string="Reiniciar descubrimiento"
+                            confirm="El descubrimiento volverá a empezar por la primera página de cada categoría. ¿Continuar?"/>
                     <button name="action_test_connection" type="object" string="Probar conexión"/>
                     <button name="action_debug_process_one" type="object"
                             string="Procesar 1 línea (diagnóstico)"
@@ -86,6 +89,8 @@
                                     <field name="page_size" invisible="not paginated"/>
                                     <field name="order_key" invisible="not paginated"/>
                                     <field name="page_count" invisible="not paginated"/>
+                                    <field name="next_page" readonly="1"/>
+                                    <field name="discovery_state" readonly="1"/>
                                     <field name="page_pattern" optional="hide"/>
                                 </list>
                             </field>
@@ -154,9 +159,10 @@
                         </page>
                         <page string="Cola" name="queue">
                             <div class="alert alert-info" role="alert">
-                                Todo el trabajo HTTP se ejecuta en el cron
-                                (<code>ir.cron._trigger()</code>), nunca en el worker web.
-                                Los botones solo encolan.
+                                El trabajo HTTP lo ejecuta <b>queue_job</b>: un job por
+                                página de listado y un job por ficha. Los botones solo
+                                encolan. El detalle de cada job, sus reintentos y su
+                                traza están en <b>Trabajos en cola</b>.
                             </div>
                             <group>
                                 <group>

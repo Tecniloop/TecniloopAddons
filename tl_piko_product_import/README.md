@@ -3,7 +3,7 @@
 Importador de productos por **scraping HTML** para Odoo 19, pensado para tiendas
 sin API pública (caso de partida: `piko-shop.de`, sistema propietario sin API).
 
-Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.4.0.0
+Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.6.0.0
 
 ## Arquitectura
 
@@ -278,3 +278,84 @@ Ejemplo de línea de ficha (nivel detallado):
 Las líneas de staging **no** llevan chatter propio, a propósito: `mail.thread`
 sobre miles de registros es coste de escritura y de almacenamiento que no
 compensa cuando el registro agregado vive en la fuente.
+
+
+## Descubrimiento reanudable (19.0.5.0.0)
+
+Medido en producción: **una página de listado de piko-shop.de tarda ~30 s**. Con
+~40 páginas, recorrer el catálogo entero son ~23 minutos en una sola llamada, muy
+por encima de `limit_time_real_cron`: el worker muere, la transacción se deshace
+y la fuente vuelve a `queued` sin dejar rastro ni líneas. Justo el síntoma de
+"horas en cola sin avanzar".
+
+Ahora el descubrimiento es un generador página a página (`iter_discovery`) y:
+
+- crea las líneas y **commitea tras cada página**, así que nada se pierde;
+- guarda el avance en la categoría (`next_page`, `discovery_state`);
+- corta a los `DISCOVERY_TIME_BUDGET` segundos (90), deja la fuente en `queued`
+  y se auto-redispara para continuar por donde iba;
+- `discover(source, limit=N)` corta de verdad el rastreo al llegar a N, en vez
+  de recorrerlo todo y recortar el resultado al final.
+
+Fin de la paginación: página sin fichas **o idéntica a la anterior**.
+
+Botón *Reiniciar descubrimiento* para volver a empezar desde la primera página;
+*Ejecutar en segundo plano* ya lo reinicia por su cuenta.
+
+`timeout` por defecto sube de 30 a 60 s: con respuestas de ~30 s, 30 iba al
+límite.
+
+
+## Migración a queue_job (19.0.6.0.0)
+
+Fuera la cola casera (`ir.cron._trigger()`, `FOR UPDATE SKIP LOCKED`,
+presupuestos de tiempo). Ahora depende de **`queue_job` (OCA)**.
+
+### Granularidad
+
+| Job | Unidad | Duración típica |
+| --- | --- | --- |
+| `tl.piko.source._job_discover_page` | una página de listado | ~30 s |
+| `tl.piko.product._job_process_line` | una ficha | ~30 s |
+
+Cada job de página encola las fichas que encuentra **y el job de la página
+siguiente**: la cadena avanza sola y ninguna unidad se acerca a
+`limit_time_real`. Era justo el fallo del diseño anterior, que intentaba
+recorrer 40 páginas en una sola ejecución de cron.
+
+### Reintentos
+
+`_is_transient()` separa los fallos de red (timeout, 502/503/504, 429, conexión
+reseteada) de los de datos. Los primeros se relanzan como `RetryableJobError`
+con `seconds=` y los reintenta queue_job; los segundos marcan la línea en
+`error` y no se reintentan, porque volver a pedir la misma ficha rota no la va a
+arreglar.
+
+### Canal
+
+`root.piko` con **capacidad 1**: los jobs de scraping se ejecutan de uno en uno.
+Es la forma correcta de ser cortés con el servidor de origen, mejor que confiar
+solo en `request_delay`.
+
+### Duplicados
+
+`identity_key=identity_exact` en todos los encolados: pulsar dos veces "Ejecutar"
+no duplica el trabajo mientras el job siga pendiente.
+
+### Crons que quedan
+
+Solo planificación y mantenimiento: sincronización diaria (desactivada),
+limpieza semanal (desactivada) y un **reencolado de huérfanas** cada 2 h, que
+recupera las líneas en `queued` cuyo job ya no existe (jobrunner caído a mitad).
+
+### Requisito de despliegue
+
+`queue_job` necesita su runner. En el `odoo.conf`:
+
+    server_wide_modules = base,web,queue_job
+
+    [queue_job]
+    channels = root:1,root.piko:1
+
+Sin eso los jobs se quedan en `pending` para siempre — el mismo tipo de fallo
+silencioso que teníamos con el cron.

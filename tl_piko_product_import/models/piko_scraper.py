@@ -156,24 +156,86 @@ class TlPikoScraper(models.AbstractModel):
     # ------------------------------------------------------------------
     @api.model
     def discover(self, source, limit=None):
-        """Devuelve una lista de URLs de ficha de producto."""
-        urls = []
+        """Lista de URLs de ficha. El límite corta el rastreo, no el resultado."""
+        seen, result = set(), []
+        for _category, _page, urls in self.iter_discovery(source):
+            for url in urls:
+                if url in seen:
+                    continue
+                seen.add(url)
+                result.append(url)
+                if limit and len(result) >= limit:
+                    return result
+        return result
+
+    @api.model
+    def urls_from_listing(self, source, page_url):
+        """URLs de ficha que aparecen en una página de listado."""
+        content = self.http_get(source, page_url)
+        if not content:
+            return []
+        tree = lxml_html.fromstring(content)
+        tree.make_links_absolute(source.base_url)
+        found = {
+            a.get("href").split("#")[0]
+            for a in tree.xpath("//a[@href]")
+            if self._is_product_url(source, a.get("href") or "")
+        }
+        return sorted(found)
+
+    @api.model
+    def iter_discovery(self, source):
+        """Generador que va devolviendo (categoría, nº de página, urls).
+
+        Página a página, para que quien lo consuma pueda guardar lo encontrado,
+        commitear y reanudar más tarde: con páginas de 30 s no cabe recorrer un
+        catálogo entero dentro de una sola ejecución de cron.
+        """
+        Category = self.env["tl.piko.category"]
         if source.discovery_mode == "manual":
             urls = [u.strip() for u in (source.url_list or "").splitlines() if u.strip()]
-        elif source.discovery_mode == "sitemap":
-            urls = self._discover_sitemap(source)
-        else:
-            urls = self._discover_categories(source)
-        seen, result = set(), []
+            yield Category, 0, self._normalize_urls(source, urls)
+            return
+        if source.discovery_mode == "sitemap":
+            yield Category, 0, self._normalize_urls(source, self._discover_sitemap(source))
+            return
+        for category in source.category_ids.filtered(
+            lambda c: c.active and c.discovery_state != "done"
+        ):
+            page_urls = category._page_urls()
+            previous = None
+            for index in range(category.next_page, len(page_urls)):
+                content = self.http_get(source, page_urls[index])
+                if not content:
+                    category.discovery_state = "done"
+                    break
+                tree = lxml_html.fromstring(content)
+                tree.make_links_absolute(source.base_url)
+                found = {
+                    a.get("href").split("#")[0]
+                    for a in tree.xpath("//a[@href]")
+                    if self._is_product_url(source, a.get("href") or "")
+                }
+                # Fin de la paginación: página sin fichas, o idéntica a la
+                # anterior (algunas tiendas repiten la última al pasarse).
+                if not found or found == previous:
+                    category.discovery_state = "done"
+                    break
+                previous = found
+                yield category, index, sorted(found)
+                if index + 1 >= len(page_urls):
+                    category.discovery_state = "done"
+
+    @api.model
+    def _normalize_urls(self, source, urls):
+        out, seen = [], set()
         for url in urls:
             url = urljoin(source.base_url, url).split("#")[0]
             if url in seen or not self._is_product_url(source, url):
                 continue
             seen.add(url)
-            result.append(url)
-            if limit and len(result) >= limit:
-                break
-        return result
+            out.append(url)
+        return out
 
     @api.model
     def _is_product_url(self, source, url):
@@ -200,37 +262,6 @@ class TlPikoScraper(models.AbstractModel):
                 out += self._discover_sitemap(source, child, depth + 1)
             return out
         return locs
-
-    @api.model
-    def _discover_categories(self, source):
-        """Rastrea las URLs de categoría configuradas y saca los enlaces de ficha."""
-        urls = []
-        seen = set()
-        for category in source.category_ids.filtered("active"):
-            for page_url in category._page_urls():
-                content = self.http_get(source, page_url)
-                if not content:
-                    break
-                tree = lxml_html.fromstring(content)
-                tree.make_links_absolute(source.base_url)
-                found = {
-                    a.get("href").split("#")[0]
-                    for a in tree.xpath("//a[@href]")
-                    if self._is_product_url(source, a.get("href") or "")
-                }
-                fresh = found - seen
-                source.log(
-                    _("%(cat)s · %(url)s -> %(found)s enlaces, %(fresh)s nuevos",
-                      cat=category.name, url=page_url.rsplit("/", 1)[-1],
-                      found=len(found), fresh=len(fresh)),
-                    level="detail",
-                )
-                if not fresh:
-                    # página vacía o repetición de la última: fin de la paginación
-                    break
-                seen |= fresh
-                urls += sorted(fresh)
-        return urls
 
     # ------------------------------------------------------------------
     # Parseo de ficha de producto

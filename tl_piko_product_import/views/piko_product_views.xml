@@ -17,6 +17,7 @@
                 <field name="product_tmpl_id" optional="show"/>
                 <field name="scraped_on" optional="hide"/>
                 <field name="attempt_count" optional="hide"/>
+                <field name="job_uuid" optional="hide"/>
                 <field name="next_attempt_date" optional="hide"/>
                 <field name="state" widget="badge"
                        decoration-info="state == 'queued'"/>
@@ -68,6 +69,7 @@
                             <field name="product_tmpl_id"/>
                             <field name="attempt_count"/>
                             <field name="next_attempt_date"/>
+                            <field name="job_uuid"/>
                             <field name="scraped_on"/>
                             <field name="imported_on"/>
                         </group>

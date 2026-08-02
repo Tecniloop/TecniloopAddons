@@ -1,32 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Cola de líneas. Activo: es el destino de _trigger(). El intervalo
-         largo es solo red de seguridad por si se pierde un disparo. -->
-    <record id="ir_cron_tl_piko_queue" model="ir.cron">
-        <field name="name">PIKO Import: cola de rastreo</field>
-        <field name="model_id" ref="model_tl_piko_product"/>
-        <field name="state">code</field>
-        <field name="code">model._cron_process_queue()</field>
-        <field name="interval_number">6</field>
-        <field name="interval_type">hours</field>
-        <field name="priority">20</field>
-        <field name="active" eval="True"/>
-    </record>
-
-    <!-- Descubrimiento de fuentes encoladas. -->
-    <record id="ir_cron_tl_piko_sources" model="ir.cron">
-        <field name="name">PIKO Import: descubrimiento de fuentes</field>
-        <field name="model_id" ref="model_tl_piko_source"/>
-        <field name="state">code</field>
-        <field name="code">model._cron_run_sources()</field>
-        <field name="interval_number">6</field>
-        <field name="interval_type">hours</field>
-        <field name="priority">15</field>
-        <field name="active" eval="True"/>
-    </record>
-
-    <!-- Sincronización periódica: encola todas las fuentes activas.
-         Desactivado hasta que hayas validado los selectores. -->
+    <!-- La ejecución la lleva queue_job; los crons son solo planificación y
+         mantenimiento. -->
     <record id="ir_cron_tl_piko_sync" model="ir.cron">
         <field name="name">PIKO Import: sincronización planificada</field>
         <field name="model_id" ref="model_tl_piko_source"/>
@@ -35,6 +10,18 @@
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
         <field name="active" eval="False"/>
+    </record>
+
+    <!-- Red de seguridad: si el jobrunner se cae con jobs en vuelo, esas
+         líneas se quedarían en 'queued' para siempre. -->
+    <record id="ir_cron_tl_piko_requeue" model="ir.cron">
+        <field name="name">PIKO Import: reencolar líneas huérfanas</field>
+        <field name="model_id" ref="model_tl_piko_source"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_requeue_stuck()</field>
+        <field name="interval_number">2</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
     </record>
 
     <record id="ir_cron_tl_piko_gc" model="ir.cron">
