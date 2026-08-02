@@ -117,6 +117,7 @@ class TlPikoProduct(models.Model):
         marcan la línea en error y no se reintentan.
         """
         self.ensure_one()
+        self = self.with_context(tl_piko_single_attempt=True)
         source = self.source_id
         try:
             self._do_scrape()

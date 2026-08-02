@@ -87,7 +87,10 @@ class TlPikoSource(models.Model):
         help="El listado de piko-shop.de tarda ~30 s por página; 30 se queda corto.",
     )
     max_retries = fields.Integer(
-        "Reintentos HTTP", default=3, help="Reintentos inmediatos dentro de una petición."
+        "Reintentos HTTP", default=1,
+        help="Reintentos inmediatos dentro de la misma petición. Déjalo en 1: "
+             "los reintentos de verdad los gestiona queue_job, y encadenar "
+             "esperas aquí agota el `limit_time_real` del worker.",
     )
     respect_robots = fields.Boolean("Respetar robots.txt", default=True)
     max_products = fields.Integer(
@@ -391,7 +394,7 @@ class TlPikoSource(models.Model):
         )._job_discover_page(False, 0)
         return 1
 
-    def _job_discover_page(self, category_id, page_index):
+    def _job_discover_page(self, category_id, page_index):  # noqa: C901
         """JOB: rastrea UNA página de listado y encadena la siguiente.
 
         Una página por job (~30 s) en lugar de un catálogo por ejecución: cada
@@ -402,6 +405,8 @@ class TlPikoSource(models.Model):
         scraper = self.env["tl.piko.scraper"]
         category = self.env["tl.piko.category"].browse(category_id).exists()
         self.queue_state = "running"
+        # una sola petición por job: el reintento lo lleva queue_job
+        self = self.with_context(tl_piko_single_attempt=True)
 
         try:
             if category:
@@ -438,7 +443,10 @@ class TlPikoSource(models.Model):
             }
             for url in nuevas
         ]) if nuevas else Line
-        lines.action_enqueue()
+        # En tandas: 100 fichas de golpe son 100 INSERT en queue_job dentro de
+        # esta misma petición, y el presupuesto del worker ya va justo.
+        for inicio in range(0, len(lines), 25):
+            lines[inicio:inicio + 25].action_enqueue()
 
         if category:
             category.write({

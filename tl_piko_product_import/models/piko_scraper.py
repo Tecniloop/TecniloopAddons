@@ -113,8 +113,13 @@ class TlPikoScraper(models.AbstractModel):
             raise UserError(_("robots.txt no permite acceder a %s") % url)
         session = source._get_session()
         source.log(_("GET %s", url), level="debug")
+        # Dentro de un job NO se reintenta aquí: 3 intentos x 60 s de timeout
+        # se comen el `limit_time_real` del worker y el proceso muere antes de
+        # poder registrar nada. Los reintentos son cosa de queue_job.
+        intentos = 1 if self.env.context.get("tl_piko_single_attempt") \
+            else max(1, source.max_retries)
         last_error = None
-        for attempt in range(max(1, source.max_retries)):
+        for attempt in range(intentos):
             if source.request_delay:
                 time.sleep(source.request_delay)
             try:
@@ -122,8 +127,10 @@ class TlPikoScraper(models.AbstractModel):
                 if resp.status_code == 404:
                     return None
                 if resp.status_code in (429, 503):
-                    time.sleep((attempt + 1) * (source.request_delay or 1) * 5)
                     last_error = "HTTP %s" % resp.status_code
+                    if intentos == 1:
+                        break  # que lo reintente queue_job, no el worker
+                    time.sleep((attempt + 1) * (source.request_delay or 1) * 5)
                     continue
                 resp.raise_for_status()
                 resp.encoding = resp.encoding or "utf-8"
