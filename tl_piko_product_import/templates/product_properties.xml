@@ -5,22 +5,27 @@
          más. Esta plantilla añade una tabla con las propiedades del producto
          justo debajo.
 
-         Anclaje verificado contra addons/website_sale/views/templates.xml
-         (19.0): el bloque de specs es `div#product_attributes_simple`, que
-         renderiza `single_value_attributes` — justo los atributos no_variant.
-         Colgamos la tabla inmediatamente después, dentro de la misma columna
-         de detalles.
+         ANCLAJE: `o_wsale_product_details_content`, la columna de detalles.
 
-         El xpath usa `//*[@id=...]` y no `//div[@id=...]`: atarlo a la
-         etiqueta hace que la vista reviente si el core cambia el `div` por un
-         `section` o similar, y el id es único de todos modos.
+         Descartado `product_attributes_simple` (el bloque de specs del core):
+         existe en el arch de `website_sale.product`, pero `website_sale_
+         comparison` lo REEMPLAZA por su propia tabla, así que desaparece del
+         arch combinado en cuanto ese módulo está instalado y la herencia falla
+         con "no puede ser localizado". Tampoco vale anclar en su sustituto
+         (`product_specifications` / `product_full_spec`): solo existe si
+         website_sale_comparison está instalado.
 
-         NO se usa `product_full_description`: es un contenedor con
-         `t-field="product.website_description"`, y lo que se meta dentro lo
-         sobrescribe el contenido del campo. -->
+         `o_wsale_product_details_content` sobrevive en ambos casos.
+
+         Descartado también `product_full_description`: es un contenedor con
+         `t-field="product.website_description"` y lo que se inserte dentro lo
+         sobrescribe el valor del campo.
+
+         El xpath usa `//*[@id=...]`, no `//div[@id=...]`: atarlo a la etiqueta
+         rompe la vista si el core cambia el `div` por un `section`. -->
     <template id="product_piko_properties" inherit_id="website_sale.product"
               name="PIKO: especificaciones adicionales">
-        <xpath expr="//*[@id='product_attributes_simple']" position="after">
+        <xpath expr="//*[@id='o_wsale_product_details_content']" position="inside">
             <div t-if="product.product_properties"
                  id="tl_piko_product_properties"
                  class="o_wsale_product_details_content_section o_wsale_product_details_content_section_specs mb-4">

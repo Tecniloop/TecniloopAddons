@@ -480,15 +480,28 @@ Las propiedades **no se muestran solas**: el bloque de especificaciones de
 `templates/product_properties.xml` añade una tabla con las propiedades del
 producto en la ficha.
 
-Anclaje **verificado contra el fuente de website_sale 19.0**: el bloque de
-specs es `div#product_attributes_simple`
-(`views/templates.xml`), que renderiza `single_value_attributes`, es decir
-justo los atributos `no_variant`. La tabla se cuelga inmediatamente después,
-con las mismas clases de sección.
+Anclaje: **`#o_wsale_product_details_content`**, la columna de detalles.
 
-Descartado `div#product_full_description`: lleva
-`t-field="product.website_description"`, así que cualquier contenido insertado
-dentro lo sobrescribe el valor del campo.
+Descartado `#product_attributes_simple` (el bloque de specs del core): está en
+el arch de `website_sale.product`, pero **`website_sale_comparison` lo
+reemplaza** por su propia tabla, así que desaparece del arch combinado y la
+herencia falla con "no puede ser localizado". Tampoco sirve anclar en su
+sustituto (`#product_specifications`, `#product_full_spec`), que solo existe si
+ese módulo está instalado.
+
+Descartado `#product_full_description`: lleva
+`t-field="product.website_description"`, así que lo insertado dentro lo
+sobrescribe el valor del campo.
+
+Los xpath usan `//*[@id=...]` y no `//div[@id=...]`: atar el anclaje a la
+etiqueta rompe la vista si el core cambia el elemento.
+
+**Lección**: validar contra el fuente de la rama no basta. Lo que decide es el
+**arch combinado de la instancia**, con sus módulos y su tema:
+
+    v = env.ref('website_sale.product')
+    arch = v.with_context(inherit_branding=False)._get_combined_arch()
+    print(sorted({e.get('id') for e in arch.iter() if e.get('id')}))
 
 ### Limitación conocida
 
