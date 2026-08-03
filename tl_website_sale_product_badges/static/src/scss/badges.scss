@@ -1,0 +1,55 @@
+.tl_product_badges {
+    .tl_badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        height: 2rem;
+        padding: 0 .35rem;
+        border-radius: .35rem;
+        background: rgba(255, 255, 255, .92);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .18);
+    }
+    .tl_badge_img {
+        max-height: 1.6rem;
+        max-width: 3rem;
+        object-fit: contain;
+    }
+    .tl_badge_text {
+        font-size: .75rem;
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: .02em;
+    }
+}
+
+// Superposición sobre la imagen en la tarjeta del listado
+.tl_product_badges_overlay {
+    position: absolute;
+    top: .5rem;
+    left: .5rem;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    pointer-events: none;
+}
+
+.tl_availability {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    white-space: nowrap;
+
+    .tl_dot {
+        width: .6rem;
+        height: .6rem;
+        border-radius: 50%;
+        display: inline-block;
+        flex: 0 0 auto;
+    }
+    .tl-dot-available    { background: #28a745; }
+    .tl-dot-limited      { background: #f0ad4e; }
+    .tl-dot-preorder     { background: #17a2b8; }
+    .tl-dot-unavailable  { background: #adb5bd; }
+}

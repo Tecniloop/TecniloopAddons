@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- La acción vive en la vista de productos rastreados del módulo, no en
+         la de productos genérica: quien rectifica contenido importado trabaja
+         sobre el staging, que es donde están la URL de origen y el registro de
+         lo que se extrajo. -->
+    <record id="action_resync_piko_content" model="ir.actions.server">
+        <field name="name">Resincronizar contenido desde el origen (PIKO)</field>
+        <field name="model_id" ref="model_tl_piko_product"/>
+        <field name="binding_model_id" ref="model_tl_piko_product"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="group_ids" eval="[(4, ref('group_tl_piko_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = records.action_resync_content()</field>
+    </record>
+
+    <record id="job_function_refresh_content" model="queue.job.function">
+        <field name="model_id" ref="model_tl_piko_product"/>
+        <field name="method">_job_refresh_content</field>
+        <field name="channel_id" ref="channel_piko_lines"/>
+    </record>
+</odoo>

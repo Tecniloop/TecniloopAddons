@@ -4,6 +4,7 @@ import base64
 import hashlib
 import json
 import logging
+import re
 
 import psycopg2
 from psycopg2 import errorcodes
@@ -20,6 +21,16 @@ _logger = logging.getLogger(__name__)
 # Conflictos de concurrencia de Postgres: no son errores de datos, se
 # reintentan. Con la transacción abortada NO se puede tocar la BD, así que
 # estos casos se relanzan sin escribir nada (ni estado, ni chatter).
+# Medidas de la tabla como PROPIEDADES: sin columnas nuevas y con la
+# definición por categoría, así solo aparecen donde tienen sentido.
+# (etiqueta en la ficha, clave, rótulo, tipo)
+SPEC_PROPERTIES = (
+    (("measurement", "länge", "length"), "piko_length", "Longitud (mm)", "float"),
+    (("minimum radius", "mindestradius"), "piko_min_radius", "Radio mínimo (mm)", "float"),
+    (("number of traction tyres", "haftreifen"), "piko_traction_tyres",
+     "Aros de adherencia", "integer"),
+)
+
 PG_CONCURRENCY_CODES = (
     errorcodes.SERIALIZATION_FAILURE,
     errorcodes.DEADLOCK_DETECTED,
@@ -57,7 +68,10 @@ class TlPikoProduct(models.Model):
         "Descripción (HTML)", sanitize_attributes=False,
         help="Bloque de descripción tal como viene en la ficha de origen.",
     )
-    image_url = fields.Char()
+    image_url = fields.Char("Imagen principal")
+    image_urls = fields.Text("Galería (una URL por línea)")
+    video_url = fields.Char("Vídeo")
+    attachment_json = fields.Text("Descargas", readonly=True)
     categ_path = fields.Char("Ruta de categoría")
     categ_external_ids = fields.Char(
         "Ids de categoría de origen", help="Ids del sitio, p.ej. 20/373/376/306."
@@ -222,18 +236,66 @@ class TlPikoProduct(models.Model):
         source.flush_log(_("Rastreo"))
         return self._log_summary()
 
-    def _job_refresh_description(self):
-        """JOB: relee la ficha solo para actualizar la descripción."""
+    def action_resync_content(self):
+        """Encola la resincronización de contenido de estas líneas."""
+        for line in self:
+            line.with_delay(
+                description=_("Resincronizar %s") % (line.default_code or line.url),
+                identity_key=identity_exact,
+                priority=5,
+            )._job_refresh_content()
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("PIKO Import"),
+                "message": _("%s fichas encoladas para resincronizar.", len(self)),
+                "type": "success",
+            },
+        }
+
+    def _job_refresh_content(self):
+        """JOB: relee la ficha y actualiza TODO el contenido del producto.
+
+        Descripción HTML, características, propiedades, categorías, galería,
+        vídeo y descargas. Deliberadamente NO toca nombre, precio ni código de
+        barras: esto es una rectificación de contenido, no una reimportación.
+        """
         self.ensure_one()
         self = self.with_context(tl_piko_single_attempt=True)
-        scraper = self.env["tl.piko.scraper"]
-        vals = scraper.parse_product(self.source_id, self.url)
-        self.write({
-            "description": vals.get("description") or self.description,
-            "description_html": vals.get("description_html") or self.description_html,
-        })
-        self.action_push_description()
-        return _("Descripción actualizada")
+        estado_previo = self.state
+        self._do_scrape()  # refresca la línea y reaplica las reglas
+        if estado_previo == "imported":
+            self.state = "imported"  # el rescrapeo no debe degradar el estado
+
+        product = self.product_tmpl_id or self._find_product()
+        if not product:
+            return _("Sin producto asociado")
+        if product.piko_no_overwrite:
+            return _("Producto marcado como 'No sobrescribir'")
+
+        vals = self._description_vals(product)
+        if vals:
+            product.write(vals)
+        self._sync_template_attributes(product)
+        self._sync_product_properties(product)
+        self._sync_public_categories(product)
+        self._sync_availability(product)
+        imagenes = self._import_gallery(product)
+        video = self._import_video(product)
+        adjuntos = self._import_attachments(product)
+        self.product_tmpl_id = product
+
+        resumen = _(
+            "%(ref)s resincronizado: %(car)s características, %(img)s imágenes, "
+            "%(vid)s vídeo, %(adj)s descargas.",
+            ref=self.default_code or self.url.rsplit("/", 1)[-1],
+            car=len(self.attribute_value_ids), img=imagenes,
+            vid=int(bool(video)), adj=adjuntos,
+        )
+        self.source_id.log(resumen, level="detail")
+        self.source_id.flush_log(_("Resincronización"))
+        return resumen
 
     def _log_summary(self):
         """Una línea legible con lo que se ha hecho con esta ficha."""
@@ -428,6 +490,41 @@ class TlPikoProduct(models.Model):
             only_leaf=source.public_categ_mode == "leaf",
         )
 
+    def _sync_availability(self, product):
+        """Traduce el texto de disponibilidad de la ficha a un estado.
+
+        Solo escribe si está instalado tl_website_sale_product_badges; el
+        módulo no depende de él.
+        """
+        self.ensure_one()
+        if "tl_availability" not in product._fields:
+            return False
+        texto = (self.availability or "").strip()
+        if not texto:
+            return False
+        bajo = texto.lower()
+        claves = (
+            ("unavailable", ("not available", "nicht verfügbar", "nicht verfuegbar",
+                             "ausverkauft", "sold out", "vergriffen", "outofstock")),
+            ("preorder", ("vorbestell", "pre-order", "preorder", "vorankündigung",
+                          "vorankuendigung", "erscheint", "announcement",
+                          "in preparation", "in vorbereitung")),
+            ("limited", ("limited", "wenige", "restbestand", "few", "limitedavailability")),
+            ("available", ("available", "verfügbar", "verfuegbar", "lieferbar",
+                           "auf lager", "instock")),
+        )
+        estado = next(
+            (clave for clave, marcas in claves if any(m in bajo for m in marcas)),
+            False,
+        )
+        if not estado:
+            return False
+        product.write({
+            "tl_availability": estado,
+            "tl_availability_note": texto[:120],
+        })
+        return True
+
     def _sync_public_categories(self, product):
         """Añade sin quitar: las categorías puestas a mano se respetan."""
         self.ensure_one()
@@ -532,28 +629,78 @@ class TlPikoProduct(models.Model):
         )
         return vals
 
+    def _spec_property_values(self):
+        """Medidas numéricas de la tabla, listas para `product_properties`."""
+        self.ensure_one()
+        specs = self._spec_dict()
+        valores = {}
+        for etiquetas, clave, _rotulo, tipo in SPEC_PROPERTIES:
+            for etiqueta in etiquetas:
+                bruto = specs.get(etiqueta)
+                if not bruto:
+                    continue
+                numero = re.search(r"[\d.,]+", str(bruto))
+                if numero:
+                    cifra = self.env["tl.piko.scraper"]._parse_price(numero.group(0))
+                    valores[clave] = int(cifra) if tipo == "integer" else cifra
+                break
+        return valores
+
+    def _sync_product_properties(self, product):
+        """Vuelca las medidas como propiedades del producto.
+
+        Las propiedades no crean columnas y su definición vive en la categoría,
+        de modo que "Radio mínimo" aparece en material rodante y no en tornillos.
+        """
+        self.ensure_one()
+        if "product_properties" not in product._fields:
+            return False  # Odoo anterior a la introducción de propiedades
+        valores = self._spec_property_values()
+        if not valores:
+            return False
+        categoria = product.categ_id
+        if not categoria:
+            return False
+        definicion = list(categoria.product_properties_definition or [])
+        conocidas = {d.get("name") for d in definicion}
+        faltan = [
+            {"name": clave, "string": rotulo, "type": tipo}
+            for _etiquetas, clave, rotulo, tipo in SPEC_PROPERTIES
+            if clave in valores and clave not in conocidas
+        ]
+        if faltan:
+            categoria.product_properties_definition = definicion + faltan
+        product.write({
+            "product_properties": [
+                {"name": clave, "value": valor} for clave, valor in valores.items()
+            ]
+        })
+        return True
+
     def _description_vals(self, product=None):
-        """Reparte la descripción entre el campo de venta y el de eCommerce."""
+        """Reparte la descripción entre el campo de venta y el de eCommerce.
+
+        Odoo 19 trae `description_ecommerce` de serie en `product.template`, así
+        que es el destino principal. `public_description` (OCA
+        website_sale_product_description) se rellena además si el módulo está
+        instalado, para no dejar a medias las instalaciones que ya lo usan.
+        """
         self.ensure_one()
         destino = self.source_id.description_target
+        campos = self.env["product.template"]._fields
         vals = {}
         if destino in ("sale", "both") and self.description:
             vals["description_sale"] = self.description
         if destino in ("public", "both"):
-            campo = "public_description"
-            if campo not in self.env["product.template"]._fields:
-                _logger.info(
-                    "website_sale_product_description no instalado: la "
-                    "descripción de eCommerce se omite."
-                )
-                return vals
             # HTML original; si la ficha no trae bloque, el texto plano
             # envuelto en un párrafo, que es mejor que dejarlo vacío.
             contenido = self.description_html
             if not contenido and self.description:
                 contenido = "<p>%s</p>" % escape(self.description)
             if contenido:
-                vals[campo] = contenido
+                for campo in ("description_ecommerce", "public_description"):
+                    if campo in campos:
+                        vals[campo] = contenido
         return vals
 
     def action_push_description(self):
@@ -589,7 +736,12 @@ class TlPikoProduct(models.Model):
             product = self.env["product.template"].create(vals)
         self._sync_template_attributes(product)
         self._sync_public_categories(product)
+        self._sync_product_properties(product)
+        self._sync_availability(product)
         self._import_image(product)
+        self._import_gallery(product)
+        self._import_video(product)
+        self._import_attachments(product)
         self.write(
             {
                 "state": "imported",
@@ -611,6 +763,125 @@ class TlPikoProduct(models.Model):
                 line.invalidate_recordset()
                 line._register_failure(str(exc))
         return True
+
+    # ------------------------------------------------------------------
+    # Medios y adjuntos
+    # ------------------------------------------------------------------
+    def _import_gallery(self, product):
+        """Imágenes adicionales como `product.image`, sin duplicar."""
+        self.ensure_one()
+        source = self.source_id
+        if not (source.import_images and source.import_extra_images):
+            return 0
+        urls = [u.strip() for u in (self.image_urls or "").splitlines() if u.strip()]
+        # la primera ya es la imagen principal del producto
+        urls = urls[1:]
+        if not urls:
+            return 0
+        Image = self.env["product.image"]
+        existentes = set(
+            Image.search([("product_tmpl_id", "=", product.id)]).mapped("name")
+        )
+        creadas = 0
+        for indice, url in enumerate(urls, start=2):
+            nombre = url.rsplit("/", 1)[-1]
+            if nombre in existentes:
+                continue
+            contenido = self.env["tl.piko.scraper"].http_get_binary(source, url)
+            if not contenido:
+                continue
+            Image.create({
+                "name": nombre,
+                "image_1920": base64.b64encode(contenido),
+                "product_tmpl_id": product.id,
+                "sequence": indice * 10,
+            })
+            creadas += 1
+        return creadas
+
+    def _import_video(self, product):
+        """El vídeo se guarda como `product.image` con `video_url`.
+
+        Es como lo modela Odoo para el carrusel de la tienda; si el campo no
+        existiera en esta versión, se omite en vez de fallar.
+        """
+        self.ensure_one()
+        if not (self.source_id.import_video and self.video_url):
+            return False
+        Image = self.env["product.image"]
+        if "video_url" not in Image._fields:
+            _logger.info("product.image sin campo video_url: vídeo omitido.")
+            return False
+        if Image.search_count([("product_tmpl_id", "=", product.id),
+                               ("video_url", "=", self.video_url)]):
+            return False
+        Image.create({
+            "name": _("Vídeo"),
+            "video_url": self.video_url,
+            "product_tmpl_id": product.id,
+            "sequence": 5,
+        })
+        return True
+
+    def _import_attachments(self, product):
+        """Descargas de la ficha como adjuntos publicables en eCommerce.
+
+        Se apoya en website_sale_product_attachment: `ir.attachment` público,
+        con `website_name` como rótulo y enlazado por `website_attachment_ids`.
+        La URL de origen se guarda en `description` para no duplicar en cada
+        sincronización.
+        """
+        self.ensure_one()
+        source = self.source_id
+        if not source.import_attachments or not self.attachment_json:
+            return 0
+        try:
+            descargas = json.loads(self.attachment_json)
+        except ValueError:
+            return 0
+        Document = self.env["product.document"]
+        campos_doc = Document._fields
+        scraper = self.env["tl.piko.scraper"]
+        # `description` (heredado de ir.attachment) guarda la URL de origen:
+        # es la marca que evita duplicar en cada sincronización.
+        ya = set(product.product_document_ids.mapped("description"))
+        creados = 0
+        for descarga in descargas:
+            url = descarga.get("url")
+            if not url or url in ya:
+                continue
+            contenido, nombre, tipo = scraper.http_get_file(source, url)
+            if not contenido:
+                continue
+            limite = (source.attachment_max_mb or 20) * 1024 * 1024
+            if len(contenido) > limite:
+                source.log(_("Adjunto %s omitido por tamaño (%s MB).",
+                             descarga.get("name"), len(contenido) // 1048576))
+                continue
+            rotulo = descarga.get("name") or "download"
+            vals = {
+                # `product.document` _inherits de ir.attachment: estos campos
+                # crean el adjunto subyacente en la misma llamada.
+                "name": nombre or "%s.pdf" % rotulo,
+                "datas": base64.b64encode(contenido),
+                "mimetype": (tipo or "").split(";")[0] or False,
+                "res_model": "product.template",
+                "res_id": product.id,
+                "description": url,
+            }
+            if "shown_on_product_page" in campos_doc:
+                vals["shown_on_product_page"] = source.publish_attachments
+            documento = Document.create(vals)
+            creados += 1
+            # Compatibilidad con website_sale_product_attachment (OCA), si la
+            # instalación ya lo usaba para listar descargas.
+            if "website_attachment_ids" in product._fields:
+                adjunto = documento.ir_attachment_id
+                adjunto.write({"public": True})
+                if "website_name" in adjunto._fields:
+                    adjunto.website_name = rotulo
+                product.write({"website_attachment_ids": [(4, adjunto.id)]})
+        return creados
 
     def _import_image(self, product):
         self.ensure_one()

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Anclaje verificado en addons/product/views/product_views.xml (19.0):
+         página "sales" -> group name="extra_info". El grupo "shop" que usaban
+         módulos de versiones anteriores ya no existe. -->
+    <record id="product_template_form_view_badges" model="ir.ui.view">
+        <field name="name">product.template.form.badges</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='sales']//group[@name='extra_info']"
+                   position="after">
+                <group name="tl_badges" string="Distintivos y disponibilidad">
+                    <field name="tl_availability"/>
+                    <field name="tl_availability_note"
+                           invisible="not tl_availability"/>
+                    <field name="tl_badge_value_ids" widget="many2many_tags"
+                           readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

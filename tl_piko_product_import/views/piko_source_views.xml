@@ -109,6 +109,14 @@
                                     <field name="public_categ_mode"/>
                                     <field name="product_type"/>
                                     <field name="import_images"/>
+                                    <field name="import_extra_images"
+                                           invisible="not import_images"/>
+                                    <field name="import_video"/>
+                                    <field name="import_attachments"/>
+                                    <field name="publish_attachments"
+                                           invisible="not import_attachments"/>
+                                    <field name="attachment_max_mb"
+                                           invisible="not import_attachments"/>
                                     <field name="apply_attribute_rules"/>
                                     <field name="update_attributes"
                                            invisible="not apply_attribute_rules"/>

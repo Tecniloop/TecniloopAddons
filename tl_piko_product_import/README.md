@@ -3,7 +3,7 @@
 Importador de productos por **scraping HTML** para Odoo 19, pensado para tiendas
 sin API pública (caso de partida: `piko-shop.de`, sistema propietario sin API).
 
-Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.8.1.0
+Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.12.0.0
 
 ## Arquitectura
 
@@ -392,17 +392,7 @@ La descripción larga va al campo **`public_description`** del módulo OCA
 
 ### Rectificar productos ya importados
 
-Acción de servidor **«Rectificar descripción web (PIKO)»**, disponible en
-Productos → seleccionar → *Acciones* (y como botón en la pestaña *Origen web*
-del formulario). Para cada producto:
-
-- si su línea de staging ya tiene la descripción, se aplica al momento;
-- si no la tiene —productos importados antes de que el módulo extrajera el
-  HTML—, se encola `_job_refresh_description`, que relee **solo** la ficha para
-  la descripción y la escribe.
-
-Al terminar informa de cuántas se han actualizado en directo y cuántas quedan
-encoladas.
+Ver «Resincronización de contenido» más abajo.
 
 
 ## Concurrencia y transacciones abortadas (19.0.8.1.0)
@@ -431,3 +421,140 @@ accesorio y nunca debe tumbar un trabajo.
 Si los conflictos son frecuentes, baja la concurrencia a
 `root.piko.lines:1` — se pierde paralelismo, pero el cuello de botella real es
 el servidor de origen, no Odoo.
+
+
+## Medios y adjuntos (19.0.9.0.0)
+
+Analizada la ficha 21002 (BR E 410), faltaba todo esto:
+
+| Contenido | En la ficha | Destino en Odoo |
+| --- | --- | --- |
+| Galería | 5 imágenes en `/media/oart_0/oart_s/oart_<id>/` | 1ª → `image_1920`, resto → `product.image` |
+| Vídeo | `youtube.com/embed/<id>` | `product.image.video_url` |
+| Descargas | 5 enlaces `is.php?id=N` | `ir.attachment` público + `website_attachment_ids` |
+| Medidas | Measurement, Minimum radius, Traction Tyres | `product_properties` |
+| Características | Interior Lighting, Coupling, Directional lights, Kind of measurement | 4 atributos `no_variant` nuevos |
+
+Detalles que importan:
+
+- **Las imágenes se filtran por la carpeta del artículo** (`/media/oart_`). Sin
+  ese filtro entraban el logo de cabecera y los iconos de GLS/DHL del pie, que
+  viven en `/media/k2757/`.
+- **Las descargas se filtran por `is.php?id=`**, no por estar en una lista: la
+  ficha tiene también secciones de accesorios y recambios llenas de enlaces a
+  otros artículos.
+- **Idempotencia**: la URL de origen se guarda en `ir.attachment.description`,
+  así que resincronizar no duplica adjuntos; las imágenes se comparan por
+  nombre de fichero.
+- `website_name` del adjunto toma el rótulo del enlace («Bedienungsanl./
+  Ersatzteilliste 21002»), que es lo que verá el cliente en la tienda.
+- Límite de tamaño por adjunto (`attachment_max_mb`, 20 por defecto).
+- Las medidas van a **propiedades**, no a atributos ni a campos: ver abajo.
+
+Nuevas dependencias: `website_sale_product_attachment`.
+
+Acción de servidor **«Recuperar imágenes, vídeo y adjuntos (PIKO)»** en
+Productos → *Acciones*, para completar lo ya importado: relee la ficha y añade
+solo lo que falte.
+
+
+## Medidas como propiedades (19.0.10.0.0)
+
+Se retiran los campos `piko_length_mm`, `piko_min_radius_mm` y
+`piko_traction_tyres`. Las medidas pasan a `product.template.product_properties`:
+
+- **Sin columnas nuevas** en la tabla de productos.
+- **Definición por categoría** (`product.category.product_properties_definition`),
+  creada al vuelo la primera vez: "Radio mínimo" aparece en material rodante y
+  no en tornillos.
+- Tipos nativos: `float` para longitud y radio, `integer` para aros.
+
+Por qué no atributos: cada longitud generaría su propio
+`product.attribute.value` (195, 196, 197…), con miles de registros basura y
+filtros de tienda inservibles.
+
+### Presentación en la tienda
+
+Las propiedades **no se muestran solas**: el bloque de especificaciones de
+`website_sale` renderiza líneas de atributo y nada más. La plantilla
+`templates/product_properties.xml` añade una tabla con las propiedades del
+producto en la ficha.
+
+Anclaje **verificado contra el fuente de website_sale 19.0**: el bloque de
+specs es `div#product_attributes_simple`
+(`views/templates.xml`), que renderiza `single_value_attributes`, es decir
+justo los atributos `no_variant`. La tabla se cuelga inmediatamente después,
+con las mismas clases de sección.
+
+Descartado `div#product_full_description`: lleva
+`t-field="product.website_description"`, así que cualquier contenido insertado
+dentro lo sobrescribe el valor del campo.
+
+### Limitación conocida
+
+Las propiedades no son filtrables en la tienda ni agrupables como un campo
+normal. Si algún día hace falta "locomotoras de menos de 200 mm" como filtro de
+catálogo, eso sí pediría campos reales.
+
+
+## Campos nativos en vez de OCA (19.0.11.0.0)
+
+Validado contra el fuente de Odoo 19 (`addons/product`, `addons/website_sale`):
+dos de las tres necesidades ya están cubiertas por el core, así que las
+dependencias OCA sobraban.
+
+| Necesidad | Antes (OCA) | Ahora (core 19) |
+| --- | --- | --- |
+| Descripción eCommerce | `public_description` | `product.template.description_ecommerce` |
+| Descargas en la ficha | `website_attachment_ids` | `product.document` + `shown_on_product_page` |
+| Vídeo | — | `product.image.video_url` → `embed_code` |
+
+`depends` pierde `website_sale_product_description` y
+`website_sale_product_attachment`. Si están instalados igualmente, se siguen
+rellenando (`public_description`, `website_name`, `public=True` y el enlace en
+`website_attachment_ids`), para no dejar a medias las bases que ya los usaban.
+
+Detalles verificados en el fuente:
+
+- `product.document` hace `_inherits` de `ir.attachment`, así que `name`,
+  `datas`, `mimetype`, `res_model`, `res_id` y `description` se pasan en el
+  mismo `create` y el adjunto se crea solo.
+- `product_document_ids` es un `One2many` por `res_id` con dominio
+  `res_model = product.template`; la deduplicación usa `description`, donde se
+  guarda la URL de origen.
+- `product.image` vive en `website_sale` (no en `product`) y su `embed_code` se
+  computa desde `video_url` con `get_video_embed_code`.
+- El bloque nativo de documentos de la ficha es `div#product_documents`, y solo
+  lista los que tienen `shown_on_product_page` — de ahí la opción
+  `publish_attachments`.
+
+
+## Resincronización de contenido (19.0.12.0.0)
+
+Las dos acciones anteriores (descripción por un lado, medios por otro) se
+funden en una sola, y se mueven de la vista genérica de Productos a la de
+**Productos rastreados** del módulo.
+
+Por qué ahí: quien rectifica contenido importado trabaja sobre el staging, que
+es donde están la URL de origen, la tabla de características extraída y el
+registro de lo que se obtuvo. En la vista de Productos la acción aparecía
+también sobre productos que no vienen del scraping.
+
+**Productos rastreados → seleccionar → Acciones → «Resincronizar contenido
+desde el origen (PIKO)»**, o el botón del formulario. Encola
+`_job_refresh_content`, que relee la ficha y actualiza:
+
+- descripción (HTML original) en `description_ecommerce`
+- características (reglas de tabla y de título)
+- propiedades (medidas)
+- categorías de eCommerce
+- galería, vídeo y descargas
+
+**No toca nombre, precio ni código de barras**: es una rectificación de
+contenido, no una reimportación. Y respeta `piko_no_overwrite`.
+
+Detalle: si la línea ya estaba en `imported`, el rescrapeo no la degrada a
+`parsed` — el estado se restaura al terminar.
+
+Queda además el botón *Enviar solo la descripción al producto* en la pestaña
+Descripción, para el caso puntual en que no haga falta releer la ficha.

@@ -167,12 +167,32 @@ class TlPikoSource(models.Model):
         "Destino de la descripción",
         default="public",
         required=True,
-        help="La de eCommerce es el campo `public_description` del módulo OCA "
-             "website_sale_product_description, y conserva el HTML original.",
+        help="La de eCommerce es `description_ecommerce` (nativo de Odoo 19) y "
+             "conserva el HTML original. Si está instalado el módulo OCA "
+             "website_sale_product_description, se rellena también su "
+             "`public_description`.",
     )
     update_price = fields.Boolean("Actualizar precio de venta", default=False)
     update_barcode = fields.Boolean("Completar EAN vacío", default=True)
     import_images = fields.Boolean("Descargar imagen principal", default=True)
+    import_extra_images = fields.Boolean(
+        "Galería adicional", default=True,
+        help="Resto de imágenes de la ficha como `product.image`."
+    )
+    import_video = fields.Boolean(
+        "Vídeo incrustado", default=True,
+        help="Se guarda como `product.image` con `video_url`."
+    )
+    import_attachments = fields.Boolean(
+        "Descargas (PDF, manuales)", default=True,
+        help="Se crean como `product.document`, el modelo nativo de Odoo 19."
+    )
+    publish_attachments = fields.Boolean(
+        "Publicar descargas en la tienda", default=True,
+        help="Marca `shown_on_product_page`: aparecen en el bloque Documents "
+             "de la ficha de eCommerce."
+    )
+    attachment_max_mb = fields.Integer("Tamaño máx. adjunto (MB)", default=20)
     apply_attribute_rules = fields.Boolean(
         "Extraer características", default=True,
         help="Aplica las reglas regex al rastrear cada ficha."

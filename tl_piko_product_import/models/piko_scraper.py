@@ -27,6 +27,10 @@ RE_URL_ID = re.compile(r"-(\d+)\.html?$", re.I)
 # index.php?vw_type=artikel&vw_id=30320&vw_name=detail (URLs legacy)
 RE_LEGACY_ID = re.compile(r"vw_id=(\d+)", re.I)
 RE_EAN = re.compile(r"\b(\d{8}|\d{12,14})\b")
+# /media/oart_0/oart_s/oart_45293/56068_21002.jpg -> galería del artículo
+RE_MEDIA_OART = re.compile(r"/media/oart_[^\"']+\.(?:jpg|jpeg|png|webp)", re.I)
+RE_YOUTUBE = re.compile(r"(?:youtube\.com/(?:embed/|watch\?v=)|youtu\.be/)([\w-]{6,})", re.I)
+RE_DOWNLOAD = re.compile(r"/is\.php\?id=\d+", re.I)
 RE_PRICE = re.compile(r"(\d{1,3}(?:\.\d{3})*,\d{2})\s*(?:€|EUR)")
 RE_SKU_LABEL = re.compile(
     r"(?:artikelnummer|artikel-nr\.?|art\.?\s*nr\.?|item\s*number|sku)\s*[:.]?\s*"
@@ -297,6 +301,8 @@ class TlPikoScraper(models.AbstractModel):
                     vals[key] = meta[0].strip()
         # 3) Selectores XPath configurables en la fuente
         vals.update(self._parse_xpath(source, tree))
+        # 3a) Galería, vídeo y descargas
+        vals.update(self._parse_media(source, tree))
         # 3b) Descripción larga en HTML, para el campo de eCommerce
         vals["description_html"] = self._parse_description_html(source, tree)
         # 4) Tabla de características: más fiable que cualquier heurística
@@ -412,6 +418,76 @@ class TlPikoScraper(models.AbstractModel):
         "//*[contains(@class,'description')]",
         "//*[contains(@id,'description')]",
     )
+
+    @api.model
+    def _parse_media(self, source, tree):
+        """Galería de imágenes, vídeo incrustado y ficheros de descarga."""
+        vals = {}
+
+        # --- imágenes: solo las de la carpeta del artículo, en orden de página
+        imagenes, vistas = [], set()
+        for atributo in ("href", "src", "data-src", "data-zoom-image"):
+            for nodo in tree.xpath("//*[@%s]" % atributo):
+                valor = nodo.get(atributo) or ""
+                if not RE_MEDIA_OART.search(valor):
+                    continue
+                url = urljoin(source.base_url, valor.split("?")[0])
+                if url not in vistas:
+                    vistas.add(url)
+                    imagenes.append(url)
+        if imagenes:
+            vals["image_url"] = imagenes[0]
+            vals["image_urls"] = "\n".join(imagenes)
+
+        # --- vídeo (YouTube incrustado)
+        for atributo in ("src", "href", "data-src"):
+            for nodo in tree.xpath("//*[@%s]" % atributo):
+                match = RE_YOUTUBE.search(nodo.get(atributo) or "")
+                if match:
+                    vals["video_url"] = "https://www.youtube.com/watch?v=%s" % match.group(1)
+                    break
+            if vals.get("video_url"):
+                break
+
+        # --- descargas: enlaces a is.php?id=N, con su rótulo como nombre
+        descargas, ids = [], set()
+        for enlace in tree.xpath("//a[@href]"):
+            href = enlace.get("href") or ""
+            if not RE_DOWNLOAD.search(href):
+                continue
+            url = urljoin(source.base_url, href)
+            if url in ids:
+                continue
+            ids.add(url)
+            descargas.append({
+                "name": self._clean(enlace.text_content()) or url.rsplit("=", 1)[-1],
+                "url": url,
+            })
+        if descargas:
+            vals["attachment_json"] = json.dumps(descargas, ensure_ascii=False)
+        return vals
+
+    @api.model
+    def http_get_file(self, source, url):
+        """Descarga un fichero devolviendo (contenido, nombre, tipo)."""
+        url = self._prepare_url(source, url)
+        if not self._robots_allows(source, url):
+            return None, None, None
+        session = source._get_session()
+        try:
+            if source.request_delay:
+                time.sleep(source.request_delay)
+            resp = session.get(url, timeout=source.timeout or 60)
+            resp.raise_for_status()
+        except Exception as exc:  # noqa: BLE001
+            _logger.warning("No se pudo descargar %s: %s", url, exc)
+            return None, None, None
+        nombre = None
+        disposicion = resp.headers.get("content-disposition") or ""
+        match = re.search(r'filename\*?=(?:UTF-8\'\')?"?([^";]+)"?', disposicion)
+        if match:
+            nombre = match.group(1).strip()
+        return resp.content, nombre, resp.headers.get("content-type")
 
     @api.model
     def _parse_description_html(self, source, tree):

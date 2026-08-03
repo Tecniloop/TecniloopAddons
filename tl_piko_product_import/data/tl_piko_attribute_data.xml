@@ -45,6 +45,57 @@
         <field name="create_variant">no_variant</field>
     </record>
 
+    <record id="attr_lighting" model="product.attribute">
+        <field name="name">Iluminación</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+    <record id="attr_coupling" model="product.attribute">
+        <field name="name">Enganche</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+    <record id="attr_head_lights" model="product.attribute">
+        <field name="name">Luces de marcha</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+    <record id="attr_measure_kind" model="product.attribute">
+        <field name="name">Tipo de medida</field>
+        <field name="create_variant">no_variant</field>
+    </record>
+
+    <record id="rule_spec_lighting" model="tl.piko.attribute.rule">
+        <field name="name">Iluminación (tabla)</field>
+        <field name="sequence">5</field>
+        <field name="attribute_id" ref="attr_lighting"/>
+        <field name="field_source">spec</field>
+        <field name="spec_label">Interior Lighting / Lights</field>
+        <field name="value_mode">value</field>
+    </record>
+    <record id="rule_spec_coupling" model="tl.piko.attribute.rule">
+        <field name="name">Enganche (tabla)</field>
+        <field name="sequence">5</field>
+        <field name="attribute_id" ref="attr_coupling"/>
+        <field name="field_source">spec</field>
+        <field name="spec_label">Coupling</field>
+        <field name="value_mode">value</field>
+    </record>
+    <record id="rule_spec_head_lights" model="tl.piko.attribute.rule">
+        <field name="name">Luces de marcha (tabla)</field>
+        <field name="sequence">5</field>
+        <field name="attribute_id" ref="attr_head_lights"/>
+        <field name="field_source">spec</field>
+        <field name="spec_label">Directional lights</field>
+        <field name="value_mode">value</field>
+    </record>
+    <record id="rule_spec_measure_kind" model="tl.piko.attribute.rule">
+        <field name="name">Tipo de medida (tabla)</field>
+        <field name="sequence">5</field>
+        <field name="attribute_id" ref="attr_measure_kind"/>
+        <field name="field_source">spec</field>
+        <field name="spec_label">Kind of measurement</field>
+        <field name="value_mode">value</field>
+        <field name="value_mapping">LüP / Länge über Puffer = LüP (longitud entre topes)</field>
+    </record>
+
     <!-- ============================================================
          Reglas sobre la TABLA DE CARACTERÍSTICAS de la ficha.
          Secuencia 5: se evalúan antes que las reglas sobre el título,

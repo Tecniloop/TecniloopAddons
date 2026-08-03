@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- FICHA DE PRODUCTO.
+         Anclaje: la llamada a `website_sale.shop_product_images` dentro de
+         `div.o_wsale_product_images`. Se usa el `t-call` porque ese div lleva
+         `t-attf-class` y `hasclass()` no lo encuentra al heredar. -->
+    <template id="product_badges_detail" inherit_id="website_sale.product"
+              name="Distintivos y disponibilidad en la ficha">
+        <xpath expr="//t[@t-call='website_sale.shop_product_images']"
+               position="before">
+            <div t-if="product.tl_badge_value_ids or product.tl_availability"
+                 class="tl_product_badges d-flex flex-wrap align-items-center gap-2 mb-2">
+                <t t-foreach="product.tl_badge_value_ids" t-as="badge">
+                    <span class="tl_badge" t-att-title="badge.attribute_id.name + ': ' + badge.name">
+                        <img t-if="badge.image"
+                             t-att-src="image_data_uri(badge.image)"
+                             t-att-alt="badge.name" class="tl_badge_img"/>
+                        <span t-else="" class="tl_badge_text"
+                              t-out="badge._tl_badge_label()"/>
+                    </span>
+                </t>
+                <span t-if="product.tl_availability" class="tl_availability ms-auto">
+                    <span t-attf-class="tl_dot #{product._tl_availability_class()}"/>
+                    <span t-out="product._tl_availability_label()"/>
+                </span>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- TARJETA DEL LISTADO.
+         Distintivos superpuestos a la imagen: se insertan tras el `span` de la
+         imagen principal, que sí tiene `class` literal, y dentro del enlace,
+         que es `position-relative`. -->
+    <template id="product_badges_tile" inherit_id="website_sale.products_item"
+              name="Distintivos en la tarjeta de producto">
+        <xpath expr="//span[hasclass('oe_product_image_img_wrapper_primary')]"
+               position="after">
+            <div t-if="product.tl_badge_value_ids"
+                 class="tl_product_badges tl_product_badges_overlay">
+                <t t-foreach="product.tl_badge_value_ids" t-as="badge">
+                    <span class="tl_badge" t-att-title="badge.name">
+                        <img t-if="badge.image"
+                             t-att-src="image_data_uri(badge.image)"
+                             t-att-alt="badge.name" class="tl_badge_img"/>
+                        <span t-else="" class="tl_badge_text"
+                              t-out="badge._tl_badge_label()"/>
+                    </span>
+                </t>
+            </div>
+        </xpath>
+
+        <!-- Disponibilidad encima del nombre -->
+        <xpath expr="//div[hasclass('o_wsale_product_information_text')]"
+               position="before">
+            <div t-if="product.tl_availability" class="tl_availability small">
+                <span t-attf-class="tl_dot #{product._tl_availability_class()}"/>
+                <span t-out="product._tl_availability_label()"/>
+            </div>
+        </xpath>
+    </template>
+</odoo>

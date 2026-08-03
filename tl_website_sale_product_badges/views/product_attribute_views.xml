@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_attribute_view_form_badges" model="ir.ui.view">
+        <field name="name">product.attribute.form.badges</field>
+        <field name="model">product.attribute</field>
+        <field name="inherit_id" ref="product.product_attribute_view_form"/>
+        <field name="arch" type="xml">
+            <field name="display_type" position="after">
+                <field name="tl_is_badge"/>
+                <field name="tl_badge_sequence" invisible="not tl_is_badge"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- El core no define un formulario para product.attribute.value, solo la
+         lista: los valores se editan embebidos en el atributo. -->
+    <record id="product_attribute_value_list_badges" model="ir.ui.view">
+        <field name="name">product.attribute.value.list.badges</field>
+        <field name="model">product.attribute.value</field>
+        <field name="inherit_id" ref="product.product_attribute_value_list"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="tl_badge_text" optional="show"/>
+                <field name="image" widget="image" options="{'size': [0, 40]}"
+                       optional="show"/>
+            </field>
+        </field>
+    </record>
+</odoo>

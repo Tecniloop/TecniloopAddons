@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Las propiedades no se muestran solas en la tienda: el bloque de
+         especificaciones de website_sale renderiza líneas de atributo y nada
+         más. Esta plantilla añade una tabla con las propiedades del producto
+         justo debajo.
+
+         Anclaje verificado contra addons/website_sale/views/templates.xml
+         (19.0): el bloque de specs es `div#product_attributes_simple`, que
+         renderiza `single_value_attributes` — justo los atributos no_variant.
+         Colgamos la tabla inmediatamente después, dentro de la misma columna
+         de detalles.
+
+         NO se usa `div#product_full_description`: es un contenedor con
+         `t-field="product.website_description"`, y lo que se meta dentro lo
+         sobrescribe el contenido del campo. -->
+    <template id="product_piko_properties" inherit_id="website_sale.product"
+              name="PIKO: especificaciones adicionales">
+        <xpath expr="//div[@id='product_attributes_simple']" position="after">
+            <div t-if="product.product_properties"
+                 id="tl_piko_product_properties"
+                 class="o_wsale_product_details_content_section o_wsale_product_details_content_section_specs mb-4">
+                <table class="table table-sm text-muted">
+                    <tbody>
+                        <tr t-foreach="product.product_properties" t-as="prop">
+                            <t t-if="prop.get('value') not in (False, None, '')">
+                                <th class="pe-4 fw-normal text-muted">
+                                    <span t-esc="prop.get('string') or prop.get('name')"/>
+                                </th>
+                                <td>
+                                    <span t-esc="prop.get('value')"/>
+                                </td>
+                            </t>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </xpath>
+    </template>
+</odoo>

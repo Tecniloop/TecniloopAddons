@@ -44,6 +44,10 @@
                             help="Síncrono: úsalo solo para depurar."/>
                     <button name="action_retry" type="object" string="Reintentar"
                             invisible="state != 'error'"/>
+                    <button name="action_resync_content" type="object"
+                            string="Resincronizar contenido"
+                            help="Relee la ficha y actualiza descripción, características, propiedades, categorías, imágenes, vídeo y descargas. No toca nombre ni precio."
+                            invisible="not product_tmpl_id"/>
                     <button name="action_import" type="object" string="Importar"
                             invisible="state not in ('parsed', 'skipped')"/>
                     <button name="action_reset" type="object" string="Reiniciar"/>
@@ -90,12 +94,19 @@
                             <separator string="Texto plano"/>
                             <field name="description"/>
                             <button name="action_push_description" type="object"
-                                    string="Enviar descripción al producto"
+                                    string="Enviar solo la descripción al producto"
                                     class="btn-link" icon="fa-arrow-right"
                                     invisible="not product_tmpl_id"/>
                         </page>
-                        <page string="Imagen">
-                            <field name="image_url" widget="url"/>
+                        <page string="Medios y descargas">
+                            <group>
+                                <field name="image_url" widget="url"/>
+                                <field name="video_url" widget="url"/>
+                            </group>
+                            <separator string="Galería"/>
+                            <field name="image_urls"/>
+                            <separator string="Descargas detectadas"/>
+                            <field name="attachment_json"/>
                         </page>
                         <page string="Características de origen">
                             <field name="spec_json" readonly="1"/>
