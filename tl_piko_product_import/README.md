@@ -136,7 +136,9 @@ disparo funciona igual, solo que en serie.
 
 - `res.groups.category_id` ya no existe: la categoría se define en un registro
   `res.groups.privilege` y el grupo la referencia con `privilege_id`.
-- `res.users.groups_id` pasa a `group_ids` (el módulo no asigna grupos por XML).
+- `groups_id` pasa a `group_ids` en todos los modelos que lo llevan
+  (`res.users`, `ir.actions.server`, `ir.ui.menu`...). El atributo XML
+  `groups="..."` de vistas y menús sigue funcionando; el campo, no.
 - `_sql_constraints` dejó de aplicarse: las restricciones usan `models.Constraint`.
 
 
