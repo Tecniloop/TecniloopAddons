@@ -117,6 +117,7 @@
                                     <field name="update_existing"/>
                                     <field name="update_name" invisible="not update_existing"/>
                                     <field name="update_description" invisible="not update_existing"/>
+                                    <field name="description_target"/>
                                     <field name="update_price" invisible="not update_existing"/>
                                     <field name="update_barcode" invisible="not update_existing"/>
                                 </group>
@@ -158,6 +159,8 @@
                                 <field name="xpath_barcode"/>
                                 <field name="xpath_description"/>
                                 <field name="xpath_image" placeholder="//img[@id='main-image']/@src"/>
+                                <field name="xpath_description_html"
+                                       placeholder="//div[@class='product-description']"/>
                             </group>
                         </page>
                         <page string="Cola" name="queue">

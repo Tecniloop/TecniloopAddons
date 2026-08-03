@@ -86,7 +86,13 @@
                     </group>
                     <notebook>
                         <page string="Descripción">
+                            <field name="description_html" widget="html"/>
+                            <separator string="Texto plano"/>
                             <field name="description"/>
+                            <button name="action_push_description" type="object"
+                                    string="Enviar descripción al producto"
+                                    class="btn-link" icon="fa-arrow-right"
+                                    invisible="not product_tmpl_id"/>
                         </page>
                         <page string="Imagen">
                             <field name="image_url" widget="url"/>

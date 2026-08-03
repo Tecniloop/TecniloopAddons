@@ -5,6 +5,8 @@ import hashlib
 import json
 import logging
 
+from markupsafe import escape
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -39,6 +41,10 @@ class TlPikoProduct(models.Model):
     currency_name = fields.Char()
     availability = fields.Char()
     description = fields.Text()
+    description_html = fields.Html(
+        "Descripción (HTML)", sanitize_attributes=False,
+        help="Bloque de descripción tal como viene en la ficha de origen.",
+    )
     image_url = fields.Char()
     categ_path = fields.Char("Ruta de categoría")
     categ_external_ids = fields.Char(
@@ -191,6 +197,19 @@ class TlPikoProduct(models.Model):
         source.log(self._log_summary(), level="detail")
         source.flush_log(_("Rastreo"))
         return self._log_summary()
+
+    def _job_refresh_description(self):
+        """JOB: relee la ficha solo para actualizar la descripción."""
+        self.ensure_one()
+        self = self.with_context(tl_piko_single_attempt=True)
+        scraper = self.env["tl.piko.scraper"]
+        vals = scraper.parse_product(self.source_id, self.url)
+        self.write({
+            "description": vals.get("description") or self.description,
+            "description_html": vals.get("description_html") or self.description_html,
+        })
+        self.action_push_description()
+        return _("Descripción actualizada")
 
     def _log_summary(self):
         """Una línea legible con lo que se ha hecho con esta ficha."""
@@ -477,8 +496,8 @@ class TlPikoProduct(models.Model):
                 categ = self._get_product_categ()
                 if categ:
                     vals["categ_id"] = categ.id
-        if source.update_description and self.description:
-            vals["description_sale"] = self.description
+        if source.update_description:
+            vals.update(self._description_vals(product))
         vals.update(
             {
                 "piko_source_id": source.id,
@@ -488,6 +507,42 @@ class TlPikoProduct(models.Model):
             }
         )
         return vals
+
+    def _description_vals(self, product=None):
+        """Reparte la descripción entre el campo de venta y el de eCommerce."""
+        self.ensure_one()
+        destino = self.source_id.description_target
+        vals = {}
+        if destino in ("sale", "both") and self.description:
+            vals["description_sale"] = self.description
+        if destino in ("public", "both"):
+            campo = "public_description"
+            if campo not in self.env["product.template"]._fields:
+                _logger.info(
+                    "website_sale_product_description no instalado: la "
+                    "descripción de eCommerce se omite."
+                )
+                return vals
+            # HTML original; si la ficha no trae bloque, el texto plano
+            # envuelto en un párrafo, que es mejor que dejarlo vacío.
+            contenido = self.description_html
+            if not contenido and self.description:
+                contenido = "<p>%s</p>" % escape(self.description)
+            if contenido:
+                vals[campo] = contenido
+        return vals
+
+    def action_push_description(self):
+        """Rectifica la descripción del producto ya existente."""
+        for line in self:
+            product = line.product_tmpl_id or line._find_product()
+            if not product:
+                continue
+            vals = line._description_vals(product)
+            if vals:
+                product.write(vals)
+                line.product_tmpl_id = product
+        return True
 
     def _do_import(self):
         self.ensure_one()

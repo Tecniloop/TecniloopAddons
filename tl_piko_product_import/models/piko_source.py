@@ -147,12 +147,29 @@ class TlPikoSource(models.Model):
     xpath_description = fields.Char("XPath descripción")
     xpath_image = fields.Char("XPath imagen", help="Debe devolver el atributo src/href.")
     xpath_barcode = fields.Char("XPath EAN")
+    xpath_description_html = fields.Char(
+        "XPath descripción (HTML)",
+        help="Debe devolver el ELEMENTO contenedor, no su texto: se guarda su "
+             "HTML interno tal cual.",
+    )
 
     # --- Reglas de importación -----------------------------------------
     create_products = fields.Boolean("Crear productos nuevos", default=True)
     update_existing = fields.Boolean("Actualizar existentes", default=True)
     update_name = fields.Boolean("Actualizar nombre", default=False)
     update_description = fields.Boolean("Actualizar descripción", default=True)
+    description_target = fields.Selection(
+        [
+            ("public", "Descripción de eCommerce (HTML)"),
+            ("sale", "Descripción de venta (texto)"),
+            ("both", "Ambas"),
+        ],
+        "Destino de la descripción",
+        default="public",
+        required=True,
+        help="La de eCommerce es el campo `public_description` del módulo OCA "
+             "website_sale_product_description, y conserva el HTML original.",
+    )
     update_price = fields.Boolean("Actualizar precio de venta", default=False)
     update_barcode = fields.Boolean("Completar EAN vacío", default=True)
     import_images = fields.Boolean("Descargar imagen principal", default=True)

@@ -3,7 +3,7 @@
 Importador de productos por **scraping HTML** para Odoo 19, pensado para tiendas
 sin API pública (caso de partida: `piko-shop.de`, sistema propietario sin API).
 
-Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.6.0.0
+Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.8.0.0
 
 ## Arquitectura
 
@@ -368,3 +368,36 @@ recupera las líneas en `queued` cuyo job ya no existe (jobrunner caído a mitad
 
 Sin eso los jobs se quedan en `pending` para siempre — el mismo tipo de fallo
 silencioso que teníamos con el cron.
+
+
+## Descripción de eCommerce (19.0.8.0.0)
+
+La descripción larga va al campo **`public_description`** del módulo OCA
+`website_sale_product_description` (Html, `sanitize_attributes=False`), no a
+`description_sale`.
+
+- El scraper guarda el **HTML original** del bloque de descripción
+  (`tl.piko.product.description_html`): párrafos, listas y negritas se
+  conservan. Solo se eliminan `script`, `style` y `noscript`.
+- Selección del bloque: `xpath_description_html` de la fuente si está definido;
+  si no, contenedores habituales (`itemprop=description`,
+  `.product-description`, `.beschreibung`, `.description`…). Se descartan los
+  candidatos con menos de 60 caracteres y los que son tablas de más de 3 filas,
+  para no confundirlo con la migas de pan ni con la tabla de características.
+- `description_target` en la fuente: eCommerce (por defecto) / venta / ambas.
+- Si `website_sale_product_description` no estuviera instalado, se omite sin
+  romper.
+
+### Rectificar productos ya importados
+
+Acción de servidor **«Rectificar descripción web (PIKO)»**, disponible en
+Productos → seleccionar → *Acciones* (y como botón en la pestaña *Origen web*
+del formulario). Para cada producto:
+
+- si su línea de staging ya tiene la descripción, se aplica al momento;
+- si no la tiene —productos importados antes de que el módulo extrajera el
+  HTML—, se encola `_job_refresh_description`, que relee **solo** la ficha para
+  la descripción y la escribe.
+
+Al terminar informa de cuántas se han actualizado en directo y cuántas quedan
+encoladas.

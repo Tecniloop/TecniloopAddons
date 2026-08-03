@@ -297,6 +297,8 @@ class TlPikoScraper(models.AbstractModel):
                     vals[key] = meta[0].strip()
         # 3) Selectores XPath configurables en la fuente
         vals.update(self._parse_xpath(source, tree))
+        # 3b) Descripción larga en HTML, para el campo de eCommerce
+        vals["description_html"] = self._parse_description_html(source, tree)
         # 4) Tabla de características: más fiable que cualquier heurística
         specs = self._parse_spec_table(tree)
         if specs:
@@ -399,6 +401,47 @@ class TlPikoScraper(models.AbstractModel):
         "barcode": ("ean", "gtin", "ean-code"),
         "brand": ("manufacturer", "hersteller", "marke"),
     }
+
+    # Contenedores típicos de la descripción larga. Se recorren en orden y se
+    # coge el primero con texto suficiente.
+    DESCRIPTION_XPATHS = (
+        "//*[@itemprop='description']",
+        "//*[contains(@class,'product-description')]",
+        "//*[contains(@class,'artikel-beschreibung')]",
+        "//*[contains(@class,'beschreibung')]",
+        "//*[contains(@class,'description')]",
+        "//*[contains(@id,'description')]",
+    )
+
+    @api.model
+    def _parse_description_html(self, source, tree):
+        """Devuelve el HTML original del bloque de descripción.
+
+        Se conserva el marcado tal cual (párrafos, listas, negritas): solo se
+        quitan scripts y estilos y se absolutizan enlaces e imágenes. Nada de
+        aplanar a texto: el destino es un campo Html.
+        """
+        candidatos = []
+        if source.xpath_description_html:
+            candidatos.append(source.xpath_description_html)
+        candidatos.extend(self.DESCRIPTION_XPATHS)
+        for expr in candidatos:
+            try:
+                nodos = tree.xpath(expr)
+            except Exception:  # noqa: BLE001
+                continue
+            for nodo in nodos:
+                if not hasattr(nodo, "text_content"):
+                    continue
+                texto = self._clean(nodo.text_content()) or ""
+                # descarta migas de pan, etiquetas sueltas y la tabla de specs
+                if len(texto) < 60 or len(nodo.xpath(".//tr")) > 3:
+                    continue
+                for basura in nodo.xpath(".//script | .//style | .//noscript"):
+                    basura.getparent().remove(basura)
+                html = etree.tostring(nodo, encoding="unicode", method="html")
+                return html.strip()
+        return False
 
     @api.model
     def _parse_spec_table(self, tree):

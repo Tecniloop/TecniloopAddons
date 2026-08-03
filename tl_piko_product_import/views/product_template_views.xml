@@ -20,6 +20,11 @@
                             <field name="piko_no_overwrite"/>
                         </group>
                     </group>
+                    <group>
+                        <button name="action_tl_piko_refresh_description" type="object"
+                                string="Rectificar descripción web desde el origen"
+                                class="btn-link" icon="fa-refresh"/>
+                    </group>
                 </page>
             </xpath>
         </field>

@@ -1,6 +1,13 @@
 # Copyright Tecniloop
 # License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0).
-from odoo import fields, models
+import logging
+
+from odoo import _, fields, models
+from odoo.exceptions import UserError
+
+from odoo.addons.queue_job.job import identity_exact
+
+_logger = logging.getLogger(__name__)
 
 
 class ProductTemplate(models.Model):
@@ -18,6 +25,48 @@ class ProductTemplate(models.Model):
         "No sobrescribir",
         help="Excluye este producto de cualquier actualización automática.",
     )
+
+    def action_tl_piko_refresh_description(self):
+        """Rectifica la descripción de eCommerce de los productos elegidos.
+
+        Si la línea de staging ya tiene la descripción rastreada, se aplica al
+        momento. Si no la tiene (productos importados antes de que el módulo
+        extrajera el HTML), se encola un job que vuelve a leer la ficha.
+        """
+        Line = self.env["tl.piko.product"]
+        candidatos = self.filtered(lambda p: p.piko_url or p.piko_external_id)
+        if not candidatos:
+            raise UserError(
+                _("Ninguno de los productos seleccionados procede de una "
+                  "importación por scraping.")
+            )
+        directos = Line.browse()
+        encolados = 0
+        for product in candidatos:
+            line = Line.search(
+                [("product_tmpl_id", "=", product.id)], limit=1
+            ) or Line.search([("url", "=", product.piko_url)], limit=1)
+            if not line:
+                continue
+            if line.description_html or line.description:
+                directos |= line
+            else:
+                line.with_delay(
+                    description=_("Releer descripción de %s") % product.display_name,
+                    identity_key=identity_exact,
+                    priority=5,
+                )._job_refresh_description()
+                encolados += 1
+        directos.action_push_description()
+        mensaje = _("%(directos)s descripciones actualizadas, "
+                    "%(encolados)s fichas encoladas para releer.",
+                    directos=len(directos), encolados=encolados)
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {"title": _("PIKO Import"), "message": mensaje,
+                       "type": "success", "sticky": True},
+        }
 
     def action_open_piko_url(self):
         self.ensure_one()
