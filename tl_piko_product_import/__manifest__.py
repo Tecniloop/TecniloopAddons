@@ -2,7 +2,7 @@
     "name": "PIKO Product Import (Web Scraping)",
     "summary": "Importador de productos por scraping de tiendas web sin API "
                "(piko-shop.de y similares), con staging previo",
-    "version": "19.0.12.3.0",
+    "version": "19.0.13.0.0",
     "category": "Sales/Sales",
     "author": "Tecniloop",
     "website": "https://www.tecniloop.com",
@@ -12,6 +12,9 @@
         "mail",
         # necesario para product.public.category (categorías de eCommerce)
         "website_sale",
+        # aporta la tabla #product_full_spec, junto a la que se muestran las
+        # propiedades; sin él ese anclaje no existe
+        "website_sale_comparison",
         # OCA: ejecución asíncrona (github.com/OCA/queue)
         "queue_job",
     ],

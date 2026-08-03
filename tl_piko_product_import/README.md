@@ -480,14 +480,19 @@ Las propiedades **no se muestran solas**: el bloque de especificaciones de
 `templates/product_properties.xml` añade una tabla con las propiedades del
 producto en la ficha.
 
-Anclaje: **`#o_wsale_product_details_content`**, la columna de detalles.
+Anclaje: **`#product_full_spec`**, la tabla de especificaciones que aporta
+`website_sale_comparison`. Las propiedades salen pegadas justo debajo.
 
-Descartado `#product_attributes_simple` (el bloque de specs del core): está en
-el arch de `website_sale.product`, pero **`website_sale_comparison` lo
-reemplaza** por su propia tabla, así que desaparece del arch combinado y la
-herencia falla con "no puede ser localizado". Tampoco sirve anclar en su
-sustituto (`#product_specifications`, `#product_full_spec`), que solo existe si
-ese módulo está instalado.
+Eso convierte a **`website_sale_comparison` en dependencia real** del módulo:
+sin él ese id no existe y la herencia falla. Está declarado en `depends`.
+
+La vista lleva `priority="99"` para aplicarse **después** de la de
+website_sale_comparison; con la prioridad por defecto (16) el orden lo decidiría
+el id de la vista, es decir el orden de instalación de los módulos.
+
+Descartado `#product_attributes_simple` (el bloque de specs del core):
+website_sale_comparison **lo reemplaza**, así que desaparece del arch combinado
+y la herencia falla con "no puede ser localizado".
 
 Descartado `#product_full_description`: lleva
 `t-field="product.website_description"`, así que lo insertado dentro lo

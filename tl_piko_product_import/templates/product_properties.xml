@@ -5,17 +5,20 @@
          más. Esta plantilla añade una tabla con las propiedades del producto
          justo debajo.
 
-         ANCLAJE: `o_wsale_product_details_content`, la columna de detalles.
+         ANCLAJE: `product_full_spec`, la tabla de especificaciones que aporta
+         `website_sale_comparison`. Las propiedades quedan pegadas debajo, que
+         es donde el usuario espera encontrarlas.
+
+         Esto convierte a website_sale_comparison en dependencia REAL: sin él
+         ese id no existe y la herencia falla. Por eso está en `depends`.
+
+         `priority=99` para que esta vista se aplique DESPUÉS de la de
+         website_sale_comparison; con la prioridad por defecto (16) el orden lo
+         decidiría el id de la vista, que depende del orden de instalación.
 
          Descartado `product_attributes_simple` (el bloque de specs del core):
-         existe en el arch de `website_sale.product`, pero `website_sale_
-         comparison` lo REEMPLAZA por su propia tabla, así que desaparece del
-         arch combinado en cuanto ese módulo está instalado y la herencia falla
-         con "no puede ser localizado". Tampoco vale anclar en su sustituto
-         (`product_specifications` / `product_full_spec`): solo existe si
-         website_sale_comparison está instalado.
-
-         `o_wsale_product_details_content` sobrevive en ambos casos.
+         website_sale_comparison lo REEMPLAZA, así que desaparece del arch
+         combinado y la herencia falla con "no puede ser localizado".
 
          Descartado también `product_full_description`: es un contenedor con
          `t-field="product.website_description"` y lo que se inserte dentro lo
@@ -24,8 +27,8 @@
          El xpath usa `//*[@id=...]`, no `//div[@id=...]`: atarlo a la etiqueta
          rompe la vista si el core cambia el `div` por un `section`. -->
     <template id="product_piko_properties" inherit_id="website_sale.product"
-              name="PIKO: especificaciones adicionales">
-        <xpath expr="//*[@id='o_wsale_product_details_content']" position="inside">
+              priority="99" name="PIKO: especificaciones adicionales">
+        <xpath expr="//*[@id='product_full_spec']" position="after">
             <div t-if="product.product_properties"
                  id="tl_piko_product_properties"
                  class="o_wsale_product_details_content_section o_wsale_product_details_content_section_specs mb-4">
