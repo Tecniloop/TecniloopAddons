@@ -29,20 +29,19 @@
     <template id="product_piko_properties" inherit_id="website_sale.product"
               priority="99" name="PIKO: especificaciones adicionales">
         <xpath expr="//*[@id='product_full_spec']" position="after">
-            <div t-if="product.product_properties"
+            <t t-set="tl_props" t-value="product._tl_piko_display_properties()"/>
+            <div t-if="tl_props"
                  id="tl_piko_product_properties"
                  class="o_wsale_product_details_content_section o_wsale_product_details_content_section_specs mb-4">
                 <table class="table table-sm text-muted">
                     <tbody>
-                        <tr t-foreach="product.product_properties" t-as="prop">
-                            <t t-if="prop.get('value') not in (False, None, '')">
-                                <th class="pe-4 fw-normal text-muted">
-                                    <span t-esc="prop.get('string') or prop.get('name')"/>
-                                </th>
-                                <td>
-                                    <span t-esc="prop.get('value')"/>
-                                </td>
-                            </t>
+                        <tr t-foreach="tl_props" t-as="prop">
+                            <th class="pe-4 fw-normal text-muted">
+                                <span t-out="prop['label']"/>
+                            </th>
+                            <td>
+                                <span t-out="prop['value']"/>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

@@ -23,6 +23,41 @@ class ProductTemplate(models.Model):
         help="Excluye este producto de cualquier actualización automática.",
     )
 
+    def _tl_piko_display_properties(self):
+        """Propiedades listas para pintar: [{'label':…, 'value':…}, …].
+
+        `product_properties` no tiene un formato único: según cómo se acceda
+        devuelve un dict {clave: valor} o una lista de dicts con 'name',
+        'string' y 'value'. Normalizarlo aquí evita tener que adivinarlo en
+        QWeb, donde un fallo tumba el renderizado de la página entera.
+        """
+        self.ensure_one()
+        if "product_properties" not in self._fields:
+            return []
+        bruto = self.product_properties or []
+        rotulos = {
+            definicion.get("name"): definicion.get("string")
+            for definicion in (self.categ_id.product_properties_definition or [])
+        }
+        if isinstance(bruto, dict):
+            pares = list(bruto.items())
+        else:
+            pares = []
+            for propiedad in bruto:
+                if isinstance(propiedad, dict):
+                    pares.append((propiedad.get("name"), propiedad.get("value")))
+                    rotulos.setdefault(propiedad.get("name"),
+                                       propiedad.get("string"))
+        salida = []
+        for clave, valor in pares:
+            if valor in (False, None, ""):
+                continue
+            salida.append({
+                "label": rotulos.get(clave) or clave,
+                "value": valor,
+            })
+        return salida
+
     def action_open_piko_url(self):
         self.ensure_one()
         return {"type": "ir.actions.act_url", "url": self.piko_url, "target": "new"}
