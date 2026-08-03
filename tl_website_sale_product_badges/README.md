@@ -4,7 +4,7 @@ Distintivos de características e indicador de disponibilidad en la tienda de
 Odoo 19, replicando el patrón de piko-shop.de: iconos sobre la imagen y punto
 de color de disponibilidad, tanto en la ficha como en el listado.
 
-Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.1.0.0 · Depende de `website_sale`
+Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.1.1.0 · Depende de `website_sale`
 
 ## Qué añade
 
@@ -40,3 +40,11 @@ usaban módulos de versiones anteriores ya no existe en 19.
 3. En el producto, pestaña Ventas → *Distintivos y disponibilidad*, elige el
    estado. `tl_piko_product_import` lo rellena solo a partir del texto de
    disponibilidad de la ficha de origen.
+
+
+## Nota sobre los xpath
+
+Todos los anclajes usan `//*[...]` en vez de fijar la etiqueta (`//div[...]`,
+`//span[...]`). Atar el xpath al nombre del elemento hace que la vista falle con
+"no puede ser localizado" en cuanto el core cambia un `div` por un `section`,
+aunque el `id` o la clase sigan ahí. El identificador ya es único por sí solo.

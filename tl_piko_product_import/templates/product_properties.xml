@@ -11,12 +11,16 @@
          Colgamos la tabla inmediatamente después, dentro de la misma columna
          de detalles.
 
-         NO se usa `div#product_full_description`: es un contenedor con
+         El xpath usa `//*[@id=...]` y no `//div[@id=...]`: atarlo a la
+         etiqueta hace que la vista reviente si el core cambia el `div` por un
+         `section` o similar, y el id es único de todos modos.
+
+         NO se usa `product_full_description`: es un contenedor con
          `t-field="product.website_description"`, y lo que se meta dentro lo
          sobrescribe el contenido del campo. -->
     <template id="product_piko_properties" inherit_id="website_sale.product"
               name="PIKO: especificaciones adicionales">
-        <xpath expr="//div[@id='product_attributes_simple']" position="after">
+        <xpath expr="//*[@id='product_attributes_simple']" position="after">
             <div t-if="product.product_properties"
                  id="tl_piko_product_properties"
                  class="o_wsale_product_details_content_section o_wsale_product_details_content_section_specs mb-4">

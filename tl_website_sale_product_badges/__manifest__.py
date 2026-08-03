@@ -2,7 +2,7 @@
     "name": "Website Sale: distintivos y disponibilidad",
     "summary": "Iconos de características sobre la imagen y punto de "
                "disponibilidad en la ficha y en el listado de la tienda",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Website/Website",
     "author": "Tecniloop",
     "website": "https://www.tecniloop.com",

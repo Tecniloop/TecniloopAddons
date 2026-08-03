@@ -2,7 +2,7 @@
     "name": "PIKO Product Import (Web Scraping)",
     "summary": "Importador de productos por scraping de tiendas web sin API "
                "(piko-shop.de y similares), con staging previo",
-    "version": "19.0.12.1.0",
+    "version": "19.0.12.2.0",
     "category": "Sales/Sales",
     "author": "Tecniloop",
     "website": "https://www.tecniloop.com",

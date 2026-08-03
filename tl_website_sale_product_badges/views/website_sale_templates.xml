@@ -33,7 +33,7 @@
          que es `position-relative`. -->
     <template id="product_badges_tile" inherit_id="website_sale.products_item"
               name="Distintivos en la tarjeta de producto">
-        <xpath expr="//span[hasclass('oe_product_image_img_wrapper_primary')]"
+        <xpath expr="//*[hasclass('oe_product_image_img_wrapper_primary')]"
                position="after">
             <div t-if="product.tl_badge_value_ids"
                  class="tl_product_badges tl_product_badges_overlay">
@@ -50,7 +50,7 @@
         </xpath>
 
         <!-- Disponibilidad encima del nombre -->
-        <xpath expr="//div[hasclass('o_wsale_product_information_text')]"
+        <xpath expr="//*[hasclass('o_wsale_product_information_text')]"
                position="before">
             <div t-if="product.tl_availability" class="tl_availability small">
                 <span t-attf-class="tl_dot #{product._tl_availability_class()}"/>
