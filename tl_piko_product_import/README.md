@@ -3,7 +3,7 @@
 Importador de productos por **scraping HTML** para Odoo 19, pensado para tiendas
 sin API pública (caso de partida: `piko-shop.de`, sistema propietario sin API).
 
-Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.8.0.0
+Autor: Tecniloop · Licencia: LGPL-3 · Versión: 19.0.8.1.0
 
 ## Arquitectura
 
@@ -403,3 +403,31 @@ del formulario). Para cada producto:
 
 Al terminar informa de cuántas se han actualizado en directo y cuántas quedan
 encoladas.
+
+
+## Concurrencia y transacciones abortadas (19.0.8.1.0)
+
+Con `root.piko.lines:2`, dos jobs pueden crear productos a la vez y chocar en el
+flush de variantes de `product.template`: Postgres devuelve
+`SerializationFailure`. Es un conflicto normal, no un error de datos.
+
+Lo delicado es el manejo: con la transacción **abortada**, cualquier `write` o
+`message_post` lanza `InFailedSqlTransaction` y convierte un fallo recuperable
+en uno definitivo, con una traza que apunta al sitio equivocado (el chatter, no
+la creación del producto).
+
+Por eso `_job_process_line` intercepta `psycopg2.Error` **antes** que el
+`except` genérico y, si el `pgcode` es de concurrencia (40001, 40P01, 55P03,
+25P02), relanza `RetryableJobError` sin tocar la base de datos: ni estado, ni
+contador de intentos, ni registro. El rollback y el reintento los hace
+queue_job.
+
+`ignore_retry=True` para que estos reintentos no gasten el cupo de
+`max_retries`: perder una ficha por haber coincidido con otra sería absurdo.
+
+`flush_log()` además envuelve el `message_post` en try/except: el registro es
+accesorio y nunca debe tumbar un trabajo.
+
+Si los conflictos son frecuentes, baja la concurrencia a
+`root.piko.lines:1` — se pierde paralelismo, pero el cuello de botella real es
+el servidor de origen, no Odoo.

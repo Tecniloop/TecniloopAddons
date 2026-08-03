@@ -5,6 +5,8 @@ import hashlib
 import json
 import logging
 
+import psycopg2
+from psycopg2 import errorcodes
 from markupsafe import escape
 
 from odoo import _, api, fields, models
@@ -14,6 +16,16 @@ from odoo.addons.queue_job.exception import RetryableJobError
 from odoo.addons.queue_job.job import identity_exact
 
 _logger = logging.getLogger(__name__)
+
+# Conflictos de concurrencia de Postgres: no son errores de datos, se
+# reintentan. Con la transacción abortada NO se puede tocar la BD, así que
+# estos casos se relanzan sin escribir nada (ni estado, ni chatter).
+PG_CONCURRENCY_CODES = (
+    errorcodes.SERIALIZATION_FAILURE,
+    errorcodes.DEADLOCK_DETECTED,
+    errorcodes.LOCK_NOT_AVAILABLE,
+    errorcodes.IN_FAILED_SQL_TRANSACTION,
+)
 
 
 class TlPikoProduct(models.Model):
@@ -178,6 +190,18 @@ class TlPikoProduct(models.Model):
             if source.auto_import and self.state == "parsed":
                 self._do_import()
         except RetryableJobError:
+            raise
+        except psycopg2.Error as exc:
+            # La transacción está abortada: cualquier write o message_post
+            # aquí lanzaría InFailedSqlTransaction y enmascararía la causa.
+            # Se relanza tal cual para que queue_job haga rollback y reintente.
+            if exc.pgcode in PG_CONCURRENCY_CODES:
+                raise RetryableJobError(
+                    _("Conflicto de concurrencia en %(url)s (%(code)s)",
+                      url=self.url, code=exc.pgcode),
+                    seconds=30,
+                    ignore_retry=True,
+                ) from exc
             raise
         except Exception as exc:  # noqa: BLE001
             if self._is_transient(exc):

@@ -299,7 +299,12 @@ class TlPikoSource(models.Model):
         body = Markup("<p><b>%s</b></p><ul>%s</ul>") % (
             title or _("Actividad"), rows
         )
-        self.message_post(body=body)
+        try:
+            self.message_post(body=body)
+        except Exception as exc:  # noqa: BLE001
+            # El registro es accesorio: nunca debe hacer fallar el trabajo.
+            _logger.warning("No se pudo publicar el registro en el chatter: %s", exc)
+            return False
         return True
 
     @api.model
