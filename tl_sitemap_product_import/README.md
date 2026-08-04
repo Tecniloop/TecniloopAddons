@@ -1,3 +1,8 @@
+## 19.0.1.128.0
+
+- Märklin normaliza las URLs `static.maerklin.de/damcontent` y elimina los parámetros de redimensión para descargar el fichero original de alta resolución.
+- La acción **Corregir productos importados (incluidas imágenes)** vuelve a descargar la imagen principal y la galería de los productos existentes, sustituyendo los medios importados anteriormente sin borrar imágenes añadidas manualmente.
+
 
 ## 19.0.1.117.0
 

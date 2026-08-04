@@ -71,6 +71,16 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
         '/en/products/products', '/en/products/gauge-h0', '/en/products/gauge-1',
         '/en/products/z-scale', '/en/products/my-world', '/en/products/start-up',
     )
+    _DAM_IMAGE_PATH_RE = re.compile(
+        r'^/damcontent/[0-9a-f]{2}/[0-9a-f]{2}/[^/?#]+\.(?:jpe?g|png|webp|avif)$',
+        re.IGNORECASE,
+    )
+    _DAM_IMAGE_URL_RE = re.compile(
+        r'(?:https?:)?//static\.maerklin\.de'
+        r'/damcontent/[0-9a-f]{2}/[0-9a-f]{2}/'
+        r'[^\s"\'<>?#]+\.(?:jpe?g|png|webp|avif)',
+        re.IGNORECASE,
+    )
 
     # ------------------------------------------------------------------
     # URL, sitemap y descubrimiento
@@ -356,6 +366,101 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
 
     def parse_category_path(self, product_url):
         return []
+
+    # ------------------------------------------------------------------
+    # Imágenes originales del DAM de Märklin
+    # ------------------------------------------------------------------
+    @classmethod
+    def _clean_image_url(cls, value, page_url=''):
+        """Devuelve el fichero original del DAM, sin parámetros de miniatura.
+
+        La ficha publica en varios puntos la misma imagen con parámetros de
+        redimensión. Al conservar la query Odoo descargaba esa miniatura. El
+        recurso original se obtiene usando exactamente la ruta ``/damcontent``
+        sin ``width``, ``height``, ``format`` ni otros parámetros.
+        """
+        raw = html.unescape(str(value or '')).strip().replace('\\/', '/')
+        if not raw or raw.startswith(('data:', 'blob:')):
+            return False
+        # Un valor procedente de srcset puede terminar en " 320w" o " 2x".
+        raw = raw.split()[0]
+        absolute = urljoin(page_url, raw)
+        parts = urlsplit(absolute)
+        host = parts.netloc.casefold().removeprefix('www.')
+        if host == 'static.maerklin.de' and cls._DAM_IMAGE_PATH_RE.match(parts.path):
+            return urlunsplit(('https', 'static.maerklin.de', parts.path, '', ''))
+        return super()._clean_image_url(value, page_url)
+
+    @classmethod
+    def _images_from_product(cls, tree, product_node, page_url, product_name, style_code):
+        """Prioriza las imágenes originales de la galería Märklin.
+
+        Además de JSON-LD, Open Graph e ``img[src]``, la web puede publicar la
+        ampliación en ``href`` o atributos ``data-*``. Todos los recursos del
+        DAM se normalizan a la URL original sin parámetros de redimensión.
+        """
+        result = []
+
+        def add(raw):
+            if isinstance(raw, dict):
+                raw = raw.get('url') or raw.get('contentUrl')
+            image = cls._clean_image_url(raw, page_url)
+            if image and image not in result:
+                result.append(image)
+
+        # Mantiene los selectores validados por el conector padre, pero la
+        # normalización anterior convierte sus miniaturas DAM en originales.
+        for image in super()._images_from_product(
+            tree, product_node, page_url, product_name, style_code,
+        ):
+            add(image)
+
+        # La ampliación suele estar en el enlace o en atributos data-* de la
+        # galería, no necesariamente en el src de la miniatura visible.
+        gallery_tokens = ('gallery', 'product', 'detail', 'slider', 'carousel', 'zoom', 'image')
+        attributes = (
+            'data-zoom-image', 'data-large-image', 'data-full-image',
+            'data-full', 'data-original', 'data-image', 'data-src',
+            'data-lazy-src', 'href', 'src',
+        )
+        for node in tree.xpath('//*[@href or @src or @data-src or @data-zoom-image or '
+                               '@data-large-image or @data-full-image or @data-full or '
+                               '@data-original or @data-image or @data-lazy-src or @srcset]'):
+            context_parts = [
+                node.get('class') or '', node.get('id') or '',
+                node.get('alt') or '', node.get('title') or '',
+            ]
+            for ancestor in node.iterancestors():
+                context_parts.extend((ancestor.get('class') or '', ancestor.get('id') or ''))
+                if len(context_parts) >= 16:
+                    break
+            context = ' '.join(context_parts).casefold()
+            raw_values = [node.get(attribute) for attribute in attributes]
+            if node.get('srcset'):
+                raw_values.extend(
+                    part.strip().split()[0]
+                    for part in node.get('srcset').split(',') if part.strip()
+                )
+            for raw in raw_values:
+                if not raw:
+                    continue
+                raw_text = html.unescape(str(raw)).replace('\\/', '/')
+                is_dam = bool(cls._DAM_IMAGE_URL_RE.search(raw_text))
+                is_gallery = any(token in context for token in gallery_tokens)
+                if is_dam and is_gallery:
+                    add(raw_text)
+
+        # Respaldo para URLs incrustadas en JSON/JavaScript. Solo se activa si
+        # los selectores anteriores no localizaron ningún recurso DAM.
+        if not any('/damcontent/' in image for image in result):
+            markup = etree.tostring(tree, encoding='unicode').replace('\\/', '/')
+            for match in cls._DAM_IMAGE_URL_RE.finditer(markup):
+                add(match.group(0))
+
+        # Una URL DAM original siempre debe preceder a Open Graph u otros CDN.
+        dam_images = [image for image in result if '/damcontent/' in image]
+        fallback_images = [image for image in result if '/damcontent/' not in image]
+        return dam_images + fallback_images
 
     # ------------------------------------------------------------------
     # Ficha de producto

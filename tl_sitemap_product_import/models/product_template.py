@@ -257,7 +257,23 @@ class ProductTemplate(models.Model):
                     (6, 0, collection_categories.ids)
                 ]
 
+        vals['sitemap_last_sync'] = fields.Datetime.now()
         self.write(vals)
+
+        # La acción "Corregir productos importados" también debe reparar las
+        # imágenes de productos ya existentes. Es especialmente importante en
+        # Märklin, donde versiones anteriores descargaban miniaturas generadas
+        # por parámetros de redimensión en vez del fichero original del DAM.
+        if source.import_images:
+            image_urls = data.get('image_urls') or []
+            if not isinstance(image_urls, (list, tuple)):
+                image_urls = [image_urls]
+            connector._import_images(
+                self,
+                {'main_image_url': data.get('main_image_url') or False},
+                [url for url in image_urls if url],
+                source,
+            )
 
         blog_articles = data.get('shopify_blog_articles') or []
         if blog_articles and hasattr(self, '_sitemap_sync_blog_articles'):

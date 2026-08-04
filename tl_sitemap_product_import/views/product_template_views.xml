@@ -69,7 +69,7 @@
     </record>
 
     <record id="ir_actions_server_repair_imported_products" model="ir.actions.server">
-        <field name="name">Corregir productos importados</field>
+        <field name="name">Corregir productos importados (incluidas imágenes)</field>
         <field name="model_id" ref="product.model_product_template"/>
         <field name="binding_model_id" ref="product.model_product_template"/>
         <field name="binding_view_types">list,form</field>
