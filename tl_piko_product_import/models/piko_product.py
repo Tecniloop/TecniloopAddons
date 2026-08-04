@@ -257,12 +257,50 @@ class TlPikoProduct(models.Model):
     def _job_refresh_content(self):
         """JOB: relee la ficha y actualiza TODO el contenido del producto.
 
+        Encolado, para catálogos completos. Envuelve la versión síncrona con el
+        contexto de un solo intento HTTP (los reintentos son cosa de queue_job)
+        y publica el resumen en el chatter de la fuente.
+        """
+        self.ensure_one()
+        resumen = self.with_context(tl_piko_single_attempt=True)._resync_content()
+        self.source_id.log(resumen, level="detail")
+        self.source_id.flush_log(_("Resincronización"))
+        return resumen
+
+    def action_resync_content_now(self):
+        """Resincroniza AHORA, en la propia petición, sin pasar por queue_job.
+
+        Para una o dos fichas puntuales, cuando esperar el turno del canal no
+        compensa. Con más de 5 líneas obliga a usar la vía encolada: cada ficha
+        cuesta una petición HTTP de ~30 s y el mismo botón para 100 fichas
+        bloquearía la sesión y agotaría el tiempo de la petición web.
+        """
+        if len(self) > 5:
+            raise UserError(
+                _("Para más de 5 líneas usa 'Resincronizar contenido' "
+                  "(encolado): cada ficha tarda ~30 s y esto bloquearía la "
+                  "sesión.")
+            )
+        resumenes = [line._resync_content() for line in self]
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("PIKO Import"),
+                "message": "\n".join(resumenes),
+                "type": "success",
+                "sticky": True,
+            },
+        }
+
+    def _resync_content(self):
+        """Lógica compartida entre la vía encolada y la inmediata.
+
         Descripción HTML, características, propiedades, categorías, galería,
         vídeo y descargas. Deliberadamente NO toca nombre, precio ni código de
         barras: esto es una rectificación de contenido, no una reimportación.
         """
         self.ensure_one()
-        self = self.with_context(tl_piko_single_attempt=True)
         estado_previo = self.state
         self._do_scrape()  # refresca la línea y reaplica las reglas
         if estado_previo == "imported":
@@ -270,9 +308,9 @@ class TlPikoProduct(models.Model):
 
         product = self.product_tmpl_id or self._find_product()
         if not product:
-            return _("Sin producto asociado")
+            return _("%s: sin producto asociado") % (self.default_code or self.url)
         if product.piko_no_overwrite:
-            return _("Producto marcado como 'No sobrescribir'")
+            return _("%s: marcado como 'No sobrescribir'") % product.display_name
 
         vals = self._description_vals(product)
         if vals:
@@ -286,16 +324,13 @@ class TlPikoProduct(models.Model):
         adjuntos = self._import_attachments(product)
         self.product_tmpl_id = product
 
-        resumen = _(
+        return _(
             "%(ref)s resincronizado: %(car)s características, %(img)s imágenes, "
             "%(vid)s vídeo, %(adj)s descargas.",
             ref=self.default_code or self.url.rsplit("/", 1)[-1],
             car=len(self.attribute_value_ids), img=imagenes,
             vid=int(bool(video)), adj=adjuntos,
         )
-        self.source_id.log(resumen, level="detail")
-        self.source_id.flush_log(_("Resincronización"))
-        return resumen
 
     def _log_summary(self):
         """Una línea legible con lo que se ha hecho con esta ficha."""

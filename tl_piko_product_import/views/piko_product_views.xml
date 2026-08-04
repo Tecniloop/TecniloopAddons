@@ -46,7 +46,11 @@
                             invisible="state != 'error'"/>
                     <button name="action_resync_content" type="object"
                             string="Resincronizar contenido"
-                            help="Relee la ficha y actualiza descripción, características, propiedades, categorías, imágenes, vídeo y descargas. No toca nombre ni precio."
+                            help="Relee la ficha y actualiza descripción, características, propiedades, categorías, imágenes, vídeo y descargas. No toca nombre ni precio. Se ejecuta en segundo plano (queue_job)."
+                            invisible="not product_tmpl_id"/>
+                    <button name="action_resync_content_now" type="object"
+                            string="Resincronizar ahora"
+                            help="Igual que 'Resincronizar contenido' pero inmediato, sin pasar por queue_job. Solo para una ficha suelta: bloquea la sesión mientras dura (~30 s)."
                             invisible="not product_tmpl_id"/>
                     <button name="action_import" type="object" string="Importar"
                             invisible="state not in ('parsed', 'skipped')"/>

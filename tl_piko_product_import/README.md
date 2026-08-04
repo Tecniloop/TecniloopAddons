@@ -558,9 +558,15 @@ es donde están la URL de origen, la tabla de características extraída y el
 registro de lo que se obtuvo. En la vista de Productos la acción aparecía
 también sobre productos que no vienen del scraping.
 
-**Productos rastreados → seleccionar → Acciones → «Resincronizar contenido
-desde el origen (PIKO)»**, o el botón del formulario. Encola
-`_job_refresh_content`, que relee la ficha y actualiza:
+Dos vías, misma lógica compartida en `_resync_content()`:
+
+| Acción | Cuándo | Límite |
+| --- | --- | --- |
+| **Resincronizar contenido** | catálogo, varias fichas | encola vía queue_job, sin límite |
+| **Resincronizar contenido AHORA** | una ficha suelta, quieres el resultado ya | máx. 5 líneas — cada una tarda ~30 s y bloquea la sesión |
+
+**Productos rastreados → seleccionar → Acciones →** la que corresponda, o los
+botones del formulario. Ambas actualizan:
 
 - descripción (HTML original) en `description_ecommerce`
 - características (reglas de tabla y de título)
@@ -570,6 +576,10 @@ desde el origen (PIKO)»**, o el botón del formulario. Encola
 
 **No toca nombre, precio ni código de barras**: es una rectificación de
 contenido, no una reimportación. Y respeta `piko_no_overwrite`.
+
+La vía inmediata está capada a 5 líneas a propósito: sin cola de por medio, un
+uso descuidado sobre 100 fichas bloquearía el worker HTTP durante 50 minutos y
+agotaría el tiempo de la petición mucho antes.
 
 Detalle: si la línea ya estaba en `imported`, el rescrapeo no la degrada a
 `parsed` — el estado se restaura al terminar.

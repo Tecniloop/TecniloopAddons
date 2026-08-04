@@ -27,6 +27,44 @@
         </xpath>
     </template>
 
+    <!-- CAMPOS ADICIONALES ESTÁNDAR EN LA TARJETA.
+         Reutiliza el modelo NATIVO `website.sale.extra.field`
+         (`website.shop_extra_field_ids`, configurado en la pestaña "Product
+         Page Extra Fields" del propio sitio web) que el core solo renderiza
+         en `website_sale.product` (ficha individual, dentro de
+         `#product_details`, plantilla `ecom_show_extra_fields`).
+
+         Se replica la misma lógica en la tarjeta del listado, anclada al
+         punto de extensión que el core deja para esto:
+         `<t t-if="product_extra_information">`, único en la plantilla y
+         pensado justo para insertar contenido extra por producto sin tocar
+         el resto de la tarjeta. -->
+    <template id="product_extra_fields_tile" inherit_id="website_sale.products_item"
+              name="Campos adicionales estándar en la tarjeta">
+        <xpath expr="//t[@t-if='product_extra_information']" position="after">
+            <div t-if="website.tl_show_extra_fields_catalog and
+                       any(product.sudo()[f.name] for f in website.shop_extra_field_ids)"
+                 class="tl_extra_fields text-muted small mt-1">
+                <t t-foreach="website.shop_extra_field_ids" t-as="field">
+                    <t t-if="product.sudo()[field.name]">
+                        <span class="fw-bold" t-out="field.label"/>:
+                        <t t-if="field.field_id.ttype != 'binary'">
+                            <span t-out="product.sudo()[field.name]"
+                                  t-options="{'widget': field.field_id.ttype}"/>
+                        </t>
+                        <t t-else="">
+                            <a target="_blank"
+                               t-attf-href="/web/content/product.template/#{product.id}/#{field.name}?download=1">
+                                <i class="fa fa-file"/>
+                            </a>
+                        </t>
+                        <br/>
+                    </t>
+                </t>
+            </div>
+        </xpath>
+    </template>
+
     <!-- TARJETA DEL LISTADO.
          Distintivos superpuestos a la imagen: se insertan tras el `span` de la
          imagen principal, que sí tiene `class` literal, y dentro del enlace,
@@ -35,7 +73,8 @@
               name="Distintivos en la tarjeta de producto">
         <xpath expr="//*[hasclass('oe_product_image_img_wrapper_primary')]"
                position="after">
-            <div t-if="product.tl_badge_value_ids"
+            <div t-if="product.tl_badge_value_ids and
+                       website.tl_show_badges_catalog"
                  class="tl_product_badges tl_product_badges_overlay">
                 <t t-foreach="product.tl_badge_value_ids" t-as="badge">
                     <span class="tl_badge" t-att-title="badge.name">
@@ -52,7 +91,9 @@
         <!-- Disponibilidad encima del nombre -->
         <xpath expr="//*[hasclass('o_wsale_product_information_text')]"
                position="before">
-            <div t-if="product.tl_availability" class="tl_availability small">
+            <div t-if="product.tl_availability and
+                       website.tl_show_availability_catalog"
+                 class="tl_availability small">
                 <span t-attf-class="tl_dot #{product._tl_availability_class()}"/>
                 <span t-out="product._tl_availability_label()"/>
             </div>

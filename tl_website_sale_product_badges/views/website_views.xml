@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Mismo patrón y mismo formulario que "Product Page Extra Fields"
+         (website_sale.view_website_sale_website_form): una página del
+         formulario de sitio web, activable por sitio. -->
+    <record id="view_website_form_badges" model="ir.ui.view">
+        <field name="name">website.form.tl.badges</field>
+        <field name="model">website</field>
+        <field name="inherit_id" ref="website.view_website_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Product Badges" name="tl_page_badges"
+                      groups="base.group_no_one">
+                    <group>
+                        <field name="tl_show_badges_catalog"/>
+                        <field name="tl_show_availability_catalog"/>
+                        <field name="tl_show_extra_fields_catalog"/>
+                    </group>
+                    <div class="text-muted">
+                        Los distintivos en la ficha de producto se muestran
+                        siempre. Estas opciones controlan si aparecen también
+                        en el listado de la tienda (/shop), la lista de deseos
+                        y los snippets de productos de este sitio web.<br/>
+                        Distintivos: configura qué atributos lo son en
+                        Ajustes → Atributos → «Mostrar como distintivo».<br/>
+                        Campos adicionales: reutiliza la tabla de la pestaña
+                        «Product Page Extra Fields», más abajo en este mismo
+                        formulario — no hay nada nuevo que configurar ahí.
+                    </div>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

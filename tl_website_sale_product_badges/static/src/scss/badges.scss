@@ -1,3 +1,25 @@
+// Fuerza la miniatura de catálogo a mostrarse ENTERA (contain).
+//
+// El core de Odoo 19 ya usa `object-fit: contain` por defecto en
+// `.oe_product_image_img`, así que un recorte no es un bug de este módulo:
+// viene de la variable CSS `--o-wsale-card-thumb-fill-mode`, que
+// website_sale.scss fija a `cover` para el diseño de tarjeta "Portrait"
+// (clase `oe_product_custom_portrait`, activable desde el editor de
+// Website > Personalizar > Tarjeta de producto).
+//
+// Se sobreescribe la variable con más especificidad (el selector del core
+// vive en `.oe_product_image_link`, aquí se ancla en el wrapper) y con
+// `!important` en la propiedad real, no solo en la variable, porque el editor
+// de Website puede inyectar estilos inline con prioridad alta.
+.oe_product_cart {
+    .oe_product_image_img_wrapper,
+    .oe_product_image_img,
+    .oe_product_image_img_secondary {
+        --o-wsale-card-thumb-fill-mode: contain;
+        object-fit: contain !important;
+    }
+}
+
 .tl_product_badges {
     .tl_badge {
         display: inline-flex;
