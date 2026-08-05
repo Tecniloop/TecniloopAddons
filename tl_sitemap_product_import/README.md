@@ -1,3 +1,12 @@
+## 19.0.1.129.0
+
+- Añade la acción **Corregir contenidos ahora (imágenes y documentos, sin cola)** en productos importados.
+- Ejecuta la corrección de forma síncrona, sin crear trabajos de `queue_job`, con un savepoint independiente por producto.
+- Vuelve a extraer contenido, categorías, imágenes y documentos desde la ficha de origen.
+- Sustituye únicamente imágenes y documentos gestionados por el importador, conservando los añadidos manualmente.
+- Si falla la descarga de algún documento, conserva los adjuntos históricos para evitar pérdidas por errores temporales de red.
+
+
 ## 19.0.1.128.0
 
 - Märklin normaliza las URLs `static.maerklin.de/damcontent` y elimina los parámetros de redimensión para descargar el fichero original de alta resolución.

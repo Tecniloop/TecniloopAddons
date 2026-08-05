@@ -1,9 +1,13 @@
 import html
 import json
+import logging
 import re
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+
+
+_logger = logging.getLogger(__name__)
 
 
 class ProductTemplate(models.Model):
@@ -183,7 +187,61 @@ class ProductTemplate(models.Model):
             },
         }
 
+    def action_repair_imported_products_direct(self):
+        """Corrige productos inmediatamente, sin crear trabajos de queue_job.
+
+        Cada producto se procesa dentro de su propio savepoint para que un fallo
+        aislado no deshaga las correcciones completadas en los demás registros
+        seleccionados. La operación se ejecuta en la petición actual y puede
+        tardar si se seleccionan muchos productos o documentos pesados.
+        """
+        products = self.filtered(
+            lambda product: product.is_sitemap_import_product
+            and product.sitemap_source_id
+            and product.sitemap_source_url
+        )
+        if not products:
+            raise UserError(_('Seleccione productos importados por sitemap.'))
+
+        repaired = failed = 0
+        errors = []
+        for product in products:
+            try:
+                with self.env.cr.savepoint():
+                    product._repair_imported_product_content()
+                repaired += 1
+            except Exception as exc:
+                failed += 1
+                _logger.exception(
+                    'Sitemap import: error corrigiendo directamente el producto %s (%s)',
+                    product.display_name, product.sitemap_source_url,
+                )
+                errors.append('%s: %s' % (product.display_name, exc))
+
+        message = _('%s productos corregidos directamente.') % repaired
+        if failed:
+            message += _(' %s productos no pudieron corregirse.') % failed
+        if errors:
+            message += '\n' + '\n'.join(errors[:8])
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Corrección directa de contenidos'),
+                'message': message,
+                'type': 'warning' if failed else 'success',
+                'sticky': bool(failed),
+            },
+        }
+
     def _job_repair_imported_product(self):
+        """Punto de entrada de queue_job; reutiliza la misma lógica directa."""
+        self.ensure_one()
+        return self._repair_imported_product_content()
+
+    def _repair_imported_product_content(self):
+        """Vuelve a extraer y sincronizar el contenido gestionado por sitemap."""
         self.ensure_one()
         source = self.sitemap_source_id
         if not self.is_sitemap_import_product or not source or not self.sitemap_source_url:
@@ -260,10 +318,9 @@ class ProductTemplate(models.Model):
         vals['sitemap_last_sync'] = fields.Datetime.now()
         self.write(vals)
 
-        # La acción "Corregir productos importados" también debe reparar las
-        # imágenes de productos ya existentes. Es especialmente importante en
-        # Märklin, donde versiones anteriores descargaban miniaturas generadas
-        # por parámetros de redimensión en vez del fichero original del DAM.
+        # Las dos acciones de corrección reparan los medios ya importados.
+        # Las imágenes añadidas manualmente se conservan porque _import_images
+        # solo sustituye la galería marcada como procedente del sitemap.
         if source.import_images:
             image_urls = data.get('image_urls') or []
             if not isinstance(image_urls, (list, tuple)):
@@ -273,6 +330,23 @@ class ProductTemplate(models.Model):
                 {'main_image_url': data.get('main_image_url') or False},
                 [url for url in image_urls if url],
                 source,
+            )
+
+        # Los documentos se descargan en esta misma ejecución. En modo
+        # reparación se eliminan de la relación del producto únicamente los
+        # adjuntos importados que ya no aparecen en la ficha de origen; los
+        # documentos añadidos manualmente nunca se tocan.
+        if source.import_attachments:
+            documents = (
+                data.get('attachments')
+                or data.get('documents')
+                or data.get('attachment_urls')
+                or []
+            )
+            if not isinstance(documents, (list, tuple)):
+                documents = [documents]
+            connector._sync_website_attachments(
+                self, documents, source, replace_imported=True,
             )
 
         blog_articles = data.get('shopify_blog_articles') or []

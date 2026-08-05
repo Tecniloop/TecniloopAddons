@@ -1891,20 +1891,46 @@ class SitemapImportService(models.AbstractModel):
         content_type = (response.headers.get('Content-Type') or '').split(';', 1)[0].strip()
         return response.content, content_type
 
-    def _sync_website_attachments(self, product_tmpl, documents, source):
-        documents = self._normalise_attachments(documents, product_tmpl.sitemap_source_url)
-        if not documents:
-            return
-        limit = max(int(source.max_attachments_per_product or 20), 1)
+    def _sync_website_attachments(
+        self, product_tmpl, documents, source, replace_imported=False,
+    ):
+        """Descarga documentos y los enlaza al producto.
+
+        ``replace_imported`` se usa en las acciones de reparación. En ese modo
+        se sustituyen solamente las relaciones con adjuntos marcados como
+        importados por sitemap y se conservan todos los documentos manuales.
+        Si falla alguna descarga no se eliminan adjuntos históricos, evitando
+        perder documentos por un error temporal de red.
+        """
+        documents = self._normalise_attachments(
+            documents, product_tmpl.sitemap_source_url,
+        )
         Attachment = self.env['ir.attachment'].sudo()
-        linked_ids = []
+        current_imported = product_tmpl.website_attachment_ids.filtered(
+            lambda attachment: attachment.sitemap_imported
+        )
+
+        if not documents:
+            if replace_imported and current_imported:
+                product_tmpl.write({
+                    'website_attachment_ids': [
+                        (3, attachment_id, 0)
+                        for attachment_id in current_imported.ids
+                    ],
+                })
+            return Attachment.browse()
+
+        limit = max(int(source.max_attachments_per_product or 20), 1)
+        linked = Attachment.browse()
+        failed_downloads = 0
         for document in documents[:limit]:
             try:
                 content, content_type = self._download_attachment(source, document)
                 if not content:
+                    failed_downloads += 1
                     continue
                 digest = hashlib.sha256(content).hexdigest()
-                existing = Attachment.search([
+                attachment = Attachment.search([
                     ('sitemap_imported', '=', True),
                     ('sitemap_sha256', '=', digest),
                 ], limit=1)
@@ -1921,9 +1947,11 @@ class SitemapImportService(models.AbstractModel):
                     'sitemap_document_type': document.get('document_type') or 'other',
                     'sitemap_imported': True,
                 }
-                if existing:
-                    attachment = existing
-                    update_vals = {k: v for k, v in vals.items() if attachment[k] != v}
+                if attachment:
+                    update_vals = {
+                        key: value for key, value in vals.items()
+                        if attachment[key] != value
+                    }
                     if update_vals:
                         attachment.write(update_vals)
                 else:
@@ -1932,14 +1960,28 @@ class SitemapImportService(models.AbstractModel):
                         'mimetype': content_type or mimetypes.guess_type(filename)[0],
                     })
                     attachment = Attachment.create(vals)
-                linked_ids.append(attachment.id)
+                linked |= attachment
             except Exception as exc:
+                failed_downloads += 1
                 _logger.warning(
                     'Sitemap import: no se pudo importar el documento %s: %s',
                     document.get('url'), exc,
                 )
-        if linked_ids:
-            product_tmpl.write({'website_attachment_ids': [(4, attachment_id) for attachment_id in linked_ids]})
+
+        commands = [
+            (4, attachment_id, 0)
+            for attachment_id in linked.ids
+            if attachment_id not in product_tmpl.website_attachment_ids.ids
+        ]
+        # Solo se eliminan relaciones obsoletas cuando todas las descargas de
+        # la ficha han terminado correctamente. Así un fallo temporal no borra
+        # documentos válidos que ya estaban asociados al producto.
+        if replace_imported and not failed_downloads:
+            stale = current_imported - linked
+            commands.extend((3, attachment_id, 0) for attachment_id in stale.ids)
+        if commands:
+            product_tmpl.write({'website_attachment_ids': commands})
+        return linked
 
     # ------------------------------------------------------------------
     # Imágenes (genérico)
