@@ -9,6 +9,13 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
+MAERKLIN_ARTICLE_CONNECTORS = frozenset({
+    'sitemap.connector.maerklin_en',
+    'sitemap.connector.trix_en',
+    'sitemap.connector.minitrix_en',
+    'sitemap.connector.lgb_en',
+})
+
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -271,6 +278,8 @@ class ProductTemplate(models.Model):
             vals['name'] = extracted_name
         if style_code:
             vals['sitemap_style_code'] = style_code
+            if source.connector_model in MAERKLIN_ARTICLE_CONNECTORS:
+                vals['default_code'] = style_code
 
         raw_segments = [
             segment.strip() for segment in str(data.get('category_path') or '').split('/')

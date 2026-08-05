@@ -26,6 +26,13 @@ IMAGE_NS = {'image': 'http://www.google.com/schemas/sitemap-image/1.1'}
 
 IMAGE_MARKER = '[Sitemap Import]'
 
+MAERKLIN_ARTICLE_CONNECTORS = frozenset({
+    'sitemap.connector.maerklin_en',
+    'sitemap.connector.trix_en',
+    'sitemap.connector.minitrix_en',
+    'sitemap.connector.lgb_en',
+})
+
 
 class SitemapImportService(models.AbstractModel):
     """Modelo base con la mecánica GENÉRICA compartida por todos los conectores: HTTP,
@@ -2217,6 +2224,14 @@ class SitemapImportService(models.AbstractModel):
             }
             if source.brand_id and 'brand_id' in Product._fields:
                 vals['brand_id'] = source.brand_id.id
+
+            # En el grupo Märklin el número de artículo es también la referencia
+            # interna comercial. Se aplica tanto al crear como al actualizar el
+            # producto desde staging.
+            if source.connector_model in MAERKLIN_ARTICLE_CONNECTORS:
+                article_reference = str(staging_row.style_code or '').strip()
+                if article_reference:
+                    vals['default_code'] = article_reference
 
             # La descripción recuperada es contenido para e-commerce. Se prioriza
             # el HTML ampliado del registro importado y se guarda únicamente en

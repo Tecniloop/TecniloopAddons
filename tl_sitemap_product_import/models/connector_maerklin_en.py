@@ -393,74 +393,127 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
 
     @classmethod
     def _images_from_product(cls, tree, product_node, page_url, product_name, style_code):
-        """Prioriza las imágenes originales de la galería Märklin.
+        """Prioriza el original enlazado por la galería frente a su miniatura.
 
-        Además de JSON-LD, Open Graph e ``img[src]``, la web puede publicar la
-        ampliación en ``href`` o atributos ``data-*``. Todos los recursos del
-        DAM se normalizan a la URL original sin parámetros de redimensión.
+        Märklin publica cada fotografía dos veces: el ``href`` (o atributo
+        ``data-*`` de ampliación) contiene el original, mientras que el ``src``
+        del ``img`` puede ser un recurso DAM distinto y de pocos píxeles. Quitar
+        parámetros de la miniatura no la convierte en el original porque ambos
+        recursos tienen hashes diferentes. Por eso los enlaces de ampliación se
+        recopilan antes que JSON-LD, Open Graph y los ``src`` visibles.
         """
-        result = []
+        preferred = []
+        fallback = []
+        discarded_thumbnails = set()
 
-        def add(raw):
+        def add(raw, bucket):
             if isinstance(raw, dict):
                 raw = raw.get('url') or raw.get('contentUrl')
             image = cls._clean_image_url(raw, page_url)
-            if image and image not in result:
-                result.append(image)
+            if bucket is fallback and image in discarded_thumbnails:
+                return
+            if image and image not in preferred and image not in fallback:
+                bucket.append(image)
 
-        # Mantiene los selectores validados por el conector padre, pero la
-        # normalización anterior convierte sus miniaturas DAM en originales.
-        for image in super()._images_from_product(
-            tree, product_node, page_url, product_name, style_code,
-        ):
-            add(image)
-
-        # La ampliación suele estar en el enlace o en atributos data-* de la
-        # galería, no necesariamente en el src de la miniatura visible.
-        gallery_tokens = ('gallery', 'product', 'detail', 'slider', 'carousel', 'zoom', 'image')
-        attributes = (
-            'data-zoom-image', 'data-large-image', 'data-full-image',
-            'data-full', 'data-original', 'data-image', 'data-src',
-            'data-lazy-src', 'href', 'src',
-        )
-        for node in tree.xpath('//*[@href or @src or @data-src or @data-zoom-image or '
-                               '@data-large-image or @data-full-image or @data-full or '
-                               '@data-original or @data-image or @data-lazy-src or @srcset]'):
-            context_parts = [
+        def gallery_context(node):
+            parts = [
                 node.get('class') or '', node.get('id') or '',
                 node.get('alt') or '', node.get('title') or '',
             ]
             for ancestor in node.iterancestors():
-                context_parts.extend((ancestor.get('class') or '', ancestor.get('id') or ''))
-                if len(context_parts) >= 16:
+                parts.extend((ancestor.get('class') or '', ancestor.get('id') or ''))
+                if len(parts) >= 16:
                     break
-            context = ' '.join(context_parts).casefold()
-            raw_values = [node.get(attribute) for attribute in attributes]
-            if node.get('srcset'):
-                raw_values.extend(
-                    part.strip().split()[0]
-                    for part in node.get('srcset').split(',') if part.strip()
-                )
-            for raw in raw_values:
-                if not raw:
-                    continue
-                raw_text = html.unescape(str(raw)).replace('\\/', '/')
-                is_dam = bool(cls._DAM_IMAGE_URL_RE.search(raw_text))
-                is_gallery = any(token in context for token in gallery_tokens)
-                if is_dam and is_gallery:
-                    add(raw_text)
+            context = ' '.join(parts).casefold()
+            return any(token in context for token in (
+                'gallery', 'product', 'detail', 'slider', 'carousel', 'zoom', 'image',
+            ))
 
-        # Respaldo para URLs incrustadas en JSON/JavaScript. Solo se activa si
-        # los selectores anteriores no localizaron ningún recurso DAM.
-        if not any('/damcontent/' in image for image in result):
+        # 1. Originales explícitos de la galería. Son los únicos candidatos
+        # capaces de desplazar a una miniatura como imagen principal.
+        preferred_attributes = (
+            'data-zoom-image', 'data-large-image', 'data-full-image',
+            'data-full', 'data-original', 'href',
+        )
+        fallback_attributes = (
+            'data-image', 'data-src', 'data-lazy-src', 'src',
+        )
+        nodes = tree.xpath(
+            '//*[@href or @src or @data-src or @data-zoom-image or '
+            '@data-large-image or @data-full-image or @data-full or '
+            '@data-original or @data-image or @data-lazy-src or @srcset]'
+        )
+        for node in nodes:
+            if not gallery_context(node):
+                continue
+
+            for attribute in preferred_attributes:
+                raw = node.get(attribute)
+                if raw and cls._DAM_IMAGE_URL_RE.search(
+                    html.unescape(str(raw)).replace('\\/', '/')
+                ):
+                    add(raw, preferred)
+
+            # Si el img está enlazado a un original DAM, su src es solo la
+            # miniatura de navegación y se descarta por completo.
+            linked_to_original = False
+            if str(getattr(node, 'tag', '')).casefold() == 'img':
+                for anchor in node.iterancestors('a'):
+                    anchor_url = cls._clean_image_url(anchor.get('href'), page_url)
+                    if anchor_url and '/damcontent/' in anchor_url:
+                        linked_to_original = True
+                        break
+            if linked_to_original:
+                for attribute in fallback_attributes:
+                    thumbnail = cls._clean_image_url(node.get(attribute), page_url)
+                    if thumbnail:
+                        discarded_thumbnails.add(thumbnail)
+                if node.get('srcset'):
+                    for part in node.get('srcset').split(','):
+                        thumbnail = cls._clean_image_url(part.strip(), page_url)
+                        if thumbnail:
+                            discarded_thumbnails.add(thumbnail)
+                continue
+
+            for attribute in fallback_attributes:
+                raw = node.get(attribute)
+                if raw:
+                    add(raw, fallback)
+            if node.get('srcset'):
+                # Se recorre de mayor a menor descriptor cuando es posible.
+                srcset_items = []
+                for part in node.get('srcset').split(','):
+                    pieces = part.strip().split()
+                    if not pieces:
+                        continue
+                    descriptor = pieces[1] if len(pieces) > 1 else ''
+                    match = re.match(r'(?P<size>\d+(?:\.\d+)?)(?P<unit>w|x)$', descriptor)
+                    score = float(match.group('size')) if match else 0.0
+                    srcset_items.append((score, pieces[0]))
+                for _score, raw in sorted(srcset_items, reverse=True):
+                    add(raw, fallback)
+
+        # 2. Metadatos genéricos. Se conservan como respaldo, pero nunca pueden
+        # adelantar al href/data-full de la galería.
+        for image in super()._images_from_product(
+            tree, product_node, page_url, product_name, style_code,
+        ):
+            add(image, fallback)
+
+        # 3. Respaldo para URLs incrustadas en JSON/JavaScript cuando la galería
+        # no publica ningún enlace de ampliación reconocible.
+        if not preferred:
             markup = etree.tostring(tree, encoding='unicode').replace('\\/', '/')
             for match in cls._DAM_IMAGE_URL_RE.finditer(markup):
-                add(match.group(0))
+                add(match.group(0), fallback)
 
-        # Una URL DAM original siempre debe preceder a Open Graph u otros CDN.
-        dam_images = [image for image in result if '/damcontent/' in image]
-        fallback_images = [image for image in result if '/damcontent/' not in image]
-        return dam_images + fallback_images
+        def dam_first(images):
+            return (
+                [image for image in images if '/damcontent/' in image]
+                + [image for image in images if '/damcontent/' not in image]
+            )
+
+        return dam_first(preferred) + dam_first(fallback)
 
     # ------------------------------------------------------------------
     # Ficha de producto
@@ -1060,6 +1113,8 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
             'currency': currency or 'EUR',
             'category_path': '/'.join(category_segments),
             'style_code': article_no,
+            'sku': article_no,
+            'default_code': article_no,
             'color_code': False,
             'attributes': attributes,
             'main_image_url': images[0] if images else False,

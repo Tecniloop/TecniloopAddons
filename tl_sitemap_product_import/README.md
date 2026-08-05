@@ -1,3 +1,11 @@
+## 19.0.1.130.0
+
+- Märklin prioriza el enlace original de ampliación de la galería sobre el `src` de la miniatura, incluso cuando ambos son recursos DAM con hashes distintos.
+- Corrige la imagen principal del artículo 18044 y de fichas con la misma estructura; la acción directa vuelve a descargarla en productos existentes.
+- Guarda el número de artículo Märklin como referencia interna (`default_code`) al crear, actualizar y corregir productos existentes.
+- La misma asignación de referencia se aplica a los conectores Trix, Minitrix y LGB que comparten el formato de número de artículo.
+
+
 ## 19.0.1.129.0
 
 - Añade la acción **Corregir contenidos ahora (imágenes y documentos, sin cola)** en productos importados.
