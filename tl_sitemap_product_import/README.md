@@ -1,3 +1,11 @@
+## 19.0.1.131.0
+
+- Evita que Märklin vuelva a añadir como imágenes secundarias las miniaturas DAM de baja resolución cuando la galería ya publica sus originales.
+- La lista de originales extraída de la ficha pasa a ser autoritativa; `src`, Open Graph, JSON-LD y el sitemap de imágenes se usan solo como respaldo cuando no hay originales explícitos.
+- La corrección directa elimina las imágenes importadas antiguas y recrea únicamente la imagen principal y las secundarias de alta resolución.
+- El mismo comportamiento se aplica a Märklin, Trix, Minitrix y LGB por herencia del conector.
+
+
 ## 19.0.1.130.0
 
 - Märklin prioriza el enlace original de ampliación de la galería sobre el `src` de la miniatura, incluso cuando ambos son recursos DAM con hashes distintos.

@@ -391,6 +391,22 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
             return urlunsplit(('https', 'static.maerklin.de', parts.path, '', ''))
         return super()._clean_image_url(value, page_url)
 
+    def _merge_import_image_urls(self, discovered_urls, extracted_urls):
+        """No reintroduce miniaturas del sitemap tras analizar la ficha.
+
+        El sitemap de Märklin puede publicar recursos DAM de previsualización
+        distintos de los originales enlazados por la galería. Si la ficha ya
+        proporcionó imágenes, esa lista es autoritativa tanto al crear como al
+        actualizar productos. El sitemap queda únicamente como respaldo.
+        """
+        page_images = []
+        for image_url in list(extracted_urls or []):
+            if image_url and image_url not in page_images:
+                page_images.append(image_url)
+        if page_images:
+            return page_images
+        return super()._merge_import_image_urls(discovered_urls, extracted_urls)
+
     @classmethod
     def _images_from_product(cls, tree, product_node, page_url, product_name, style_code):
         """Prioriza el original enlazado por la galería frente a su miniatura.
@@ -493,8 +509,14 @@ class SitemapConnectorMaerklinEn(models.AbstractModel):
                 for _score, raw in sorted(srcset_items, reverse=True):
                     add(raw, fallback)
 
-        # 2. Metadatos genéricos. Se conservan como respaldo, pero nunca pueden
-        # adelantar al href/data-full de la galería.
+        # Cuando existen originales explícitos, la galería es autoritativa.
+        # No se añaden después los src, Open Graph ni JSON-LD porque Märklin
+        # publica ahí copias de baja resolución con hashes DAM diferentes.
+        if preferred:
+            return preferred
+
+        # 2. Metadatos genéricos. Solo se usan cuando la ficha no expone ningún
+        # original explícito mediante href/data-full/data-zoom-image.
         for image in super()._images_from_product(
             tree, product_node, page_url, product_name, style_code,
         ):

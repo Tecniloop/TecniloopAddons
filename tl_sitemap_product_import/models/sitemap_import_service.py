@@ -1998,6 +1998,18 @@ class SitemapImportService(models.AbstractModel):
         response = self._http_get(session, image_url, source)
         return response.content
 
+    def _merge_import_image_urls(self, discovered_urls, extracted_urls):
+        """Combina imágenes del sitemap y de la ficha manteniendo el orden.
+
+        Los conectores pueden especializar este método cuando la galería de la
+        ficha sea una fuente más fiable que el sitemap de imágenes.
+        """
+        merged = []
+        for image_url in list(discovered_urls or []) + list(extracted_urls or []):
+            if image_url and image_url not in merged:
+                merged.append(image_url)
+        return merged
+
     def _import_images(self, product_tmpl, data, image_urls, source):
         urls = list(image_urls) if image_urls else []
         main_url = data.get('main_image_url')
@@ -2388,10 +2400,9 @@ class SitemapImportService(models.AbstractModel):
                             'Sitemap import: JSON de imagenes invalido para la fila %s',
                             staging_row.id,
                         )
-                merged_image_urls = []
-                for image_url in list(image_urls or []) + staged_image_urls:
-                    if image_url and image_url not in merged_image_urls:
-                        merged_image_urls.append(image_url)
+                merged_image_urls = self._merge_import_image_urls(
+                    image_urls, staged_image_urls,
+                )
                 image_data = {'main_image_url': staging_row.main_image_url}
                 self._import_images(product_tmpl, image_data, merged_image_urls, source)
 
