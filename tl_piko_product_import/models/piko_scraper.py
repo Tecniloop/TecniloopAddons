@@ -152,14 +152,22 @@ class TlPikoScraper(models.AbstractModel):
         if not self._robots_allows(source, url):
             return None
         session = source._get_session()
+        inicio = time.monotonic()
         try:
             if source.request_delay:
                 time.sleep(source.request_delay)
             resp = session.get(url, timeout=source.timeout or 30)
             resp.raise_for_status()
+            _logger.info(
+                "PIKO TIMING GET imagen %s -> %.1fs (%s KB)",
+                url, time.monotonic() - inicio, len(resp.content) // 1024,
+            )
             return resp.content
         except Exception as exc:  # noqa: BLE001
-            _logger.warning("No se pudo descargar la imagen %s: %s", url, exc)
+            _logger.warning(
+                "No se pudo descargar la imagen %s tras %.1fs: %s",
+                url, time.monotonic() - inicio, exc,
+            )
             return None
 
     # ------------------------------------------------------------------
@@ -487,13 +495,21 @@ class TlPikoScraper(models.AbstractModel):
         if not self._robots_allows(source, url):
             return None, None, None
         session = source._get_session()
+        inicio = time.monotonic()
         try:
             if source.request_delay:
                 time.sleep(source.request_delay)
             resp = session.get(url, timeout=source.timeout or 60)
             resp.raise_for_status()
+            _logger.info(
+                "PIKO TIMING GET adjunto %s -> %.1fs (%s KB)",
+                url, time.monotonic() - inicio, len(resp.content) // 1024,
+            )
         except Exception as exc:  # noqa: BLE001
-            _logger.warning("No se pudo descargar %s: %s", url, exc)
+            _logger.warning(
+                "No se pudo descargar %s tras %.1fs: %s",
+                url, time.monotonic() - inicio, exc,
+            )
             return None, None, None
         nombre = None
         disposicion = resp.headers.get("content-disposition") or ""

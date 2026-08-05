@@ -621,3 +621,34 @@ en la galería; se prefiere capturar de más a arriesgarse a capturar de menos.
    sobre esa línea.
 3. Con nivel de registro **Depuración**, el chatter muestra cada petición
    HTTP y ahora también los fallos de descarga de imagen.
+
+
+## Diagnóstico de "conexión restablecida" en Resincronizar ahora (19.0.14.2.0)
+
+El camino síncrono encadena varias peticiones HTTP dentro de una sola petición
+web (ficha + galería + adjuntos, cada una con su `request_delay`). Con
+imágenes o PDFs grandes, es fácil superar `limit_time_real` del worker o el
+timeout del proxy — el navegador lo ve como "conexión restablecida", sin más
+detalle, porque el corte no es un error de Odoo: es la conexión muriendo a
+mitad.
+
+`action_resync_content_now` ahora traza cada paso al **log del servidor**
+(nivel INFO, prefijo `PIKO TIMING`) con el tiempo transcurrido desde el
+arranque: rastreo de ficha, descripción, características, propiedades,
+categorías, disponibilidad, galería, vídeo, adjuntos. También cada petición
+HTTP de imagen o adjunto traza su propia duración.
+
+Deliberadamente no va al chatter: si la conexión muere a mitad, el
+`flush_log()` final puede no llegar a ejecutarse nunca, y el log del servidor
+es lo único garantizado.
+
+Para diagnosticar: pulsa el botón y mira el log del servidor por la ref del
+producto:
+
+    grep "PIKO TIMING" /var/log/odoo/odoo.log | tail -30
+
+La última línea antes de que el navegador reciba el corte es el paso donde se
+agota el tiempo. Si es sistemáticamente "adjuntos" o "galería" con archivos
+grandes, la solución de fondo no es este log sino dejar de intentar bajar
+medios en el camino síncrono: son binarios de tamaño variable y ese es
+justamente el trabajo para el que existe la cola.

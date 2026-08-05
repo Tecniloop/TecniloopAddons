@@ -5,6 +5,7 @@ import hashlib
 import json
 import logging
 import re
+import time
 
 import psycopg2
 from psycopg2 import errorcodes
@@ -274,6 +275,15 @@ class TlPikoProduct(models.Model):
         compensa. Con más de 5 líneas obliga a usar la vía encolada: cada ficha
         cuesta una petición HTTP de ~30 s y el mismo botón para 100 fichas
         bloquearía la sesión y agotaría el tiempo de la petición web.
+
+        AVISO: incluso con 1 sola línea, este camino encadena varias
+        peticiones dentro de la misma petición web (ficha + galería +
+        adjuntos), y puede agotar `limit_time_real` o el timeout del proxy
+        antes de terminar — el síntoma es justo "conexión restablecida" sin
+        más detalle. `_resync_content` traza cada paso con tiempos en el log
+        del servidor (nivel INFO, prefijo "PIKO TIMING") para diagnosticarlo;
+        el chatter no sirve aquí porque depende de un flush que, si la
+        conexión muere a mitad, puede no llegar a ejecutarse.
         """
         if len(self) > 5:
             raise UserError(
@@ -281,7 +291,7 @@ class TlPikoProduct(models.Model):
                   "(encolado): cada ficha tarda ~30 s y esto bloquearía la "
                   "sesión.")
             )
-        resumenes = [line._resync_content() for line in self]
+        resumenes = [line._resync_content(verbose=True) for line in self]
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
@@ -293,42 +303,69 @@ class TlPikoProduct(models.Model):
             },
         }
 
-    def _resync_content(self):
+    def _resync_content(self, verbose=False):
         """Lógica compartida entre la vía encolada y la inmediata.
 
         Descripción HTML, características, propiedades, categorías, galería,
         vídeo y descargas. Deliberadamente NO toca nombre, precio ni código de
         barras: esto es una rectificación de contenido, no una reimportación.
+
+        `verbose`: traza cada paso con tiempos al log del servidor (no al
+        chatter). Pensado para diagnosticar cortes a mitad ("conexión
+        restablecida") en el camino síncrono, donde no hay garantía de que el
+        proceso llegue vivo hasta el `flush_log` final.
         """
         self.ensure_one()
+        ref = self.default_code or self.url.rsplit("/", 1)[-1]
+        inicio = time.monotonic()
+
+        def traza(paso):
+            if verbose:
+                _logger.info(
+                    "PIKO TIMING [%s] %s -> %.1fs desde el inicio",
+                    ref, paso, time.monotonic() - inicio,
+                )
+
+        traza("arranque")
         estado_previo = self.state
         self._do_scrape()  # refresca la línea y reaplica las reglas
+        traza("ficha rastreada (_do_scrape)")
         if estado_previo == "imported":
             self.state = "imported"  # el rescrapeo no debe degradar el estado
 
         product = self.product_tmpl_id or self._find_product()
         if not product:
+            traza("sin producto asociado, fin")
             return _("%s: sin producto asociado") % (self.default_code or self.url)
         if product.piko_no_overwrite:
+            traza("'No sobrescribir', fin")
             return _("%s: marcado como 'No sobrescribir'") % product.display_name
 
         vals = self._description_vals(product)
         if vals:
             product.write(vals)
+        traza("descripción escrita")
         self._sync_template_attributes(product)
+        traza("características sincronizadas")
         self._sync_product_properties(product)
+        traza("propiedades sincronizadas")
         self._sync_public_categories(product)
+        traza("categorías sincronizadas")
         self._sync_availability(product)
+        traza("disponibilidad sincronizada")
         imagenes = self._import_gallery(product)
+        traza("galería descargada (%s imágenes)" % imagenes)
         video = self._import_video(product)
+        traza("vídeo procesado")
         adjuntos = self._import_attachments(product)
+        traza("adjuntos descargados (%s ficheros)" % adjuntos)
         self.product_tmpl_id = product
+        traza("fin, todo escrito")
 
         return _(
             "%(ref)s resincronizado: %(car)s características, %(img)s imágenes, "
             "%(vid)s vídeo, %(adj)s descargas.",
-            ref=self.default_code or self.url.rsplit("/", 1)[-1],
-            car=len(self.attribute_value_ids), img=imagenes,
+            ref=ref, car=len(self.attribute_value_ids), img=imagenes,
             vid=int(bool(video)), adj=adjuntos,
         )
 
