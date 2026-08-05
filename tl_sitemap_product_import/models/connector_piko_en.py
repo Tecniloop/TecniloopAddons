@@ -281,88 +281,144 @@ class SitemapConnectorPikoEn(models.AbstractModel):
         return 0.0, 'EUR'
 
     @classmethod
+    def _normalise_piko_image_url(cls, value, page_url, expected_folder=None):
+        """Normaliza una imagen de producto PIKO y descarta recursos ajenos.
+
+        Las fichas PIKO publican la galería original y, por separado, miniaturas
+        bajo ``/thumbs/``. Además, la misma página puede incluir imágenes de
+        accesorios y repuestos. ``expected_folder`` limita la extracción al
+        directorio del artículo de la URL de la ficha (por ejemplo
+        ``/oart_49196/``), evitando contaminar la galería del producto.
+        """
+        if isinstance(value, dict):
+            value = value.get('url') or value.get('contentUrl')
+        if not value:
+            return False
+        value = html.unescape(str(value)).replace('\\/', '/').strip()
+        if not value:
+            return False
+        absolute = urljoin(page_url, value)
+        parts = urlsplit(absolute)
+        if parts.scheme not in {'http', 'https'}:
+            return False
+        if parts.netloc.casefold().removeprefix('www.') != 'piko-shop.de':
+            return False
+        path = re.sub(r'/+', '/', parts.path or '')
+        folded = path.casefold()
+        if '/media/oart_' not in folded:
+            return False
+        if expected_folder and expected_folder.casefold() not in folded:
+            return False
+        if not re.search(r'\.(?:jpe?g|png|webp)$', folded):
+            return False
+        # Los parámetros se usan para caché o redimensión; el recurso original
+        # está identificado por la ruta y es el que interesa almacenar.
+        return urlunsplit(('https', 'www.piko-shop.de', path, '', ''))
+
+    @staticmethod
+    def _piko_image_asset_key(image_url):
+        """Agrupa el original y su miniatura aunque tengan sufijos distintos.
+
+        Ejemplo real de PIKO::
+
+            62451_21007.jpg             (original)
+            thumbs/62451_559863.jpg     (miniatura)
+
+        El identificador inicial ``62451`` es estable para ambas versiones.
+        """
+        path = urlsplit(image_url).path.casefold()
+        filename = path.rsplit('/', 1)[-1]
+        match = re.match(r'(?P<asset>\d+)_', filename)
+        if match:
+            if '/thumbs/' in path:
+                folder = path.split('/thumbs/', 1)[0].rstrip('/')
+            else:
+                folder = path.rsplit('/', 1)[0].rstrip('/')
+            return '%s/%s' % (folder, match.group('asset'))
+        return path.replace('/thumbs/', '/')
+
+    @classmethod
     def _images(cls, tree, product, page_url):
-        """Return the complete PIKO product gallery in page order."""
-        candidates = []
+        """Devuelve la galería completa PIKO, solo con originales si existen.
+
+        PIKO enlaza las imágenes grandes desde los elementos de la galería y
+        publica miniaturas con nombres diferentes. La extracción anterior podía
+        depender demasiado de atributos concretos y no restringía los recursos
+        al directorio del artículo. Aquí se inspeccionan todos los atributos y
+        el HTML serializado, se limita el resultado a ``oart_<id de ficha>`` y
+        se deduplican original/miniatura por el identificador de activo.
+        """
+        match = cls._product_match(page_url)
+        expected_folder = (
+            '/oart_%s/' % match.group('page_id')
+            if match else None
+        )
+        originals = []
+        thumbnails = []
 
         def add(value):
-            if isinstance(value, dict):
-                value = value.get('url') or value.get('contentUrl')
-            if value:
-                candidates.append(str(value).strip())
+            if isinstance(value, (list, tuple)):
+                for item in value:
+                    add(item)
+                return
+            normalized = cls._normalise_piko_image_url(
+                value, page_url, expected_folder=expected_folder,
+            )
+            if not normalized:
+                return
+            target = thumbnails if '/thumbs/' in urlsplit(normalized).path.casefold() else originals
+            if normalized not in target:
+                target.append(normalized)
 
+        # JSON-LD suele aportar al menos la imagen principal.
         image = product.get('image') if product else None
-        if isinstance(image, list):
-            for value in image:
-                add(value)
-        else:
-            add(image)
+        add(image)
 
-        for value in tree.xpath(
-            '//meta[@property="og:image" or @property="og:image:secure_url"]/@content | '
-            '//meta[@name="twitter:image" or @name="twitter:image:src"]/@content | '
-            '//link[@rel="preload" and @as="image"]/@href | '
-            '//a[contains(@href, "/media/oart_")]/@href | '
-            '//img[contains(@src, "/media/oart_")]/@src | '
-            '//img[contains(@data-src, "/media/oart_")]/@data-src | '
-            '//img[contains(@data-original, "/media/oart_")]/@data-original | '
-            '//img[contains(@data-lazy-src, "/media/oart_")]/@data-lazy-src | '
-            '//img[contains(@data-zoom-image, "/media/oart_")]/@data-zoom-image | '
-            '//img[contains(@data-large, "/media/oart_")]/@data-large'
-        ):
-            add(value)
+        # Se recorren todos los atributos porque PIKO ha alternado entre href,
+        # data-src, data-image, data-zoom-image y variantes equivalentes.
+        for value in tree.xpath('//@*'):
+            raw = str(value or '')
+            if '/media/oart_' in raw.casefold() or 'media\\/oart_' in raw.casefold():
+                # Algunos atributos contienen srcset o listas separadas por coma.
+                for candidate in raw.split(','):
+                    candidate = candidate.strip().split()[0] if candidate.strip() else ''
+                    add(candidate)
 
-        for raw in tree.xpath('//img/@srcset | //img/@data-srcset | //source/@srcset'):
-            choices = []
-            for part in str(raw).split(','):
-                bits = part.strip().split()
-                if not bits:
-                    continue
-                weight = 0
-                if len(bits) > 1:
-                    token = bits[-1].lower()
-                    try:
-                        weight = int(float(token[:-1])) if token.endswith(('w', 'x')) else 0
-                    except ValueError:
-                        weight = 0
-                choices.append((weight, bits[0]))
-            if choices:
-                add(max(choices, key=lambda item: item[0])[1])
-
-        document = '\n'.join(tree.xpath('//script/text() | //style/text() | //@style'))
+        # Respaldo para URLs incrustadas en JavaScript, JSON o plantillas HTML.
+        document = lxml_html.tostring(tree, encoding='unicode')
         media_re = re.compile(
             r"(?P<url>(?:https?:)?//[^\s\"'<>]+/media/oart_[^\s\"'<>]+?\.(?:jpe?g|png|webp)(?:\?[^\s\"'<>]*)?|/media/oart_[^\s\"'<>]+?\.(?:jpe?g|png|webp)(?:\?[^\s\"'<>]*)?)",
             re.IGNORECASE,
         )
-        for match in media_re.finditer(html.unescape(document).replace('\\/', '/')):
-            add(match.group('url'))
+        decoded_document = html.unescape(document).replace('\\/', '/')
+        for embedded in media_re.finditer(decoded_document):
+            add(embedded.group('url'))
 
+        # Los originales se procesan primero. Después solo se conservan las
+        # miniaturas cuyo activo no tenga un original equivalente, como respaldo
+        # para fichas antiguas o galerías parcialmente publicadas.
+        candidates = originals + thumbnails
         result = []
-        seen = set()
-        for value in candidates:
-            value = html.unescape(value).replace('\\/', '/')
-            absolute = urljoin(page_url, value)
-            parts = urlsplit(absolute)
-            if parts.scheme not in {'http', 'https'}:
+        seen_assets = set()
+        for image_url in candidates:
+            asset_key = cls._piko_image_asset_key(image_url)
+            if asset_key in seen_assets:
                 continue
-            if parts.netloc.casefold().removeprefix('www.') != 'piko-shop.de':
-                continue
-            path = parts.path
-            folded = path.casefold()
-            if '/media/oart_' not in folded:
-                if any(token in folded for token in ('logo', 'icon', 'placeholder', 'spinner')):
-                    continue
-                if not re.search(r'\.(?:jpe?g|png|webp)$', folded):
-                    continue
-            normalized = urlunsplit(('https', 'www.piko-shop.de', path, parts.query, ''))
-            dedupe_key = urlunsplit(('https', 'www.piko-shop.de', path, '', '')).casefold()
-            if dedupe_key in seen:
-                continue
-            seen.add(dedupe_key)
-            result.append(normalized)
+            seen_assets.add(asset_key)
+            result.append(image_url)
+        return result
 
-        gallery = [url for url in result if '/media/oart_' in url.casefold()]
-        return gallery or result
+    def _merge_import_image_urls(self, discovered_urls, extracted_urls):
+        """Da prioridad a la galería extraída de la ficha PIKO.
+
+        PIKO no necesita mezclar imágenes del sitemap. Esto evita que datos
+        históricos de staging o miniaturas descubiertas externamente desplacen
+        o limiten la galería completa recuperada de la página del producto.
+        """
+        extracted = [url for url in list(extracted_urls or []) if url]
+        if extracted:
+            return extracted
+        return super()._merge_import_image_urls(discovered_urls, extracted_urls)
 
     @classmethod
     def _descriptions(cls, tree, product):

@@ -1,4 +1,20 @@
+## 19.0.1.133.0
+
+- Corrige la galería del conector PIKO para importar todas las imágenes adicionales de la ficha.
+- Limita la extracción al directorio del artículo (`oart_<id de ficha>`) y evita incorporar imágenes de accesorios o repuestos mostrados en la misma página.
+- Prioriza siempre los originales y descarta sus miniaturas bajo `/thumbs/`, aunque original y miniatura tengan nombres de archivo distintos.
+- Inspecciona todos los atributos HTML y las URLs incrustadas en JavaScript/JSON para tolerar cambios de atributos en la galería PIKO.
+- La galería extraída de la ficha es autoritativa tanto en importación normal como en actualización y en las acciones de corrección, con o sin `queue_job`.
+
 ## 19.0.1.131.0
+
+
+## 19.0.1.132.0
+
+- Restaura las acciones masivas en la vista de lista de **Productos importados**.
+- Añade botones permanentes en la cabecera para actualizar EAN/GTIN, corregir contenidos mediante `queue_job` y corregirlos directamente sin cola.
+- Mantiene las mismas operaciones también en el menú **Acción** y fuerza explícitamente su vinculación al modelo `product.template` durante la actualización del módulo.
+- La acción de Productos importados utiliza una vista de lista propia para evitar que personalizaciones o cambios de la vista genérica de productos oculten los controles del importador.
 
 - Evita que Märklin vuelva a añadir como imágenes secundarias las miniaturas DAM de baja resolución cuando la galería ya publica sus originales.
 - La lista de originales extraída de la ficha pasa a ser autoritativa; `src`, Open Graph, JSON-LD y el sitemap de imágenes se usan solo como respaldo cuando no hay originales explícitos.
