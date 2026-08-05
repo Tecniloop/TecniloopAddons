@@ -425,16 +425,29 @@ class TlPikoScraper(models.AbstractModel):
         vals = {}
 
         # --- imágenes: solo las de la carpeta del artículo, en orden de página
+        # Lista amplia de atributos: lazy-loading y carruseles varían mucho de
+        # marcado entre plantillas, y un atributo no contemplado aquí es la
+        # explicación más probable de una galería que sale vacía.
+        atributos_imagen = (
+            "href", "src", "data-src", "data-zoom-image", "data-large",
+            "data-full", "data-original", "data-lazy", "data-image",
+            "data-srcset", "srcset",
+        )
         imagenes, vistas = [], set()
-        for atributo in ("href", "src", "data-src", "data-zoom-image"):
+        for atributo in atributos_imagen:
             for nodo in tree.xpath("//*[@%s]" % atributo):
                 valor = nodo.get(atributo) or ""
-                if not RE_MEDIA_OART.search(valor):
-                    continue
-                url = urljoin(source.base_url, valor.split("?")[0])
-                if url not in vistas:
-                    vistas.add(url)
-                    imagenes.append(url)
+                # srcset / data-srcset pueden traer varias URLs separadas por
+                # coma, cada una con un descriptor de tamaño detrás.
+                candidatos = [valor] if atributo not in ("srcset", "data-srcset") \
+                    else [c.strip().split(" ")[0] for c in valor.split(",")]
+                for candidato in candidatos:
+                    if not RE_MEDIA_OART.search(candidato):
+                        continue
+                    url = urljoin(source.base_url, candidato.split("?")[0])
+                    if url not in vistas:
+                        vistas.add(url)
+                        imagenes.append(url)
         if imagenes:
             vals["image_url"] = imagenes[0]
             vals["image_urls"] = "\n".join(imagenes)

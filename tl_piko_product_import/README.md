@@ -586,3 +586,38 @@ Detalle: si la línea ya estaba en `imported`, el rescrapeo no la degrada a
 
 Queda además el botón *Enviar solo la descripción al producto* en la pestaña
 Descripción, para el caso puntual en que no haga falta releer la ficha.
+
+
+## Galería que no descarga nada (19.0.14.1.0)
+
+Dos bugs corregidos:
+
+- **`import_extra_images` dependía de `import_images`.** Si la principal
+  estaba desactivada, la galería entera se saltaba con ella, aunque el
+  interruptor de galería siguiera marcado. Ahora son independientes.
+- **Fallos de descarga silenciosos.** Si `http_get_binary` fallaba en alguna
+  imagen (404, timeout…), no quedaba ningún rastro. Ahora se registra en el
+  chatter de la fuente con las URLs concretas que fallaron.
+
+También se amplía la lista de atributos escaneados
+(`data-large`, `data-full`, `data-original`, `data-lazy`, `data-image`,
+`srcset`, `data-srcset`, con soporte de `<picture><source>`), por si el
+carrusel de alguna ficha usa lazy-loading con un atributo que la lista
+original no cubría. Efecto secundario aceptado: en marcados con `srcset`
+pueden colarse variantes de tamaño de la misma foto como imágenes "distintas"
+en la galería; se prefiere capturar de más a arriesgarse a capturar de menos.
+
+### Si sigue sin descargar nada para una ficha en concreto
+
+1. Rastrea esa línea y mira el campo `image_urls` en la pestaña *Medios y
+   descargas* del staging. Vacío o con una sola URL confirma que el HTML que
+   recibe `requests` no trae la galería — posible causa: el carrusel de esa
+   plantilla se rellena por JavaScript/AJAX tras la carga, y `requests` (sin
+   motor JS) nunca lo ve. `web_fetch` u otras herramientas basadas en
+   navegador SÍ pueden verlo, lo que despista al comparar manualmente.
+2. Si el producto es de una importación anterior a 19.0.9.0.0 (cuando se
+   añadió la extracción de galería), su línea de staging nunca se ha vuelto a
+   rastrear y `image_urls` está vacío por eso. Usa **Resincronizar contenido**
+   sobre esa línea.
+3. Con nivel de registro **Depuración**, el chatter muestra cada petición
+   HTTP y ahora también los fallos de descarga de imagen.

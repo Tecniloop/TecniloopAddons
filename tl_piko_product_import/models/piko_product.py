@@ -803,12 +803,24 @@ class TlPikoProduct(models.Model):
     # Medios y adjuntos
     # ------------------------------------------------------------------
     def _import_gallery(self, product):
-        """Imágenes adicionales como `product.image`, sin duplicar."""
+        """Imágenes adicionales como `product.image`, sin duplicar.
+
+        Independiente de `import_images`: la principal y la galería son dos
+        interruptores separados en la vista y deben comportarse como tales.
+        """
         self.ensure_one()
         source = self.source_id
-        if not (source.import_images and source.import_extra_images):
+        if not source.import_extra_images:
             return 0
         urls = [u.strip() for u in (self.image_urls or "").splitlines() if u.strip()]
+        if not urls:
+            source.log(
+                _("%s: sin galería que descargar (image_urls vacío; si el "
+                  "producto es antiguo, usa 'Resincronizar contenido').",
+                  self.default_code or self.url),
+                level="detail",
+            )
+            return 0
         # la primera ya es la imagen principal del producto
         urls = urls[1:]
         if not urls:
@@ -818,12 +830,14 @@ class TlPikoProduct(models.Model):
             Image.search([("product_tmpl_id", "=", product.id)]).mapped("name")
         )
         creadas = 0
+        fallidas = []
         for indice, url in enumerate(urls, start=2):
             nombre = url.rsplit("/", 1)[-1]
             if nombre in existentes:
                 continue
             contenido = self.env["tl.piko.scraper"].http_get_binary(source, url)
             if not contenido:
+                fallidas.append(url)
                 continue
             Image.create({
                 "name": nombre,
@@ -832,6 +846,13 @@ class TlPikoProduct(models.Model):
                 "sequence": indice * 10,
             })
             creadas += 1
+        if fallidas:
+            source.log(
+                _("%(ref)s: %(n)s imágenes de galería no se pudieron "
+                  "descargar: %(urls)s",
+                  ref=self.default_code or self.url, n=len(fallidas),
+                  urls=", ".join(fallidas)),
+            )
         return creadas
 
     def _import_video(self, product):
