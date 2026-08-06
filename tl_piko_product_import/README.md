@@ -652,3 +652,33 @@ agota el tiempo. Si es sistemáticamente "adjuntos" o "galería" con archivos
 grandes, la solución de fondo no es este log sino dejar de intentar bajar
 medios en el camino síncrono: son binarios de tamaño variable y ese es
 justamente el trabajo para el que existe la cola.
+
+
+## Resincronizar solo galería (19.0.15.0.0)
+
+Con el log del servidor confirmamos algo relevante: **cada petición al
+servidor de PIKO tarda ~32 s, sea la ficha entera, una foto de 3 MB o una
+miniatura de 9 KB.** No es ancho de banda, es la latencia fija de su backend
+para cualquier recurso. Con eso, cualquier acción con varias imágenes va a
+tardar minutos por diseño — no hay optimización de nuestro lado que lo evite,
+solo se puede evitar trabajo innecesario.
+
+Dos acciones nuevas, disponibles **también desde la lista** de Productos
+rastreados (seleccionando varias filas → Acciones), no solo desde el
+formulario:
+
+- **Resincronizar solo galería** (encolado) — `action_resync_gallery`
+- **Resincronizar solo galería AHORA** (sin cola, tope de 3 líneas) —
+  `action_resync_gallery_now`
+
+La optimización real: `_resync_gallery()` **reutiliza `image_urls` si la línea
+ya lo tiene** de un rastreo anterior, en vez de releer la página entera
+(~30 s de por sí, antes de descargar ninguna imagen). Solo relee la ficha si
+`image_urls` está vacío o se pide `force_rescrape=True` explícitamente. No
+toca descripción, características, propiedades, categorías, vídeo ni
+adjuntos — solo imágenes.
+
+La vía inmediata sigue trazando tiempos al log del servidor
+(`PIKO TIMING`), y el tope baja de 5 a 3 líneas respecto a "Resincronizar
+contenido ahora", porque aquí el coste por ficha puede ser varias imágenes en
+vez de una sola operación.

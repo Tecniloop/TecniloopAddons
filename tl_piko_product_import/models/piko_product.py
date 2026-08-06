@@ -268,6 +268,102 @@ class TlPikoProduct(models.Model):
         self.source_id.flush_log(_("Resincronización"))
         return resumen
 
+    def action_resync_gallery(self):
+        """Encola la resincronización de SOLO la galería."""
+        for line in self:
+            line.with_delay(
+                description=_("Resincronizar galería %s") % (
+                    line.default_code or line.url),
+                identity_key=identity_exact,
+                priority=5,
+            )._job_refresh_gallery()
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("PIKO Import"),
+                "message": _("%s fichas encoladas (solo galería).", len(self)),
+                "type": "success",
+            },
+        }
+
+    def _job_refresh_gallery(self):
+        """JOB: descarga solo la galería, sin releer la página si no hace falta."""
+        self.ensure_one()
+        self = self.with_context(tl_piko_single_attempt=True)
+        resumen = self._resync_gallery()
+        self.source_id.log(resumen, level="detail")
+        self.source_id.flush_log(_("Resincronización de galería"))
+        return resumen
+
+    def action_resync_gallery_now(self):
+        """Solo galería, en la propia petición, sin queue_job.
+
+        Cada imagen cuesta ~30 s en el servidor de PIKO (medido: la latencia
+        es igual para una ficha, una foto de 3 MB o una miniatura de 9 KB, así
+        que no es ancho de banda, es su backend). Con eso, incluso 3 líneas
+        con varias fotos cada una se va a varios minutos. Tope bajo a
+        propósito, y trazas de tiempo al log del servidor por si aun así se
+        corta a mitad.
+        """
+        if len(self) > 3:
+            raise UserError(
+                _("Para más de 3 líneas usa 'Resincronizar galería' "
+                  "(encolado): cada imagen tarda ~30 s en el servidor de "
+                  "origen y esto bloquearía la sesión varios minutos.")
+            )
+        resumenes = [line._resync_gallery(verbose=True) for line in self]
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("PIKO Import"),
+                "message": "\n".join(resumenes),
+                "type": "success",
+                "sticky": True,
+            },
+        }
+
+    def _resync_gallery(self, verbose=False, force_rescrape=False):
+        """Descarga solo la galería, reutilizando `image_urls` si ya se conoce.
+
+        Se salta `_do_scrape()` (la parte cara: ~30 s solo por pedir la
+        página) cuando la línea ya tiene `image_urls` de un rastreo anterior.
+        `force_rescrape=True` obliga a releer la ficha primero, por si la
+        galería en origen ha podido cambiar.
+        """
+        self.ensure_one()
+        ref = self.default_code or self.url.rsplit("/", 1)[-1]
+        inicio = time.monotonic()
+
+        def traza(paso):
+            if verbose:
+                _logger.info(
+                    "PIKO TIMING [%s] %s -> %.1fs desde el inicio",
+                    ref, paso, time.monotonic() - inicio,
+                )
+
+        if force_rescrape or not self.image_urls:
+            self._do_scrape()
+            traza("ficha releída para obtener image_urls")
+        else:
+            traza("reutilizando image_urls ya conocido (sin releer la ficha)")
+
+        product = self.product_tmpl_id or self._find_product()
+        if not product:
+            traza("sin producto asociado, fin")
+            return _("%s: sin producto asociado") % ref
+        if product.piko_no_overwrite:
+            traza("'No sobrescribir', fin")
+            return _("%s: marcado como 'No sobrescribir'") % product.display_name
+
+        imagenes = self._import_gallery(product)
+        traza("galería descargada (%s imágenes nuevas)" % imagenes)
+        self.product_tmpl_id = product
+
+        return _("%(ref)s: %(img)s imágenes de galería descargadas.",
+                 ref=ref, img=imagenes)
+
     def action_resync_content_now(self):
         """Resincroniza AHORA, en la propia petición, sin pasar por queue_job.
 

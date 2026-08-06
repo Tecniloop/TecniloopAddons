@@ -24,6 +24,32 @@
         <field name="code">action = records.action_resync_content_now()</field>
     </record>
 
+    <record id="action_resync_piko_gallery" model="ir.actions.server">
+        <field name="name">Resincronizar solo galería (encolado, PIKO)</field>
+        <field name="model_id" ref="model_tl_piko_product"/>
+        <field name="binding_model_id" ref="model_tl_piko_product"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="group_ids" eval="[(4, ref('group_tl_piko_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = records.action_resync_gallery()</field>
+    </record>
+
+    <record id="action_resync_piko_gallery_now" model="ir.actions.server">
+        <field name="name">Resincronizar solo galería AHORA (sin cola, PIKO)</field>
+        <field name="model_id" ref="model_tl_piko_product"/>
+        <field name="binding_model_id" ref="model_tl_piko_product"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="group_ids" eval="[(4, ref('group_tl_piko_manager'))]"/>
+        <field name="state">code</field>
+        <field name="code">action = records.action_resync_gallery_now()</field>
+    </record>
+
+    <record id="job_function_refresh_gallery" model="queue.job.function">
+        <field name="model_id" ref="model_tl_piko_product"/>
+        <field name="method">_job_refresh_gallery</field>
+        <field name="channel_id" ref="channel_piko_lines"/>
+    </record>
+
     <record id="job_function_refresh_content" model="queue.job.function">
         <field name="model_id" ref="model_tl_piko_product"/>
         <field name="method">_job_refresh_content</field>

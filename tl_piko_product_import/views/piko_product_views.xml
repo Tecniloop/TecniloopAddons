@@ -52,6 +52,14 @@
                             string="Resincronizar ahora"
                             help="Igual que 'Resincronizar contenido' pero inmediato, sin pasar por queue_job. Solo para una ficha suelta: bloquea la sesión mientras dura (~30 s)."
                             invisible="not product_tmpl_id"/>
+                    <button name="action_resync_gallery" type="object"
+                            string="Resincronizar galería"
+                            help="Solo la galería de imágenes, sin tocar descripción, características ni el resto. En segundo plano (queue_job)."
+                            invisible="not product_tmpl_id"/>
+                    <button name="action_resync_gallery_now" type="object"
+                            string="Resincronizar galería ahora"
+                            help="Solo la galería, inmediato, sin queue_job. Cada imagen tarda ~30 s en el servidor de PIKO: úsalo solo con una ficha suelta."
+                            invisible="not product_tmpl_id"/>
                     <button name="action_import" type="object" string="Importar"
                             invisible="state not in ('parsed', 'skipped')"/>
                     <button name="action_reset" type="object" string="Reiniciar"/>
