@@ -6,4 +6,4 @@ paramiko
 azure-storage-blob
 google-cloud-storage
 webdavclient3
-pyhanko==0.21.0
+pyhanko==0.24.0
