@@ -11,95 +11,141 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#. module: l10n_es_deca
 msgid "Draft"
 msgstr "Zirriborroa"
+#. module: l10n_es_deca
 msgid "Issued"
 msgstr "Jaulkita"
+#. module: l10n_es_deca
 msgid "In transit"
 msgstr "Garraioan"
+#. module: l10n_es_deca
 msgid "Completed"
 msgstr "Osatuta"
+#. module: l10n_es_deca
 msgid "Cancelled"
 msgstr "Ezeztatuta"
+#. module: l10n_es_deca
 msgid "Transfer"
 msgstr "Transferentzia"
+#. module: l10n_es_deca
 msgid "Batch transfer"
 msgstr "Sortakako transferentzia"
+#. module: l10n_es_deca
 msgid "DeCA required"
 msgstr "DeCA nahitaezkoa"
+#. module: l10n_es_deca
 msgid "Contractual shipper"
 msgstr "Kontratuzko kargatzailea"
+#. module: l10n_es_deca
 msgid "Contractual shipper Tax ID"
 msgstr "Kontratuzko kargatzailearen IFZ"
+#. module: l10n_es_deca
 msgid "Effective carrier"
 msgstr "Benetako garraiolaria"
+#. module: l10n_es_deca
 msgid "Effective carrier Tax ID"
 msgstr "Benetako garraiolariaren IFZ"
+#. module: l10n_es_deca
 msgid "Goods weight"
 msgstr "Salgaiaren pisua"
+#. module: l10n_es_deca
 msgid "Weight unit"
 msgstr "Pisu-unitatea"
+#. module: l10n_es_deca
 msgid "Special traffic permit"
 msgstr "Zirkulazio-baimen berezia"
+#. module: l10n_es_deca
 msgid "Issue and seal PDF"
 msgstr "PDFa jaulki eta zigilatu"
+#. module: l10n_es_deca
 msgid "Record delivery"
 msgstr "Entrega erregistratu"
+#. module: l10n_es_deca
 msgid "Start transport"
 msgstr "Garraioa hasi"
+#. module: l10n_es_deca
 msgid "Create revision"
 msgstr "Berrikuspena sortu"
+#. module: l10n_es_deca
 msgid "Download current PDF"
 msgstr "Indarreko PDFa deskargatu"
+#. module: l10n_es_deca
 msgid "Create / open DeCA"
 msgstr "DeCA sortu / ireki"
+#. module: l10n_es_deca
 msgid "Create DeCA documents"
 msgstr "DeCA dokumentuak sortu"
+#. module: l10n_es_deca
 msgid "Legal data"
 msgstr "Legezko datuak"
+#. module: l10n_es_deca
 msgid "Shipment"
 msgstr "Bidalketa"
+#. module: l10n_es_deca
 msgid "Vehicle and driver"
 msgstr "Ibilgailua eta gidaria"
+#. module: l10n_es_deca
 msgid "Versions"
 msgstr "Bertsioak"
+#. module: l10n_es_deca
 msgid "Delivery evidence"
 msgstr "Entrega-frogak"
+#. module: l10n_es_deca
 msgid "Technical verification"
 msgstr "Egiaztapen teknikoa"
+#. module: l10n_es_deca
 msgid "Electronic copy on mobile device"
 msgstr "Kopia elektronikoa gailu mugikorrean"
+#. module: l10n_es_deca
 msgid "Independent QR"
 msgstr "QR independentea"
+#. module: l10n_es_deca
 msgid "Printed copy"
 msgstr "Inprimatutako kopia"
+#. module: l10n_es_deca
 msgid "Create traced DeCA revision"
 msgstr "DeCAren berrikuspen trazatua sortu"
+#. module: l10n_es_deca
 msgid "Seal new version"
 msgstr "Bertsio berria zigilatu"
+#. module: l10n_es_deca
 msgid "Stock values are initial suggestions. Review every legal field before sealing the PDF."
 msgstr "Inbentarioko balioak hasierako proposamenak dira. Berrikusi legezko eremu guztiak PDFa zigilatu aurretik."
+#. module: l10n_es_deca
 msgid "A DeCA must be linked to a stock transfer."
 msgstr "DeCA inbentarioko transferentzia bati lotu behar zaio."
+#. module: l10n_es_deca
 msgid "Record delivery of the current PDF/QR to the driver first."
 msgstr "Lehenik, erregistratu indarreko PDFaren edo QRaren entrega gidariari."
+#. module: l10n_es_deca
 msgid "Only one DeCA document can be linked to a stock transfer."
 msgstr "DeCA dokumentu bakarra lotu daiteke inbentarioko transferentzia bakoitzari."
+#. module: l10n_es_deca
 msgid "Administrative only"
 msgstr "Administratiboa soilik"
+#. module: l10n_es_deca
 msgid "Administrative and contractual"
 msgstr "Administratiboa eta kontratuala"
+#. module: l10n_es_deca
 msgid "Document purpose"
 msgstr "Dokumentuaren xedea"
+#. module: l10n_es_deca
 msgid "Not required"
 msgstr "Ez da beharrezkoa"
+#. module: l10n_es_deca
 msgid "Pending"
 msgstr "Zain"
+#. module: l10n_es_deca
 msgid "Complete"
 msgstr "Osatua"
+#. module: l10n_es_deca
 msgid "Electronic-signature evidence"
 msgstr "Sinadura elektronikoaren frogak"
+#. module: l10n_es_deca
 msgid "Contractual use requires an installed and configured electronic-signature addon. Administrative DeCA issuance remains available without signatures."
 msgstr "Kontratu-erabilerak sinadura elektronikoko modulu instalatu eta konfiguratu bat behar du. DeCA administratiboa sinadurarik gabe jaulki daiteke oraindik."
+#. module: l10n_es_deca
 msgid "The contractual DeCA did not produce the required electronic-signature evidence."
 msgstr "Kontratuzko DeCAk ez ditu beharrezko sinadura elektronikoaren frogak sortu."

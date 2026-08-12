@@ -6,116 +6,172 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#. module: l10n_es_deca_ades
 msgid "DeCA PAdES Signer"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "DeCA signature profile"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "PAdES B-B"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "PAdES B-T with trusted timestamp"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "DeCA timestamp authority URL"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Required contractual signatures"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Contractual shipper"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Effective carrier"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Contractual shipper and effective carrier"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Shipper signing company"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Carrier signing company"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "PAdES profile"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Timestamp authority"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Only an authorized DeCA PAdES Signer may issue this document."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Select at least one required signature party."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Configure one distinct signing company for every required party."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "You may only use certificates of companies available in your current multi-company access."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Configure an RFC 3161 timestamp authority URL for PAdES B-T."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "The final PDF does not contain every required PAdES signature."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "A contractual partner record is required for the %(role)s signature."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "B-T requires an RFC 3161 trusted timestamp service."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Contractual PDF signatures"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "DeCA PAdES"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "HTTPS endpoint of the RFC 3161 timestamp authority used for PAdES B-T."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Odoo company whose active AEAT certificate signs for the contractual shipper. Its commercial partner must match the shipper."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Odoo company whose active AEAT certificate signs for the effective carrier. Its commercial partner must match the carrier."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "PAdES B-T embeds an RFC 3161 timestamp. Certificate trust, identity, revocation and AdES/QES legal qualification still require an independent validation policy."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "PAdES signing failed for %(company)s. No DeCA version was sealed."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Required when the selected profile is PAdES B-T."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Select the parties whose PAdES signatures must be embedded before the contractual DeCA version is sealed."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Signing company %(company)s does not match the contractual partner assigned to role %(role)s."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "The %(role)s PAdES signature cannot be validated."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "The %(role)s PAdES signature is not intact."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "The active AEAT certificate files for %(company)s are not available on this Odoo worker."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "The active AEAT certificate for %(company)s cannot be loaded by the PAdES engine."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "The active AEAT certificate for %(company)s contains no usable signing key."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "The final PDF is missing the %(role)s signature."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Distinct contractual parties cannot use the same signing certificate."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Contractual issue embeds PAdES signatures before the final hash is calculated. Certificate possession alone does not prove AdES/QES qualification or authority to represent a party."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "The %(role)s PAdES B-T signature has no valid embedded RFC 3161 timestamp."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "l10n_es_deca_ades requires Odoo 19 on Python 3.12 or newer. Use an external signing service on older Python runtimes."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "l10n_es_deca_ades requires pyHanko 0.24.x to remain compatible with the official Odoo 19 dependency pins."
 msgstr ""
 
+#. module: l10n_es_deca_ades
 msgid "Administrative only (no signature)"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Administrative and contractual (PAdES required)"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Default DeCA purpose"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Default DeCA signature parties"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Default shipper signing company"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Default carrier signing company"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Default document purpose"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Default contractual signers"
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Applied to new DeCA drafts for this operational company. Administrative drafts are not signed. Contractual drafts must be signed according to the default party policy before they can be issued."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Parties preselected on new DeCA drafts. This policy is enforced only when the document purpose is administrative and contractual."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Company preselected to sign for the contractual shipper. Its commercial partner must match the shipper on the DeCA."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Company preselected to sign for the effective carrier. Its commercial partner must match the carrier on the DeCA."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Administrative drafts are not signed. Contractual drafts require PAdES before issue. The default applies only to newly created drafts."
 msgstr ""
+#. module: l10n_es_deca_ades
 msgid "Preselect the parties and signing companies copied to every new draft. Operators may change them before issue."
 msgstr ""

@@ -11,116 +11,172 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#. module: l10n_es_deca_ades
 msgid "DeCA PAdES Signer"
 msgstr "Signant PAdES del DeCA"
+#. module: l10n_es_deca_ades
 msgid "DeCA signature profile"
 msgstr "Perfil de signatura del DeCA"
+#. module: l10n_es_deca_ades
 msgid "PAdES B-B"
 msgstr "PAdES B-B"
+#. module: l10n_es_deca_ades
 msgid "PAdES B-T with trusted timestamp"
 msgstr "PAdES B-T amb segell de temps de confiança"
+#. module: l10n_es_deca_ades
 msgid "DeCA timestamp authority URL"
 msgstr "URL de l'autoritat de segell de temps del DeCA"
+#. module: l10n_es_deca_ades
 msgid "Required contractual signatures"
 msgstr "Signatures contractuals requerides"
+#. module: l10n_es_deca_ades
 msgid "Contractual shipper"
 msgstr "Carregador contractual"
+#. module: l10n_es_deca_ades
 msgid "Effective carrier"
 msgstr "Transportista efectiu"
+#. module: l10n_es_deca_ades
 msgid "Contractual shipper and effective carrier"
 msgstr "Carregador contractual i transportista efectiu"
+#. module: l10n_es_deca_ades
 msgid "Shipper signing company"
 msgstr "Companyia signant del carregador"
+#. module: l10n_es_deca_ades
 msgid "Carrier signing company"
 msgstr "Companyia signant del transportista"
+#. module: l10n_es_deca_ades
 msgid "PAdES profile"
 msgstr "Perfil PAdES"
+#. module: l10n_es_deca_ades
 msgid "Timestamp authority"
 msgstr "Autoritat de segell de temps"
+#. module: l10n_es_deca_ades
 msgid "Only an authorized DeCA PAdES Signer may issue this document."
 msgstr "Només un signant PAdES del DeCA autoritzat pot emetre aquest document."
+#. module: l10n_es_deca_ades
 msgid "Select at least one required signature party."
 msgstr "Seleccioneu almenys una part amb signatura requerida."
+#. module: l10n_es_deca_ades
 msgid "Configure one distinct signing company for every required party."
 msgstr "Configureu una companyia signant diferent per a cada part requerida."
+#. module: l10n_es_deca_ades
 msgid "You may only use certificates of companies available in your current multi-company access."
 msgstr "Només podeu usar certificats de companyies disponibles en l'accés multiempresa actual."
+#. module: l10n_es_deca_ades
 msgid "Configure an RFC 3161 timestamp authority URL for PAdES B-T."
 msgstr "Configureu una URL d'autoritat de segell de temps RFC 3161 per a PAdES B-T."
+#. module: l10n_es_deca_ades
 msgid "The final PDF does not contain every required PAdES signature."
 msgstr "El PDF final no conté totes les signatures PAdES requerides."
+#. module: l10n_es_deca_ades
 msgid "A contractual partner record is required for the %(role)s signature."
 msgstr "Cal un contacte contractual per a la signatura de %(role)s."
+#. module: l10n_es_deca_ades
 msgid "B-T requires an RFC 3161 trusted timestamp service."
 msgstr "B-T requereix un servei de segell de temps de confiança RFC 3161."
+#. module: l10n_es_deca_ades
 msgid "Contractual PDF signatures"
 msgstr "Signatures contractuals del PDF"
+#. module: l10n_es_deca_ades
 msgid "DeCA PAdES"
 msgstr "DeCA PAdES"
+#. module: l10n_es_deca_ades
 msgid "HTTPS endpoint of the RFC 3161 timestamp authority used for PAdES B-T."
 msgstr "Punt d'accés HTTPS de l'autoritat de segell de temps RFC 3161 usada per a PAdES B-T."
+#. module: l10n_es_deca_ades
 msgid "Odoo company whose active AEAT certificate signs for the contractual shipper. Its commercial partner must match the shipper."
 msgstr "Companyia d'Odoo el certificat AEAT actiu de la qual signa pel carregador contractual. El seu contacte comercial ha de coincidir amb el carregador."
+#. module: l10n_es_deca_ades
 msgid "Odoo company whose active AEAT certificate signs for the effective carrier. Its commercial partner must match the carrier."
 msgstr "Companyia d'Odoo el certificat AEAT actiu de la qual signa pel transportista efectiu. El seu contacte comercial ha de coincidir amb el transportista."
+#. module: l10n_es_deca_ades
 msgid "PAdES B-T embeds an RFC 3161 timestamp. Certificate trust, identity, revocation and AdES/QES legal qualification still require an independent validation policy."
 msgstr "PAdES B-T incorpora un segell de temps RFC 3161. La confiança, identitat, revocació i qualificació jurídica AdES/QES del certificat encara requereixen una política de validació independent."
+#. module: l10n_es_deca_ades
 msgid "PAdES signing failed for %(company)s. No DeCA version was sealed."
 msgstr "Ha fallat la signatura PAdES de %(company)s. No s'ha segellat cap versió del DeCA."
+#. module: l10n_es_deca_ades
 msgid "Required when the selected profile is PAdES B-T."
 msgstr "Obligatòria quan el perfil seleccionat és PAdES B-T."
+#. module: l10n_es_deca_ades
 msgid "Select the parties whose PAdES signatures must be embedded before the contractual DeCA version is sealed."
 msgstr "Seleccioneu les parts les signatures PAdES de les quals s'han d'incorporar abans de segellar la versió contractual del DeCA."
+#. module: l10n_es_deca_ades
 msgid "Signing company %(company)s does not match the contractual partner assigned to role %(role)s."
 msgstr "La companyia signant %(company)s no coincideix amb el contacte contractual assignat al rol %(role)s."
+#. module: l10n_es_deca_ades
 msgid "The %(role)s PAdES signature cannot be validated."
 msgstr "No es pot validar la signatura PAdES de %(role)s."
+#. module: l10n_es_deca_ades
 msgid "The %(role)s PAdES signature is not intact."
 msgstr "La signatura PAdES de %(role)s no és íntegra."
+#. module: l10n_es_deca_ades
 msgid "The active AEAT certificate files for %(company)s are not available on this Odoo worker."
 msgstr "Els fitxers del certificat AEAT actiu de %(company)s no estan disponibles en aquest procés d'Odoo."
+#. module: l10n_es_deca_ades
 msgid "The active AEAT certificate for %(company)s cannot be loaded by the PAdES engine."
 msgstr "El motor PAdES no pot carregar el certificat AEAT actiu de %(company)s."
+#. module: l10n_es_deca_ades
 msgid "The active AEAT certificate for %(company)s contains no usable signing key."
 msgstr "El certificat AEAT actiu de %(company)s no conté cap clau de signatura utilitzable."
+#. module: l10n_es_deca_ades
 msgid "The final PDF is missing the %(role)s signature."
 msgstr "Falta la signatura de %(role)s en el PDF final."
+#. module: l10n_es_deca_ades
 msgid "Distinct contractual parties cannot use the same signing certificate."
 msgstr "Parts contractuals diferents no poden usar el mateix certificat de signatura."
+#. module: l10n_es_deca_ades
 msgid "Contractual issue embeds PAdES signatures before the final hash is calculated. Certificate possession alone does not prove AdES/QES qualification or authority to represent a party."
 msgstr "L'emissió contractual incorpora les signatures PAdES abans de calcular el hash final. La mera possessió del certificat no acredita la qualificació AdES/QES ni la facultat de representar una part."
+#. module: l10n_es_deca_ades
 msgid "The %(role)s PAdES B-T signature has no valid embedded RFC 3161 timestamp."
 msgstr "La signatura PAdES B-T de %(role)s no conté cap segell de temps RFC 3161 vàlid."
+#. module: l10n_es_deca_ades
 msgid "l10n_es_deca_ades requires Odoo 19 on Python 3.12 or newer. Use an external signing service on older Python runtimes."
 msgstr "l10n_es_deca_ades requereix Odoo 19 sobre Python 3.12 o posterior. Useu un servei de signatura extern en versions anteriors de Python."
+#. module: l10n_es_deca_ades
 msgid "l10n_es_deca_ades requires pyHanko 0.24.x to remain compatible with the official Odoo 19 dependency pins."
 msgstr "l10n_es_deca_ades requereix pyHanko 0.24.x per mantenir la compatibilitat amb les versions de dependències oficials d'Odoo 19."
 
+#. module: l10n_es_deca_ades
 msgid "Administrative only (no signature)"
 msgstr "Només administrativa (sense signatura)"
+#. module: l10n_es_deca_ades
 msgid "Administrative and contractual (PAdES required)"
 msgstr "Administrativa i contractual (PAdES obligatòria)"
+#. module: l10n_es_deca_ades
 msgid "Default DeCA purpose"
 msgstr "Finalitat predeterminada del DeCA"
+#. module: l10n_es_deca_ades
 msgid "Default DeCA signature parties"
 msgstr "Parts signants predeterminades del DeCA"
+#. module: l10n_es_deca_ades
 msgid "Default shipper signing company"
 msgstr "Companyia signant predeterminada del carregador"
+#. module: l10n_es_deca_ades
 msgid "Default carrier signing company"
 msgstr "Companyia signant predeterminada del transportista"
+#. module: l10n_es_deca_ades
 msgid "Default document purpose"
 msgstr "Finalitat predeterminada del document"
+#. module: l10n_es_deca_ades
 msgid "Default contractual signers"
 msgstr "Signants contractuals predeterminats"
+#. module: l10n_es_deca_ades
 msgid "Applied to new DeCA drafts for this operational company. Administrative drafts are not signed. Contractual drafts must be signed according to the default party policy before they can be issued."
 msgstr "S'aplica als nous esborranys DeCA d'aquesta companyia operativa. Els esborranys administratius no se signen. Els contractuals s'han de signar segons la política predeterminada abans d'emetre's."
+#. module: l10n_es_deca_ades
 msgid "Parties preselected on new DeCA drafts. This policy is enforced only when the document purpose is administrative and contractual."
 msgstr "Parts preseleccionades als nous esborranys DeCA. Aquesta política només s'aplica quan la finalitat del document és administrativa i contractual."
+#. module: l10n_es_deca_ades
 msgid "Company preselected to sign for the contractual shipper. Its commercial partner must match the shipper on the DeCA."
 msgstr "Companyia preseleccionada per signar pel carregador contractual. El seu contacte comercial ha de coincidir amb el carregador del DeCA."
+#. module: l10n_es_deca_ades
 msgid "Company preselected to sign for the effective carrier. Its commercial partner must match the carrier on the DeCA."
 msgstr "Companyia preseleccionada per signar pel transportista efectiu. El seu contacte comercial ha de coincidir amb el transportista del DeCA."
+#. module: l10n_es_deca_ades
 msgid "Administrative drafts are not signed. Contractual drafts require PAdES before issue. The default applies only to newly created drafts."
 msgstr "Els esborranys administratius no se signen. Els contractuals requereixen PAdES abans d'emetre's. El valor predeterminat només s'aplica als esborranys nous."
+#. module: l10n_es_deca_ades
 msgid "Preselect the parties and signing companies copied to every new draft. Operators may change them before issue."
 msgstr "Preseleccioneu les parts i companyies signants que es copiaran a cada esborrany nou. Els operadors poden canviar-les abans de l'emissió."

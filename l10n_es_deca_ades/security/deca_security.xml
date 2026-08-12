@@ -2,7 +2,7 @@
 <odoo>
     <record id="group_deca_ades_signer" model="res.groups">
         <field name="name">DeCA PAdES Signer</field>
-        <field name="category_id" ref="l10n_es_deca.module_category_deca" />
+        <field name="privilege_id" ref="l10n_es_deca.privilege_deca" />
         <field
             name="implied_ids"
             eval="[(4, ref('l10n_es_deca.group_deca_manager'))]"

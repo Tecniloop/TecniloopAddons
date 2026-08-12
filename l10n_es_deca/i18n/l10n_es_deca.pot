@@ -10,146 +10,195 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#. module: l10n_es_deca
 msgid "Draft"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Issued"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "In transit"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Completed"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Cancelled"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Transfer"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Batch transfer"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "DeCA required"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Contractual shipper"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Contractual shipper Tax ID"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Effective carrier"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Effective carrier Tax ID"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Goods weight"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Weight unit"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Special traffic permit"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Issue and seal PDF"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Record delivery"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Start transport"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Create revision"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Download current PDF"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Create / open DeCA"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Create DeCA documents"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Legal data"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Shipment"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Vehicle and driver"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Versions"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Delivery evidence"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Technical verification"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Electronic copy on mobile device"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Independent QR"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Printed copy"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Create traced DeCA revision"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Seal new version"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Stock values are initial suggestions. Review every legal field before sealing the PDF."
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "A DeCA must be linked to a stock transfer."
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Record delivery of the current PDF/QR to the driver first."
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Only one DeCA document can be linked to a stock transfer."
 msgstr ""
+#. module: l10n_es_deca
 msgid "The DeCA PDF post-processing hook returned an invalid PDF."
 msgstr ""
+#. module: l10n_es_deca
 msgid "Reset to draft"
 msgstr ""
+#. module: l10n_es_deca
 msgid "Only a cancelled DeCA without issued versions can be reopened."
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Administrative only"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Administrative and contractual"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Document purpose"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Not required"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Pending"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Complete"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Electronic-signature evidence"
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "Contractual use requires an installed and configured electronic-signature addon. Administrative DeCA issuance remains available without signatures."
 msgstr ""
 
+#. module: l10n_es_deca
 msgid "The contractual DeCA did not produce the required electronic-signature evidence."
 msgstr ""

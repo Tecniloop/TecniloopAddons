@@ -11,95 +11,141 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#. module: l10n_es_deca
 msgid "Draft"
 msgstr "Borrador"
+#. module: l10n_es_deca
 msgid "Issued"
 msgstr "Emitido"
+#. module: l10n_es_deca
 msgid "In transit"
 msgstr "En tránsito"
+#. module: l10n_es_deca
 msgid "Completed"
 msgstr "Completado"
+#. module: l10n_es_deca
 msgid "Cancelled"
 msgstr "Cancelado"
+#. module: l10n_es_deca
 msgid "Transfer"
 msgstr "Transferencia"
+#. module: l10n_es_deca
 msgid "Batch transfer"
 msgstr "Transferencia por lotes"
+#. module: l10n_es_deca
 msgid "DeCA required"
 msgstr "DeCA obrigatorio"
+#. module: l10n_es_deca
 msgid "Contractual shipper"
 msgstr "Cargador contractual"
+#. module: l10n_es_deca
 msgid "Contractual shipper Tax ID"
 msgstr "NIF do cargador contractual"
+#. module: l10n_es_deca
 msgid "Effective carrier"
 msgstr "Transportista efectivo"
+#. module: l10n_es_deca
 msgid "Effective carrier Tax ID"
 msgstr "NIF do transportista efectivo"
+#. module: l10n_es_deca
 msgid "Goods weight"
 msgstr "Peso da mercadoría"
+#. module: l10n_es_deca
 msgid "Weight unit"
 msgstr "Unidade de peso"
+#. module: l10n_es_deca
 msgid "Special traffic permit"
 msgstr "Autorización especial de circulación"
+#. module: l10n_es_deca
 msgid "Issue and seal PDF"
 msgstr "Emitir e selar PDF"
+#. module: l10n_es_deca
 msgid "Record delivery"
 msgstr "Rexistrar entrega"
+#. module: l10n_es_deca
 msgid "Start transport"
 msgstr "Iniciar transporte"
+#. module: l10n_es_deca
 msgid "Create revision"
 msgstr "Crear revisión"
+#. module: l10n_es_deca
 msgid "Download current PDF"
 msgstr "Descargar PDF vixente"
+#. module: l10n_es_deca
 msgid "Create / open DeCA"
 msgstr "Crear / abrir DeCA"
+#. module: l10n_es_deca
 msgid "Create DeCA documents"
 msgstr "Crear documentos DeCA"
+#. module: l10n_es_deca
 msgid "Legal data"
 msgstr "Datos legais"
+#. module: l10n_es_deca
 msgid "Shipment"
 msgstr "Envío"
+#. module: l10n_es_deca
 msgid "Vehicle and driver"
 msgstr "Vehículo e condutor"
+#. module: l10n_es_deca
 msgid "Versions"
 msgstr "Versións"
+#. module: l10n_es_deca
 msgid "Delivery evidence"
 msgstr "Evidencias de entrega"
+#. module: l10n_es_deca
 msgid "Technical verification"
 msgstr "Verificación técnica"
+#. module: l10n_es_deca
 msgid "Electronic copy on mobile device"
 msgstr "Copia electrónica en dispositivo móbil"
+#. module: l10n_es_deca
 msgid "Independent QR"
 msgstr "QR independente"
+#. module: l10n_es_deca
 msgid "Printed copy"
 msgstr "Copia impresa"
+#. module: l10n_es_deca
 msgid "Create traced DeCA revision"
 msgstr "Crear revisión trazada do DeCA"
+#. module: l10n_es_deca
 msgid "Seal new version"
 msgstr "Selar nova versión"
+#. module: l10n_es_deca
 msgid "Stock values are initial suggestions. Review every legal field before sealing the PDF."
 msgstr "Os valores de inventario son suxestións iniciais. Revise todos os campos legais antes de selar o PDF."
+#. module: l10n_es_deca
 msgid "A DeCA must be linked to a stock transfer."
 msgstr "O DeCA debe estar vinculado a unha transferencia de inventario."
+#. module: l10n_es_deca
 msgid "Record delivery of the current PDF/QR to the driver first."
 msgstr "Rexistre primeiro a entrega ao condutor do PDF ou QR vixente."
+#. module: l10n_es_deca
 msgid "Only one DeCA document can be linked to a stock transfer."
 msgstr "Só se pode vincular un documento DeCA a cada transferencia de inventario."
+#. module: l10n_es_deca
 msgid "Administrative only"
 msgstr "Só administrativa"
+#. module: l10n_es_deca
 msgid "Administrative and contractual"
 msgstr "Administrativa e contractual"
+#. module: l10n_es_deca
 msgid "Document purpose"
 msgstr "Finalidade do documento"
+#. module: l10n_es_deca
 msgid "Not required"
 msgstr "Non requirida"
+#. module: l10n_es_deca
 msgid "Pending"
 msgstr "Pendente"
+#. module: l10n_es_deca
 msgid "Complete"
 msgstr "Completa"
+#. module: l10n_es_deca
 msgid "Electronic-signature evidence"
 msgstr "Evidencias de sinatura electrónica"
+#. module: l10n_es_deca
 msgid "Contractual use requires an installed and configured electronic-signature addon. Administrative DeCA issuance remains available without signatures."
 msgstr "O uso contractual require un módulo de sinatura electrónica instalado e configurado. A emisión administrativa do DeCA segue dispoñible sen sinaturas."
+#. module: l10n_es_deca
 msgid "The contractual DeCA did not produce the required electronic-signature evidence."
 msgstr "O DeCA contractual non xerou as evidencias de sinatura electrónica requiridas."
