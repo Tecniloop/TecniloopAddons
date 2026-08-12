@@ -3,7 +3,7 @@
     <menuitem
     id="menu_deca_root"
     name="DeCA"
-    parent="stock.menu_stock_root"
+    parent="stock.menu_stock_warehouse_mgmt"
     sequence="45"
     groups="group_deca_user"
   />

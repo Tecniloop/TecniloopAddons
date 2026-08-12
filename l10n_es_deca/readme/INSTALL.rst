@@ -1,4 +1,4 @@
-Install the addon on Odoo 19 Community with the standard ``stock_picking_batch``
-module. The Python packages ``qrcode`` and Pillow must be available to every Odoo
-worker. Use the PDF library version pinned by the official Odoo 19 requirements.
-
+Instala el módulo en Odoo 19 Community junto con el módulo estándar
+``stock_picking_batch``. Los paquetes Python ``qrcode`` y Pillow deben estar
+disponibles en todos los workers de Odoo. Usa la versión de la librería PDF
+fijada por los requisitos oficiales de Odoo 19.

@@ -72,8 +72,8 @@ msgstr "Crear revisión"
 msgid "Download current PDF"
 msgstr "Descargar PDF vigente"
 #. module: l10n_es_deca
-msgid "Create / open DeCA"
-msgstr "Crear / abrir DeCA"
+msgid "Add to DeCA"
+msgstr "Añadir a DeCA"
 #. module: l10n_es_deca
 msgid "Create DeCA documents"
 msgstr "Crear documentos DeCA"
@@ -158,3 +158,32 @@ msgstr "El uso contractual requiere un módulo de firma electrónica instalado y
 #. module: l10n_es_deca
 msgid "The contractual DeCA did not produce the required electronic-signature evidence."
 msgstr "El DeCA contractual no generó las evidencias de firma electrónica requeridas."
+#. module: l10n_es_deca
+msgid "DeCA"
+msgstr "DeCA"
+#. module: l10n_es_deca
+msgid "%(count)s transfer(s) added to DeCA."
+msgstr "%(count)s transferencia(s) añadida(s) a DeCA."
+#. module: l10n_es_deca
+msgid "The following transfers already have a DeCA or cannot have one and were skipped: %(names)s"
+msgstr "Las siguientes transferencias ya tienen un DeCA o no pueden tenerlo y se han omitido: %(names)s"
+#. module: l10n_es_deca
+msgid "DeCA public URL"
+msgstr "URL pública del DeCA"
+#. module: l10n_es_deca
+msgid "HTTPS URL used to build each DeCA's public download link and QR code"
+msgstr "URL HTTPS usada para construir el enlace público de descarga y el código QR de cada DeCA"
+#. module: l10n_es_deca
+msgid "Clean HTTPS URL used to build each DeCA's public download link and QR code (TLS 1.2 or newer; no credentials, query or fragment). Falls back to the general Odoo base URL when left empty."
+msgstr "URL HTTPS limpia usada para construir el enlace público de descarga y el código QR de cada DeCA (TLS 1.2 o superior; sin credenciales, query ni fragment). Si se deja vacía, se usa la URL base general de Odoo."
+#. module: l10n_es_deca
+#: model:ir.module.module,summary:l10n_es_deca
+msgid "Issue immutable Spanish DeCA PDFs from stock transfers"
+msgstr "Emita PDFs DeCA españoles inmutables desde las transferencias de inventario"
+#. module: l10n_es_deca
+#: model:ir.module.module,name:l10n_es_deca
+msgid "Spain - Electronic Transport Control Document (DeCA)"
+msgstr "España - Documento Electrónico de Control Administrativo del Transporte (DeCA)"
+#. module: l10n_es_deca
+msgid "Direct link to the batch's DeCA when it groups a single transfer. A batch with several transfers can hold several DeCA documents (one per transfer by design); this field then points to the first one — use the DeCA smart button to see them all."
+msgstr "Enlace directo al DeCA del lote cuando agrupa una sola transferencia. Un lote con varias transferencias puede tener varios documentos DeCA (uno por transferencia, por diseño); en ese caso este campo apunta al primero — usa el botón inteligente DeCA para verlos todos."

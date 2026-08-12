@@ -1,0 +1,36 @@
+# Translation of Odoo Server to Spanish.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"PO-Revision-Date: 2026-08-12 00:00+0000\n"
+"Last-Translator: Ecmr DeCA contributors\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: l10n_es_deca_intrastat
+#: model:ir.module.module,name:l10n_es_deca_intrastat
+msgid "Spain - DeCA / Intrastat bridge"
+msgstr "España - Puente DeCA / Intrastat"
+#. module: l10n_es_deca_intrastat
+#: model:ir.module.module,summary:l10n_es_deca_intrastat
+msgid "Let the DeCA goods-nature text be built from CN8 codes (Intrastat) instead of sale-line/product descriptions, as an Inventory setting"
+msgstr "Permite construir la naturaleza de la mercancía del DeCA a partir de los códigos CN8 (Intrastat) en lugar de la descripción de la línea de venta o del producto, mediante un ajuste de Inventario"
+#. module: l10n_es_deca_intrastat
+msgid "Sale order line / picking description"
+msgstr "Descripción de la línea de venta / del picking"
+#. module: l10n_es_deca_intrastat
+msgid "Intrastat CN8 code, grouped by code and quantity"
+msgstr "Código CN8 de Intrastat, agrupado por código y cantidad"
+#. module: l10n_es_deca_intrastat
+msgid "DeCA goods nature"
+msgstr "Naturaleza de la mercancía del DeCA"
+#. module: l10n_es_deca_intrastat
+msgid "Applies to new DeCA drafts. Documents already issued keep their sealed text."
+msgstr "Se aplica a los nuevos borradores de DeCA. Los documentos ya emitidos conservan su texto sellado."
+#. module: l10n_es_deca_intrastat
+msgid "How the 'Naturaleza' text of new DeCA drafts is built.\n- Sale order line / picking description: one line per stock move, using the linked sale order line's description, or the picking's own product when there is no sale line.\n- Intrastat CN8 code: one line per CN8 code found in the transfer, using the CN8 code and its description, with quantities of all moves sharing that code (and unit of measure) added together."
+msgstr "Cómo se construye el texto 'Naturaleza' de los nuevos borradores de DeCA.\n- Descripción de la línea de venta / del picking: una línea por movimiento de existencias, usando la descripción de la línea de venta vinculada, o el producto del propio picking cuando no hay línea de venta.\n- Código CN8 de Intrastat: una línea por código CN8 encontrado en la transferencia, usando el código CN8 y su descripción, sumando las cantidades de todos los movimientos que comparten ese código (y unidad de medida)."

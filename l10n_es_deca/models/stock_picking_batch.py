@@ -15,12 +15,25 @@ class StockPickingBatch(models.Model):
         readonly=True,
     )
     deca_document_count = fields.Integer(compute="_compute_deca_documents")
+    deca_document_id = fields.Many2one(
+        "l10n.es.deca.document",
+        string="DeCA",
+        compute="_compute_deca_documents",
+        readonly=True,
+        help=(
+            "Direct link to the batch's DeCA when it groups a single transfer. "
+            "A batch with several transfers can hold several DeCA documents (one "
+            "per transfer by design); this field then points to the first one — "
+            "use the DeCA smart button to see them all."
+        ),
+    )
 
     @api.depends("picking_ids.deca_document_ids")
     def _compute_deca_documents(self):
         for batch in self:
             batch.deca_document_ids = batch.picking_ids.deca_document_ids
             batch.deca_document_count = len(batch.deca_document_ids)
+            batch.deca_document_id = batch.deca_document_ids[:1]
 
     def action_create_deca_documents(self):
         """Create one DeCA per picking and retain the batch as grouping evidence.

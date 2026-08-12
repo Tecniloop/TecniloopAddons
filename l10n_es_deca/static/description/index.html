@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <!-- Generated from README.rst by oca-gen-addon-readme compatible workflow. -->
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Spain - Electronic Transport Control Document (DeCA)</title>
+  <title>España - Documento Electrónico de Control Administrativo del Transporte (DeCA)</title>
   <style>
     html {
       color: #1a1a1a;
@@ -166,153 +166,185 @@
   </style>
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">Spain - Electronic Transport Control Document
-(DeCA)</h1>
-</header>
-<p><a
-href="https://odoo-community.org/get-involved?utm_source=readme"><img
-src="https://odoo-community.org/readme-banner-image"
-alt="Odoo Community Association" /></a></p>
-<h1 id="spain---electronic-transport-control-document-deca">Spain -
-Electronic Transport Control Document (DeCA)</h1>
-<p><a href="https://odoo-community.org/page/development-status"><img
-src="https://img.shields.io/badge/maturity-Beta-yellow.png"
-alt="Beta" /></a> <a
-href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img
-src="https://img.shields.io/badge/license-AGPL--3-blue.png"
-alt="License: AGPL-3" /></a> <a
-href="https://github.com/OCA/l10n-spain/tree/19.0/l10n_es_deca"><img
-src="https://img.shields.io/badge/github-OCA%2Fl10n--spain-lightgray.png?logo=github"
-alt="OCA/l10n-spain" /></a> <a
-href="https://translation.odoo-community.org/projects/l10n-spain-19-0/l10n-spain-19-0-l10n_es_deca"><img
-src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png"
-alt="Translate me on Weblate" /></a> <a
-href="https://runboat.odoo-community.org/builds?repo=OCA/l10n-spain&amp;target_branch=19.0"><img
-src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png"
-alt="Try me on Runboat" /></a></p>
-<p>Issue the Spanish electronic administrative transport control
-document (DeCA) from Odoo 19 Community stock transfers. Each document
-seals a canonical Spanish PDF with a QR that resolves directly to the
-same PDF without login or intermediate interaction.</p>
-<p>One DeCA is linked to one <code>stock.picking</code>. When documents
-are created from a <code>stock.picking.batch</code>, the module creates
-one per picking and freezes the batch reference as provenance. This
-avoids presenting a multidestination batch as a single transport
-service.</p>
-<p>The base addon is deliberately administrative and does not sign PDFs.
-Install <code>l10n_es_deca_ades</code> only when the same document is
-also used contractually and the selected parties must sign it with
-PAdES.</p>
-<p><strong>Table of contents</strong></p>
-<div class="contents" data-local="">
-
-</div>
-<h2 id="installation">Installation</h2>
-<p>Install the addon on Odoo 19 Community with the standard
-<code>stock_picking_batch</code> module. The Python packages
-<code>qrcode</code> and Pillow must be available to every Odoo worker.
-Use the PDF library version pinned by the official Odoo 19
-requirements.</p>
-<h2 id="configuration">Configuration</h2>
-<ul>
-<li>Set <code>l10n_es_deca.public_base_url</code> to the public HTTPS
-origin.</li>
-<li>Enforce TLS 1.2 or newer at the reverse proxy.</li>
-<li>Configure the public hostname and <code>dbfilter</code> so no
-database selector appears.</li>
-<li>Use the official Odoo 19 Python requirements. The module supports
-the pinned <code>PyPDF2</code> runtime on Python 3.10--3.12 and
-<code>PyPDF</code> on Python 3.13+.</li>
-<li>Grant the DeCA User or DeCA Manager group to authorized stock
-users.</li>
-<li>Define an operational procedure for applicability, driver delivery,
-retention, trusted time, backups and public endpoint monitoring.</li>
+<main>
+<a class="reference external image-reference" href="https://odoo-community.org/get-involved?utm_source=readme">
+<img alt="Odoo Community Association" src="https://odoo-community.org/readme-banner-image" />
+</a>
+<section id="espana-documento-electronico-de-control-administrativo-del-transporte-deca">
+<h2>España - Documento Electrónico de Control Administrativo del Transporte (DeCA)</h2>
+<!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! Este fichero se ha actualizado manualmente para reflejar la    !!
+!! última descripción en español. No usar oca-gen-addon-readme    !!
+!! hasta trasladar estos textos de vuelta al repositorio OCA.     !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+<p><a class="reference external image-reference" href="https://odoo-community.org/page/development-status"><img alt="Beta" src="https://img.shields.io/badge/maturity-Beta-yellow.png" /></a> <a class="reference external image-reference" href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img alt="License: AGPL-3" src="https://img.shields.io/badge/license-AGPL--3-blue.png" /></a> <a class="reference external image-reference" href="https://github.com/OCA/l10n-spain/tree/19.0/l10n_es_deca"><img alt="OCA/l10n-spain" src="https://img.shields.io/badge/github-OCA%2Fl10n--spain-lightgray.png?logo=github" /></a> <a class="reference external image-reference" href="https://translation.odoo-community.org/projects/l10n-spain-19-0/l10n-spain-19-0-l10n_es_deca"><img alt="Translate me on Weblate" src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png" /></a> <a class="reference external image-reference" href="https://runboat.odoo-community.org/builds?repo=OCA/l10n-spain&amp;target_branch=19.0"><img alt="Try me on Runboat" src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png" /></a></p>
+<p>Emite el Documento electrónico de Control Administrativo del transporte (DeCA)
+español desde las transferencias de existencias de Odoo 19 Community. Cada
+documento sella un PDF español canónico con un código QR que descarga
+directamente ese mismo PDF, sin inicio de sesión ni pasos intermedios.</p>
+<p>Un DeCA está vinculado a un único <span class="docutils literal">stock.picking</span>. Cuando los documentos se
+crean desde una <span class="docutils literal">stock.picking.batch</span> (agrupación de albaranes), el módulo
+crea uno por albarán y conserva la referencia del lote como trazabilidad. Así
+se evita presentar un lote con varios destinos como un único servicio de
+transporte.</p>
+<p>El módulo base es deliberadamente administrativo y no firma los PDF. Instala
+<span class="docutils literal">l10n_es_deca_ades</span> únicamente cuando el mismo documento también se use con
+finalidad contractual y las partes deban firmarlo con PAdES.</p>
+<section id="modulos-puente-opcionales">
+<h3>Módulos puente opcionales</h3>
+<ul class="simple">
+<li><p><span class="docutils literal">l10n_es_deca_delivery</span> (requiere <span class="docutils literal">delivery_carrier_partner</span>): precarga
+el transportista efectivo del DeCA a partir del contacto asignado al
+transportista (<span class="docutils literal">delivery.carrier</span>). Si además está instalado el módulo
+<span class="docutils literal">fleet</span>, busca un vehículo cuyo conductor esté relacionado con ese
+contacto y sugiere su matrícula como tractora.</p></li>
+<li><p><span class="docutils literal">l10n_es_deca_intrastat</span> (requiere <span class="docutils literal">intrastat_product</span>): añade en
+Ajustes de Inventario, dentro del apartado <strong>DeCA</strong>, la opción de construir
+la naturaleza de la mercancía a partir del código CN8 de Intrastat
+(agrupando por código y unidad de medida) en lugar de la descripción de la
+línea de venta o del producto del picking.</p></li>
 </ul>
-<h2 id="usage">Usage</h2>
-<ol>
-<li>Open an eligible stock transfer and select <strong>Create / open
-DeCA</strong>. Alternatively, use <strong>Create DeCA documents</strong>
-on a batch to create one draft per picking.</li>
-<li>Review all stock-prefilled values. They are suggestions, not legal
-assertions.</li>
-<li>Complete the effective carrier, vehicle and other mandatory
-data.</li>
-<li>Issue and seal the PDF before the road transport starts.</li>
-<li>Record delivery of the current PDF or QR to the driver.</li>
-<li>Start the DeCA workflow. If data change, create a traced revision
-and deliver the new version.</li>
-<li>Complete the DeCA when the service ends.</li>
+<p><strong>Tabla de contenidos</strong></p>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#instalacion" id="toc-entry-1">Instalación</a></p></li>
+<li><p><a class="reference internal" href="#configuracion" id="toc-entry-2">Configuración</a></p></li>
+<li><p><a class="reference internal" href="#uso" id="toc-entry-3">Uso</a></p></li>
+<li><p><a class="reference internal" href="#desarrollo" id="toc-entry-4">Desarrollo</a></p></li>
+<li><p><a class="reference internal" href="#incidencias-conocidas-hoja-de-ruta" id="toc-entry-5">Incidencias conocidas / Hoja de ruta</a></p></li>
+</ul>
+</nav>
+<section id="instalacion">
+<h4><a class="toc-backref" href="#toc-entry-1" role="doc-backlink">Instalación</a></h4>
+<p>Instala el módulo en Odoo 19 Community junto con el módulo estándar
+<span class="docutils literal">stock_picking_batch</span>. Los paquetes Python <span class="docutils literal">qrcode</span> y Pillow deben estar
+disponibles en todos los workers de Odoo. Usa la versión de la librería PDF
+fijada por los requisitos oficiales de Odoo 19.</p>
+</section>
+<section id="configuracion">
+<h4><a class="toc-backref" href="#toc-entry-2" role="doc-backlink">Configuración</a></h4>
+<ul class="simple">
+<li><p>En Ajustes → Inventario → apartado <strong>DeCA</strong>, indica la URL pública HTTPS
+(<span class="docutils literal">l10n_es_deca.public_base_url</span>) usada para el enlace de descarga y el QR.</p></li>
+<li><p>Si tienes instalado <span class="docutils literal">l10n_es_deca_intrastat</span>, en ese mismo apartado puedes
+elegir si la naturaleza de la mercancía se construye desde la descripción de
+la línea de venta/picking o desde el código CN8 de Intrastat.</p></li>
+<li><p>Exige TLS 1.2 o superior en el proxy inverso.</p></li>
+<li><p>Configura el hostname público y <span class="docutils literal">dbfilter</span> para que no aparezca el
+selector de bases de datos.</p></li>
+<li><p>Usa los requisitos oficiales de Python de Odoo 19. El módulo admite el
+entorno fijado con <span class="docutils literal">PyPDF2</span> en Python 3.10-3.12 y <span class="docutils literal">PyPDF</span> en Python
+3.13+.</p></li>
+<li><p>Concede el grupo DeCA User o DeCA Manager a los usuarios de inventario
+autorizados.</p></li>
+<li><p>Define un procedimiento operativo de aplicabilidad, entrega al conductor,
+retención, tiempo confiable, copias de seguridad y monitorización del
+endpoint público.</p></li>
+</ul>
+</section>
+<section id="uso">
+<h4><a class="toc-backref" href="#toc-entry-3" role="doc-backlink">Uso</a></h4>
+<ol class="arabic simple">
+<li><p>Abre un albarán elegible y pulsa <strong>Añadir a DeCA</strong> en la cabecera (solo
+visible si el albarán aún no tiene uno). Como alternativa, pulsa <strong>Crear
+documentos DeCA</strong> en una agrupación de albaranes para crear un borrador por
+cada albarán.</p></li>
+<li><p>También puedes seleccionar varios albaranes en la vista de lista y usar la
+acción <strong>Añadir a DeCA</strong> del menú ⚙️. Los albaranes que ya tuvieran un DeCA
+(o que estén completados/cancelados) se omiten y se informa de ello en un
+aviso.</p></li>
+<li><p>Para abrir el DeCA ya creado de un albarán, usa el botón inteligente
+<strong>DeCA</strong> o el campo homónimo del formulario (junto al transportista, si
+tienes instalado <span class="docutils literal">l10n_es_deca_delivery</span>).</p></li>
+<li><p>Revisa todos los valores precargados desde las existencias. Son
+sugerencias, no declaraciones legales.</p></li>
+<li><p>Completa el transportista efectivo, el vehículo y el resto de datos
+obligatorios.</p></li>
+<li><p>Emite y sella el PDF antes de que comience el transporte por carretera.</p></li>
+<li><p>Registra la entrega del PDF o QR vigente al conductor.</p></li>
+<li><p>Inicia el transporte del DeCA. Si los datos cambian, crea una revisión
+trazada y entrega la nueva versión.</p></li>
+<li><p>Completa el DeCA cuando finalice el servicio.</p></li>
 </ol>
-<p>For a PDF that is also used contractually, install
-<code>l10n_es_deca_ades</code> before selecting <strong>Administrative
-and contractual</strong>. The base addon deliberately refuses to issue
-that modality unsigned.</p>
-<p>Enable <strong>DeCA required</strong> on a transfer to prevent its
-validation until the current sealed version has delivery evidence.</p>
-<h2 id="development">Development</h2>
-<p>Do not edit <code>README.rst</code> or
-<code>static/description/index.html</code> directly. From the
-<code>OCA/l10n-spain</code> repository root, regenerate both files
-with:</p>
-<pre><code>oca-gen-addon-readme --org-name=OCA --repo-name=l10n-spain \
-    --branch=19.0 --addon-dir=l10n_es_deca</code></pre>
-<h2 id="known-issues-roadmap">Known issues / Roadmap</h2>
-<h3 id="known-limitations">Known limitations</h3>
-<ul>
-<li>The addon cannot determine whether a transport is legally in scope
-or exempt.</li>
-<li>It cannot prove TLS policy, external availability, trusted time,
-backup immutability or factual correctness of operator-entered
-data.</li>
-<li>It deliberately does not aggregate a whole batch into one DeCA
-because a batch can contain several destinations and transport
-services.</li>
-<li>The administrative DeCA does not require a signature. The base addon
-therefore refuses to issue the contractual modality without an installed
-signing addon.</li>
+<p>Para un PDF que también se use con finalidad contractual, instala
+<span class="docutils literal">l10n_es_deca_ades</span> antes de seleccionar <strong>Administrativa y contractual</strong>.
+El módulo base rechaza deliberadamente emitir esa modalidad sin firmar.</p>
+<p>Activa <strong>DeCA obligatorio</strong> en un albarán para impedir su validación hasta
+que la versión sellada vigente tenga evidencia de entrega.</p>
+</section>
+<section id="desarrollo">
+<h4><a class="toc-backref" href="#toc-entry-4" role="doc-backlink">Desarrollo</a></h4>
+<p>Do not edit <span class="docutils literal">README.rst</span> or <span class="docutils literal">static/description/index.html</span> directly. From the
+<span class="docutils literal"><span class="pre">OCA/l10n-spain</span></span> repository root, regenerate both files with:</p>
+<pre class="literal-block">oca-gen-addon-readme --org-name=OCA --repo-name=l10n-spain \
+    --branch=19.0 --addon-dir=l10n_es_deca</pre>
+</section>
+<section id="incidencias-conocidas-hoja-de-ruta">
+<h4><a class="toc-backref" href="#toc-entry-5" role="doc-backlink">Incidencias conocidas / Hoja de ruta</a></h4>
+</section>
+</section>
+<section id="limitaciones-conocidas">
+<h3>Limitaciones conocidas</h3>
+<ul class="simple">
+<li><p>El módulo no puede determinar si un transporte está legalmente dentro del
+ámbito de aplicación o exento.</p></li>
+<li><p>No puede probar la política TLS, la disponibilidad externa, el tiempo
+confiable, la inmutabilidad de las copias de seguridad ni la veracidad de
+los datos introducidos por el operador.</p></li>
+<li><p>Deliberadamente no agrupa todo un lote en un único DeCA, porque un lote
+puede contener varios destinos y servicios de transporte.</p></li>
+<li><p>El DeCA administrativo no requiere firma. Por ello, el módulo base rechaza
+emitir la modalidad contractual sin un complemento de firma instalado.</p></li>
 </ul>
-<h3 id="planned">Planned</h3>
-<ul>
-<li>Add optional glue modules for OCA carrier, fleet and e-CMR projects
-once their Odoo 19 target APIs are agreed.</li>
-<li>Extend <code>l10n_es_deca_ades</code> with remote counterparty,
-qualified-trust-service and HSM signing adapters.</li>
-<li>Add optional SMS, WhatsApp or mobile-app delivery adapters without
-making them a statutory validity condition.</li>
-<li>Evaluate automated domestic-scope suggestions without replacing the
-operator's legal applicability decision.</li>
+</section>
+<section id="previsto">
+<h3>Previsto</h3>
+<ul class="simple">
+<li><p>Ampliar <span class="docutils literal">l10n_es_deca_ades</span> con adaptadores de firma remota para
+contraparte, prestador de confianza cualificado y HSM.</p></li>
+<li><p>Añadir adaptadores opcionales de entrega por SMS, WhatsApp o app móvil, sin
+convertirlos en condición de validez legal.</p></li>
+<li><p>Evaluar sugerencias automáticas de ámbito doméstico sin sustituir la
+decisión legal de aplicabilidad del operador.</p></li>
+<li><p>Añadir un módulo puente para proyectos OCA de e-CMR cuando su API objetivo
+para Odoo 19 esté acordada.</p></li>
 </ul>
-<h2 id="bug-tracker">Bug Tracker</h2>
-<p>Bugs are tracked on <a
-href="https://github.com/OCA/l10n-spain/issues">GitHub Issues</a>. In
-case of trouble, please check there if your issue has already been
-reported. If you spotted it first, help us to smash it by providing a
-detailed and welcomed <a
-href="https://github.com/OCA/l10n-spain/issues/new?body=module:%20l10n_es_deca%0Aversion:%2019.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.
-Do not contact contributors directly about support or help with
-technical issues.</p>
-<h2 id="credits">Credits</h2>
-<h3 id="authors">Authors</h3>
-<ul>
-<li>Ecmr DeCA contributors</li>
+<section id="rastreador-de-errores">
+<h4>Rastreador de errores</h4>
+<p>Los fallos se registran en <a class="reference external" href="https://github.com/OCA/l10n-spain/issues">GitHub Issues</a>. Si detectas un problema, por
+favor revisa antes si ya se ha reportado. Si eres tú quien lo detecta,
+ayúdanos a solucionarlo enviando información detallada y bien recibida
+<a class="reference external" href="https://github.com/OCA/l10n-spain/issues/new?body=module:%20l10n_es_deca%0Aversion:%2019.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">aquí</a>.</p>
+<p>No contactes directamente con los colaboradores para pedir soporte o ayuda
+sobre incidencias técnicas.</p>
+</section>
+<section id="creditos">
+<h4>Créditos</h4>
+<section id="autores">
+<h5>Autores</h5>
+<ul class="simple">
+<li><p>Ecmr DeCA contributors</p></li>
 </ul>
-<h3 id="contributors">Contributors</h3>
-<ul>
-<li>Ecmr DeCA project contributors</li>
+</section>
+<section id="colaboradores">
+<h5>Colaboradores</h5>
+<ul class="simple">
+<li><p>Ecmr DeCA project contributors</p></li>
 </ul>
-<h3 id="maintainers">Maintainers</h3>
-<p>This module is maintained by the OCA.</p>
-<p><a href="https://odoo-community.org"><img
-src="https://odoo-community.org/logo.png"
-alt="Odoo Community Association" /></a></p>
-<p>OCA, or the Odoo Community Association, is a nonprofit organization
-whose mission is to support the collaborative development of Odoo
-features and promote its widespread use.</p>
-<p>This module is part of the <a
-href="https://github.com/OCA/l10n-spain/tree/19.0/l10n_es_deca">OCA/l10n-spain</a>
-project on GitHub.</p>
-<p>You are welcome to contribute. To learn how please visit <a
-href="https://odoo-community.org/page/Contribute">https://odoo-community.org/page/Contribute</a>.</p>
+</section>
+<section id="mantenedores">
+<h5>Mantenedores</h5>
+<p>Este módulo es mantenido por Ecmr DeCA contributors.</p>
+<a class="reference external image-reference" href="https://odoo-community.org">
+<img alt="Odoo Community Association" src="https://odoo-community.org/logo.png" />
+</a>
+<p>Este módulo forma parte del proyecto <a class="reference external" href="https://github.com/OCA/l10n-spain/tree/19.0/l10n_es_deca">OCA/l10n-spain</a>.</p>
+<p>Te invitamos a contribuir. Para saber cómo, visita
+<a class="reference external" href="https://odoo-community.org/page/Contribute">https://odoo-community.org/page/Contribute</a>.</p>
+</section>
+</section>
+</section>
+</section>
+</main>
 </body>
 </html>

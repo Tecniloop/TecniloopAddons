@@ -9,9 +9,9 @@
                 <button
           name="action_create_deca"
           type="object"
-          string="Create / open DeCA"
+          string="Add to DeCA"
           groups="l10n_es_deca.group_deca_user"
-          invisible="state in ('done', 'cancel')"
+          invisible="state in ('done', 'cancel') or deca_document_id"
         />
             </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">

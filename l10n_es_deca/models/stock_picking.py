@@ -23,11 +23,58 @@ class StockPicking(models.Model):
         readonly=True,
     )
     deca_document_count = fields.Integer(compute="_compute_deca_document_count")
+    deca_document_id = fields.Many2one(
+        "l10n.es.deca.document",
+        string="DeCA",
+        compute="_compute_deca_document_id",
+        store=True,
+        readonly=True,
+    )
 
     @api.depends("deca_document_ids")
     def _compute_deca_document_count(self):
         for picking in self:
             picking.deca_document_count = len(picking.deca_document_ids)
+
+    @api.depends("deca_document_ids")
+    def _compute_deca_document_id(self):
+        for picking in self:
+            picking.deca_document_id = picking.deca_document_ids[:1]
+
+    def _deca_move_nature_line(self, move):
+        """Describe one move as '<description> <quantity> <uom>'.
+
+        The description is taken from the linked sale order line (its free-text
+        description, as agreed with the customer) whenever the move originates
+        from a sale, falling back to the picking's own product when there is no
+        sale line — e.g. internal transfers or manually added moves.
+        """
+        sale_line = move.sale_line_id if "sale_line_id" in move._fields else False
+        description = (sale_line.name or "").strip() if sale_line else ""
+        if not description:
+            description = move.product_id.display_name
+        quantity = move.product_uom_qty
+        if quantity == int(quantity):
+            quantity_label = str(int(quantity))
+        else:
+            quantity_label = f"{quantity:g}"
+        uom = move.product_uom.name or ""
+        return f"{description} {quantity_label} {uom}".strip()
+
+    def _deca_compute_goods_nature(self, moves):
+        """Build the DeCA goods-nature text for a set of moves.
+
+        Default behaviour: one line per move, using the description of the
+        linked sale order line when there is one, otherwise the picking's own
+        product, followed by quantity and unit of measure. Downstream modules
+        (e.g. an Intrastat bridge) may override this to group differently,
+        as long as they keep returning a single text blob ready for the
+        ``goods_nature`` field.
+        """
+        self.ensure_one()
+        return "\n".join(
+            filter(None, (self._deca_move_nature_line(move) for move in moves))
+        )
 
     def _prepare_deca_values(self):
         """Map stock data to a draft without asserting that it is legally correct.
@@ -39,7 +86,7 @@ class StockPicking(models.Model):
         """
         self.ensure_one()
         moves = self.move_ids.filtered(lambda move: move.state != "cancel")
-        product_names = list(dict.fromkeys(moves.mapped("product_id.display_name")))
+        goods_nature = self._deca_compute_goods_nature(moves)
         weight = 0.0
         for move in moves:
             quantity = move.product_uom._compute_quantity(
@@ -65,7 +112,7 @@ class StockPicking(models.Model):
             ),
             "origin": self.location_id.complete_name,
             "destination": destination,
-            "goods_nature": ", ".join(product_names),
+            "goods_nature": goods_nature,
             "goods_weight": weight,
             "weight_uom": "kg",
             "transport_date": (
@@ -95,6 +142,50 @@ class StockPicking(models.Model):
     def action_create_deca(self):
         self.ensure_one()
         return self._create_or_open_deca().get_formview_action()
+
+    def action_add_to_deca_multi(self):
+        """List-view action: create a draft DeCA for every eligible picking.
+
+        Pickings that already have a DeCA, or that are done/cancelled, are
+        skipped and reported back in a notification instead of blocking the
+        pickings that can still be processed.
+        """
+        already = self.filtered("deca_document_id")
+        not_eligible = self.filtered(lambda p: p.state in ("done", "cancel"))
+        to_create = self - already - not_eligible
+        for picking in to_create:
+            picking._create_or_open_deca()
+        skipped = already | not_eligible
+        if not skipped:
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": _("DeCA"),
+                    "message": _(
+                        "%(count)s transfer(s) added to DeCA.", count=len(to_create)
+                    ),
+                    "type": "success",
+                    "sticky": False,
+                },
+            }
+        message = _(
+            "The following transfers already have a DeCA or cannot have one "
+            "and were skipped: %(names)s",
+            names=", ".join(skipped.mapped("display_name")),
+        )
+        if not to_create:
+            raise UserError(message)
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("DeCA"),
+                "message": message,
+                "type": "warning",
+                "sticky": True,
+            },
+        }
 
     def action_view_deca_documents(self):
         self.ensure_one()

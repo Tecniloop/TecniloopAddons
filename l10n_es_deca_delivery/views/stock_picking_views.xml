@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_picking_form_deca_delivery" model="ir.ui.view">
+        <field name="name">stock.picking.form.deca.delivery</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='carrier_id']" position="after">
+                <field
+          name="deca_document_id"
+          groups="l10n_es_deca.group_deca_user"
+          invisible="not deca_document_id"
+        />
+            </xpath>
+        </field>
+    </record>
+</odoo>

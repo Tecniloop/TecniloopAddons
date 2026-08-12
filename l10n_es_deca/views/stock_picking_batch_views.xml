@@ -33,6 +33,13 @@
           />
                 </button>
             </xpath>
+            <xpath expr="//field[@name='picking_type_id']" position="after">
+                <field
+          name="deca_document_id"
+          groups="l10n_es_deca.group_deca_user"
+          invisible="not deca_document_id"
+        />
+            </xpath>
         </field>
     </record>
 </odoo>
