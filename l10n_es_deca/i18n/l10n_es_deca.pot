@@ -1,0 +1,155 @@
+# Translation template for Odoo module l10n_es_deca.
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Draft"
+msgstr ""
+
+msgid "Issued"
+msgstr ""
+
+msgid "In transit"
+msgstr ""
+
+msgid "Completed"
+msgstr ""
+
+msgid "Cancelled"
+msgstr ""
+
+msgid "Transfer"
+msgstr ""
+
+msgid "Batch transfer"
+msgstr ""
+
+msgid "DeCA required"
+msgstr ""
+
+msgid "Contractual shipper"
+msgstr ""
+
+msgid "Contractual shipper Tax ID"
+msgstr ""
+
+msgid "Effective carrier"
+msgstr ""
+
+msgid "Effective carrier Tax ID"
+msgstr ""
+
+msgid "Goods weight"
+msgstr ""
+
+msgid "Weight unit"
+msgstr ""
+
+msgid "Special traffic permit"
+msgstr ""
+
+msgid "Issue and seal PDF"
+msgstr ""
+
+msgid "Record delivery"
+msgstr ""
+
+msgid "Start transport"
+msgstr ""
+
+msgid "Create revision"
+msgstr ""
+
+msgid "Download current PDF"
+msgstr ""
+
+msgid "Create / open DeCA"
+msgstr ""
+
+msgid "Create DeCA documents"
+msgstr ""
+
+msgid "Legal data"
+msgstr ""
+
+msgid "Shipment"
+msgstr ""
+
+msgid "Vehicle and driver"
+msgstr ""
+
+msgid "Versions"
+msgstr ""
+
+msgid "Delivery evidence"
+msgstr ""
+
+msgid "Technical verification"
+msgstr ""
+
+msgid "Electronic copy on mobile device"
+msgstr ""
+
+msgid "Independent QR"
+msgstr ""
+
+msgid "Printed copy"
+msgstr ""
+
+msgid "Create traced DeCA revision"
+msgstr ""
+
+msgid "Seal new version"
+msgstr ""
+
+msgid "Stock values are initial suggestions. Review every legal field before sealing the PDF."
+msgstr ""
+
+msgid "A DeCA must be linked to a stock transfer."
+msgstr ""
+
+msgid "Record delivery of the current PDF/QR to the driver first."
+msgstr ""
+
+msgid "Only one DeCA document can be linked to a stock transfer."
+msgstr ""
+msgid "The DeCA PDF post-processing hook returned an invalid PDF."
+msgstr ""
+msgid "Reset to draft"
+msgstr ""
+msgid "Only a cancelled DeCA without issued versions can be reopened."
+msgstr ""
+
+msgid "Administrative only"
+msgstr ""
+
+msgid "Administrative and contractual"
+msgstr ""
+
+msgid "Document purpose"
+msgstr ""
+
+msgid "Not required"
+msgstr ""
+
+msgid "Pending"
+msgstr ""
+
+msgid "Complete"
+msgstr ""
+
+msgid "Electronic-signature evidence"
+msgstr ""
+
+msgid "Contractual use requires an installed and configured electronic-signature addon. Administrative DeCA issuance remains available without signatures."
+msgstr ""
+
+msgid "The contractual DeCA did not produce the required electronic-signature evidence."
+msgstr ""

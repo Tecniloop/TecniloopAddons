@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_deca_document_search" model="ir.ui.view">
+        <field name="name">l10n.es.deca.document.search</field>
+        <field name="model">l10n.es.deca.document</field>
+        <field name="arch" type="xml">
+            <search string="Search DeCA">
+                <field name="name" />
+                <field name="contractual_shipper_name" />
+                <field name="effective_carrier_name" />
+                <field name="tractor_plate" />
+                <field name="transport_date" />
+                <field name="picking_id" />
+                <field name="batch_id" />
+                <filter
+          name="draft"
+          string="Draft"
+          domain="[('state', '=', 'draft')]"
+        />
+                <filter
+          name="active_transport"
+          string="Issued / In transit"
+          domain="[('state', 'in', ('issued', 'in_transit'))]"
+        />
+                <filter
+          name="group_state"
+          string="State"
+          context="{'group_by': 'state'}"
+        />
+                <filter
+          name="group_transport_date"
+          string="Transport date"
+          context="{'group_by': 'transport_date'}"
+        />
+                <filter
+          name="group_batch"
+          string="Batch transfer"
+          context="{'group_by': 'batch_id'}"
+        />
+            </search>
+        </field>
+    </record>
+
+    <record id="view_deca_document_list" model="ir.ui.view">
+        <field name="name">l10n.es.deca.document.list</field>
+        <field name="model">l10n.es.deca.document</field>
+        <field name="arch" type="xml">
+            <list
+        decoration-info="state == 'issued'"
+        decoration-warning="state == 'in_transit'"
+        decoration-muted="state in ('done', 'cancelled')"
+      >
+                <field name="name" />
+                <field name="transport_date" />
+                <field name="picking_id" />
+                <field name="batch_id" optional="hide" />
+                <field name="contractual_shipper_name" />
+                <field name="effective_carrier_name" />
+                <field name="origin" />
+                <field name="destination" />
+                <field name="tractor_plate" />
+                <field name="version_count" />
+                <field name="state" widget="badge" />
+                <field name="company_id" groups="base.group_multi_company" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_deca_document_form" model="ir.ui.view">
+        <field name="name">l10n.es.deca.document.form</field>
+        <field name="model">l10n.es.deca.document</field>
+        <field name="arch" type="xml">
+            <form string="DeCA">
+                <header>
+                    <button
+            name="action_issue"
+            type="object"
+            string="Issue and seal PDF"
+            class="btn-primary"
+            invisible="state != 'draft'"
+          />
+                    <button
+            name="action_open_delivery_wizard"
+            type="object"
+            string="Record delivery"
+            invisible="state not in ('issued', 'in_transit')"
+          />
+                    <button
+            name="action_start_transport"
+            type="object"
+            string="Start transport"
+            class="btn-primary"
+            invisible="state != 'issued'"
+          />
+                    <button
+            name="action_open_revision_wizard"
+            type="object"
+            string="Create revision"
+            invisible="state not in ('issued', 'in_transit')"
+          />
+                    <button
+            name="action_download_current"
+            type="object"
+            string="Download current PDF"
+            invisible="not current_version_id"
+          />
+                    <button
+            name="action_complete_transport"
+            type="object"
+            string="Complete"
+            class="btn-primary"
+            invisible="state != 'in_transit'"
+          />
+                    <button
+            name="action_cancel"
+            type="object"
+            string="Cancel"
+            invisible="state != 'draft'"
+            confirm="Cancel this draft?"
+          />
+                    <button
+            name="action_reset_to_draft"
+            type="object"
+            string="Reset to draft"
+            invisible="state != 'cancelled'"
+          />
+                    <field
+            name="state"
+            widget="statusbar"
+            statusbar_visible="draft,issued,in_transit,done"
+          />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+              class="oe_stat_button"
+              name="action_download_current"
+              type="object"
+              icon="fa-file-pdf-o"
+              invisible="not current_version_id"
+            >
+                            <field
+                name="version_count"
+                widget="statinfo"
+                string="Versions"
+              />
+                        </button>
+                    </div>
+                    <widget
+            name="web_ribbon"
+            title="Immutable legal data"
+            bg_color="text-bg-info"
+            invisible="state == 'draft'"
+          />
+                    <div
+            class="alert alert-info"
+            role="alert"
+            invisible="state != 'draft'"
+          >
+                        Stock values are initial suggestions. Review every legal field before sealing the PDF.
+                    </div>
+                    <div class="oe_title"><h1><field name="name" /></h1></div>
+                    <group>
+                        <group string="Control">
+                            <field
+                name="company_id"
+                groups="base.group_multi_company"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="responsible_id"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="purpose"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="transport_date"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="planned_start_at"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="picking_id"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="batch_id"
+                readonly="state != 'draft'"
+              />
+                            <field name="actual_start_at" />
+                            <field name="actual_end_at" />
+                        </group>
+                        <group string="Vehicle and driver">
+                            <field
+                name="tractor_plate"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="trailer_plate"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="driver_id"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="driver_name"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="special_permit_required"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="special_permit_ref"
+                invisible="not special_permit_required"
+                required="special_permit_required"
+                readonly="state != 'draft'"
+              />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Legal data">
+                            <group string="Contractual shipper">
+                                <field
+                  name="contractual_shipper_id"
+                  readonly="state != 'draft'"
+                />
+                                <field
+                  name="contractual_shipper_name"
+                  readonly="state != 'draft'"
+                />
+                                <field
+                  name="contractual_shipper_vat"
+                  readonly="state != 'draft'"
+                />
+                                <field
+                  name="contractual_shipper_address"
+                  readonly="state != 'draft'"
+                />
+                            </group>
+                            <group string="Effective carrier">
+                                <field
+                  name="effective_carrier_id"
+                  readonly="state != 'draft'"
+                />
+                                <field
+                  name="effective_carrier_name"
+                  readonly="state != 'draft'"
+                />
+                                <field
+                  name="effective_carrier_vat"
+                  readonly="state != 'draft'"
+                />
+                            </group>
+                            <group string="Shipment">
+                                <field
+                  name="origin"
+                  readonly="state != 'draft'"
+                />
+                                <field
+                  name="destination"
+                  readonly="state != 'draft'"
+                />
+                                <field
+                  name="goods_nature"
+                  readonly="state != 'draft'"
+                />
+                                <field
+                  name="goods_weight"
+                  readonly="state != 'draft'"
+                />
+                                <field
+                  name="weight_uom"
+                  readonly="state != 'draft'"
+                />
+                                <field
+                  name="alternative_weight_measure"
+                  readonly="state != 'draft'"
+                />
+                                <field
+                  name="observations"
+                  readonly="state != 'draft'"
+                />
+                            </group>
+                        </page>
+                        <page string="Versions">
+                            <field name="version_ids" readonly="1">
+                                <list create="0" delete="0" edit="0">
+                                    <field name="version_number" />
+                                    <field name="created_at" />
+                                    <field name="change_reason" />
+                                    <field name="pdf_size" />
+                                    <field name="pdf_sha256" />
+                                    <field name="signature_status" />
+                                    <field name="signature_count" />
+                                    <button
+                    name="action_download"
+                    type="object"
+                    string="Download"
+                    icon="fa-download"
+                  />
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Delivery evidence">
+                            <field name="delivery_log_ids" readonly="1">
+                                <list create="0" delete="0" edit="0">
+                                    <field name="version_id" />
+                                    <field name="delivered_at" />
+                                    <field name="method" />
+                                    <field name="recipient_name" />
+                                    <field name="delivered_by_id" />
+                                    <field name="note" />
+                                </list>
+                            </field>
+                        </page>
+                        <page
+              string="Technical verification"
+              groups="group_deca_manager"
+            >
+                            <group>
+                                <field name="current_version_id" />
+                                <field name="current_pdf_url" widget="url" />
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <record id="action_deca_document" model="ir.actions.act_window">
+        <field name="name">Transport DeCA</field>
+        <field name="res_model">l10n.es.deca.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_deca_document_search" />
+        <field name="context">{'search_default_active_transport': 1}</field>
+        <field name="help" type="html"><p
+        class="o_view_nocontent_smiling_face"
+      >Create a transport control document</p><p
+      >Issue the native PDF and deliver its QR to the driver before transport starts.</p></field>
+    </record>
+</odoo>

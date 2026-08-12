@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_picking_form_deca" model="ir.ui.view">
+        <field name="name">stock.picking.form.deca</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button
+          name="action_create_deca"
+          type="object"
+          string="Create / open DeCA"
+          groups="l10n_es_deca.group_deca_user"
+          invisible="state in ('done', 'cancel')"
+        />
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+          name="action_view_deca_documents"
+          type="object"
+          class="oe_stat_button"
+          icon="fa-file-pdf-o"
+          groups="l10n_es_deca.group_deca_user"
+          invisible="deca_document_count == 0"
+        >
+                    <field
+            name="deca_document_count"
+            widget="statinfo"
+            string="DeCA"
+          />
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='origin']" position="after">
+                <field
+          name="deca_required"
+          groups="l10n_es_deca.group_deca_user"
+        />
+            </xpath>
+        </field>
+    </record>
+</odoo>

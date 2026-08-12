@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_deca_delivery_wizard_form" model="ir.ui.view">
+        <field name="name">l10n.es.deca.delivery.wizard.form</field>
+        <field name="model">l10n.es.deca.delivery.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Record delivery to driver">
+                <group>
+                    <field name="document_id" />
+                    <field name="version_id" />
+                    <field name="method" />
+                    <field name="recipient_name" />
+                    <field name="note" />
+                </group>
+                <footer>
+                    <button
+            name="action_confirm"
+            type="object"
+            string="Record delivery"
+            class="btn-primary"
+          />
+                    <button
+            string="Cancel"
+            special="cancel"
+            class="btn-secondary"
+          />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_deca_revision_wizard_form" model="ir.ui.view">
+        <field name="name">l10n.es.deca.revision.wizard.form</field>
+        <field name="model">l10n.es.deca.revision.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Create traced DeCA revision">
+                <div
+          class="alert alert-warning"
+          role="alert"
+        >A new immutable PDF, URL and QR will be created. The previous PDF remains preserved.</div>
+                <group><field name="document_id" /><field
+            name="source_version_id"
+          /><field name="purpose" /><field
+            name="reason"
+            placeholder="Mandatory reason for the change"
+          /></group>
+                <notebook>
+                    <page string="Parties">
+                        <group string="Contractual shipper">
+                            <field name="contractual_shipper_id" />
+                            <field name="contractual_shipper_name" />
+                            <field name="contractual_shipper_vat" />
+                            <field name="contractual_shipper_address" />
+                        </group>
+                        <group string="Effective carrier">
+                            <field name="effective_carrier_id" />
+                            <field name="effective_carrier_name" />
+                            <field name="effective_carrier_vat" />
+                        </group>
+                    </page>
+                    <page string="Shipment">
+                        <group>
+                            <field name="origin" /><field name="destination" />
+                            <field name="transport_date" /><field
+                name="planned_start_at"
+              />
+                            <field name="goods_nature" />
+                            <field name="goods_weight" /><field
+                name="weight_uom"
+              />
+                            <field name="alternative_weight_measure" />
+                            <field name="observations" />
+                        </group>
+                    </page>
+                    <page string="Vehicle and driver">
+                        <group>
+                            <field name="tractor_plate" /><field
+                name="trailer_plate"
+              />
+                            <field name="special_permit_required" />
+                            <field
+                name="special_permit_ref"
+                invisible="not special_permit_required"
+                required="special_permit_required"
+              />
+                            <field name="driver_id" /><field
+                name="driver_name"
+              />
+                        </group>
+                    </page>
+                </notebook>
+                <footer>
+                    <button
+            name="action_apply"
+            type="object"
+            string="Seal new version"
+            class="btn-primary"
+          />
+                    <button
+            string="Cancel"
+            special="cancel"
+            class="btn-secondary"
+          />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<!-- Generated from README.rst by oca-gen-addon-readme compatible workflow. -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Spain - DeCA PAdES Contractual Signatures</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Spain - DeCA PAdES Contractual Signatures</h1>
+</header>
+<p><a
+href="https://odoo-community.org/get-involved?utm_source=readme"><img
+src="https://odoo-community.org/readme-banner-image"
+alt="Odoo Community Association" /></a></p>
+<h1 id="spain---deca-pades-contractual-signatures">Spain - DeCA PAdES
+Contractual Signatures</h1>
+<p><a href="https://odoo-community.org/page/development-status"><img
+src="https://img.shields.io/badge/maturity-Beta-yellow.png"
+alt="Beta" /></a> <a
+href="http://www.gnu.org/licenses/agpl-3.0-standalone.html"><img
+src="https://img.shields.io/badge/license-AGPL--3-blue.png"
+alt="License: AGPL-3" /></a> <a
+href="https://github.com/OCA/l10n-spain/tree/19.0/l10n_es_deca_ades"><img
+src="https://img.shields.io/badge/github-OCA%2Fl10n--spain-lightgray.png?logo=github"
+alt="OCA/l10n-spain" /></a> <a
+href="https://translation.odoo-community.org/projects/l10n-spain-19-0/l10n-spain-19-0-l10n_es_deca_ades"><img
+src="https://img.shields.io/badge/weblate-Translate%20me-F47D42.png"
+alt="Translate me on Weblate" /></a> <a
+href="https://runboat.odoo-community.org/builds?repo=OCA/l10n-spain&amp;target_branch=19.0"><img
+src="https://img.shields.io/badge/runboat-Try%20me-875A7B.png"
+alt="Try me on Runboat" /></a></p>
+<p>Optionally sign a DeCA that is used for both administrative and
+contractual purposes. The addon applies one or two sequential PAdES
+signatures before the base module calculates the final PDF checksum and
+immutable hash-chain entry.</p>
+<p>The active certificate and private-key paths are obtained from OCA
+<code>l10n_es_aeat</code>. The signing engine is pyHanko.</p>
+<p>Each operational company can default new drafts to administrative
+(unsigned) or administrative and contractual (PAdES required). The same
+policy presets the required parties and their signing companies without
+changing existing drafts or issued documents.</p>
+<p><strong>Table of contents</strong></p>
+<div class="contents" data-local="">
+
+</div>
+<h2 id="installation">Installation</h2>
+<p>Install <code>l10n_es_deca</code> and OCA <code>l10n_es_aeat</code>
+first. The embedded signer requires Odoo 19 on Python 3.12 or newer and
+<code>pyHanko==0.24.*</code>. The pre-install hook rejects incompatible
+Python or pyHanko versions instead of changing Odoo's official
+cryptography dependency pins.</p>
+<h2 id="configuration">Configuration</h2>
+<ul>
+<li>Install and configure an active, in-date AEAT certificate for every
+Odoo company that will sign.</li>
+<li>Run Odoo 19 on Python 3.12 or newer and install
+<code>pyHanko==0.24.*</code>. This is the compatible series for Odoo's
+official Python 3.12 pin <code>cryptography==42.0.8</code>. The addon
+fails closed for other combinations.</li>
+<li>On Python 3.10/3.11, use a separate signing service: Odoo pins
+<code>cryptography==3.4.8</code> there, which is incompatible with
+pyHanko 0.24.</li>
+<li>Grant <strong>DeCA PAdES Signer</strong> only to users authorized to
+invoke those company keys.</li>
+<li>Choose PAdES B-B or PAdES B-T in Settings. B-T requires an HTTPS RFC
+3161 timestamp authority URL.</li>
+<li>In <strong>Settings &gt; DeCA PAdES</strong>, choose <strong>Default
+DeCA purpose</strong> per operational company:
+<ul>
+<li><strong>Administrative only (no signature)</strong> creates unsigned
+DeCA drafts.</li>
+<li><strong>Administrative and contractual (PAdES required)</strong>
+creates drafts that cannot be issued until the configured PAdES
+signatures have been embedded.</li>
+</ul></li>
+<li>For the contractual default, select the default parties (shipper,
+carrier or both) and the Odoo signing company for each role. These are
+initial values copied to new drafts. They do not update existing drafts
+and remain editable until the document is issued.</li>
+<li>Ensure every signing company commercial partner is the same partner
+selected as contractual shipper or effective carrier on the DeCA.</li>
+<li>Establish and audit the organizational authority, exclusive
+key-control and representation procedures required by the intended
+AdES/QES policy.</li>
+</ul>
+<h2 id="usage">Usage</h2>
+<ol>
+<li>Create the DeCA from a transfer or batch. The operational company's
+defaults determine whether the new draft is administrative (unsigned) or
+contractual (PAdES required).</li>
+<li>While it is a draft, review or change the purpose, required parties
+and signing companies. Explicit values on the draft take precedence over
+company defaults.</li>
+<li>For contractual use, ensure the contractual shipper and effective
+carrier match the commercial partners of their respective signing
+companies.</li>
+<li>Issue the DeCA as an authorized PAdES signer.</li>
+<li>Independently validate the resulting PDF against the applicable
+trust, revocation, certificate-policy and representation
+requirements.</li>
+</ol>
+<p>Every traced revision is rendered and signed again. Previous signed
+versions remain immutable.</p>
+<p>Changing company defaults affects only DeCA drafts created
+afterwards. It never rewrites an existing draft or a sealed version.</p>
+<h2 id="development">Development</h2>
+<p>Do not edit <code>README.rst</code> or
+<code>static/description/index.html</code> directly. From the
+<code>OCA/l10n-spain</code> repository root, regenerate both files
+with:</p>
+<pre><code>oca-gen-addon-readme --org-name=OCA --repo-name=l10n-spain \
+    --branch=19.0 --addon-dir=l10n_es_deca_ades</code></pre>
+<h2 id="known-issues-roadmap">Known issues / Roadmap</h2>
+<h3 id="known-limitations">Known limitations</h3>
+<ul>
+<li>An AEAT/SII certificate is reusable key material, but its presence
+does not by itself prove AdES or QES qualification, representation
+authority or a second party's consent.</li>
+<li>The addon signs only for parties represented by Odoo companies with
+locally configured AEAT certificate material.</li>
+<li>Remote counterparties, HSMs, qualified remote-signature services and
+EUTL validation require separate adapters.</li>
+</ul>
+<h3 id="planned">Planned</h3>
+<ul>
+<li>Add interrupted-signing adapters for remote qualified trust services
+and external counterparties.</li>
+<li>Add HSM/PKCS#11 and cloud-KMS signers without exposing private keys
+to Odoo workers.</li>
+<li>Add independent EUTL, revocation and long-term PAdES validation
+policies.</li>
+</ul>
+<h2 id="bug-tracker">Bug Tracker</h2>
+<p>Bugs are tracked on <a
+href="https://github.com/OCA/l10n-spain/issues">GitHub Issues</a>. In
+case of trouble, please check there if your issue has already been
+reported. If you spotted it first, help us to smash it by providing a
+detailed and welcomed <a
+href="https://github.com/OCA/l10n-spain/issues/new?body=module:%20l10n_es_deca_ades%0Aversion:%2019.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**">feedback</a>.
+Do not contact contributors directly about support or help with
+technical issues.</p>
+<h2 id="credits">Credits</h2>
+<h3 id="authors">Authors</h3>
+<ul>
+<li>Ecmr DeCA contributors</li>
+</ul>
+<h3 id="contributors">Contributors</h3>
+<ul>
+<li>Ecmr DeCA project contributors</li>
+</ul>
+<h3 id="maintainers">Maintainers</h3>
+<p>This module is maintained by the OCA.</p>
+<p><a href="https://odoo-community.org"><img
+src="https://odoo-community.org/logo.png"
+alt="Odoo Community Association" /></a></p>
+<p>OCA, or the Odoo Community Association, is a nonprofit organization
+whose mission is to support the collaborative development of Odoo
+features and promote its widespread use.</p>
+<p>This module is part of the <a
+href="https://github.com/OCA/l10n-spain/tree/19.0/l10n_es_deca_ades">OCA/l10n-spain</a>
+project on GitHub.</p>
+<p>You are welcome to contribute. To learn how please visit <a
+href="https://odoo-community.org/page/Contribute">https://odoo-community.org/page/Contribute</a>.</p>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_deca_document_form_ades" model="ir.ui.view">
+        <field name="name">l10n.es.deca.document.form.ades</field>
+        <field name="model">l10n.es.deca.document</field>
+        <field name="inherit_id" ref="l10n_es_deca.view_deca_document_form" />
+        <field name="arch" type="xml">
+            <field name="purpose" position="after">
+                <field
+                    name="signature_party_policy"
+                    invisible="purpose != 'contractual'"
+                    required="purpose == 'contractual'"
+                    readonly="state != 'draft'"
+                    groups="l10n_es_deca_ades.group_deca_ades_signer"
+                />
+                <field
+                    name="shipper_signing_company_id"
+                    invisible="purpose != 'contractual' or signature_party_policy == 'carrier'"
+                    required="purpose == 'contractual' and signature_party_policy in ('shipper', 'both')"
+                    readonly="state != 'draft'"
+                    groups="l10n_es_deca_ades.group_deca_ades_signer"
+                />
+                <field
+                    name="carrier_signing_company_id"
+                    invisible="purpose != 'contractual' or signature_party_policy == 'shipper'"
+                    required="purpose == 'contractual' and signature_party_policy in ('carrier', 'both')"
+                    readonly="state != 'draft'"
+                    groups="l10n_es_deca_ades.group_deca_ades_signer"
+                />
+            </field>
+            <div class="alert alert-info" role="alert" position="after">
+                <div
+                    class="alert alert-warning"
+                    role="alert"
+                    invisible="purpose != 'contractual'"
+                    groups="l10n_es_deca_ades.group_deca_ades_signer"
+                >
+                    Contractual issue embeds PAdES signatures before the final hash is
+                    calculated. Certificate possession alone does not prove AdES/QES
+                    qualification or authority to represent a party.
+                </div>
+            </div>
+        </field>
+    </record>
+</odoo>

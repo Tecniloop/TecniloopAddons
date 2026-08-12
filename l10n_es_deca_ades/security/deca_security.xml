@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="group_deca_ades_signer" model="res.groups">
+        <field name="name">DeCA PAdES Signer</field>
+        <field name="category_id" ref="l10n_es_deca.module_category_deca" />
+        <field
+            name="implied_ids"
+            eval="[(4, ref('l10n_es_deca.group_deca_manager'))]"
+        />
+    </record>
+</odoo>

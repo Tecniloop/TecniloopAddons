@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="res_config_settings_view_form_deca_ades" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.deca.ades</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app
+                    string="DeCA PAdES"
+                    name="l10n_es_deca_ades"
+                    groups="l10n_es_deca_ades.group_deca_ades_signer"
+                >
+                    <block title="Contractual PDF signatures">
+                        <setting
+                            string="Default document purpose"
+                            help="Administrative drafts are not signed. Contractual drafts require PAdES before issue. The default applies only to newly created drafts."
+                        >
+                            <field name="deca_default_purpose" />
+                        </setting>
+                        <setting
+                            string="Default contractual signers"
+                            help="Preselect the parties and signing companies copied to every new draft. Operators may change them before issue."
+                            invisible="deca_default_purpose != 'contractual'"
+                        >
+                            <div class="content-group">
+                                <div class="mt16">
+                                    <field name="deca_default_signature_party_policy" />
+                                </div>
+                                <div
+                                    class="mt16"
+                                    invisible="deca_default_signature_party_policy == 'carrier'"
+                                >
+                                    <label
+                                        for="deca_default_shipper_signing_company_id"
+                                        string="Shipper signing company"
+                                    />
+                                    <field name="deca_default_shipper_signing_company_id" />
+                                </div>
+                                <div
+                                    class="mt16"
+                                    invisible="deca_default_signature_party_policy == 'shipper'"
+                                >
+                                    <label
+                                        for="deca_default_carrier_signing_company_id"
+                                        string="Carrier signing company"
+                                    />
+                                    <field name="deca_default_carrier_signing_company_id" />
+                                </div>
+                            </div>
+                        </setting>
+                        <setting
+                            string="PAdES profile"
+                            help="B-T requires an RFC 3161 trusted timestamp service."
+                        >
+                            <field name="deca_ades_profile" />
+                        </setting>
+                        <setting
+                            string="Timestamp authority"
+                            help="Required when the selected profile is PAdES B-T."
+                            invisible="deca_ades_profile != 'pades_b_t'"
+                        >
+                            <field
+                                name="deca_ades_tsa_url"
+                                placeholder="https://tsa.example.com/rfc3161"
+                                required="deca_ades_profile == 'pades_b_t'"
+                            />
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

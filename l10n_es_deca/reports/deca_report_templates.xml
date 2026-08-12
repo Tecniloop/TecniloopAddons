@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="report_deca_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="v">
+                <t t-call="web.basic_layout">
+                    <div
+            class="page"
+            t-translation="off"
+            style="font-family: Arial, sans-serif; font-size: 10.5pt; color: #17202a;"
+          >
+                        <t t-set="d" t-value="v.data_snapshot" />
+                        <div
+              style="border-bottom: 3px solid #1f4e78; padding-bottom: 8px; margin-bottom: 14px;"
+            >
+                            <table
+                style="width: 100%; border-collapse: collapse;"
+              >
+                                <tr>
+                                    <td
+                    style="width: 72%; vertical-align: top;"
+                  >
+                                        <h1
+                      style="font-size: 19pt; margin: 0 0 4px 0; color: #1f4e78;"
+                    >Documento electrónico de control administrativo</h1>
+                                        <div
+                      style="font-size: 13pt; font-weight: bold;"
+                    >DeCA — Transporte público de mercancías por carretera</div>
+                                    </td>
+                                    <td
+                    style="width: 28%; text-align: right; vertical-align: top;"
+                  >
+                                        <div><strong>Referencia:</strong> <span
+                        t-esc="d.get('reference')"
+                      /></div>
+                                        <div><strong>Versión:</strong> <span
+                        t-esc="v.version_number"
+                      /></div>
+                                        <div><strong>Finalidad:</strong>
+                                            <span t-if="d.get('purpose') == 'contractual'">Administrativa y contractual</span>
+                                            <span t-else="">Administrativa</span>
+                                        </div>
+                                        <div><strong
+                      >Creado (UTC):</strong> <span
+                        t-esc="v.created_at"
+                      /></div>
+                                        <div><strong>Picking:</strong> <span
+                        t-esc="d.get('picking_reference')"
+                      /></div>
+                                        <div
+                      t-if="d.get('batch_reference')"
+                    ><strong>Batch:</strong> <span
+                        t-esc="d.get('batch_reference')"
+                      /></div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <h2
+              style="font-size: 12pt; color: #1f4e78; margin: 12px 0 5px;"
+            >Sujetos obligados</h2>
+                        <table
+              style="width: 100%; border-collapse: collapse;"
+              class="table table-sm table-bordered"
+            >
+                            <tr>
+                                <th
+                  style="width: 25%; background: #eaf2f8;"
+                >Cargador contractual</th>
+                                <td><span
+                    t-esc="d.get('contractual_shipper_name')"
+                  /></td>
+                                <th
+                  style="width: 12%; background: #eaf2f8;"
+                >NIF</th>
+                                <td style="width: 20%;"><span
+                    t-esc="d.get('contractual_shipper_vat')"
+                  /></td>
+                            </tr>
+                            <tr>
+                                <th style="background: #eaf2f8;">Domicilio</th>
+                                <td
+                  colspan="3"
+                  style="white-space: pre-line;"
+                ><span t-esc="d.get('contractual_shipper_address')" /></td>
+                            </tr>
+                            <tr>
+                                <th
+                  style="background: #eaf2f8;"
+                >Transportista efectivo</th>
+                                <td><span
+                    t-esc="d.get('effective_carrier_name')"
+                  /></td>
+                                <th style="background: #eaf2f8;">NIF</th>
+                                <td><span
+                    t-esc="d.get('effective_carrier_vat')"
+                  /></td>
+                            </tr>
+                        </table>
+
+                        <h2
+              style="font-size: 12pt; color: #1f4e78; margin: 12px 0 5px;"
+            >Servicio y mercancía</h2>
+                        <table
+              style="width: 100%; border-collapse: collapse;"
+              class="table table-sm table-bordered"
+            >
+                            <tr>
+                                <th
+                  style="width: 18%; background: #eaf2f8;"
+                >Origen</th>
+                                <td style="width: 32%;"><span
+                    t-esc="d.get('origin')"
+                  /></td>
+                                <th
+                  style="width: 18%; background: #eaf2f8;"
+                >Destino</th>
+                                <td style="width: 32%;"><span
+                    t-esc="d.get('destination')"
+                  /></td>
+                            </tr>
+                            <tr>
+                                <th
+                  style="background: #eaf2f8;"
+                >Fecha transporte</th>
+                                <td><span
+                    t-esc="d.get('transport_date')"
+                  /></td>
+                                <th
+                  style="background: #eaf2f8;"
+                >Inicio previsto (UTC)</th>
+                                <td><span
+                    t-esc="d.get('planned_start_at') or '—'"
+                  /></td>
+                            </tr>
+                            <tr>
+                                <th style="background: #eaf2f8;">Naturaleza</th>
+                                <td
+                  colspan="3"
+                  style="white-space: pre-line;"
+                ><span t-esc="d.get('goods_nature')" /></td>
+                            </tr>
+                            <tr>
+                                <th
+                  style="background: #eaf2f8;"
+                >Peso / magnitud</th>
+                                <td colspan="3">
+                                    <t t-if="d.get('goods_weight')"><span
+                      t-esc="d.get('goods_weight')"
+                    /> <span t-esc="d.get('weight_uom') or 'kg'" /></t>
+                                    <t t-if="not d.get('goods_weight')"><span
+                      t-esc="d.get('alternative_weight_measure')"
+                    /></t>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th
+                  style="background: #eaf2f8;"
+                >Matrícula tractora</th>
+                                <td><span t-esc="d.get('tractor_plate')" /></td>
+                                <th style="background: #eaf2f8;">Remolque</th>
+                                <td><span
+                    t-esc="d.get('trailer_plate') or 'No consta'"
+                  /></td>
+                            </tr>
+                            <tr>
+                                <th
+                  style="background: #eaf2f8;"
+                >Autorización especial</th>
+                                <td colspan="3"><span
+                    t-esc="d.get('special_permit_ref') or 'No requerida'"
+                  /></td>
+                            </tr>
+                            <tr>
+                                <th
+                  style="background: #eaf2f8;"
+                >Observaciones / reservas</th>
+                                <td
+                  colspan="3"
+                  style="white-space: pre-line;"
+                ><span t-esc="d.get('observations') or '—'" /></td>
+                            </tr>
+                        </table>
+
+                        <div
+              t-if="v.previous_version_id"
+              style="margin-top: 12px; padding: 8px; border: 1px solid #d68910; background: #fef5e7;"
+            >
+                            <strong>Revisión trazada.</strong>
+                            Sustituye operativamente a la versión <span
+                t-esc="v.previous_version_id.version_number"
+              />.
+                            Motivo: <span t-esc="v.change_reason" />.
+                            El PDF anterior se conserva inalterado.
+                        </div>
+
+                        <table
+              style="width: 100%; margin-top: 18px; border-collapse: collapse; page-break-inside: avoid;"
+            >
+                            <tr>
+                                <td
+                  style="width: 68%; vertical-align: top; padding-right: 15px;"
+                >
+                                    <h2
+                    style="font-size: 12pt; color: #1f4e78; margin: 0 0 5px;"
+                  >Verificación en carretera</h2>
+                                    <p
+                    style="margin: 0 0 6px;"
+                  >La invocación del QR descarga directamente este PDF. No requiere credenciales ni interacción adicional.</p>
+                                    <p
+                    style="font-size: 8pt; word-break: break-all; margin: 0;"
+                  ><span t-esc="v.public_url" /></p>
+                                    <p
+                    t-if="d.get('purpose') != 'contractual'"
+                    style="font-size: 8pt; margin-top: 10px;"
+                  >Este DeCA se emite únicamente con finalidad administrativa y no requiere firma.</p>
+                                    <p
+                    t-else=""
+                    style="font-size: 8pt; margin-top: 10px;"
+                  >Documento de finalidad administrativa y contractual. Las firmas electrónicas PAdES y su evidencia se incorporan al fichero PDF definitivo después de generar esta representación.</p>
+                                </td>
+                                <td
+                  style="width: 32%; text-align: center; vertical-align: top;"
+                >
+                                    <img
+                    t-att-src="image_data_uri(v.qr_code)"
+                    alt="QR de descarga directa del DeCA"
+                    style="width: 42mm; height: 42mm;"
+                  />
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div
+              style="margin-top: 12px; padding-top: 6px; border-top: 1px solid #999; font-size: 7.5pt; color: #555;"
+            >
+                            PDF nativo digital. Metadatos de creación y modificación incorporados al fichero. Tamaño máximo controlado: 5 MB.
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

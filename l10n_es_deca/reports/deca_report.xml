@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="paperformat_deca_a4" model="report.paperformat">
+        <field name="name">DeCA A4</field>
+        <field name="default" eval="False" />
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">12</field>
+        <field name="margin_bottom">12</field>
+        <field name="margin_left">12</field>
+        <field name="margin_right">12</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <record id="action_report_deca" model="ir.actions.report">
+        <field name="name">DeCA PDF</field>
+        <field name="model">l10n.es.deca.version</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">l10n_es_deca.report_deca_document</field>
+        <field name="report_file">l10n_es_deca.report_deca_document</field>
+        <field name="paperformat_id" ref="paperformat_deca_a4" />
+        <field name="print_report_name">object.pdf_filename</field>
+    </record>
+</odoo>

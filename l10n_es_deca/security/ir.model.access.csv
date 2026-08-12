@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_deca_document_user,DeCA document user,model_l10n_es_deca_document,group_deca_user,1,1,1,0
+access_deca_document_manager,DeCA document manager,model_l10n_es_deca_document,group_deca_manager,1,1,1,1
+access_deca_version_user,DeCA version user,model_l10n_es_deca_version,group_deca_user,1,0,0,0
+access_deca_delivery_user,DeCA delivery evidence user,model_l10n_es_deca_delivery_log,group_deca_user,1,0,1,0
+access_deca_revision_wizard,DeCA revision wizard,model_l10n_es_deca_revision_wizard,group_deca_user,1,1,1,1
+access_deca_delivery_wizard,DeCA delivery wizard,model_l10n_es_deca_delivery_wizard,group_deca_user,1,1,1,1
