@@ -5,14 +5,21 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="l10n_es_deca.res_config_settings_view_form_deca" />
         <field name="arch" type="xml">
-            <xpath expr="//block[@id='deca_setting_container']" position="inside">
-                <setting
-          id="deca_goods_nature_source"
-          string="DeCA goods nature"
-          help="Applies to new DeCA drafts. Documents already issued keep their sealed text."
+            <xpath expr="//div[@id='deca_setting_container']" position="inside">
+                <div
+          class="col-12 col-lg-6 o_setting_box"
+          id="deca_goods_nature_source_box"
         >
-                    <field name="deca_goods_nature_source" widget="radio" />
-                </setting>
+                    <div class="o_setting_right_pane">
+                        <label for="deca_goods_nature_source" string="DeCA goods nature" />
+                        <div class="text-muted">
+                            Applies to new DeCA drafts. Documents already issued keep their sealed text.
+                        </div>
+                        <div class="content-group">
+                            <field name="deca_goods_nature_source" widget="radio" />
+                        </div>
+                    </div>
+                </div>
             </xpath>
         </field>
     </record>
