@@ -164,6 +164,7 @@ class VendorDocumentIntake(models.Model):
         required=True,
         index=True,
     )
+    mailbox_id = fields.Many2one("vendor.parseur.mailbox", index=True, ondelete="set null")
     document_type = fields.Selection(
         [
             ('delivery_note', 'Delivery Note'),
@@ -278,10 +279,17 @@ class VendorDocumentIntake(models.Model):
     # Payload ingest
     # ------------------------------------------------------------------
     @api.model
-    def ingest_parseur_payload(self, payload, document_type=None):
+    def ingest_parseur_payload(self, payload, document_type=None, mailbox=None):
         payload = payload or {}
         if isinstance(payload, str):
             payload = json.loads(payload)
+        mailbox = mailbox or self.env["vendor.parseur.mailbox"]._from_request(payload=payload)
+        if mailbox and not document_type:
+            document_type = mailbox.default_document_type
+        if mailbox and mailbox.partner_id and not _first(payload, HEADER_ALIASES["supplier_vat"]):
+            payload = dict(payload)
+            payload["supplier_vat"] = mailbox.partner_id.vat or payload.get("supplier_vat")
+            payload.setdefault("supplier_name", mailbox.partner_id.name)
 
         raw_type = document_type or _first(payload, ('document_type', 'DocumentType', 'type'), '')
         doc_type = DOC_TYPE_ALIASES.get(str(raw_type).strip().lower())
@@ -300,7 +308,9 @@ class VendorDocumentIntake(models.Model):
                 document_type=doc_type,
             )
         except UserError:
-            company = self.env.company
+            company = mailbox.company_id if mailbox and mailbox.company_id else self.env.company
+        if mailbox and mailbox.company_id and not header.get("company_vat"):
+            company = mailbox.company_id
         currency = self._resolve_currency(header.get('currency'), company=company)
         lock_key = "tl_parseur:%s:%s:%s" % (
             company.id,
@@ -332,6 +342,7 @@ class VendorDocumentIntake(models.Model):
         intake = self.create({
             'document_type': doc_type,
             'company_id': company.id,
+            'mailbox_id': mailbox.id if mailbox else False,
             'parseur_document_id': parseur_id or False,
             'payload_json': json.dumps(payload, default=str, ensure_ascii=False),
             'supplier_name': header.get('supplier_name') or False,
@@ -637,6 +648,8 @@ class VendorDocumentIntake(models.Model):
             partner = unique_fuzzy_match(suppliers, "name", name)
             if partner:
                 _trace(self, "partner_fuzzy", partner=partner.id, raw=name)
+        if not partner and self.mailbox_id.partner_id:
+            partner = self.mailbox_id.partner_id
         self.partner_id = partner
 
     def _match_purchase_orders(self):

@@ -1,3 +1,4 @@
+from . import parseur_mailbox
 from . import vendor_document_intake
 from . import vendor_document_intake_line
 from . import res_config_settings

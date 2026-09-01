@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_vendor_parseur_mailbox_tree" model="ir.ui.view">
+        <field name="name">vendor.parseur.mailbox.list</field>
+        <field name="model">vendor.parseur.mailbox</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="default_document_type"/>
+                <field name="partner_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="webhook_path"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_vendor_parseur_mailbox_form" model="ir.ui.view">
+        <field name="name">vendor.parseur.mailbox.form</field>
+        <field name="model">vendor.parseur.mailbox</field>
+        <field name="arch" type="xml">
+            <form string="Parseur mailbox">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="parseur_mailbox_id"/>
+                            <field name="default_document_type"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="webhook_token" password="True"/>
+                            <field name="webhook_path" readonly="1"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <field name="note" placeholder="Template notes, supplier PDF quirks…"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_vendor_parseur_mailbox" model="ir.actions.act_window">
+        <field name="name">Parseur mailboxes</field>
+        <field name="res_model">vendor.parseur.mailbox</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <menuitem
+        id="menu_vendor_parseur_mailbox"
+        name="Parseur mailboxes"
+        parent="purchase.menu_purchase_config"
+        action="action_vendor_parseur_mailbox"
+        sequence="55"/>
+</odoo>

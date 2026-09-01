@@ -22,6 +22,7 @@
         "security/ir.model.access.csv",
         "security/vendor_document_intake_security.xml",
         "data/ir_sequence_data.xml",
+        "views/parseur_mailbox_views.xml",
         "views/vendor_document_intake_views.xml",
         "views/res_partner_views.xml",
         "views/res_config_settings_views.xml",
