@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_parseur" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.parseur.intake</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="purchase.res_config_settings_view_form_purchase"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='purchase']" position="inside">
+                <block title="Parseur vendor documents" name="parseur_intake_settings">
+                    <setting id="parseur_spellcheck_setting" help="Correct OCR typos using vendor names, product names and internal references.">
+                        <field name="parseur_spellcheck"/>
+                    </setting>
+                    <setting id="parseur_hotkeys_setting" help="Function keys on the intake form. The scanner still uses the hidden barcode handler.">
+                        <field name="parseur_hotkey_identify"/>
+                        <field name="parseur_hotkey_apply"/>
+                        <field name="parseur_hotkey_scan"/>
+                        <field name="parseur_barcode_prefix"/>
+                        <field name="parseur_barcode_min_length"/>
+                    </setting>
+                    <setting id="parseur_webhook_token_setting" help="Shared secret expected on incoming Parseur webhooks.">
+                        <field name="parseur_webhook_token" password="True"/>
+                    </setting>
+                    <setting id="parseur_auto_apply_setting" help="Create/receive/bill automatically when partner, products and PO match.">
+                        <field name="parseur_auto_apply"/>
+                    </setting>
+                    <setting id="parseur_auto_validate_setting" help="Legacy company flag. Enable Auto-validate Parseur receipts on each vendor.">
+                        <field name="parseur_auto_validate_picking"/>
+                    </setting>
+                    <setting id="parseur_over_policy_setting" help="What to do when the delivery note exceeds the purchase order.">
+                        <field name="parseur_over_policy"/>
+                    </setting>
+                    <setting id="parseur_price_tol_setting" help="Company default. Each vendor can override this on the contact form.">
+                        <field name="parseur_price_tolerance_pct"/>
+                        <field name="parseur_price_tolerance_abs"/>
+                    </setting>
+                    <setting id="parseur_qty_tol_setting" help="Company default extra quantity allowed before blocking the receipt. Override per vendor.">
+                        <field name="parseur_qty_tolerance_pct"/>
+                        <field name="parseur_qty_tolerance_abs"/>
+                    </setting>
+                    <setting id="parseur_price_diff_mode_setting" help="How accepted vendor prices are written on the draft bill.">
+                        <field name="parseur_price_diff_mode"/>
+                    </setting>
+                    <setting id="parseur_update_po_price_setting" help="If enabled, accepting the document price also writes price_unit on the purchase order line.">
+                        <field name="parseur_update_po_price"/>
+                    </setting>
+                    <setting id="parseur_auto_post_bill_setting" help="Posts the draft bill only after a clean match and within total tolerance.">
+                        <field name="parseur_auto_post_bill"/>
+                        <field name="parseur_bill_total_tolerance_pct"/>
+                        <field name="parseur_bill_total_tolerance_abs"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

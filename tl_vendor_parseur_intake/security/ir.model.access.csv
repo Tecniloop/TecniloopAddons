@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_vendor_document_intake_user,vendor.document.intake.user,model_vendor_document_intake,purchase.group_purchase_user,1,1,1,0
+access_vendor_document_intake_manager,vendor.document.intake.manager,model_vendor_document_intake,purchase.group_purchase_manager,1,1,1,1
+access_vendor_document_intake_line_user,vendor.document.intake.line.user,model_vendor_document_intake_line,purchase.group_purchase_user,1,1,1,0
+access_vendor_document_intake_line_manager,vendor.document.intake.line.manager,model_vendor_document_intake_line,purchase.group_purchase_manager,1,1,1,1

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+      company_ids = compañías permitidas del usuario (Ajustes → Usuarios).
+      El webhook usa sudo() y no aplica estas reglas; el intake se crea
+      igual con company_id resuelto por NIF.
+    -->
+    <record id="vendor_document_intake_company_rule" model="ir.rule">
+        <field name="name">Vendor document intake: multi-company</field>
+        <field name="model_id" ref="model_vendor_document_intake"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="global" eval="True"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+    <record id="vendor_document_intake_line_company_rule" model="ir.rule">
+        <field name="name">Vendor document intake line: multi-company</field>
+        <field name="model_id" ref="model_vendor_document_intake_line"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="global" eval="True"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+</odoo>

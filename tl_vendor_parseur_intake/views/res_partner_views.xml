@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_tl_parseur" model="ir.ui.view">
+        <field name="name">res.partner.form.tl.parseur</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='sales_purchases']" position="inside">
+                <group string="Parseur" name="tl_parseur">
+                    <field name="tl_auto_validate_receipt"/>
+                    <field name="tl_price_tolerance_pct"/>
+                    <field name="tl_price_tolerance_abs"/>
+                    <field name="tl_effective_price_tolerance_pct" readonly="1"/>
+                    <field name="tl_effective_price_tolerance_abs" readonly="1"/>
+                    <field name="tl_qty_tolerance_pct"/>
+                    <field name="tl_qty_tolerance_abs"/>
+                    <field name="tl_effective_qty_tolerance_pct" readonly="1"/>
+                    <field name="tl_effective_qty_tolerance_abs" readonly="1"/>
+                    <field name="tl_min_shelf_life_days"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
