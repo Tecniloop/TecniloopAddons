@@ -527,7 +527,7 @@
     <record id="sitemap_import_source_araolit_es" model="sitemap.import.source">
         <field name="name">Araolit España</field>
         <field name="connector_model">sitemap.connector.araolit_es</field>
-        <field name="sitemap_index_url">https://www.araolit.es/sitemap.xml</field>
+        <field name="sitemap_index_url">https://www.araolit.es/robots.txt</field>
         <field name="import_eans">1</field>
         <field name="max_ean_requests_per_product">20</field>
         <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>

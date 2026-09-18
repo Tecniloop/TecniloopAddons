@@ -1275,3 +1275,8 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 
 ### 19.0.1.136.0
 - Araolit: lectura robusta del sitemap real con redirecciones y cabeceras XML/navegador.
+
+### 19.0.1.138.0
+- Araolit: resuelve el WAF que responde HTTP 202 con un interstitial HTML y cookie JavaScript ``dhd2`` (no hay ``Set-Cookie``).
+- Sin ese handshake el conector parseaba la página de espera como sitemap y no encontraba productos ni en XML ni en el catálogo HTML.
+- Prioriza ``robots.txt`` → ``1_index_sitemap.xml`` (``/sitemap.xml`` es 404 en Araolit).

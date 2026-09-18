@@ -14,10 +14,18 @@ _logger = logging.getLogger(__name__)
 class SitemapConnectorAraolitEs(models.AbstractModel):
     """Conector para Araolit España (PrestaShop).
 
-    La fuente se configura con https://www.araolit.es/sitemap.xml. El conector
-    lee de robots.txt las directivas Sitemap y mantiene varios nombres
-    habituales de Google Sitemap/PrestaShop como respaldo. Si el XML no está
-    disponible, descubre fichas desde el mapa del sitio, marcas y categorías.
+    La fuente puede configurarse con ``https://www.araolit.es/robots.txt`` o
+    con ``https://www.araolit.es/1_index_sitemap.xml``. ``/sitemap.xml`` no
+    existe (404). El conector lee las directivas Sitemap de robots.txt y
+    mantiene nombres habituales de Google Sitemap/PrestaShop como respaldo.
+    Si el XML no está disponible, descubre fichas desde el mapa del sitio,
+    marcas y categorías.
+
+    Delante de PrestaShop hay un WAF que, a clientes sin cookie, responde
+    HTTP 202 con una página HTML de espera. Esa página no envía ``Set-Cookie``:
+    inyecta ``document.cookie = 'dhd2=...; domain=araolit.es'`` por JavaScript.
+    Sin completar ese handshake el importador interpreta el interstitial como
+    sitemap y aborta.
 
     Las categorías de Araolit usan URLs del tipo ``/13-anodos-magnesio`` y las
     fichas de producto PrestaShop terminan en ``.html``; esa diferencia permite
@@ -44,9 +52,18 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
         '/contact', '/login', '/cart', '/order', '/my-account', '/new-products',
         '/best-sales', '/prices-drop', '/mapa-del-sitio', '/sitemap',
     )
+    # Las categorías son ``/13-anodos-magnesio`` (sin .html). Si el patrón
+    # aceptara ``.html`` también coincidiría con las fichas
+    # ``/1-kit-termostato....html`` y el conector las descartaría todas.
     _CATEGORY_PATH_RE = re.compile(
-        r'^/(?P<category_id>\d+)-(?P<slug>[^/?#]+?)/?$', re.IGNORECASE,
+        r'^/(?P<category_id>\d+)-(?P<slug>[^/?#]+?)(?<!\.html)/?$',
+        re.IGNORECASE,
     )
+    _WAF_COOKIE_RE = re.compile(
+        r"document\.cookie\s*=\s*['\"](?P<cookie>[^'\"]+)['\"]",
+        re.IGNORECASE,
+    )
+    _WAF_COOKIE_NAME = 'dhd2'
 
 
     def _get_session(self, source):
@@ -73,6 +90,100 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
             'Accept-Language': 'es-ES,es;q=0.9,en;q=0.3',
         })
         return session
+
+    @classmethod
+    def _waf_challenge_cookie(cls, response):
+        """Extrae la cookie JS del interstitial 202 del WAF de Araolit."""
+        if response is None:
+            return False
+        body = response.content or b''
+        if cls._WAF_COOKIE_NAME.encode('ascii') not in body and b'document.cookie' not in body:
+            return False
+        try:
+            snippet = body[:8192].decode(response.encoding or 'utf-8', errors='replace')
+        except Exception:
+            snippet = ''
+        match = cls._WAF_COOKIE_RE.search(snippet)
+        if not match:
+            return False
+        name = value = domain = path = None
+        for part in match.group('cookie').split(';'):
+            item = part.strip()
+            if not item or '=' not in item:
+                continue
+            key, raw = item.split('=', 1)
+            key = key.strip()
+            raw = raw.strip()
+            lowered = key.lower()
+            if lowered == 'domain':
+                domain = raw.lstrip('.')
+            elif lowered == 'path':
+                path = raw or '/'
+            elif lowered in {'max-age', 'expires', 'samesite', 'secure', 'httponly'}:
+                continue
+            elif name is None:
+                name, value = key, raw
+        if not name or value is None:
+            return False
+        return {
+            'name': name,
+            'value': value,
+            'domain': domain or 'araolit.es',
+            'path': path or '/',
+        }
+
+    @classmethod
+    def _is_waf_challenge(cls, response):
+        """Detecta el HTML de espera del WAF (HTTP 202 + cookie JS)."""
+        cookie = cls._waf_challenge_cookie(response)
+        if not cookie:
+            return False
+        content_type = (response.headers.get('Content-Type') or '').lower()
+        body = response.content or b''
+        if response.status_code == 202:
+            return True
+        if 'html' in content_type and (
+            b'http-equiv' in body and b'refresh' in body
+        ):
+            return True
+        return False
+
+    @classmethod
+    def _apply_waf_cookie(cls, session, cookie):
+        if not cookie:
+            return
+        for domain in dict.fromkeys((cookie['domain'], 'araolit.es', 'www.araolit.es')):
+            if not domain:
+                continue
+            session.cookies.set(
+                cookie['name'], cookie['value'],
+                domain=domain, path=cookie['path'],
+            )
+        _logger.info(
+            'Araolit: cookie WAF %s aplicada para el dominio %s',
+            cookie['name'], cookie['domain'],
+        )
+
+    def _http_get(self, session, url, source):
+        """GET que resuelve el desafío JS ``dhd2`` antes de parsear la respuesta.
+
+        ``requests`` no ejecuta JavaScript y el WAF no envía ``Set-Cookie``, así
+        que hay que leer el interstitial, guardar la cookie en la sesión y
+        repetir la petición. Sin este paso tanto el sitemap como el catálogo
+        HTML llegan como la página de puntos suspensivos.
+        """
+        response = super()._http_get(session, url, source)
+        if not self._is_waf_challenge(response):
+            return response
+
+        self._apply_waf_cookie(session, self._waf_challenge_cookie(response))
+        last_response = response
+        for attempt in range(2):
+            last_response = super()._http_get(session, url, source)
+            if not self._is_waf_challenge(last_response):
+                return last_response
+            self._apply_waf_cookie(session, self._waf_challenge_cookie(last_response))
+        return last_response
 
     @staticmethod
     def _araolit_xml_root(content):
@@ -254,9 +365,12 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
         lowered = path.lower()
         if any(lowered.startswith(prefix) for prefix in cls._NON_PRODUCT_PREFIXES):
             return False
+        product = cls._PRODUCT_PATH_RE.match(path)
+        if product:
+            return product
         if cls._CATEGORY_PATH_RE.match(path):
             return False
-        return cls._PRODUCT_PATH_RE.match(path) or cls._PRODUCT_PATH_FALLBACK_RE.match(path)
+        return cls._PRODUCT_PATH_FALLBACK_RE.match(path)
 
     @classmethod
     def _product_key(cls, value):
@@ -324,15 +438,16 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
         root = 'https://www.araolit.es/'
         candidates = []
         session = self._get_session(source)
-        for candidate in (source.sitemap_index_url, urljoin(root, 'robots.txt')):
+        probes = [
+            source.sitemap_index_url,
+            urljoin(root, 'robots.txt'),
+            urljoin(root, '1_index_sitemap.xml'),
+        ]
+        for candidate in probes:
             if not candidate or candidate in candidates:
                 continue
             try:
-                response = session.get(
-                    candidate,
-                    timeout=source.request_timeout or 20,
-                    allow_redirects=True,
-                )
+                response = self._http_get(session, candidate, source)
                 if response.status_code >= 400:
                     continue
                 candidates.extend(self._robots_sitemaps(response.text, response.url))
@@ -347,12 +462,14 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
             except Exception as exc:
                 _logger.info('Araolit: índice %s no accesible: %s', candidate, exc)
 
+        # ``sitemap.xml`` y ``sitemap_index.xml`` no existen en Araolit (404 HTML).
+        # El índice real publicado en robots.txt es ``1_index_sitemap.xml``.
         candidates.extend([
-            urljoin(root, 'sitemap.xml'),
-            urljoin(root, 'sitemap_index.xml'),
             urljoin(root, '1_index_sitemap.xml'),
             urljoin(root, '1_es_0_sitemap.xml'),
             urljoin(root, '1_es_1_sitemap.xml'),
+            urljoin(root, 'sitemap.xml'),
+            urljoin(root, 'sitemap_index.xml'),
         ])
         return list(dict.fromkeys(candidates))
 
