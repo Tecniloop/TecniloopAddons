@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 class SitemapConnectorAraolitEs(models.AbstractModel):
     """Conector para Araolit España (PrestaShop).
 
-    La fuente se configura con https://www.araolit.es/robots.txt. El conector
+    La fuente se configura con https://www.araolit.es/sitemap.xml. El conector
     lee de robots.txt las directivas Sitemap y mantiene varios nombres
     habituales de Google Sitemap/PrestaShop como respaldo. Si el XML no está
     disponible, descubre fichas desde el mapa del sitio, marcas y categorías.
@@ -34,6 +34,15 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
     _PRODUCT_PATH_RE = re.compile(
         r'^/(?:[^/?#]+/)*(?P<product_id>\d+)(?:-\d+)?-(?P<slug>[^/?#]+)\.html/?$',
         re.IGNORECASE,
+    )
+    _PRODUCT_PATH_FALLBACK_RE = re.compile(
+        r'^/(?:[^/?#]+/)+(?P<product_id>\d+)(?:-\d+)?-(?P<slug>[^/?#]+?)(?:\.html)?/?$',
+        re.IGNORECASE,
+    )
+    _NON_PRODUCT_PREFIXES = (
+        '/brand/', '/brands', '/content/', '/module/', '/search', '/stores',
+        '/contact', '/login', '/cart', '/order', '/my-account', '/new-products',
+        '/best-sales', '/prices-drop', '/mapa-del-sitio', '/sitemap',
     )
     _CATEGORY_PATH_RE = re.compile(
         r'^/(?P<category_id>\d+)-(?P<slug>[^/?#]+?)/?$', re.IGNORECASE,
@@ -145,6 +154,18 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
             except Exception:
                 raise exc
 
+            # Si el WAF sustituye el XML por una página PrestaShop, aprovechar
+            # directamente sus tarjetas de producto en lugar de abortar.
+            card_entries = self._product_card_entries_from_tree(tree, final_url)
+            if card_entries:
+                for item in card_entries:
+                    yield {
+                        'url': item['url'],
+                        'lastmod': False,
+                        'images': [],
+                    }
+                return
+
             discovered = []
             for value in tree.xpath('//a[@href]/@href | //a/text()'):
                 candidate = self._canonical_url(urljoin(final_url, str(value).strip()))
@@ -219,10 +240,23 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
 
     @classmethod
     def _product_match(cls, value):
+        """Reconoce fichas Araolit sin depender de una única forma de URL.
+
+        El patrón clásico PrestaShop termina en ``.html``. Algunas plantillas
+        generan rutas localizadas o sin extensión; para esas aceptamos un
+        segundo patrón únicamente cuando existe al menos un segmento padre,
+        evitando así confundir categorías raíz como ``/88-contacto``.
+        """
         parsed = urlparse(value)
         if parsed.netloc.lower() not in cls._HOSTS:
             return False
-        return cls._PRODUCT_PATH_RE.match(parsed.path)
+        path = parsed.path or '/'
+        lowered = path.lower()
+        if any(lowered.startswith(prefix) for prefix in cls._NON_PRODUCT_PREFIXES):
+            return False
+        if cls._CATEGORY_PATH_RE.match(path):
+            return False
+        return cls._PRODUCT_PATH_RE.match(path) or cls._PRODUCT_PATH_FALLBACK_RE.match(path)
 
     @classmethod
     def _product_key(cls, value):
@@ -230,28 +264,61 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
         return match.group('product_id') if match else False
 
     @classmethod
-    def _product_links_from_tree(cls, tree, page_url):
-        """Extrae enlaces desde las tarjetas PrestaShop y como respaldo desde todo el DOM.
+    def _safe_internal_href(cls, href, page_url):
+        absolute = cls._canonical_url(urljoin(page_url, href))
+        parsed = urlparse(absolute)
+        if parsed.netloc.lower() not in cls._HOSTS:
+            return False
+        lowered = (parsed.path or '/').lower()
+        if any(lowered.startswith(prefix) for prefix in cls._NON_PRODUCT_PREFIXES):
+            return False
+        if cls._CATEGORY_PATH_RE.match(parsed.path):
+            return False
+        return absolute
 
-        Araolit renderiza listados con miniaturas PrestaShop. Priorizar esos
-        nodos evita depender de clases concretas del tema para descubrir fichas.
+    @classmethod
+    def _product_card_entries_from_tree(cls, tree, page_url):
+        """Obtiene fichas desde miniaturas usando ``data-id-product`` como verdad.
+
+        Esta rutina no exige que el href cumpla un patrón concreto. Araolit es
+        PrestaShop y ``data-id-product`` es un identificador mucho más estable
+        que la reescritura SEO de la URL.
         """
         result = []
-        seen = set()
-        xpaths = [
-            '//*[@data-id-product]//a[@href]/@href',
-            '//*[contains(concat(" ", normalize-space(@class), " "), " product-miniature ")]//a[@href]/@href',
-            '//article[contains(@class,"product")]//a[@href]/@href',
-            '//a[@href]/@href',
-        ]
-        for xpath in xpaths:
-            for href in tree.xpath(xpath):
-                absolute = cls._canonical_url(urljoin(page_url, href))
-                if absolute in seen or not cls._product_match(absolute):
+        seen_ids = set()
+        cards = tree.xpath('//*[@data-id-product]')
+        for card in cards:
+            product_id = str(card.get('data-id-product') or '').strip()
+            if not product_id.isdigit() or product_id in seen_ids:
+                continue
+            hrefs = card.xpath(
+                './/a[contains(concat(" ", normalize-space(@class), " "), " product-thumbnail ")]/@href | '
+                './/*[contains(concat(" ", normalize-space(@class), " "), " product-title ")]//a[@href]/@href | '
+                './/a[@href]/@href'
+            )
+            selected = False
+            for href in hrefs:
+                absolute = cls._safe_internal_href(href, page_url)
+                if not absolute:
                     continue
-                seen.add(absolute)
-                result.append(absolute)
+                # En tarjetas PrestaShop el primer enlace interno no-listado suele
+                # ser la ficha. Preferir de todos modos URLs que reconozcamos.
+                if cls._product_match(absolute):
+                    selected = absolute
+                    break
+                if not selected:
+                    selected = absolute
+            if selected:
+                seen_ids.add(product_id)
+                result.append({
+                    'url': selected, 'lastmod': False, 'prestashop_id': product_id,
+                })
         return result
+
+    @classmethod
+    def _product_links_from_tree(cls, tree, page_url):
+        # Compatibilidad con llamadas antiguas del conector.
+        return [item['url'] for item in cls._product_card_entries_from_tree(tree, page_url)]
 
     def _candidate_sitemaps(self, source):
         root = 'https://www.araolit.es/'
@@ -290,43 +357,56 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
         return list(dict.fromkeys(candidates))
 
     def _fallback_html_entries(self, source, category_filter=None, limit=0):
+        """Descubre productos desde listados PrestaShop sin asumir su URL SEO."""
         session = self._get_session(source)
         start_urls = [
-            'https://www.araolit.es/mapa-del-sitio',
-            'https://www.araolit.es/',
             'https://www.araolit.es/brands',
+            'https://www.araolit.es/',
+            'https://www.araolit.es/mapa-del-sitio',
             'https://www.araolit.es/nuevos-productos',
         ]
         products = {}
-        categories = []
+        listings = []
+        queued = set()
 
-        def add_tree(tree, page_url):
-            for product_url in self._product_links_from_tree(tree, page_url):
-                key = self._product_key(product_url)
-                if key and key not in products:
-                    products[key] = {'url': product_url, 'lastmod': False}
+        def add_listing(url):
+            absolute = self._canonical_url(url)
+            if absolute and absolute not in queued:
+                queued.add(absolute)
+                listings.append(absolute)
+
+        def absorb_tree(tree, page_url):
+            for item in self._product_card_entries_from_tree(tree, page_url):
+                key = item.get('prestashop_id') or item['url']
+                products.setdefault(key, {'url': item['url'], 'lastmod': False})
             for href in tree.xpath('//a[@href]/@href'):
                 absolute = self._canonical_url(urljoin(page_url, href))
                 parsed = urlparse(absolute)
                 if parsed.netloc.lower() not in self._HOSTS:
                     continue
-                if self._CATEGORY_PATH_RE.match(parsed.path) and absolute not in categories:
-                    categories.append(absolute)
+                path = parsed.path or '/'
+                if (
+                    self._CATEGORY_PATH_RE.match(path)
+                    or re.match(r'^/brand/\d+(?:-[^/?#]+)?/?$', path, re.I)
+                ):
+                    add_listing(absolute)
 
         for start_url in start_urls:
             try:
                 response = self._http_get(session, start_url, source)
-                add_tree(lxml_html.fromstring(response.content), response.url)
+                absorb_tree(lxml_html.fromstring(response.content), response.url)
             except Exception as exc:
                 _logger.info('Araolit: respaldo inicial no accesible %s: %s', start_url, exc)
-            if limit and len(products) >= limit:
-                break
 
-        # Las categorías PrestaShop de Araolit muestran 30 productos por página.
-        for category_url in categories[:300]:
+        # Recorre categorías y marcas; la web muestra 30 productos por página.
+        index = 0
+        max_listings = 500
+        while index < len(listings) and index < max_listings:
+            base_url = listings[index]
+            index += 1
             seen_signatures = set()
             for page in range(1, 100):
-                parts = urlsplit(category_url)
+                parts = urlsplit(base_url)
                 query = dict(parse_qsl(parts.query, keep_blank_values=True))
                 if page > 1:
                     query['page'] = str(page)
@@ -335,20 +415,22 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
                     response = self._http_get(session, page_url, source)
                     tree = lxml_html.fromstring(response.content)
                 except Exception as exc:
-                    _logger.info('Araolit: categoría no accesible %s: %s', page_url, exc)
+                    _logger.info('Araolit: listado no accesible %s: %s', page_url, exc)
                     break
-                links = self._product_links_from_tree(tree, response.url)
-                signature = tuple(sorted(self._product_key(url) for url in links if self._product_key(url)))
-                if not links or not signature or signature in seen_signatures:
+
+                card_entries = self._product_card_entries_from_tree(tree, response.url)
+                signature = tuple(sorted(item.get('prestashop_id') for item in card_entries))
+                if not card_entries or signature in seen_signatures:
                     break
                 seen_signatures.add(signature)
-                for product_url in links:
-                    key = self._product_key(product_url)
-                    if key and key not in products:
-                        products[key] = {'url': product_url, 'lastmod': False}
+                absorb_tree(tree, response.url)
                 if limit and len(products) >= limit:
                     break
-                if not tree.xpath('//a[contains(@rel,"next") or contains(@class,"next")][@href]'):
+
+                next_links = tree.xpath(
+                    '//a[contains(@rel,"next") or contains(concat(" ", normalize-space(@class), " "), " next ")][@href]/@href'
+                )
+                if not next_links:
                     break
             if limit and len(products) >= limit:
                 break
@@ -363,9 +445,10 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
     def get_product_entries(self, source, category_filter=None, limit=0):
         entries, _image_map, errors = self._collect_products(source)
         html_entries = self._fallback_html_entries(source, category_filter=None, limit=0)
-        result = self._prestashop_merge_discovery(
-            'Araolit España', sitemap_entries=list(entries.values()),
-            category_entries=html_entries, category_filter=category_filter, limit=limit,
+        result = self._merge_discovery_entries(
+            'Araolit España',
+            [('sitemap', list(entries.values())), ('catalogo_html', html_entries)],
+            key_getter=None, category_filter=category_filter, limit=limit,
         )
         if result:
             return result
