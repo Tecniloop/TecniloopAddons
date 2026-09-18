@@ -69,3 +69,21 @@ class TestDecaStockIntegration(TransactionCase):
         picking.deca_required = True
         with self.assertRaises(UserError):
             picking.button_validate()
+
+    def test_company_default_carrier_and_lightweight_vehicle_catalog_prefill(self):
+        carrier = self.env["res.partner"].create(
+            {"name": "Carrier DeCA", "vat": "ESB11223344", "deca_is_carrier": True}
+        )
+        self.env["l10n.es.deca.vehicle"].create(
+            {
+                "carrier_id": carrier.id,
+                "vehicle_type": "tractor",
+                "license_plate": "1234 abc",
+                "is_default": True,
+            }
+        )
+        self.env.company.deca_default_carrier_id = carrier
+        picking = self._new_picking()
+        values = picking._prepare_deca_values()
+        self.assertEqual(values["effective_carrier_id"], carrier.id)
+        self.assertEqual(values["tractor_plate"], "1234 ABC")

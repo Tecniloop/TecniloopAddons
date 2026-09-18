@@ -26,9 +26,20 @@ class TestDecaPublicDownload(HttpCase):
         return output.getvalue()
 
     def _sealed_public_version(self):
-        document = self.env["l10n.es.deca.document"].sudo().create({})
-        now = fields.Datetime.now()
         token = "A" * 43
+        document = (
+            self.env["l10n.es.deca.document"]
+            .sudo()
+            .with_context(_deca_internal_create=True)
+            .create(
+                {
+                "public_access_token": token,
+                "public_url": f"https://deca.example.test/deca/pdf/{token}",
+                    "public_access_active": True,
+                }
+            )
+        )
+        now = fields.Datetime.now()
         version = (
             self.env["l10n.es.deca.version"]
             .sudo()
@@ -40,7 +51,7 @@ class TestDecaPublicDownload(HttpCase):
                     "data_snapshot": {},
                     "created_at": now,
                     "modified_at": now,
-                    "public_until": now + timedelta(days=1),
+                    "public_until": False,
                     "access_token": token,
                     "public_url": f"https://deca.example.test/deca/pdf/{token}",
                     "pdf_filename": "DeCA-http-test.pdf",

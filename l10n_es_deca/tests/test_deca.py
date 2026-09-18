@@ -178,7 +178,7 @@ class TestDeca(TransactionCase):
         self.assertEqual(document.state, "in_transit")
         self.assertTrue(document.actual_start_at)
 
-    def test_revision_preserves_previous_pdf_and_changes_url(self):
+    def test_revision_preserves_previous_pdf_and_keeps_stable_url(self):
         document = self._new_document()
         first = self._issue(document)
         self.env["l10n.es.deca.delivery.log"].with_user(self.deca_user).create(
@@ -209,7 +209,8 @@ class TestDeca(TransactionCase):
             )
         self.assertEqual(second.version_number, 2)
         self.assertEqual(second.previous_version_id, first)
-        self.assertNotEqual(second.public_url, first.public_url)
+        self.assertEqual(second.public_url, first.public_url)
+        self.assertEqual(document.public_url, first.public_url)
         self.assertEqual(first.get_pdf_bytes(), old_pdf)
         self.assertEqual(document.destination, "Barcelona")
         self.assertEqual(document.state, "in_transit")

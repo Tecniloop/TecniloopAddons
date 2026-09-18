@@ -98,6 +98,7 @@ class StockPicking(models.Model):
             destination = self.partner_id._display_address(without_company=False)
         scheduled = fields.Datetime.to_datetime(self.scheduled_date)
         company_partner = self.company_id.partner_id
+        default_carrier = self.company_id.deca_default_carrier_id
         return {
             "picking_id": self.id,
             "batch_id": self.batch_id.id,
@@ -119,6 +120,20 @@ class StockPicking(models.Model):
                 scheduled.date() if scheduled else fields.Date.context_today(self)
             ),
             "planned_start_at": self.scheduled_date,
+            "effective_carrier_id": default_carrier.id if default_carrier else False,
+            "effective_carrier_name": (
+                default_carrier.commercial_company_name or default_carrier.name
+                if default_carrier else False
+            ),
+            "effective_carrier_vat": default_carrier.vat if default_carrier else False,
+            "tractor_plate": (
+                default_carrier._deca_default_vehicle_plate("tractor")
+                if default_carrier else False
+            ),
+            "trailer_plate": (
+                default_carrier._deca_default_vehicle_plate("trailer")
+                if default_carrier else False
+            ),
         }
 
     def _create_or_open_deca(self):

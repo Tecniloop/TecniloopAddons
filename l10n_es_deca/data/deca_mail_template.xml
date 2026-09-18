@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <record id="mail_template_deca_issued" model="mail.template">
+        <field name="name">DeCA - Issued document</field>
+        <field name="model_id" ref="model_l10n_es_deca_document" />
+        <field name="subject">DeCA {{ object.name }}</field>
+        <field name="email_from">{{ object.company_id.partner_id.email_formatted or user.email_formatted }}</field>
+        <field name="body_html" type="html">
+            <div>
+                <p>Hola <t t-out="ctx.get('deca_recipient_name') or ''" />,</p>
+                <p>Se adjunta el Documento Electrónico de Control Administrativo (DeCA) <strong><t t-out="object.name" /></strong>.</p>
+                <p>El código QR y la URL pública permanecen estables aunque se registre una modificación durante el transporte.</p>
+            </div>
+        </field>
+        <field name="auto_delete" eval="False" />
+    </record>
+</odoo>

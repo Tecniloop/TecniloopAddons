@@ -57,7 +57,7 @@ class DecaVersion(models.Model):
 
     created_at = fields.Datetime(required=True, readonly=True)
     modified_at = fields.Datetime(required=True, readonly=True)
-    public_until = fields.Datetime(required=True, readonly=True, index=True)
+    public_until = fields.Datetime(readonly=True, index=True)
     access_token = fields.Char(required=True, readonly=True, copy=False, index=True)
     public_url = fields.Char(required=True, readonly=True)
 
@@ -73,9 +73,6 @@ class DecaVersion(models.Model):
         "l10n.es.deca.delivery.log", "version_id", readonly=True
     )
 
-    _token_unique = models.Constraint(
-        "UNIQUE(access_token)", "The DeCA public access token must be unique."
-    )
     _document_version_unique = models.Constraint(
         "UNIQUE(document_id, version_number)",
         "A DeCA version number can only occur once per document.",
@@ -126,8 +123,16 @@ class DecaVersion(models.Model):
         )
 
     def action_download(self):
+        """Download this exact immutable version through authenticated Odoo."""
         self.ensure_one()
-        return {"type": "ir.actions.act_url", "url": self.public_url, "target": "new"}
+        return {
+            "type": "ir.actions.act_url",
+            "url": (
+                f"/web/content/l10n.es.deca.version/{self.id}/pdf_data/"
+                f"{self.pdf_filename}?download=true"
+            ),
+            "target": "new",
+        }
 
     def get_pdf_bytes(self):
         self.ensure_one()

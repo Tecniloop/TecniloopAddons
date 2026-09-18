@@ -326,6 +326,8 @@
                             <group>
                                 <field name="current_version_id" />
                                 <field name="current_pdf_url" widget="url" />
+                                <field name="public_access_active" />
+                                <field name="public_access_until" />
                             </group>
                         </page>
                     </notebook>

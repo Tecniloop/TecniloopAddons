@@ -6,7 +6,6 @@ import hashlib
 import hmac
 import logging
 import re
-from datetime import timedelta
 
 from odoo import fields, http
 from odoo.http import request
@@ -27,41 +26,33 @@ class DecaPublicController(http.Controller):
         save_session=False,
     )
     def download_deca_pdf(self, token, **_kwargs):
-        """Return the sealed PDF directly, as required for roadside inspection.
-
-        ``sudo`` is intentional and narrowly scoped to an unguessable 256-bit token.
-        The response exposes only the already-sealed PDF; no partner, chatter or
-        mutable record data are serialized.  A landing page or login redirect would
-        violate section three of the 5 June 2026 Resolution.
-        """
+        """Return the current sealed PDF through the document's stable Method-A URL."""
         if not TOKEN_PATTERN.fullmatch(token):
             raise NotFound()
-        version = (
-            request.env["l10n.es.deca.version"]
+        document = (
+            request.env["l10n.es.deca.document"]
             .sudo()
-            .search([("access_token", "=", token)], limit=1)
+            .search([("public_access_token", "=", token)], limit=1)
         )
-        if not version or not version.pdf_data:
+        if not document or not document.current_version_id.pdf_data:
             raise NotFound()
 
         now = fields.Datetime.now()
-        public_until = version.public_until
-        if version.document_id.actual_end_at:
-            public_until = max(
-                public_until,
-                version.document_id.actual_end_at + timedelta(days=7),
-            )
         if (
-            public_until
-            and now > public_until
-            and version.document_id.state not in ("issued", "in_transit")
+            not document.public_access_active
+            or (
+                document.public_access_until
+                and now > document.public_access_until
+                and document.state not in ("issued", "in_transit")
+            )
         ):
+            document._close_public_access_if_expired(now=now)
             raise Gone()
 
+        version = document.current_version_id
         pdf = base64.b64decode(version.pdf_data)
         actual_hash = hashlib.sha256(pdf).hexdigest()
         if not hmac.compare_digest(actual_hash, version.pdf_sha256 or ""):
-            # Never serve bytes that no longer match the transactionally sealed hash.
             _logger.error("DeCA PDF integrity check failed for version %s", version.id)
             raise InternalServerError()
         headers = [

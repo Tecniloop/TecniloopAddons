@@ -22,3 +22,12 @@ Previsto
   decisión legal de aplicabilidad del operador.
 * Añadir un módulo puente para proyectos OCA de e-CMR cuando su API objetivo
   para Odoo 19 esté acordada.
+
+Implemented in 19.0.2.0.0
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Stable Method-A public URL/QR across immutable revisions.
+* Automatic email delivery to shipper/carrier when email addresses are available.
+* Lightweight carrier vehicle/plate catalogue without Fleet.
+* Company default DeCA carrier.
+* Public access closure seven natural days after completion (configurable, default 7) with hourly cron.

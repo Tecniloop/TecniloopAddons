@@ -5,3 +5,5 @@ access_deca_version_user,DeCA version user,model_l10n_es_deca_version,group_deca
 access_deca_delivery_user,DeCA delivery evidence user,model_l10n_es_deca_delivery_log,group_deca_user,1,0,1,0
 access_deca_revision_wizard,DeCA revision wizard,model_l10n_es_deca_revision_wizard,group_deca_user,1,1,1,1
 access_deca_delivery_wizard,DeCA delivery wizard,model_l10n_es_deca_delivery_wizard,group_deca_user,1,1,1,1
+access_deca_vehicle_user,DeCA vehicle user,model_l10n_es_deca_vehicle,group_deca_user,1,1,1,0
+access_deca_vehicle_manager,DeCA vehicle manager,model_l10n_es_deca_vehicle,group_deca_manager,1,1,1,1

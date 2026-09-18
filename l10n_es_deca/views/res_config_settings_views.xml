@@ -6,30 +6,28 @@
         <field name="inherit_id" ref="base.res_config_settings_view_form" />
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
-                <div
-          class="app_settings_block"
-          data-string="DeCA"
-          string="DeCA"
-          data-key="l10n_es_deca"
-          groups="l10n_es_deca.group_deca_manager"
-        >
+                <div class="app_settings_block" data-string="DeCA" string="DeCA" data-key="l10n_es_deca" groups="l10n_es_deca.group_deca_manager">
                     <h2>DeCA</h2>
                     <div class="row mt16 o_settings_container" id="deca_setting_container">
-                        <div
-              class="col-12 col-lg-6 o_setting_box"
-              id="deca_public_base_url"
-            >
+                        <div class="col-12 col-lg-6 o_setting_box" id="deca_public_base_url">
                             <div class="o_setting_right_pane">
                                 <label for="l10n_es_deca_public_base_url" string="DeCA public URL" />
-                                <div class="text-muted">
-                                    HTTPS URL used to build each DeCA's public download link and QR code
-                                </div>
-                                <div class="content-group">
-                                    <field
-                    name="l10n_es_deca_public_base_url"
-                    placeholder="https://deca.example.com"
-                  />
-                                </div>
+                                <div class="text-muted">HTTPS URL used to build the stable public DeCA link and QR code.</div>
+                                <div class="content-group"><field name="l10n_es_deca_public_base_url" placeholder="https://deca.example.com" /></div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box" id="deca_default_carrier">
+                            <div class="o_setting_right_pane">
+                                <label for="deca_default_carrier_id" />
+                                <div class="text-muted">Carrier proposed when the transfer has no more specific carrier.</div>
+                                <div class="content-group"><field name="deca_default_carrier_id" /></div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box" id="deca_retention_days">
+                            <div class="o_setting_right_pane">
+                                <label for="deca_public_retention_days" />
+                                <div class="text-muted">Public access remains open this many natural days after transport completion.</div>
+                                <div class="content-group"><field name="deca_public_retention_days" /></div>
                             </div>
                         </div>
                     </div>

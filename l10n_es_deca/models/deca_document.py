@@ -17,7 +17,7 @@ try:
 except ImportError:  # pragma: no cover - selected by the Odoo Python runtime
     from PyPDF2 import PdfReader, PdfWriter
 
-from odoo import _, api, fields, models
+from odoo import _, Command, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 
@@ -137,9 +137,13 @@ class DecaDocument(models.Model):
         "l10n.es.deca.version", readonly=True, copy=False, ondelete="restrict"
     )
     version_count = fields.Integer(compute="_compute_version_count")
-    current_pdf_url = fields.Char(
-        related="current_version_id.public_url", readonly=True
+    public_access_token = fields.Char(readonly=True, copy=False, index=True)
+    public_url = fields.Char(readonly=True, copy=False)
+    public_access_active = fields.Boolean(
+        readonly=True, copy=False, default=False, index=True
     )
+    public_access_until = fields.Datetime(readonly=True, copy=False, index=True)
+    current_pdf_url = fields.Char(related="public_url", readonly=True)
     delivery_log_ids = fields.One2many(
         "l10n.es.deca.delivery.log", "document_id", readonly=True
     )
@@ -177,9 +181,16 @@ class DecaDocument(models.Model):
         "actual_start_at",
         "actual_end_at",
         "current_version_id",
+        "public_access_token",
+        "public_url",
+        "public_access_active",
+        "public_access_until",
     }
     _company_reference_unique = models.Constraint(
         "UNIQUE(company_id, name)", "The DeCA reference must be unique per company."
+    )
+    _public_token_unique = models.Constraint(
+        "UNIQUE(public_access_token)", "The DeCA public access token must be unique."
     )
     _picking_unique = models.Constraint(
         "UNIQUE(picking_id)",
@@ -198,6 +209,10 @@ class DecaDocument(models.Model):
                 vals.pop("actual_start_at", None)
                 vals.pop("actual_end_at", None)
                 vals.pop("current_version_id", None)
+                vals.pop("public_access_token", None)
+                vals.pop("public_url", None)
+                vals.pop("public_access_active", None)
+                vals.pop("public_access_until", None)
             if vals.get("name", "/") == "/":
                 vals["name"] = (
                     self.env["ir.sequence"].next_by_code("l10n.es.deca.document")
@@ -335,6 +350,10 @@ class DecaDocument(models.Model):
                 "actual_end_at",
                 "version_ids",
                 "current_version_id",
+                "public_access_token",
+                "public_url",
+                "public_access_active",
+                "public_access_until",
             ]
         )
 
@@ -446,6 +465,60 @@ class DecaDocument(models.Model):
                 )
             )
         return base_url
+
+    def _ensure_public_access(self):
+        """Create the document-level stable token/URL once (Method A)."""
+        self.ensure_one()
+        if self.public_access_token and self.public_url:
+            return
+        if self.current_version_id.access_token and self.current_version_id.public_url:
+            token = self.current_version_id.access_token
+            public_url = self.current_version_id.public_url
+        else:
+            token = secrets.token_urlsafe(32)
+            public_url = urljoin(self._get_public_base_url() + "/", f"deca/pdf/{token}")
+        self.sudo().with_context(_deca_internal_write=True).write(
+            {
+                "public_access_token": token,
+                "public_url": public_url,
+                "public_access_active": True,
+                "public_access_until": False,
+            }
+        )
+
+    def _get_public_retention_days(self):
+        self.ensure_one()
+        return max(int(self.company_id.deca_public_retention_days or 7), 1)
+
+    def _close_public_access_if_expired(self, now=None):
+        now = now or fields.Datetime.now()
+        expired = self.filtered(
+            lambda doc: doc.public_access_active
+            and doc.public_access_until
+            and doc.public_access_until < now
+            and doc.state not in ("issued", "in_transit")
+        )
+        if expired:
+            expired.sudo().with_context(_deca_internal_write=True).write(
+                {"public_access_active": False}
+            )
+        return expired
+
+    @api.model
+    def _cron_close_expired_public_access(self):
+        now = fields.Datetime.now()
+        documents = self.sudo().search(
+            [
+                ("public_access_active", "=", True),
+                ("public_access_until", "!=", False),
+                ("public_access_until", "<", now),
+                ("state", "not in", ("issued", "in_transit")),
+            ]
+        )
+        documents.with_context(_deca_internal_write=True).write(
+            {"public_access_active": False}
+        )
+        return True
 
     def _snapshot(self):
         """Freeze legal values and stock provenance used by the sealed PDF."""
@@ -567,9 +640,10 @@ class DecaDocument(models.Model):
         previous = self.current_version_id
         number = max(self.version_ids.mapped("version_number"), default=0) + 1
         now = fields.Datetime.now()
-        token = secrets.token_urlsafe(32)
-        public_url = urljoin(self._get_public_base_url() + "/", f"deca/pdf/{token}")
-        public_until = now + timedelta(days=366)
+        self._ensure_public_access()
+        token = self.public_access_token
+        public_url = self.public_url
+        public_until = self.public_access_until or False
         safe_reference = re.sub(r"[^A-Za-z0-9._-]+", "-", self.name).strip("-.")
         filename = f"{safe_reference or 'DeCA'}-v{number}.pdf"
         values = {
@@ -650,7 +724,75 @@ class DecaDocument(models.Model):
             ),
             subtype_xmlid="mail.mt_note",
         )
+        self._send_version_emails(version)
         return version
+
+    def _email_recipients(self):
+        self.ensure_one()
+        recipients = []
+        for partner in (self.contractual_shipper_id, self.effective_carrier_id):
+            if (
+                partner
+                and partner.email
+                and partner.id not in [item.id for item in recipients]
+            ):
+                recipients.append(partner)
+        return recipients
+
+    def _send_version_emails(self, version):
+        """Send the sealed current PDF to shipper/carrier without blocking issuance."""
+        self.ensure_one()
+        template = self.env.ref(
+            "l10n_es_deca.mail_template_deca_issued", raise_if_not_found=False
+        )
+        if not template:
+            return False
+        recipients = self._email_recipients()
+        if not recipients:
+            return False
+        pdf = version.get_pdf_bytes()
+        attachment = self.env["ir.attachment"].create(
+            {
+                "name": version.pdf_filename,
+                "type": "binary",
+                "datas": base64.b64encode(pdf),
+                "mimetype": "application/pdf",
+                "res_model": self._name,
+                "res_id": self.id,
+            }
+        )
+        for partner in recipients:
+            try:
+                template.with_context(deca_recipient_name=partner.name).send_mail(
+                    self.id,
+                    force_send=True,
+                    email_values={
+                        "email_to": partner.email,
+                        "attachment_ids": [Command.link(attachment.id)],
+                    },
+                )
+                self.env["l10n.es.deca.delivery.log"].create(
+                    {
+                        "version_id": version.id,
+                        "method": "email",
+                        "recipient_name": partner.name,
+                        "note": _(
+                            "Automatically sent to %(email)s", email=partner.email
+                        ),
+                    }
+                )
+            except Exception as error:  # noqa: BLE001
+                self.message_post(
+                    body=_(
+                        "Automatic DeCA email to %(recipient)s (%(email)s) failed: "
+                        "%(error)s",
+                        recipient=partner.display_name,
+                        email=partner.email,
+                        error=str(error),
+                    ),
+                    subtype_xmlid="mail.mt_note",
+                )
+        return True
 
     def action_issue(self):
         self.ensure_one()
@@ -712,8 +854,15 @@ class DecaDocument(models.Model):
             raise UserError(
                 _("Deliver the current revised PDF/QR to the driver first.")
             )
+        now = fields.Datetime.now()
         self.sudo().with_context(_deca_internal_write=True).write(
-            {"state": "done", "actual_end_at": fields.Datetime.now()}
+            {
+                "state": "done",
+                "actual_end_at": now,
+                "public_access_until": now
+                + timedelta(days=self._get_public_retention_days()),
+                "public_access_active": True,
+            }
         )
         return True
 

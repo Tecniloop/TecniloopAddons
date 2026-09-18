@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_partner_form_deca" model="ir.ui.view">
+        <field name="name">res.partner.form.deca</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="DeCA" groups="l10n_es_deca.group_deca_user">
+                    <group>
+                        <field name="deca_is_carrier" />
+                    </group>
+                    <field name="deca_vehicle_ids" invisible="not deca_is_carrier">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle" />
+                            <field name="vehicle_type" />
+                            <field name="license_plate" />
+                            <field name="is_default" />
+                            <field name="active" />
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

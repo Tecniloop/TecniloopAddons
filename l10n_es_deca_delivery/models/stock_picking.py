@@ -34,9 +34,15 @@ class StockPicking(models.Model):
                     "effective_carrier_vat": carrier_partner.vat,
                 }
             )
-            plate = self._deca_find_carrier_vehicle_plate(carrier_partner)
-            if plate:
-                values["tractor_plate"] = plate
+            tractor_plate = (
+                carrier_partner._deca_default_vehicle_plate("tractor")
+                or self._deca_find_carrier_vehicle_plate(carrier_partner)
+            )
+            trailer_plate = carrier_partner._deca_default_vehicle_plate("trailer")
+            if tractor_plate:
+                values["tractor_plate"] = tractor_plate
+            if trailer_plate:
+                values["trailer_plate"] = trailer_plate
         return values
 
     def _deca_find_carrier_vehicle_plate(self, carrier_partner):
@@ -53,7 +59,11 @@ class StockPicking(models.Model):
             return ""
         vehicle = Vehicle.sudo().search(
             [
-                ("driver_id.commercial_partner_id", "=", carrier_partner.commercial_partner_id.id),
+                (
+                    "driver_id.commercial_partner_id",
+                    "=",
+                    carrier_partner.commercial_partner_id.id,
+                ),
             ],
             limit=1,
         )
