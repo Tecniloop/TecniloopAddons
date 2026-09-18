@@ -1,8 +1,8 @@
 {
     "name": "Pedidos demo diarios (compra y venta)",
-    "version": "19.0.1.1.1",
+    "version": "19.0.1.2.0",
     "category": "Sales",
-    "summary": "Genera 3-7 pedidos de venta y compra por día (queue_job) con fechas de pedido y albarán pasadas",
+    "summary": "Pedidos demo por fechas, albaranes a fecha pasada y facturación el mismo día",
     "author": "Tecniloop",
     "license": "LGPL-3",
     "depends": ["sale_management", "purchase", "stock", "account", "queue_job"],

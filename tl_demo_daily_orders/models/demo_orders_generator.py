@@ -100,10 +100,39 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             return "product_uom", uom_id
         return None, None
 
+    def _sql_set_dates(self, table, ids, when, extra_columns=()):
+        if not ids:
+            return
+        cr = self.env.cr
+        cr.execute(
+            "SELECT column_name FROM information_schema.columns "
+            "WHERE table_name = %s",
+            (table,),
+        )
+        existing = {row[0] for row in cr.fetchall()}
+        assigns = []
+        params = []
+        for col in ("date_order", "date_approve", "date_planned", "commitment_date", "expected_date") + tuple(extra_columns):
+            if col in existing:
+                assigns.append("%s = %%s" % col)
+                params.append(when)
+        if "create_date" in existing:
+            assigns.append("create_date = %s")
+            params.append(when)
+        if "write_date" in existing:
+            assigns.append("write_date = %s")
+            params.append(when)
+        if not assigns:
+            return
+        params.append(tuple(ids))
+        cr.execute(
+            "UPDATE %s SET %s WHERE id IN %%s" % (table, ", ".join(assigns)),
+            params,
+        )
+
     def _force_document_date(self, record, when):
-        """Odoo pisa date_order al confirmar; se reescribe después.
-        La fecha de entrega (commitment_date / expected_date / date_planned)
-        queda en el mismo día pretendido.
+        """Tras confirmar, Odoo 19 deja date_order en 'ahora' y a veces readonly.
+        Se fuerza por ORM y por SQL en cabecera y líneas.
         """
         vals = {}
         for fname in (
@@ -115,18 +144,37 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             "date_planned",
         ):
             field = record._fields.get(fname)
-            if field and not field.readonly and (not field.compute or field.store):
-                vals[fname] = when
+            if not field:
+                continue
+            if field.compute and not field.store:
+                continue
+            vals[fname] = when
+        ctx = dict(tracking_disable=True, mail_notrack=True, skip_readonly_check=True)
         if vals:
-            record.with_context(tracking_disable=True, mail_notrack=True).write(vals)
+            try:
+                record.with_context(**ctx).sudo().write(vals)
+            except Exception:
+                pass
         lines = record.order_line if "order_line" in record._fields else record.browse()
         line_vals = {}
         if "customer_lead" in lines._fields:
             line_vals["customer_lead"] = 0
         if "date_planned" in lines._fields:
             line_vals["date_planned"] = when
+        if "date_order" in lines._fields:
+            line_vals["date_order"] = when
         if line_vals and lines:
-            lines.with_context(tracking_disable=True).write(line_vals)
+            try:
+                lines.with_context(**ctx).sudo().write(line_vals)
+            except Exception:
+                pass
+        table = record._table
+        self._sql_set_dates(table, record.ids, when)
+        if lines:
+            self._sql_set_dates(lines._table, lines.ids, when)
+        record.invalidate_recordset()
+        if lines:
+            lines.invalidate_recordset()
 
     def _create_purchase(self, vendor, products, when, confirm, backdate, lines_min, lines_max):
         lines = []
@@ -272,3 +320,145 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             picking.move_line_ids.write({"date": when})
         if "is_locked" in picking._fields and not picking.is_locked and hasattr(picking, "action_toggle_is_locked"):
             picking.action_toggle_is_locked()
+
+    def _invoice_day(self, day_str, opts):
+        """Factura ventas y compras DEMO de un día, con fecha de factura = ese día."""
+        day = fields.Date.from_string(day_str)
+        company = self.env["res.company"].browse(opts["company_id"])
+        self = self.with_company(company)
+        origin = "DEMO-%s" % day
+        sales = self.env["sale.order"].search(
+            [
+                ("origin", "=", origin),
+                ("company_id", "=", company.id),
+                ("state", "in", ("sale", "done")),
+                ("invoice_status", "in", ("to invoice", "no")),
+            ]
+        )
+        # incluir parcialmente facturados
+        sales |= self.env["sale.order"].search(
+            [
+                ("origin", "=", origin),
+                ("company_id", "=", company.id),
+                ("state", "in", ("sale", "done")),
+                ("invoice_status", "=", "to invoice"),
+            ]
+        )
+        purchases = self.env["purchase.order"].search(
+            [
+                ("origin", "=", origin),
+                ("company_id", "=", company.id),
+                ("state", "in", ("purchase", "done")),
+                ("invoice_status", "in", ("to invoice", "no")),
+            ]
+        )
+        purchases |= self.env["purchase.order"].search(
+            [
+                ("origin", "=", origin),
+                ("company_id", "=", company.id),
+                ("invoice_status", "=", "to invoice"),
+            ]
+        )
+        sale_moves, purchase_moves = self.env["account.move"], self.env["account.move"]
+        if opts.get("invoice_sales", True):
+            for so in sales:
+                sale_moves |= self._invoice_sale(so, day)
+        if opts.get("invoice_purchases", True):
+            for po in purchases:
+                purchase_moves |= self._invoice_purchase(po, day)
+        _logger.info(
+            "Facturas demo %s: %s ventas, %s compras",
+            day_str,
+            len(sale_moves),
+            len(purchase_moves),
+        )
+        return {
+            "day": day_str,
+            "sale_move_ids": sale_moves.ids,
+            "purchase_move_ids": purchase_moves.ids,
+        }
+
+    def _random_vendor_ref(self, day):
+        year = day.year if hasattr(day, "year") else fields.Date.from_string(str(day)).year
+        styles = (
+            "F-%s/%05d" % (year, random.randint(1, 99999)),
+            "FRA-%s-%04d" % (year, random.randint(100, 9999)),
+            "A-%s" % random.randint(100000, 999999),
+            "%s/%02d/%04d" % (year, random.randint(1, 12), random.randint(1, 9999)),
+            "ALB-%s" % random.randint(10000, 99999),
+        )
+        return random.choice(styles)
+
+    def _invoice_sale(self, order, day):
+        if order.invoice_status not in ("to invoice",):
+            # intentar igual si hay qty por facturar
+            if all(line.qty_to_invoice <= 0 for line in order.order_line if line.product_id):
+                return self.env["account.move"]
+        moves = self.env["account.move"]
+        try:
+            created = order._create_invoices()
+            moves = created if created else self.env["account.move"]
+        except Exception as exc:
+            _logger.warning("No se facturó venta %s: %s", order.name, exc)
+            return self.env["account.move"]
+        for move in moves:
+            self._finalize_invoice(move, day, vendor_ref=False)
+        return moves
+
+    def _invoice_purchase(self, order, day):
+        if hasattr(order, "invoice_status") and order.invoice_status not in ("to invoice",):
+            if all(
+                (getattr(line, "qty_to_invoice", 0) or 0) <= 0
+                for line in order.order_line
+                if line.product_id
+            ):
+                return self.env["account.move"]
+        moves = self.env["account.move"]
+        try:
+            action = order.with_context(create_bill=True).action_create_invoice()
+            if isinstance(action, dict) and action.get("res_id"):
+                moves = self.env["account.move"].browse(action["res_id"])
+            elif isinstance(action, dict) and action.get("res_ids"):
+                moves = self.env["account.move"].browse(action["res_ids"])
+            else:
+                moves = order.invoice_ids.filtered(lambda m: m.state == "draft")
+        except Exception as exc:
+            _logger.warning("No se facturó compra %s: %s", order.name, exc)
+            return self.env["account.move"]
+        ref = self._random_vendor_ref(day)
+        for move in moves:
+            self._finalize_invoice(move, day, vendor_ref=ref)
+        return moves
+
+    def _finalize_invoice(self, move, day, vendor_ref=False):
+        vals = {}
+        if "invoice_date" in move._fields:
+            vals["invoice_date"] = day
+        if "date" in move._fields:
+            vals["date"] = day
+        if vendor_ref:
+            if "ref" in move._fields:
+                vals["ref"] = vendor_ref
+            if "payment_reference" in move._fields:
+                vals["payment_reference"] = vendor_ref
+        if vals:
+            move.with_context(tracking_disable=True, check_move_validity=False).write(vals)
+        if move.state == "draft":
+            try:
+                move.action_post()
+            except Exception as exc:
+                _logger.warning("No se publicó %s: %s", move.name, exc)
+        # Forzar fecha contable / factura por si action_post la pisa
+        when_dt = datetime.combine(day, time(12, 0))
+        self._sql_set_dates(
+            move._table,
+            move.ids,
+            fields.Datetime.to_datetime(when_dt),
+            extra_columns=("invoice_date", "date"),
+        )
+        if vendor_ref:
+            self.env.cr.execute(
+                "UPDATE account_move SET ref = %s WHERE id = %s",
+                (vendor_ref, move.id),
+            )
+        move.invalidate_recordset()

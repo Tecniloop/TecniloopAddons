@@ -53,4 +53,48 @@
         parent="menu_tl_demo_orders_root"
         action="action_tl_demo_orders_wizard"
         sequence="10"/>
+
+    <record id="view_tl_demo_invoice_wizard_form" model="ir.ui.view">
+        <field name="name">tl.demo.invoice.wizard.form</field>
+        <field name="model">tl.demo.invoice.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Facturar pedidos demo">
+                <sheet>
+                    <group>
+                        <group string="Intervalo">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="company_id"/>
+                        </group>
+                        <group string="Opciones">
+                            <field name="invoice_sales"/>
+                            <field name="invoice_purchases"/>
+                            <field name="use_queue_job"/>
+                        </group>
+                    </group>
+                    <group string="Resultado" invisible="not last_summary">
+                        <field name="last_summary" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_invoice" type="object" string="Facturar" class="btn-primary"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tl_demo_invoice_wizard" model="ir.actions.act_window">
+        <field name="name">Facturar pedidos demo</field>
+        <field name="res_model">tl.demo.invoice.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        id="menu_tl_demo_invoice_wizard"
+        name="Facturar pedidos demo"
+        parent="menu_tl_demo_orders_root"
+        action="action_tl_demo_invoice_wizard"
+        sequence="20"/>
 </odoo>
