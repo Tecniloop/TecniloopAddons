@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tl_demo_orders_wizard_form" model="ir.ui.view">
+        <field name="name">tl.demo.orders.wizard.form</field>
+        <field name="model">tl.demo.orders.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generar pedidos demo">
+                <sheet>
+                    <group>
+                        <group string="Intervalo">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="min_per_day"/>
+                            <field name="max_per_day"/>
+                        </group>
+                        <group string="Opciones">
+                            <field name="company_id"/>
+                            <field name="warehouse_id"/>
+                            <field name="confirm_pickings"/>
+                            <field name="backdate_pickings"/>
+                            <field name="lines_min"/>
+                            <field name="lines_max"/>
+                        </group>
+                    </group>
+                    <group string="Resultado" invisible="not last_summary">
+                        <field name="last_summary" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_generate" type="object" string="Generar pedidos" class="btn-primary"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tl_demo_orders_wizard" model="ir.actions.act_window">
+        <field name="name">Generar pedidos demo</field>
+        <field name="res_model">tl.demo.orders.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        id="menu_tl_demo_orders_root"
+        name="Datos demo"
+        parent="sale.sale_menu_root"
+        sequence="90"/>
+    <menuitem
+        id="menu_tl_demo_orders_wizard"
+        name="Pedidos aleatorios por fechas"
+        parent="menu_tl_demo_orders_root"
+        action="action_tl_demo_orders_wizard"
+        sequence="10"/>
+</odoo>
