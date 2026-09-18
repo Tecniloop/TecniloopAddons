@@ -28,8 +28,10 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
     _description = 'Conector Araolit España'
 
     _HOSTS = {'araolit.es', 'www.araolit.es'}
+    # Araolit usa rutas PrestaShop con uno o varios segmentos de categoria
+    # antes del id del producto. No asumimos una profundidad fija.
     _PRODUCT_PATH_RE = re.compile(
-        r'^/(?:[^/?#]+/)?(?P<product_id>\d+)-(?P<slug>[^/?#]+)\.html/?$',
+        r'^/(?:[^/?#]+/)*(?P<product_id>\d+)(?:-\d+)?-(?P<slug>[^/?#]+)\.html/?$',
         re.IGNORECASE,
     )
     _CATEGORY_PATH_RE = re.compile(
@@ -56,6 +58,30 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
     def _product_key(cls, value):
         match = cls._product_match(value)
         return match.group('product_id') if match else False
+
+    @classmethod
+    def _product_links_from_tree(cls, tree, page_url):
+        """Extrae enlaces desde las tarjetas PrestaShop y como respaldo desde todo el DOM.
+
+        Araolit renderiza listados con miniaturas PrestaShop. Priorizar esos
+        nodos evita depender de clases concretas del tema para descubrir fichas.
+        """
+        result = []
+        seen = set()
+        xpaths = [
+            '//*[@data-id-product]//a[@href]/@href',
+            '//*[contains(concat(" ", normalize-space(@class), " "), " product-miniature ")]//a[@href]/@href',
+            '//article[contains(@class,"product")]//a[@href]/@href',
+            '//a[@href]/@href',
+        ]
+        for xpath in xpaths:
+            for href in tree.xpath(xpath):
+                absolute = cls._canonical_url(urljoin(page_url, href))
+                if absolute in seen or not cls._product_match(absolute):
+                    continue
+                seen.add(absolute)
+                result.append(absolute)
+        return result
 
     def _candidate_sitemaps(self, source):
         root = 'https://www.araolit.es/'
