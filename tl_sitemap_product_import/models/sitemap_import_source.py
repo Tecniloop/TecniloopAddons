@@ -28,6 +28,7 @@ CONNECTOR_SELECTION = [
     ('sitemap.connector.cervelo_es', 'Cervélo España'),
     ('sitemap.connector.colnago_es', 'Colnago España'),
     ('sitemap.connector.bicicletasquer_es', 'Bicicletas Quer B2B España'),
+    ('sitemap.connector.araolit_es', 'Araolit España'),
     ('sitemap.connector.ridley_es', 'Ridley Bikes España'),
     ('sitemap.connector.gtbicycles', 'GT Bicycles'),
     ('sitemap.connector.conor_es', 'Conor Bikes España'),

@@ -66,6 +66,9 @@
     <record id="product_brand_colnago_es" model="res.brand">
         <field name="name">Colnago</field>
     </record>
+    <record id="product_brand_araolit_es" model="res.brand">
+        <field name="name">Araolit</field>
+    </record>
     <record id="product_brand_bicicletasquer_es" model="res.brand">
         <field name="name">Bicicletas Quer</field>
     </record>
@@ -520,6 +523,19 @@
         <field name="products_per_run">20</field>
         <field name="max_images_per_product">8</field>
         <field name="brand_id" ref="product_brand_colnago_es" />
+    </record>
+    <record id="sitemap_import_source_araolit_es" model="sitemap.import.source">
+        <field name="name">Araolit España</field>
+        <field name="connector_model">sitemap.connector.araolit_es</field>
+        <field name="sitemap_index_url">https://www.araolit.es/robots.txt</field>
+        <field name="import_eans">1</field>
+        <field name="max_ean_requests_per_product">20</field>
+        <field name="user_agent">Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36</field>
+        <field name="request_delay">1.0</field>
+        <field name="request_timeout">30</field>
+        <field name="products_per_run">20</field>
+        <field name="max_images_per_product">10</field>
+        <field name="auto_archive_discontinued">0</field>
     </record>
     <record id="sitemap_import_source_bicicletasquer_es" model="sitemap.import.source">
         <field name="name">Bicicletas Quer B2B España</field>

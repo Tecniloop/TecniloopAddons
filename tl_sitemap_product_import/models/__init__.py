@@ -29,6 +29,7 @@ from . import connector_cervelo_es
 from . import connector_colnago_es
 from . import connector_prestashop_base
 from . import connector_bicicletasquer_es
+from . import connector_araolit_es
 from . import connector_ridley_es
 from . import connector_gtbicycles
 from . import connector_conor_es
