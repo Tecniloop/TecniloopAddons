@@ -1272,3 +1272,6 @@ configurada en la fuente. Esta versión no depende de `product_brand`.
 ## 19.0.1.124.0
 - Diagnóstico detallado para PIKO y staging: fase, intento, HTTP, URL final, extracto y traceback.
 - Persistencia de la excepción original antes de reintentos de queue_job.
+
+### 19.0.1.136.0
+- Araolit: lectura robusta del sitemap real con redirecciones y cabeceras XML/navegador.

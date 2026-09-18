@@ -3,6 +3,7 @@ import logging
 import re
 from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlsplit, urlunsplit
 
+from lxml import etree
 from lxml import html as lxml_html
 
 from odoo import models
@@ -37,6 +38,175 @@ class SitemapConnectorAraolitEs(models.AbstractModel):
     _CATEGORY_PATH_RE = re.compile(
         r'^/(?P<category_id>\d+)-(?P<slug>[^/?#]+?)/?$', re.IGNORECASE,
     )
+
+
+    def _get_session(self, source):
+        """Sesión Araolit con cabeceras de navegador y preferencia XML.
+
+        Araolit responde de forma distinta a clientes identificados como bot en
+        sus endpoints ``*.xml``. El importador genérico usa un User-Agent propio
+        y el conector PrestaShop heredado prioriza HTML; ambas cosas pueden hacer
+        que el servidor entregue una página HTML en lugar del sitemap.
+        """
+        session = super()._get_session(source)
+        configured_ua = (getattr(source, 'user_agent', False) or '').strip()
+        if not configured_ua or 'OdooSitemapImporter' in configured_ua:
+            session.headers['User-Agent'] = (
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/153.0.0.0 Safari/537.36'
+            )
+        session.headers.update({
+            'Accept': (
+                'application/xml,text/xml;q=0.9,application/xhtml+xml;q=0.8,'
+                'text/html;q=0.7,*/*;q=0.5'
+            ),
+            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.3',
+        })
+        return session
+
+    @staticmethod
+    def _araolit_xml_root(content):
+        """Parsea el sitemap incluso si el servidor antepone HTML/basura.
+
+        En producción se ha observado que el endpoint puede devolver contenido
+        que empieza como HTML aunque el navegador termine mostrando el sitemap.
+        Primero intentamos XML estricto y después recortamos hasta el comienzo
+        real de ``<urlset>``/``<sitemapindex>``. También contemplamos XML
+        escapado dentro de HTML.
+        """
+        raw = content or b''
+        if raw[:2] == b'\x1f\x8b':
+            import gzip
+            raw = gzip.decompress(raw)
+
+        parser = etree.XMLParser(resolve_entities=False, no_network=True, recover=False)
+        try:
+            return etree.fromstring(raw, parser=parser)
+        except etree.XMLSyntaxError as first_exc:
+            candidates = [raw]
+            try:
+                decoded = raw.decode('utf-8', errors='replace')
+                unescaped = html.unescape(decoded).encode('utf-8')
+                if unescaped != raw:
+                    candidates.append(unescaped)
+            except Exception:
+                pass
+
+            markers = (b'<?xml', b'<urlset', b'<sitemapindex')
+            for candidate in candidates:
+                starts = [candidate.find(marker) for marker in markers]
+                starts = [pos for pos in starts if pos >= 0]
+                if not starts:
+                    continue
+                trimmed = candidate[min(starts):]
+                # Si hay contenido HTML después del cierre XML, cortar ahí.
+                for closing in (b'</urlset>', b'</sitemapindex>'):
+                    end = trimmed.find(closing)
+                    if end >= 0:
+                        trimmed = trimmed[:end + len(closing)]
+                        break
+                try:
+                    return etree.fromstring(trimmed, parser=parser)
+                except etree.XMLSyntaxError:
+                    continue
+            raise first_exc
+
+    def _iter_sitemap_entries(self, source, sitemap_url, depth=0, visited=None):
+        """Iterador específico para los sitemaps de Araolit.
+
+        Sigue las redirecciones (``sitemap.xml`` -> ``1_es_0_sitemap.xml``) y
+        conserva como clave visitada la URL final para evitar bucles.
+        """
+        if depth > 8:
+            raise ValueError('El sitemap de Araolit supera ocho niveles de índices.')
+        visited = visited or set()
+        requested_url = (sitemap_url or '').strip()
+        if not requested_url or requested_url in visited:
+            return
+        visited.add(requested_url)
+
+        session = self._get_session(source)
+        response = self._http_get(session, requested_url, source)
+        final_url = response.url or requested_url
+        if final_url in visited and final_url != requested_url:
+            return
+        visited.add(final_url)
+
+        try:
+            root = self._araolit_xml_root(response.content)
+        except etree.XMLSyntaxError as exc:
+            # Algunos proxies/WAF entregan el sitemap ya transformado a HTML.
+            # En ese caso las entradas siguen siendo enlaces visibles en la
+            # página; extraerlos permite trabajar con la misma representación
+            # que ve un navegador sin asumir que el XML bruto está disponible.
+            try:
+                tree = lxml_html.fromstring(response.content)
+            except Exception:
+                raise exc
+
+            discovered = []
+            for value in tree.xpath('//a[@href]/@href | //a/text()'):
+                candidate = self._canonical_url(urljoin(final_url, str(value).strip()))
+                if not candidate or candidate in discovered:
+                    continue
+                parsed = urlparse(candidate)
+                if parsed.netloc.lower() not in self._HOSTS:
+                    continue
+                discovered.append(candidate)
+
+            yielded = False
+            for candidate in discovered:
+                if self._product_match(candidate):
+                    yielded = True
+                    yield {'url': candidate, 'lastmod': False, 'images': []}
+                elif candidate.lower().endswith('.xml'):
+                    yielded = True
+                    yield from self._iter_sitemap_entries(
+                        source, candidate, depth=depth + 1, visited=visited,
+                    )
+            if yielded:
+                return
+            content_type = response.headers.get('Content-Type', '')
+            raise ValueError(
+                'Araolit devolvió HTML en lugar de XML y no se encontraron '
+                'enlaces de producto/sitemap en la representación HTML. '
+                f'URL final: {final_url}; Content-Type: {content_type or "desconocido"}. '
+                f'Error XML original: {exc}'
+            ) from exc
+
+        root_name = etree.QName(root).localname.lower()
+
+        if root_name == 'sitemapindex':
+            for child in root.xpath('./*[local-name()="sitemap"]'):
+                locs = child.xpath('./*[local-name()="loc"]/text()')
+                if not locs or not locs[0].strip():
+                    continue
+                yield from self._iter_sitemap_entries(
+                    source,
+                    urljoin(final_url, locs[0].strip()),
+                    depth=depth + 1,
+                    visited=visited,
+                )
+            return
+
+        if root_name != 'urlset':
+            raise ValueError(
+                'El recurso de Araolit no contiene <urlset> ni <sitemapindex> '
+                f'(raíz recibida: <{root_name}>).'
+            )
+
+        for node in root.xpath('./*[local-name()="url"]'):
+            locs = node.xpath('./*[local-name()="loc"]/text()')
+            if not locs or not locs[0].strip():
+                continue
+            lastmods = node.xpath('./*[local-name()="lastmod"]/text()')
+            images = node.xpath('./*[local-name()="image"]/*[local-name()="loc"]/text()')
+            yield {
+                'url': locs[0].strip(),
+                'lastmod': self._parse_sitemap_lastmod(lastmods[0] if lastmods else None),
+                'images': [value.strip() for value in images if value and value.strip()],
+            }
 
     @classmethod
     def _canonical_url(cls, value):
