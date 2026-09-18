@@ -18,6 +18,7 @@
                             <field name="warehouse_id"/>
                             <field name="confirm_pickings"/>
                             <field name="backdate_pickings"/>
+                            <field name="use_queue_job"/>
                             <field name="lines_min"/>
                             <field name="lines_max"/>
                         </group>

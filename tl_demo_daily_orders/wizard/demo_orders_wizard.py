@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import logging
 import random
-from datetime import datetime, time, timedelta
+from datetime import timedelta
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -13,21 +13,32 @@ class TlDemoOrdersWizard(models.TransientModel):
     _name = "tl.demo.orders.wizard"
     _description = "Generar pedidos de compra y venta demo por fechas"
 
-    date_from = fields.Date(required=True, default=lambda s: fields.Date.today() - timedelta(days=14))
-    date_to = fields.Date(required=True, default=fields.Date.today)
-    min_per_day = fields.Integer(default=3, required=True)
-    max_per_day = fields.Integer(default=7, required=True)
-    lines_min = fields.Integer(default=1)
-    lines_max = fields.Integer(default=4)
-    company_id = fields.Many2one("res.company", default=lambda s: s.env.company, required=True)
-    warehouse_id = fields.Many2one("stock.warehouse")
-    confirm_pickings = fields.Boolean(default=True, string="Validar albaranes")
-    backdate_pickings = fields.Boolean(
-        default=True,
-        string="Fecha efectiva pasada (Odoo 19)",
-        help="Desbloquea el albarán, escribe date_done / scheduled_date y vuelve a bloquear.",
+    date_from = fields.Date(
+        string="Fecha desde",
+        required=True,
+        default=lambda s: fields.Date.today() - timedelta(days=14),
     )
-    last_summary = fields.Text(readonly=True)
+    date_to = fields.Date(string="Fecha hasta", required=True, default=fields.Date.today)
+    min_per_day = fields.Integer(string="Mínimo de pedidos por día", default=3, required=True)
+    max_per_day = fields.Integer(string="Máximo de pedidos por día", default=7, required=True)
+    lines_min = fields.Integer(string="Líneas mínimas por pedido", default=1)
+    lines_max = fields.Integer(string="Líneas máximas por pedido", default=4)
+    company_id = fields.Many2one(
+        "res.company", string="Compañía", default=lambda s: s.env.company, required=True
+    )
+    warehouse_id = fields.Many2one("stock.warehouse", string="Almacén")
+    confirm_pickings = fields.Boolean(string="Validar albaranes", default=True)
+    backdate_pickings = fields.Boolean(
+        string="Fecha efectiva pasada (Odoo 19)",
+        default=True,
+        help="Desbloquea el albarán, escribe la fecha efectiva y vuelve a bloquearlo.",
+    )
+    use_queue_job = fields.Boolean(
+        string="Usar cola de trabajos (un job por día)",
+        default=True,
+        help="Recomendado si el intervalo es largo. Requiere el módulo queue_job y un worker.",
+    )
+    last_summary = fields.Text(string="Resultado", readonly=True)
 
     @api.model
     def default_get(self, fields_list):
@@ -39,298 +50,79 @@ class TlDemoOrdersWizard(models.TransientModel):
             res["warehouse_id"] = wh.id
         return res
 
+    def _days(self):
+        day = self.date_from
+        while day <= self.date_to:
+            yield day
+            day += timedelta(days=1)
+
+    def _opts(self, count):
+        return {
+            "count": count,
+            "company_id": self.company_id.id,
+            "warehouse_id": self.warehouse_id.id if self.warehouse_id else False,
+            "confirm_pickings": self.confirm_pickings,
+            "backdate_pickings": self.backdate_pickings,
+            "lines_min": self.lines_min,
+            "lines_max": self.lines_max,
+        }
+
     def action_generate(self):
         self.ensure_one()
         if self.date_to < self.date_from:
-            raise UserError("La fecha hasta no puede ser anterior a la fecha desde.")
+            raise UserError(_("La fecha hasta no puede ser anterior a la fecha desde."))
         if self.min_per_day < 1 or self.max_per_day < self.min_per_day:
-            raise UserError("Revisa el intervalo de pedidos por día (mínimo 3–7 recomendado).")
+            raise UserError(_("Revisa el intervalo de pedidos por día."))
 
-        customers = self._customers()
-        vendors = self._vendors()
-        products = self._products()
-        if not customers:
-            raise UserError("No hay contactos con rango de cliente (customer_rank > 0).")
-        if not vendors:
-            raise UserError("No hay contactos con rango de proveedor (supplier_rank > 0).")
-        if not products:
-            raise UserError("No hay productos almacenables o consumibles activos con precio.")
+        generator = self.env["tl.demo.orders.generator"]
+        if not generator._customers(self.company_id.id):
+            raise UserError(_("No hay contactos con rango de cliente."))
+        if not generator._products(self.company_id.id):
+            raise UserError(_("No hay productos almacenables o consumibles activos."))
 
-        sale_ids, purchase_ids = [], []
-        day = self.date_from
-        while day <= self.date_to:
+        days = list(self._days())
+        queued = 0
+        use_job = self.use_queue_job and hasattr(generator, "with_delay")
+        if self.use_queue_job and not hasattr(generator, "with_delay"):
+            raise UserError(
+                _("La cola de trabajos no está disponible. Instala queue_job o desmarca la opción.")
+            )
+
+        for day in days:
             count = random.randint(self.min_per_day, self.max_per_day)
-            when = self._dt_on(day)
-            # Compras primero para que haya stock el mismo día
-            for _ in range(count):
-                po = self._create_purchase(random.choice(vendors), products, when)
-                purchase_ids.append(po.id)
-            for _ in range(count):
-                so = self._create_sale(random.choice(customers), products, when)
-                sale_ids.append(so.id)
-            day += timedelta(days=1)
+            opts = self._opts(count)
+            if use_job:
+                generator.with_delay(
+                    description=_("Pedidos demo %(day)s (%(count)s pedidos)")
+                    % {"day": day, "count": count},
+                    max_retries=3,
+                )._generate_day(str(day), opts)
+                queued += 1
+            else:
+                generator._generate_day(str(day), opts)
+                queued += 1
 
-        summary = (
-            f"Generados {len(sale_ids)} pedidos de venta y {len(purchase_ids)} pedidos de compra "
-            f"entre {self.date_from} y {self.date_to}."
-        )
+        if use_job:
+            summary = _(
+                "Se han encolado %(jobs)s trabajos (un día cada uno) entre %(start)s y %(end)s. "
+                "Revisa Cola de trabajos."
+            ) % {"jobs": queued, "start": self.date_from, "end": self.date_to}
+        else:
+            summary = _("Generación síncrona de %(days)s días entre %(start)s y %(end)s.") % {
+                "days": queued,
+                "start": self.date_from,
+                "end": self.date_to,
+            }
         self.last_summary = summary
         _logger.info(summary)
-        return {
-            "type": "ir.actions.act_window",
-            "name": "Pedidos de venta generados",
-            "res_model": "sale.order",
-            "view_mode": "list,form",
-            "domain": [("id", "in", sale_ids)],
-            "target": "current",
-        }
 
-    def _customers(self):
-        return self.env["res.partner"].search(
-            [
-                ("customer_rank", ">", 0),
-                ("active", "=", True),
-                "|",
-                ("company_id", "=", False),
-                ("company_id", "=", self.company_id.id),
-            ]
-        )
-
-    def _vendors(self):
-        partners = self.env["res.partner"].search(
-            [
-                ("supplier_rank", ">", 0),
-                ("active", "=", True),
-                "|",
-                ("company_id", "=", False),
-                ("company_id", "=", self.company_id.id),
-            ]
-        )
-        if partners:
-            return partners
-        # Si no hay proveedores, reutiliza clientes como fallback documentado
-        return self._customers()
-
-    def _products(self):
-        Product = self.env["product.product"]
-        domain = [
-            ("sale_ok", "=", True),
-            ("purchase_ok", "=", True),
-            ("active", "=", True),
-            ("type", "in", ("product", "consu")),
-            "|",
-            ("company_id", "=", False),
-            ("company_id", "=", self.company_id.id),
-        ]
-        products = Product.search(domain, limit=400)
-        priced = products.filtered(lambda p: p.list_price > 0 or p.standard_price > 0)
-        return priced or products
-
-    def _dt_on(self, day):
-        hour = random.randint(8, 17)
-        minute = random.choice((0, 15, 30, 45))
-        naive = datetime.combine(day, time(hour, minute))
-        return fields.Datetime.to_datetime(naive)
-
-    def _line_count(self):
-        lo = max(1, self.lines_min)
-        hi = max(lo, self.lines_max)
-        return random.randint(lo, hi)
-
-    def _create_purchase(self, vendor, products, when):
-        lines = []
-        used = set()
-        for _ in range(self._line_count()):
-            product = random.choice(products)
-            if product.id in used and len(products) > 1:
-                continue
-            used.add(product.id)
-            qty = random.randint(2, 12)
-            price = product.standard_price or max(product.list_price * 0.7, 0.5)
-            line_vals = {
-                "product_id": product.id,
-                "name": product.display_name,
-                "product_qty": qty,
-                "price_unit": price,
-                "date_planned": when,
+        if use_job and "queue.job" in self.env:
+            return {
+                "type": "ir.actions.act_window",
+                "name": _("Trabajos de pedidos demo"),
+                "res_model": "queue.job",
+                "view_mode": "list,form",
+                "domain": [("name", "ilike", "Pedidos demo")],
+                "target": "current",
             }
-            uom_id = product.uom_id.id
-            Line = self.env["purchase.order.line"]
-            if "product_uom_id" in Line._fields:
-                line_vals["product_uom_id"] = uom_id
-            elif "product_uom" in Line._fields:
-                line_vals["product_uom"] = uom_id
-            lines.append((0, 0, line_vals))
-        po = self.env["purchase.order"].create(
-            {
-                "partner_id": vendor.id,
-                "company_id": self.company_id.id,
-                "date_order": when,
-                "origin": "DEMO-%s" % when.date(),
-                "order_line": lines,
-            }
-        )
-        po.button_confirm()
-        if self.confirm_pickings:
-            for picking in po.picking_ids.filtered(lambda p: p.state != "cancel"):
-                self._validate_and_backdate(picking, when)
-        return po
-
-    def _create_sale(self, customer, products, when):
-        lines = []
-        used = set()
-        for _ in range(self._line_count()):
-            product = random.choice(products)
-            if product.id in used and len(products) > 1:
-                continue
-            used.add(product.id)
-            qty = random.randint(1, 5)
-            line_vals = {
-                "product_id": product.id,
-                "name": product.display_name,
-                "product_uom_qty": qty,
-                "price_unit": product.list_price or product.standard_price or 1.0,
-            }
-            SaleLine = self.env["sale.order.line"]
-            if "product_uom_id" in SaleLine._fields:
-                line_vals["product_uom_id"] = product.uom_id.id
-            elif "product_uom" in SaleLine._fields:
-                line_vals["product_uom"] = product.uom_id.id
-            lines.append((0, 0, line_vals))
-        vals = {
-            "partner_id": customer.id,
-            "company_id": self.company_id.id,
-            "date_order": when,
-            "origin": "DEMO-%s" % when.date(),
-            "order_line": lines,
-        }
-        if self.warehouse_id:
-            vals["warehouse_id"] = self.warehouse_id.id
-        if "commitment_date" in self.env["sale.order"]._fields:
-            vals["commitment_date"] = when
-        so = self.env["sale.order"].create(vals)
-        so.action_confirm()
-        if self.confirm_pickings:
-            pickings = so.picking_ids.filtered(lambda p: p.state != "cancel")
-            # Entregas: asignar y validar
-            for picking in pickings:
-                self._validate_and_backdate(picking, when)
-        return so
-
-    def _validate_and_backdate(self, picking, when):
-        picking = picking.with_context(
-            mail_notrack=True,
-            tracking_disable=True,
-            skip_sms=True,
-            skip_immediate=True,
-            skip_backorder=True,
-            cancel_backorder=True,
-        )
-        if picking.state == "draft":
-            picking.action_confirm()
-        if picking.state in ("confirmed", "waiting", "assigned", "partially_available"):
-            try:
-                picking.action_assign()
-            except Exception as exc:
-                _logger.warning("No se pudo reservar %s: %s", picking.name, exc)
-            self._set_done_qty(picking)
-            try:
-                picking.button_validate()
-            except Exception as exc:
-                _logger.warning("Validación inmediata de %s falló (%s), se intenta wizard.", picking.name, exc)
-                self._validate_via_wizard(picking)
-        if picking.state not in ("done",) and picking.state != "cancel":
-            self._set_done_qty(picking)
-            try:
-                picking._action_done()
-            except Exception as exc:
-                _logger.warning("No se validó %s: %s", picking.name, exc)
-                return
-        if self.backdate_pickings:
-            self._apply_effective_date(picking, when)
-
-    def _set_done_qty(self, picking):
-        for move in picking.move_ids.filtered(lambda m: m.state != "cancel"):
-            qty = move.product_uom_qty
-            if "quantity" in move._fields:
-                move.quantity = qty
-            elif "quantity_done" in move._fields:
-                move.quantity_done = qty
-            for line in move.move_line_ids:
-                if "quantity" in line._fields:
-                    line.quantity = line.quantity or qty
-                elif "qty_done" in line._fields:
-                    line.qty_done = line.qty_done or qty
-
-    def _validate_via_wizard(self, picking):
-        action = picking.button_validate()
-        if not isinstance(action, dict):
-            return
-        model = action.get("res_model")
-        ctx = dict(action.get("context") or {}, skip_backorder=True, cancel_backorder=True)
-        if model == "stock.immediate.transfer":
-            wiz = self.env[model].with_context(ctx).create(
-                {"pick_ids": [(6, 0, picking.ids)]} if "pick_ids" in self.env[model]._fields else {}
-            )
-            if hasattr(wiz, "process"):
-                wiz.process()
-        elif model == "stock.backorder.confirmation":
-            wiz = self.env[model].with_context(ctx).create({})
-            if hasattr(wiz, "process_cancel_backorder"):
-                wiz.process_cancel_backorder()
-            elif hasattr(wiz, "process"):
-                wiz.process()
-        elif model == "stock.immediate.transfer" or model:
-            try:
-                wiz = self.env[model].with_context(ctx).browse(action.get("res_id"))
-                if not wiz:
-                    wiz = self.env[model].with_context(ctx).create({})
-                for method in ("process", "button_validate", "action_confirm"):
-                    if hasattr(wiz, method):
-                        getattr(wiz, method)()
-                        break
-            except Exception as exc:
-                _logger.warning("Wizard %s no procesado: %s", model, exc)
-
-    def _apply_effective_date(self, picking, when):
-        """Odoo 19: desbloquear, fecha efectiva, bloquear."""
-        picking = picking.sudo()
-        if picking.state != "done":
-            return
-        if "is_locked" in picking._fields and picking.is_locked and hasattr(picking, "action_toggle_is_locked"):
-            picking.action_toggle_is_locked()
-        vals = {}
-        if "date_done" in picking._fields:
-            vals["date_done"] = when
-        if "scheduled_date" in picking._fields:
-            vals["scheduled_date"] = when
-        if vals:
-            picking.write(vals)
-        move_vals = {"date": when}
-        if "date_deadline" in picking.move_ids._fields:
-            move_vals["date_deadline"] = when
-        picking.move_ids.write(move_vals)
-        lines = picking.move_line_ids
-        if lines and "date" in lines._fields:
-            lines.write({"date": when})
-        # asientos de valoración si existen
-        accounts = self.env["account.move"]
-        if "account_move_id" in picking.move_ids._fields:
-            accounts |= picking.move_ids.mapped("account_move_id")
-        if "stock_valuation_layer_ids" in picking.move_ids._fields:
-            layers = picking.move_ids.mapped("stock_valuation_layer_ids")
-            if "account_move_id" in layers._fields:
-                accounts |= layers.mapped("account_move_id")
-            if "create_date" not in layers._fields:
-                pass
-        for move in accounts.filtered(lambda m: m.state != "cancel"):
-            try:
-                if move.state == "posted" and hasattr(move, "button_draft"):
-                    move.button_draft()
-                move.write({"date": when.date() if hasattr(when, "date") else when})
-                if move.state == "draft" and hasattr(move, "action_post"):
-                    move.action_post()
-            except Exception as exc:
-                _logger.warning("No se retrodató asiento %s: %s", move.name, exc)
-        if "is_locked" in picking._fields and not picking.is_locked and hasattr(picking, "action_toggle_is_locked"):
-            picking.action_toggle_is_locked()
+        return {"type": "ir.actions.act_window_close"}
