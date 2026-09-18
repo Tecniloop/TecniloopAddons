@@ -147,20 +147,20 @@ class TlDemoOrdersWizard(models.TransientModel):
             used.add(product.id)
             qty = random.randint(2, 12)
             price = product.standard_price or max(product.list_price * 0.7, 0.5)
-            lines.append(
-                (
-                    0,
-                    0,
-                    {
-                        "product_id": product.id,
-                        "name": product.display_name,
-                        "product_qty": qty,
-                        "product_uom": product.uom_po_id.id or product.uom_id.id,
-                        "price_unit": price,
-                        "date_planned": when,
-                    },
-                )
-            )
+            line_vals = {
+                "product_id": product.id,
+                "name": product.display_name,
+                "product_qty": qty,
+                "price_unit": price,
+                "date_planned": when,
+            }
+            uom_id = product.uom_id.id
+            Line = self.env["purchase.order.line"]
+            if "product_uom_id" in Line._fields:
+                line_vals["product_uom_id"] = uom_id
+            elif "product_uom" in Line._fields:
+                line_vals["product_uom"] = uom_id
+            lines.append((0, 0, line_vals))
         po = self.env["purchase.order"].create(
             {
                 "partner_id": vendor.id,
@@ -185,19 +185,18 @@ class TlDemoOrdersWizard(models.TransientModel):
                 continue
             used.add(product.id)
             qty = random.randint(1, 5)
-            lines.append(
-                (
-                    0,
-                    0,
-                    {
-                        "product_id": product.id,
-                        "name": product.display_name,
-                        "product_uom_qty": qty,
-                        "product_uom": product.uom_id.id,
-                        "price_unit": product.list_price or product.standard_price or 1.0,
-                    },
-                )
-            )
+            line_vals = {
+                "product_id": product.id,
+                "name": product.display_name,
+                "product_uom_qty": qty,
+                "price_unit": product.list_price or product.standard_price or 1.0,
+            }
+            SaleLine = self.env["sale.order.line"]
+            if "product_uom_id" in SaleLine._fields:
+                line_vals["product_uom_id"] = product.uom_id.id
+            elif "product_uom" in SaleLine._fields:
+                line_vals["product_uom"] = product.uom_id.id
+            lines.append((0, 0, line_vals))
         vals = {
             "partner_id": customer.id,
             "company_id": self.company_id.id,
