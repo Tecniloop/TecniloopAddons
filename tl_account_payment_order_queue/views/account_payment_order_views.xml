@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="account_payment_order_form_queue" model="ir.ui.view">
+        <field name="name">account.payment.order.form.tl.queue</field>
+        <field name="model">account.payment.order</field>
+        <field
+            name="inherit_id"
+            ref="account_payment_order.account_payment_order_form"
+        />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="after">
+                <field
+                    name="upload_job_state"
+                    invisible="upload_job_state in ('idle', False)"
+                    widget="badge"
+                />
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <group
+                    string="Background Upload"
+                    invisible="upload_job_state in ('idle', False)"
+                >
+                    <field name="upload_job_state" />
+                    <field
+                        name="upload_job_error"
+                        invisible="not upload_job_error"
+                    />
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

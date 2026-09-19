@@ -10,16 +10,12 @@ class AccountPaymentLine(models.Model):
     def _should_use_line_date_as_payment_date(self):
         """Hook: whether the payment/journal date must follow the line date.
 
-        Default: inbound remittances with execution type "due date".
+        Default: remittances with execution type "due date".
         Override in extra modules to extend or restrict the rule.
         """
         self.ensure_one()
         order = self.order_id
-        return bool(
-            order
-            and order.payment_type == "inbound"
-            and order.date_prefered == "due"
-        )
+        return bool(order and order.date_prefered == "due")
 
     def _get_account_payment_date(self):
         """Date to set on the generated ``account.payment``.

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="account_payment_mode_form_queue" model="ir.ui.view">
+        <field name="name">account.payment.mode.form.tl.queue</field>
+        <field name="model">account.payment.mode</field>
+        <field name="inherit_id" ref="account_payment_mode.account_payment_mode_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="Queue Job / Large Remittances">
+                    <field name="upload_use_queue_job" />
+                    <field
+                        name="upload_queue_batch_size"
+                        invisible="not upload_use_queue_job"
+                    />
+                    <field
+                        name="grouped_move_batch_size"
+                        invisible="not upload_use_queue_job"
+                    />
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
