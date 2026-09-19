@@ -23,6 +23,18 @@ class TlDemoInvoiceWizard(models.TransientModel):
     )
     invoice_sales = fields.Boolean(string="Facturar ventas", default=True)
     invoice_purchases = fields.Boolean(string="Facturar compras", default=True)
+    sale_journal_id = fields.Many2one(
+        "account.journal",
+        string="Diario de ventas",
+        domain="[('type', '=', 'sale'), ('company_id', '=', company_id)]",
+        help="Si lo dejas vacío se usa el diario por defecto. Elige otro para no mezclar numeración.",
+    )
+    purchase_journal_id = fields.Many2one(
+        "account.journal",
+        string="Diario de compras",
+        domain="[('type', '=', 'purchase'), ('company_id', '=', company_id)]",
+        help="Opcional. Mismo criterio que el diario de ventas.",
+    )
     use_queue_job = fields.Boolean(
         string="Usar cola de trabajos (un job por día)",
         default=True,
@@ -56,6 +68,8 @@ class TlDemoInvoiceWizard(models.TransientModel):
                 "company_id": self.company_id.id,
                 "invoice_sales": self.invoice_sales,
                 "invoice_purchases": self.invoice_purchases,
+                "sale_journal_id": self.sale_journal_id.id if self.sale_journal_id else False,
+                "purchase_journal_id": self.purchase_journal_id.id if self.purchase_journal_id else False,
             }
             if use_job:
                 generator.with_delay(

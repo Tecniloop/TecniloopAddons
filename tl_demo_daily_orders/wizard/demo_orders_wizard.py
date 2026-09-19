@@ -27,6 +27,17 @@ class TlDemoOrdersWizard(models.TransientModel):
         "res.company", string="Compañía", default=lambda s: s.env.company, required=True
     )
     warehouse_id = fields.Many2one("stock.warehouse", string="Almacén")
+    sale_journal_id = fields.Many2one(
+        "account.journal",
+        string="Diario de facturación ventas",
+        domain="[('type', '=', 'sale'), ('company_id', '=', company_id)]",
+        help="Se graba en el pedido (Odoo 19) y lo usa la factura.",
+    )
+    purchase_journal_id = fields.Many2one(
+        "account.journal",
+        string="Diario de facturación compras",
+        domain="[('type', '=', 'purchase'), ('company_id', '=', company_id)]",
+    )
     generate_confirmed = fields.Boolean(
         string="Pedidos confirmados",
         default=True,
@@ -36,6 +47,16 @@ class TlDemoOrdersWizard(models.TransientModel):
         string="Presupuestos de venta",
         default=True,
         help="Presupuestos en borrador o enviado, sin confirmar ni albarán.",
+    )
+    sales_per_purchase = fields.Integer(
+        string="Ventas por cada compra",
+        default=2,
+        help="Cada día se generan N compras y N×este valor ventas, para dejar margen.",
+    )
+    purchase_price_ratio = fields.Float(
+        string="Coste compra / PVP",
+        default=0.65,
+        help="Precio de compra = PVP × este ratio (0,65 ≈ 35 % de margen sobre venta).",
     )
     generate_purchase_rfqs = fields.Boolean(
         string="Presupuestos de compra (RFQ)",
@@ -108,6 +129,10 @@ class TlDemoOrdersWizard(models.TransientModel):
             "generate_confirmed": self.generate_confirmed,
             "generate_sale_quotes": self.generate_sale_quotes,
             "generate_purchase_rfqs": self.generate_purchase_rfqs,
+            "sales_per_purchase": max(1, self.sales_per_purchase or 2),
+            "purchase_price_ratio": self.purchase_price_ratio or 0.65,
+            "sale_journal_id": self.sale_journal_id.id if self.sale_journal_id else False,
+            "purchase_journal_id": self.purchase_journal_id.id if self.purchase_journal_id else False,
         }
 
     def action_generate(self):

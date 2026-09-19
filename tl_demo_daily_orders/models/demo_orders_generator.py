@@ -38,6 +38,9 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         do_quotes = opts.get("generate_sale_quotes", False)
         do_rfqs = opts.get("generate_purchase_rfqs", False)
         po_ids, so_ids, quote_ids, rfq_ids = [], [], [], []
+        sales_per_purchase = max(1, int(opts.get("sales_per_purchase") or 2))
+        purchase_price_ratio = float(opts.get("purchase_price_ratio") or 0.65)
+        sale_count = count * sales_per_purchase
         if do_confirmed:
             for _ in range(count):
                 po = self._create_purchase(
@@ -50,9 +53,11 @@ class TlDemoOrdersGenerator(models.AbstractModel):
                     lines_max,
                     user_ids,
                     schedule_only,
+                    purchase_price_ratio,
+                    opts.get("purchase_journal_id"),
                 )
                 po_ids.append(po.id)
-            for _ in range(count):
+            for _ in range(sale_count):
                 so = self._create_sale(
                     random.choice(customers),
                     products,
@@ -64,6 +69,7 @@ class TlDemoOrdersGenerator(models.AbstractModel):
                     lines_max,
                     user_ids,
                     schedule_only,
+                    opts.get("sale_journal_id"),
                 )
                 so_ids.append(so.id)
         if do_quotes:
@@ -306,6 +312,14 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         if lines:
             lines.invalidate_recordset()
 
+    def _set_order_journal(self, order, journal_id):
+        if not journal_id:
+            return
+        for fname in ("journal_id", "invoice_journal_id"):
+            if fname in order._fields:
+                order.with_context(tracking_disable=True).write({fname: journal_id})
+                return
+
     def _pick_user(self, user_ids):
         ids = [int(x) for x in (user_ids or [2, 5]) if x]
         return random.choice(ids) if ids else self.env.uid
@@ -352,13 +366,11 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             line_vals = {
                 "product_id": product.id,
                 "name": product.display_name,
-                "product_uom_qty": random.randint(1, 5),
+                "product_uom_qty": random.randint(3, 8),
                 "price_unit": product.list_price or product.standard_price or 1.0,
             }
             if "purchase_price" in self.env["sale.order.line"]._fields:
-                line_vals["purchase_price"] = product.standard_price or max(
-                    (product.list_price or 1.0) * 0.7, 0.5
-                )
+                line_vals["purchase_price"] = max((product.list_price or 1.0) * 0.65, 0.5)
             fname, uom = self._uom_field("sale.order.line", product)
             if fname:
                 line_vals[fname] = uom
@@ -417,7 +429,18 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         return po
 
     def _create_purchase(
-        self, vendor, products, when, confirm, backdate, lines_min, lines_max, user_ids=None, schedule_only=False
+        self,
+        vendor,
+        products,
+        when,
+        confirm,
+        backdate,
+        lines_min,
+        lines_max,
+        user_ids=None,
+        schedule_only=False,
+        purchase_price_ratio=0.65,
+        journal_id=False,
     ):
         lines = []
         used = set()
@@ -427,11 +450,12 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             if product.id in used and len(products) > 1:
                 continue
             used.add(product.id)
+            sale_price = product.list_price or product.standard_price or 1.0
             line_vals = {
                 "product_id": product.id,
                 "name": product.display_name,
-                "product_qty": random.randint(2, 12),
-                "price_unit": product.standard_price or max(product.list_price * 0.7, 0.5),
+                "product_qty": random.randint(1, 3),
+                "price_unit": max(sale_price * (purchase_price_ratio or 0.65), 0.5),
                 "date_planned": when,
             }
             fname, uom = self._uom_field("purchase.order.line", product)
@@ -448,6 +472,7 @@ class TlDemoOrdersGenerator(models.AbstractModel):
                 "order_line": lines,
             }
         )
+        self._set_order_journal(po, journal_id)
         po.button_confirm()
         self._force_document_date(po, when)
         if confirm:
@@ -471,6 +496,7 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         lines_max,
         user_ids=None,
         schedule_only=False,
+        journal_id=False,
     ):
         lines = []
         used = set()
@@ -482,13 +508,11 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             line_vals = {
                 "product_id": product.id,
                 "name": product.display_name,
-                "product_uom_qty": random.randint(1, 5),
+                "product_uom_qty": random.randint(3, 8),
                 "price_unit": product.list_price or product.standard_price or 1.0,
             }
             if "purchase_price" in self.env["sale.order.line"]._fields:
-                line_vals["purchase_price"] = product.standard_price or max(
-                    (product.list_price or 1.0) * 0.7, 0.5
-                )
+                line_vals["purchase_price"] = max((product.list_price or 1.0) * 0.65, 0.5)
             if "customer_lead" in self.env["sale.order.line"]._fields:
                 line_vals["customer_lead"] = 0
             fname, uom = self._uom_field("sale.order.line", product)
@@ -508,6 +532,7 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         if "commitment_date" in self.env["sale.order"]._fields:
             vals["commitment_date"] = when
         so = self.env["sale.order"].create(vals)
+        self._set_order_journal(so, journal_id)
         so.action_confirm()
         self._force_document_date(so, when)
         if confirm:
@@ -664,12 +689,14 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             ]
         )
         sale_moves, purchase_moves = self.env["account.move"], self.env["account.move"]
+        sale_journal_id = opts.get("sale_journal_id") or False
+        purchase_journal_id = opts.get("purchase_journal_id") or False
         if opts.get("invoice_sales", True):
             for so in sales:
-                sale_moves |= self._invoice_sale(so, day)
+                sale_moves |= self._invoice_sale(so, day, sale_journal_id)
         if opts.get("invoice_purchases", True):
             for po in purchases:
-                purchase_moves |= self._invoice_purchase(po, day)
+                purchase_moves |= self._invoice_purchase(po, day, purchase_journal_id)
         _logger.info(
             "Facturas demo %s: %s ventas, %s compras",
             day_str,
@@ -693,7 +720,7 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         )
         return random.choice(styles)
 
-    def _invoice_sale(self, order, day):
+    def _invoice_sale(self, order, day, journal_id=False):
         if order.invoice_status not in ("to invoice",):
             # intentar igual si hay qty por facturar
             if all(line.qty_to_invoice <= 0 for line in order.order_line if line.product_id):
@@ -706,10 +733,10 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             _logger.warning("No se facturó venta %s: %s", order.name, exc)
             return self.env["account.move"]
         for move in moves:
-            self._finalize_invoice(move, day, vendor_ref=False)
+            self._finalize_invoice(move, day, vendor_ref=False, journal_id=journal_id)
         return moves
 
-    def _invoice_purchase(self, order, day):
+    def _invoice_purchase(self, order, day, journal_id=False):
         if hasattr(order, "invoice_status") and order.invoice_status not in ("to invoice",):
             if all(
                 (getattr(line, "qty_to_invoice", 0) or 0) <= 0
@@ -731,11 +758,13 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             return self.env["account.move"]
         ref = self._random_vendor_ref(day)
         for move in moves:
-            self._finalize_invoice(move, day, vendor_ref=ref)
+            self._finalize_invoice(move, day, vendor_ref=ref, journal_id=journal_id)
         return moves
 
-    def _finalize_invoice(self, move, day, vendor_ref=False):
+    def _finalize_invoice(self, move, day, vendor_ref=False, journal_id=False):
         vals = {}
+        if journal_id and "journal_id" in move._fields and move.state == "draft":
+            vals["journal_id"] = journal_id
         if "invoice_date" in move._fields:
             vals["invoice_date"] = day
         if "invoice_date_due" in move._fields:

@@ -16,9 +16,13 @@
                         <group string="Opciones">
                             <field name="company_id"/>
                             <field name="warehouse_id"/>
+                            <field name="sale_journal_id"/>
+                            <field name="purchase_journal_id"/>
                             <field name="generate_confirmed"/>
                             <field name="generate_sale_quotes"/>
                             <field name="generate_purchase_rfqs"/>
+                            <field name="sales_per_purchase"/>
+                            <field name="purchase_price_ratio"/>
                             <field name="validate_deliveries_by_date" invisible="not generate_confirmed"/>
                             <field name="backdate_pickings" invisible="not validate_deliveries_by_date"/>
                             <field name="use_queue_job"/>
@@ -74,7 +78,9 @@
                         </group>
                         <group string="Opciones">
                             <field name="invoice_sales"/>
+                            <field name="sale_journal_id" invisible="not invoice_sales"/>
                             <field name="invoice_purchases"/>
+                            <field name="purchase_journal_id" invisible="not invoice_purchases"/>
                             <field name="use_queue_job"/>
                         </group>
                     </group>
