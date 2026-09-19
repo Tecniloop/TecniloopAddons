@@ -105,6 +105,7 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         user_ids = opts.get("user_ids") or []
         tag_ids = list(opts.get("tag_ids") or [])
         country_ids = list(opts.get("country_ids") or [])
+        stage_ids = list(opts.get("stage_ids") or [])
         tags_min = max(0, int(opts.get("tags_min") or 0))
         tags_max = max(tags_min, int(opts.get("tags_max") or tags_min))
         partners = self._customers(company.id)
@@ -143,10 +144,23 @@ class TlDemoOrdersGenerator(models.AbstractModel):
                 vals["tag_ids"] = [(6, 0, chosen_tags)]
             if country_ids:
                 vals["country_id"] = random.choice(country_ids)
+            if stage_ids:
+                vals["stage_id"] = random.choice(stage_ids)
+            rev_min = float(opts.get("expected_revenue_min") or 0)
+            rev_max = float(opts.get("expected_revenue_max") or rev_min)
+            if rev_max < rev_min:
+                rev_max = rev_min
+            if rev_max > 0:
+                vals["expected_revenue"] = round(random.uniform(rev_min, rev_max), 2)
+            pmin = float(opts.get("probability_min") or 0)
+            pmax = float(opts.get("probability_max") or pmin)
+            pmin = max(0.0, min(100.0, pmin))
+            pmax = max(pmin, min(100.0, pmax))
+            probability = round(random.uniform(pmin, pmax), 2)
             lead = self.env["crm.lead"].create(vals)
             self.env.cr.execute(
-                "UPDATE crm_lead SET create_date = %s, date_open = %s WHERE id = %s",
-                (when, when, lead.id),
+                "UPDATE crm_lead SET create_date = %s, date_open = %s, probability = %s, expected_revenue = %s WHERE id = %s",
+                (when, when, probability, vals.get("expected_revenue") or 0.0, lead.id),
             )
             created |= lead
         _logger.info("Leads demo %s: %s", day_str, len(created))

@@ -48,6 +48,18 @@ class TlDemoLeadsWizard(models.TransientModel):
         string="Países",
         help="Vacío al abrir. Elige manualmente; cada lead recibe uno al azar.",
     )
+    stage_ids = fields.Many2many(
+        "crm.stage",
+        "tl_demo_leads_wizard_stage_rel",
+        "wizard_id",
+        "stage_id",
+        string="Etapas",
+        help="Vacío al abrir. Elige las etapas; cada lead recibe una al azar.",
+    )
+    expected_revenue_min = fields.Float(string="Ingreso esperado mínimo", default=100.0)
+    expected_revenue_max = fields.Float(string="Ingreso esperado máximo", default=5000.0)
+    probability_min = fields.Float(string="Probabilidad mínima (%)", default=5.0)
+    probability_max = fields.Float(string="Probabilidad máxima (%)", default=80.0)
     tags_min = fields.Integer(string="Etiquetas mínimas por lead", default=1)
     tags_max = fields.Integer(string="Etiquetas máximas por lead", default=3)
     use_queue_job = fields.Boolean(
@@ -91,6 +103,10 @@ class TlDemoLeadsWizard(models.TransientModel):
             raise UserError(_("Selecciona al menos un comercial."))
         if self.tags_min < 0 or self.tags_max < self.tags_min:
             raise UserError(_("Revisa el número de etiquetas por lead."))
+        if self.expected_revenue_min < 0 or self.expected_revenue_max < self.expected_revenue_min:
+            raise UserError(_("Revisa el rango de ingreso esperado."))
+        if self.probability_min < 0 or self.probability_max > 100 or self.probability_max < self.probability_min:
+            raise UserError(_("Revisa el rango de probabilidad (0–100)."))
 
         generator = self.env["tl.demo.orders.generator"]
         use_job = self.use_queue_job and hasattr(generator, "with_delay")
@@ -108,6 +124,11 @@ class TlDemoLeadsWizard(models.TransientModel):
                 "tags_min": self.tags_min,
                 "tags_max": self.tags_max,
                 "country_ids": self.country_ids.ids,
+                "stage_ids": self.stage_ids.ids,
+                "expected_revenue_min": self.expected_revenue_min,
+                "expected_revenue_max": self.expected_revenue_max,
+                "probability_min": self.probability_min,
+                "probability_max": self.probability_max,
             }
             if use_job:
                 generator.with_delay(
