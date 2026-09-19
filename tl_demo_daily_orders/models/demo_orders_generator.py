@@ -21,6 +21,7 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         warehouse = self.env["stock.warehouse"].browse(opts.get("warehouse_id") or 0)
         confirm = opts.get("confirm_pickings", True)
         backdate = opts.get("backdate_pickings", True)
+        schedule_only = opts.get("schedule_only", False)
         count = int(opts.get("count") or 3)
         lines_min = int(opts.get("lines_min") or 1)
         lines_max = int(opts.get("lines_max") or 4)
@@ -32,17 +33,124 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             raise UserError("Faltan clientes o productos para el job del %s." % day_str)
 
         when = self._dt_on(day)
-        po_ids, so_ids = [], []
+        user_ids = opts.get("user_ids") or [2, 5]
+        do_confirmed = opts.get("generate_confirmed", True)
+        do_quotes = opts.get("generate_sale_quotes", False)
+        do_rfqs = opts.get("generate_purchase_rfqs", False)
+        po_ids, so_ids, quote_ids, rfq_ids = [], [], [], []
+        if do_confirmed:
+            for _ in range(count):
+                po = self._create_purchase(
+                    random.choice(vendors),
+                    products,
+                    when,
+                    confirm,
+                    backdate,
+                    lines_min,
+                    lines_max,
+                    user_ids,
+                    schedule_only,
+                )
+                po_ids.append(po.id)
+            for _ in range(count):
+                so = self._create_sale(
+                    random.choice(customers),
+                    products,
+                    when,
+                    warehouse,
+                    confirm,
+                    backdate,
+                    lines_min,
+                    lines_max,
+                    user_ids,
+                    schedule_only,
+                )
+                so_ids.append(so.id)
+        if do_quotes:
+            for _ in range(count):
+                quote_ids.append(
+                    self._create_sale_quote(
+                        random.choice(customers), products, when, warehouse, lines_min, lines_max, user_ids
+                    ).id
+                )
+        if do_rfqs:
+            for _ in range(count):
+                rfq_ids.append(
+                    self._create_purchase_rfq(
+                        random.choice(vendors), products, when, lines_min, lines_max, user_ids
+                    ).id
+                )
+        _logger.info(
+            "Demo %s: %s compras, %s ventas, %s presupuestos, %s RFQ",
+            day_str,
+            len(po_ids),
+            len(so_ids),
+            len(quote_ids),
+            len(rfq_ids),
+        )
+        return {
+            "day": day_str,
+            "purchase_ids": po_ids,
+            "sale_ids": so_ids,
+            "quote_ids": quote_ids,
+            "rfq_ids": rfq_ids,
+        }
+
+    def _generate_leads_day(self, day_str, opts):
+        day = fields.Date.from_string(day_str)
+        company = self.env["res.company"].browse(opts["company_id"])
+        self = self.with_company(company)
+        when = self._dt_on(day)
+        count = int(opts.get("count") or 3)
+        user_ids = opts.get("user_ids") or []
+        tag_ids = list(opts.get("tag_ids") or [])
+        country_ids = list(opts.get("country_ids") or [])
+        tags_min = max(0, int(opts.get("tags_min") or 0))
+        tags_max = max(tags_min, int(opts.get("tags_max") or tags_min))
+        partners = self._customers(company.id)
+        names = (
+            "Reforma caldera",
+            "Consulta ánodos",
+            "Presupuesto termos",
+            "Cambio resistencias",
+            "Mantenimiento industrial",
+            "Petición web Araolit",
+            "Llamada ferretería",
+            "Lead feria",
+            "WhatsApp recambios",
+            "Email catálogo",
+        )
+        created = self.env["crm.lead"]
         for _ in range(count):
-            po = self._create_purchase(random.choice(vendors), products, when, confirm, backdate, lines_min, lines_max)
-            po_ids.append(po.id)
-        for _ in range(count):
-            so = self._create_sale(
-                random.choice(customers), products, when, warehouse, confirm, backdate, lines_min, lines_max
+            partner = random.choice(partners) if partners else False
+            chosen_tags = []
+            if tag_ids:
+                n = min(len(tag_ids), random.randint(tags_min, max(tags_min, tags_max)))
+                chosen_tags = random.sample(tag_ids, n) if n else []
+            vals = {
+                "name": "%s — %s" % (random.choice(names), day),
+                "type": "lead",
+                "company_id": company.id,
+                "user_id": self._pick_user(user_ids),
+                "date_open": when,
+                "create_date": when,
+            }
+            if partner:
+                vals["partner_id"] = partner.id
+                vals["email_from"] = partner.email
+                vals["phone"] = partner.phone
+            if chosen_tags:
+                vals["tag_ids"] = [(6, 0, chosen_tags)]
+            if country_ids:
+                vals["country_id"] = random.choice(country_ids)
+            lead = self.env["crm.lead"].create(vals)
+            self.env.cr.execute(
+                "UPDATE crm_lead SET create_date = %s, date_open = %s WHERE id = %s",
+                (when, when, lead.id),
             )
-            so_ids.append(so.id)
-        _logger.info("Demo %s: %s compras, %s ventas", day_str, len(po_ids), len(so_ids))
-        return {"day": day_str, "purchase_ids": po_ids, "sale_ids": so_ids}
+            created |= lead
+        _logger.info("Leads demo %s: %s", day_str, len(created))
+        return {"day": day_str, "lead_ids": created.ids}
 
     def _customers(self, company_id):
         return self.env["res.partner"].search(
@@ -112,7 +220,14 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         existing = {row[0] for row in cr.fetchall()}
         assigns = []
         params = []
-        for col in ("date_order", "date_approve", "date_planned", "commitment_date", "expected_date") + tuple(extra_columns):
+        for col in (
+            "date_order",
+            "date_approve",
+            "confirmation_date",
+            "date_planned",
+            "commitment_date",
+            "expected_date",
+        ) + tuple(extra_columns):
             if col in existing:
                 assigns.append("%s = %%s" % col)
                 params.append(when)
@@ -138,6 +253,7 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         for fname in (
             "date_order",
             "date_approve",
+            "confirmation_date",
             "effective_date",
             "commitment_date",
             "expected_date",
@@ -176,7 +292,119 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         if lines:
             lines.invalidate_recordset()
 
-    def _create_purchase(self, vendor, products, when, confirm, backdate, lines_min, lines_max):
+    def _pick_user(self, user_ids):
+        ids = [int(x) for x in (user_ids or [2, 5]) if x]
+        return random.choice(ids) if ids else self.env.uid
+
+    def _schedule_picking_dates(self, pickings, when):
+        """Albaranes pendientes con fecha prevista = fecha del pedido."""
+        for picking in pickings.filtered(lambda p: p.state != "cancel"):
+            if picking.state == "draft":
+                picking.action_confirm()
+            try:
+                picking.action_assign()
+            except Exception:
+                pass
+            vals = {}
+            if "scheduled_date" in picking._fields:
+                vals["scheduled_date"] = when
+            if vals:
+                picking.write(vals)
+            move_vals = {}
+            if "date" in picking.move_ids._fields:
+                move_vals["date"] = when
+            if "date_deadline" in picking.move_ids._fields:
+                move_vals["date_deadline"] = when
+            if move_vals and picking.move_ids:
+                picking.move_ids.write(move_vals)
+
+    def _assign_picking_users(self, pickings, user_ids):
+        for picking in pickings.filtered(lambda p: p.state != "cancel"):
+            uid = self._pick_user(user_ids)
+            vals = {}
+            if "user_id" in picking._fields:
+                vals["user_id"] = uid
+            if vals:
+                picking.with_context(tracking_disable=True).write(vals)
+
+    def _create_sale_quote(self, customer, products, when, warehouse, lines_min, lines_max, user_ids=None):
+        lines = []
+        used = set()
+        for _ in range(self._line_count(lines_min, lines_max)):
+            product = random.choice(products)
+            if product.id in used and len(products) > 1:
+                continue
+            used.add(product.id)
+            line_vals = {
+                "product_id": product.id,
+                "name": product.display_name,
+                "product_uom_qty": random.randint(1, 5),
+                "price_unit": product.list_price or product.standard_price or 1.0,
+            }
+            if "purchase_price" in self.env["sale.order.line"]._fields:
+                line_vals["purchase_price"] = product.standard_price or max(
+                    (product.list_price or 1.0) * 0.7, 0.5
+                )
+            fname, uom = self._uom_field("sale.order.line", product)
+            if fname:
+                line_vals[fname] = uom
+            lines.append((0, 0, line_vals))
+        vals = {
+            "partner_id": customer.id,
+            "company_id": self.env.company.id,
+            "date_order": when,
+            "user_id": self._pick_user(user_ids),
+            "origin": "DEMO-%s" % when.date(),
+            "order_line": lines,
+            "state": "sent" if random.random() < 0.5 else "draft",
+        }
+        if warehouse:
+            vals["warehouse_id"] = warehouse.id
+        so = self.env["sale.order"].create(vals)
+        if so.state not in ("draft", "sent"):
+            so.write({"state": vals["state"]})
+        self._force_document_date(so, when)
+        return so
+
+    def _create_purchase_rfq(self, vendor, products, when, lines_min, lines_max, user_ids=None):
+        lines = []
+        used = set()
+        for _ in range(self._line_count(lines_min, lines_max)):
+            product = random.choice(products)
+            if product.id in used and len(products) > 1:
+                continue
+            used.add(product.id)
+            line_vals = {
+                "product_id": product.id,
+                "name": product.display_name,
+                "product_qty": random.randint(2, 12),
+                "price_unit": product.standard_price or max(product.list_price * 0.7, 0.5),
+                "date_planned": when,
+            }
+            fname, uom = self._uom_field("purchase.order.line", product)
+            if fname:
+                line_vals[fname] = uom
+            lines.append((0, 0, line_vals))
+        state = "sent" if random.random() < 0.5 else "draft"
+        po = self.env["purchase.order"].create(
+            {
+                "partner_id": vendor.id,
+                "company_id": vendor.company_id.id or self.env.company.id,
+                "date_order": when,
+                "user_id": self._pick_user(user_ids),
+                "origin": "DEMO-%s" % when.date(),
+                "order_line": lines,
+                "state": state,
+            }
+        )
+        if po.state not in ("draft", "sent"):
+            po.write({"state": state})
+        self._force_document_date(po, when)
+        return po
+
+    def _create_purchase(
+        self, vendor, products, when, confirm, backdate, lines_min, lines_max, user_ids=None, schedule_only=False
+    ):
         lines = []
         used = set()
         fname, uom = None, None
@@ -201,6 +429,7 @@ class TlDemoOrdersGenerator(models.AbstractModel):
                 "partner_id": vendor.id,
                 "company_id": vendor.company_id.id or self.env.company.id,
                 "date_order": when,
+                "user_id": self._pick_user(user_ids),
                 "origin": "DEMO-%s" % when.date(),
                 "order_line": lines,
             }
@@ -210,10 +439,25 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         if confirm:
             for picking in po.picking_ids.filtered(lambda p: p.state != "cancel"):
                 self._validate_and_backdate(picking, when, backdate)
+        elif schedule_only or not confirm:
+            self._schedule_picking_dates(po.picking_ids, when)
+        self._assign_picking_users(po.picking_ids, user_ids)
         self._force_document_date(po, when)
         return po
 
-    def _create_sale(self, customer, products, when, warehouse, confirm, backdate, lines_min, lines_max):
+    def _create_sale(
+        self,
+        customer,
+        products,
+        when,
+        warehouse,
+        confirm,
+        backdate,
+        lines_min,
+        lines_max,
+        user_ids=None,
+        schedule_only=False,
+    ):
         lines = []
         used = set()
         for _ in range(self._line_count(lines_min, lines_max)):
@@ -227,6 +471,10 @@ class TlDemoOrdersGenerator(models.AbstractModel):
                 "product_uom_qty": random.randint(1, 5),
                 "price_unit": product.list_price or product.standard_price or 1.0,
             }
+            if "purchase_price" in self.env["sale.order.line"]._fields:
+                line_vals["purchase_price"] = product.standard_price or max(
+                    (product.list_price or 1.0) * 0.7, 0.5
+                )
             if "customer_lead" in self.env["sale.order.line"]._fields:
                 line_vals["customer_lead"] = 0
             fname, uom = self._uom_field("sale.order.line", product)
@@ -237,6 +485,7 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             "partner_id": customer.id,
             "company_id": self.env.company.id,
             "date_order": when,
+            "user_id": self._pick_user(user_ids),
             "origin": "DEMO-%s" % when.date(),
             "order_line": lines,
         }
@@ -250,6 +499,9 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         if confirm:
             for picking in so.picking_ids.filtered(lambda p: p.state != "cancel"):
                 self._validate_and_backdate(picking, when, backdate)
+        elif schedule_only or not confirm:
+            self._schedule_picking_dates(so.picking_ids, when)
+        self._assign_picking_users(so.picking_ids, user_ids)
         self._force_document_date(so, when)
         return so
 
@@ -285,6 +537,7 @@ class TlDemoOrdersGenerator(models.AbstractModel):
                     return
         if backdate:
             self._apply_effective_date(picking, when)
+        self._sql_align_move_to_planned(picking, when)
 
     def _set_done_qty(self, picking):
         for move in picking.move_ids.filtered(lambda m: m.state != "cancel"):
@@ -320,6 +573,43 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             picking.move_line_ids.write({"date": when})
         if "is_locked" in picking._fields and not picking.is_locked and hasattr(picking, "action_toggle_is_locked"):
             picking.action_toggle_is_locked()
+
+    def _sql_align_move_to_planned(self, picking, when):
+        """On-time rate: stock.move.date::date <= purchase.order.line.date_planned::date."""
+        if not picking:
+            return
+        self.env.cr.execute(
+            """
+            UPDATE stock_move sm
+            SET date = COALESCE(pol.date_planned, %s)
+            FROM purchase_order_line pol
+            WHERE sm.picking_id = %s
+              AND sm.purchase_line_id = pol.id
+            """,
+            (when, picking.id),
+        )
+        self.env.cr.execute(
+            """
+            UPDATE stock_move sm
+            SET date = %s
+            WHERE sm.picking_id = %s
+              AND sm.purchase_line_id IS NULL
+            """,
+            (when, picking.id),
+        )
+        self.env.cr.execute(
+            """
+            UPDATE stock_move_line sml
+            SET date = sm.date
+            FROM stock_move sm
+            WHERE sml.move_id = sm.id
+              AND sm.picking_id = %s
+            """,
+            (picking.id,),
+        )
+        picking.invalidate_recordset()
+        if picking.move_ids:
+            picking.move_ids.invalidate_recordset()
 
     def _invoice_day(self, day_str, opts):
         """Factura ventas y compras DEMO de un día, con fecha de factura = ese día."""
@@ -434,6 +724,8 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         vals = {}
         if "invoice_date" in move._fields:
             vals["invoice_date"] = day
+        if "invoice_date_due" in move._fields:
+            vals["invoice_date_due"] = day
         if "date" in move._fields:
             vals["date"] = day
         if vendor_ref:
@@ -454,7 +746,17 @@ class TlDemoOrdersGenerator(models.AbstractModel):
             move._table,
             move.ids,
             fields.Datetime.to_datetime(when_dt),
-            extra_columns=("invoice_date", "date"),
+            extra_columns=("invoice_date", "date", "invoice_date_due"),
+        )
+        self.env.cr.execute(
+            "UPDATE account_move SET invoice_date = %s, invoice_date_due = %s, date = %s "
+            "WHERE id = %s",
+            (day, day, day, move.id),
+        )
+        self.env.cr.execute(
+            "UPDATE account_move_line SET date_maturity = %s, date = %s "
+            "WHERE move_id = %s",
+            (day, day, move.id),
         )
         if vendor_ref:
             self.env.cr.execute(
@@ -462,3 +764,5 @@ class TlDemoOrdersGenerator(models.AbstractModel):
                 (vendor_ref, move.id),
             )
         move.invalidate_recordset()
+        if move.line_ids:
+            move.line_ids.invalidate_recordset()

@@ -16,12 +16,18 @@
                         <group string="Opciones">
                             <field name="company_id"/>
                             <field name="warehouse_id"/>
-                            <field name="confirm_pickings"/>
-                            <field name="backdate_pickings"/>
+                            <field name="generate_confirmed"/>
+                            <field name="generate_sale_quotes"/>
+                            <field name="generate_purchase_rfqs"/>
+                            <field name="validate_deliveries_by_date" invisible="not generate_confirmed"/>
+                            <field name="backdate_pickings" invisible="not validate_deliveries_by_date"/>
                             <field name="use_queue_job"/>
                             <field name="lines_min"/>
                             <field name="lines_max"/>
                         </group>
+                    </group>
+                    <group string="Usuarios (asignación aleatoria)">
+                        <field name="user_ids" widget="many2many_tags" options="{'no_create': True}" colspan="2"/>
                     </group>
                     <group string="Resultado" invisible="not last_summary">
                         <field name="last_summary" nolabel="1" colspan="2"/>
@@ -97,4 +103,53 @@
         parent="menu_tl_demo_orders_root"
         action="action_tl_demo_invoice_wizard"
         sequence="20"/>
+
+    <record id="view_tl_demo_leads_wizard_form" model="ir.ui.view">
+        <field name="name">tl.demo.leads.wizard.form</field>
+        <field name="model">tl.demo.leads.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generar leads demo">
+                <sheet>
+                    <group>
+                        <group string="Intervalo">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="min_per_day"/>
+                            <field name="max_per_day"/>
+                            <field name="company_id"/>
+                        </group>
+                        <group string="Asignación aleatoria">
+                            <field name="user_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="country_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="tags_min"/>
+                            <field name="tags_max"/>
+                            <field name="use_queue_job"/>
+                        </group>
+                    </group>
+                    <group string="Resultado" invisible="not last_summary">
+                        <field name="last_summary" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_generate" type="object" string="Generar leads" class="btn-primary"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tl_demo_leads_wizard" model="ir.actions.act_window">
+        <field name="name">Generar leads demo</field>
+        <field name="res_model">tl.demo.leads.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        id="menu_tl_demo_leads_wizard"
+        name="Leads aleatorios por fechas"
+        parent="menu_tl_demo_orders_root"
+        action="action_tl_demo_leads_wizard"
+        sequence="30"/>
 </odoo>

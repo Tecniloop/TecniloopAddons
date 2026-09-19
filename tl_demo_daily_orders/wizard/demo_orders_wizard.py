@@ -27,6 +27,28 @@ class TlDemoOrdersWizard(models.TransientModel):
         "res.company", string="Compañía", default=lambda s: s.env.company, required=True
     )
     warehouse_id = fields.Many2one("stock.warehouse", string="Almacén")
+    generate_confirmed = fields.Boolean(
+        string="Pedidos confirmados",
+        default=True,
+        help="Pedidos de venta y compra confirmados (comportamiento actual).",
+    )
+    generate_sale_quotes = fields.Boolean(
+        string="Presupuestos de venta",
+        default=True,
+        help="Presupuestos en borrador o enviado, sin confirmar ni albarán.",
+    )
+    generate_purchase_rfqs = fields.Boolean(
+        string="Presupuestos de compra (RFQ)",
+        default=True,
+        help="Solicitudes de presupuesto en borrador o enviado, sin confirmar.",
+    )
+    validate_deliveries_by_date = fields.Boolean(
+        string="Validar entregas según fecha",
+        default=True,
+        help="Marcado: valida recepciones y entregas con fecha efectiva = día del pedido. "
+             "Desmarcado: deja los albaranes pendientes (listos para servir/recibir) "
+             "con fecha prevista = fecha del pedido.",
+    )
     confirm_pickings = fields.Boolean(string="Validar albaranes", default=True)
     backdate_pickings = fields.Boolean(
         string="Fecha efectiva pasada (Odoo 19)",
@@ -38,7 +60,21 @@ class TlDemoOrdersWizard(models.TransientModel):
         default=True,
         help="Recomendado si el intervalo es largo. Requiere el módulo queue_job y un worker.",
     )
+    user_ids = fields.Many2many(
+        "res.users",
+        "tl_demo_orders_wizard_user_rel",
+        "wizard_id",
+        "user_id",
+        string="Comerciales / responsables",
+        help="Se asignan al azar en cada pedido y albarán. Por defecto todos los usuarios internos.",
+    )
     last_summary = fields.Text(string="Resultado", readonly=True)
+
+    @api.model
+    def _default_users(self):
+        return self.env["res.users"].search(
+            [("share", "=", False), ("active", "=", True), ("id", "!=", 1)]
+        )
 
     @api.model
     def default_get(self, fields_list):
@@ -48,6 +84,8 @@ class TlDemoOrdersWizard(models.TransientModel):
         )
         if wh and "warehouse_id" in fields_list:
             res["warehouse_id"] = wh.id
+        if "user_ids" in fields_list and not res.get("user_ids"):
+            res["user_ids"] = [(6, 0, self._default_users().ids)]
         return res
 
     def _days(self):
@@ -61,10 +99,15 @@ class TlDemoOrdersWizard(models.TransientModel):
             "count": count,
             "company_id": self.company_id.id,
             "warehouse_id": self.warehouse_id.id if self.warehouse_id else False,
-            "confirm_pickings": self.confirm_pickings,
-            "backdate_pickings": self.backdate_pickings,
+            "confirm_pickings": self.validate_deliveries_by_date,
+            "backdate_pickings": self.validate_deliveries_by_date and self.backdate_pickings,
+            "schedule_only": not self.validate_deliveries_by_date,
             "lines_min": self.lines_min,
             "lines_max": self.lines_max,
+            "user_ids": self.user_ids.ids or self._default_users().ids,
+            "generate_confirmed": self.generate_confirmed,
+            "generate_sale_quotes": self.generate_sale_quotes,
+            "generate_purchase_rfqs": self.generate_purchase_rfqs,
         }
 
     def action_generate(self):
@@ -73,6 +116,10 @@ class TlDemoOrdersWizard(models.TransientModel):
             raise UserError(_("La fecha hasta no puede ser anterior a la fecha desde."))
         if self.min_per_day < 1 or self.max_per_day < self.min_per_day:
             raise UserError(_("Revisa el intervalo de pedidos por día."))
+        if not self.user_ids:
+            raise UserError(_("Selecciona al menos un usuario para comercial y responsable."))
+        if not (self.generate_confirmed or self.generate_sale_quotes or self.generate_purchase_rfqs):
+            raise UserError(_("Marca al menos un tipo de documento."))
 
         generator = self.env["tl.demo.orders.generator"]
         if not generator._customers(self.company_id.id):
