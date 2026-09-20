@@ -42,31 +42,28 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         purchase_price_ratio = float(opts.get("purchase_price_ratio") or 0.65)
         sale_count = count * sales_per_purchase
         if do_confirmed:
-            for _ in range(count):
-                po = self._create_purchase(
+            demand, sale_plans = self._plan_sales_demand(products, sale_count, lines_min, lines_max)
+            for chunk in self._chunk_demand(demand, max(1, count)):
+                po = self._create_purchase_planned(
                     random.choice(vendors),
-                    products,
+                    chunk,
                     when,
                     confirm,
                     backdate,
-                    lines_min,
-                    lines_max,
                     user_ids,
                     schedule_only,
                     purchase_price_ratio,
                     opts.get("purchase_journal_id"),
                 )
                 po_ids.append(po.id)
-            for _ in range(sale_count):
-                so = self._create_sale(
+            for lines in sale_plans:
+                so = self._create_sale_planned(
                     random.choice(customers),
-                    products,
+                    lines,
                     when,
                     warehouse,
                     confirm,
                     backdate,
-                    lines_min,
-                    lines_max,
                     user_ids,
                     schedule_only,
                     opts.get("sale_journal_id"),
@@ -311,6 +308,137 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         record.invalidate_recordset()
         if lines:
             lines.invalidate_recordset()
+
+    def _plan_sales_demand(self, products, sale_count, lines_min, lines_max):
+        demand = {}
+        sale_plans = []
+        pool = list(products)
+        if not pool:
+            return demand, sale_plans
+        for _ in range(sale_count):
+            lines = []
+            used = set()
+            for _n in range(self._line_count(lines_min, lines_max)):
+                product = random.choice(pool)
+                if product.id in used and len(pool) > 1:
+                    continue
+                used.add(product.id)
+                qty = random.randint(3, 8)
+                lines.append((product, qty))
+                demand[product] = demand.get(product, 0) + qty
+            if lines:
+                sale_plans.append(lines)
+        return demand, sale_plans
+
+    def _chunk_demand(self, demand, po_count):
+        items = [(p, qty + max(1, int(qty * 0.15))) for p, qty in demand.items()]
+        if not items:
+            return []
+        chunks = [[] for _ in range(po_count)]
+        for i, item in enumerate(items):
+            chunks[i % po_count].append(item)
+        return [c for c in chunks if c]
+
+    def _create_purchase_planned(
+        self,
+        vendor,
+        items,
+        when,
+        confirm,
+        backdate,
+        user_ids,
+        schedule_only,
+        purchase_price_ratio,
+        journal_id,
+    ):
+        lines = []
+        for product, qty in items:
+            sale_price = product.list_price or product.standard_price or 1.0
+            line_vals = {
+                "product_id": product.id,
+                "name": product.display_name,
+                "product_qty": qty,
+                "price_unit": max(sale_price * (purchase_price_ratio or 0.65), 0.5),
+                "date_planned": when,
+            }
+            fname, uom = self._uom_field("purchase.order.line", product)
+            if fname:
+                line_vals[fname] = uom
+            lines.append((0, 0, line_vals))
+        po = self.env["purchase.order"].create(
+            {
+                "partner_id": vendor.id,
+                "company_id": vendor.company_id.id or self.env.company.id,
+                "date_order": when,
+                "user_id": self._pick_user(user_ids),
+                "origin": "DEMO-%s" % when.date(),
+                "order_line": lines,
+            }
+        )
+        self._set_order_journal(po, journal_id)
+        po.button_confirm()
+        self._force_document_date(po, when)
+        if confirm:
+            for picking in po.picking_ids.filtered(lambda p: p.state != "cancel"):
+                self._validate_and_backdate(picking, when, backdate)
+        elif schedule_only or not confirm:
+            self._schedule_picking_dates(po.picking_ids, when)
+        self._assign_picking_users(po.picking_ids, user_ids)
+        self._force_document_date(po, when)
+        return po
+
+    def _create_sale_planned(
+        self,
+        customer,
+        items,
+        when,
+        warehouse,
+        confirm,
+        backdate,
+        user_ids,
+        schedule_only,
+        journal_id,
+    ):
+        lines = []
+        for product, qty in items:
+            line_vals = {
+                "product_id": product.id,
+                "name": product.display_name,
+                "product_uom_qty": qty,
+                "price_unit": product.list_price or product.standard_price or 1.0,
+            }
+            if "purchase_price" in self.env["sale.order.line"]._fields:
+                line_vals["purchase_price"] = max((product.list_price or 1.0) * 0.65, 0.5)
+            if "customer_lead" in self.env["sale.order.line"]._fields:
+                line_vals["customer_lead"] = 0
+            fname, uom = self._uom_field("sale.order.line", product)
+            if fname:
+                line_vals[fname] = uom
+            lines.append((0, 0, line_vals))
+        vals = {
+            "partner_id": customer.id,
+            "company_id": self.env.company.id,
+            "date_order": when,
+            "user_id": self._pick_user(user_ids),
+            "origin": "DEMO-%s" % when.date(),
+            "order_line": lines,
+        }
+        if warehouse:
+            vals["warehouse_id"] = warehouse.id
+        if "commitment_date" in self.env["sale.order"]._fields:
+            vals["commitment_date"] = when
+        so = self.env["sale.order"].create(vals)
+        self._set_order_journal(so, journal_id)
+        so.action_confirm()
+        self._force_document_date(so, when)
+        if confirm:
+            for picking in so.picking_ids.filtered(lambda p: p.state != "cancel"):
+                self._validate_and_backdate(picking, when, backdate)
+        elif schedule_only or not confirm:
+            self._schedule_picking_dates(so.picking_ids, when)
+        self._assign_picking_users(so.picking_ids, user_ids)
+        self._force_document_date(so, when)
+        return so
 
     def _set_order_journal(self, order, journal_id):
         if not journal_id:
@@ -809,3 +937,93 @@ class TlDemoOrdersGenerator(models.AbstractModel):
         move.invalidate_recordset()
         if move.line_ids:
             move.line_ids.invalidate_recordset()
+
+    def _pay_day(self, day_str, opts):
+        day = fields.Date.from_string(day_str)
+        company = self.env["res.company"].browse(opts["company_id"])
+        self = self.with_company(company)
+        journal = self.env["account.journal"].browse(opts["journal_id"])
+        origin = "DEMO-%s" % day
+        paid = self.env["account.payment"]
+        if opts.get("pay_customer", True):
+            invoices = self._demo_open_moves(origin, company.id, ("out_invoice", "out_refund"))
+            paid |= self._register_payments(invoices, journal, day, "inbound")
+        if opts.get("pay_vendor", True):
+            bills = self._demo_open_moves(origin, company.id, ("in_invoice", "in_refund"))
+            paid |= self._register_payments(bills, journal, day, "outbound")
+        _logger.info("Pagos demo %s: %s", day_str, len(paid))
+        return {"day": day_str, "payment_ids": paid.ids}
+
+    def _demo_open_moves(self, origin, company_id, types):
+        Move = self.env["account.move"]
+        domain = [
+            ("company_id", "=", company_id),
+            ("state", "=", "posted"),
+            ("move_type", "in", list(types)),
+            ("payment_state", "in", ("not_paid", "partial", "in_payment")),
+        ]
+        moves = Move.search(domain + [("invoice_origin", "=", origin)])
+        so = self.env["sale.order"].search([("origin", "=", origin), ("company_id", "=", company_id)])
+        if so:
+            moves |= so.invoice_ids.filtered(
+                lambda m: m.state == "posted" and m.payment_state in ("not_paid", "partial", "in_payment")
+            )
+        po = self.env["purchase.order"].search([("origin", "=", origin), ("company_id", "=", company_id)])
+        if po:
+            moves |= po.invoice_ids.filtered(
+                lambda m: m.state == "posted" and m.payment_state in ("not_paid", "partial", "in_payment")
+            )
+        return moves.filtered(lambda m: m.move_type in types and abs(m.amount_residual) > 0.009)
+
+    def _register_payments(self, moves, journal, day, payment_type):
+        payments = self.env["account.payment"]
+        if not moves:
+            return payments
+        Register = self.env["account.payment.register"]
+        for move in moves:
+            try:
+                ctx = {
+                    "active_model": "account.move",
+                    "active_ids": move.ids,
+                    "dont_redirect_to_payments": True,
+                }
+                vals = {
+                    "journal_id": journal.id,
+                    "payment_date": day,
+                }
+                if "amount" in Register._fields:
+                    vals["amount"] = abs(move.amount_residual)
+                wizard = Register.with_context(**ctx).create(vals)
+                action = wizard.action_create_payments()
+                new_pays = self.env["account.payment"]
+                if isinstance(action, dict) and action.get("res_id"):
+                    new_pays = self.env["account.payment"].browse(action["res_id"])
+                elif isinstance(action, dict) and action.get("domain"):
+                    new_pays = self.env["account.payment"].search(action["domain"])
+                else:
+                    new_pays = move._get_reconciled_payments() if hasattr(move, "_get_reconciled_payments") else self.env["account.payment"]
+                for pay in new_pays:
+                    self._backdate_payment(pay, day)
+                payments |= new_pays
+            except Exception as exc:
+                _logger.warning("Pago demo %s: %s", move.name, exc)
+        return payments
+
+    def _backdate_payment(self, payment, day):
+        if "date" in payment._fields:
+            try:
+                payment.with_context(tracking_disable=True, skip_account_move_synchronization=True).write({"date": day})
+            except Exception:
+                pass
+        self.env.cr.execute("UPDATE account_payment SET date = %s WHERE id = %s", (day, payment.id))
+        if payment.move_id:
+            self.env.cr.execute(
+                "UPDATE account_move SET date = %s WHERE id = %s",
+                (day, payment.move_id.id),
+            )
+            self.env.cr.execute(
+                "UPDATE account_move_line SET date = %s, date_maturity = %s WHERE move_id = %s",
+                (day, day, payment.move_id.id),
+            )
+            payment.move_id.invalidate_recordset()
+        payment.invalidate_recordset()

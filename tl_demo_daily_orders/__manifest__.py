@@ -1,6 +1,6 @@
 {
     "name": "Pedidos demo diarios (compra y venta)",
-    "version": "19.0.1.5.2",
+    "version": "19.0.1.5.4",
     "category": "Sales",
     "summary": "Pedidos, facturas y leads demo por fechas",
     "author": "Tecniloop",

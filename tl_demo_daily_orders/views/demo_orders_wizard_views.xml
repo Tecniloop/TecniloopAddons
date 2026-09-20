@@ -110,6 +110,51 @@
         action="action_tl_demo_invoice_wizard"
         sequence="20"/>
 
+    <record id="view_tl_demo_payment_wizard_form" model="ir.ui.view">
+        <field name="name">tl.demo.payment.wizard.form</field>
+        <field name="model">tl.demo.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cobrar y pagar facturas demo">
+                <sheet>
+                    <group>
+                        <group string="Intervalo">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="company_id"/>
+                        </group>
+                        <group string="Tesorería">
+                            <field name="journal_id"/>
+                            <field name="pay_customer"/>
+                            <field name="pay_vendor"/>
+                            <field name="use_queue_job"/>
+                        </group>
+                    </group>
+                    <group string="Resultado" invisible="not last_summary">
+                        <field name="last_summary" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_pay" type="object" string="Cobrar / Pagar" class="btn-primary"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tl_demo_payment_wizard" model="ir.actions.act_window">
+        <field name="name">Cobrar y pagar facturas demo</field>
+        <field name="res_model">tl.demo.payment.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem
+        id="menu_tl_demo_payment_wizard"
+        name="Cobrar y pagar facturas demo"
+        parent="menu_tl_demo_orders_root"
+        action="action_tl_demo_payment_wizard"
+        sequence="25"/>
+
     <record id="view_tl_demo_leads_wizard_form" model="ir.ui.view">
         <field name="name">tl.demo.leads.wizard.form</field>
         <field name="model">tl.demo.leads.wizard</field>
