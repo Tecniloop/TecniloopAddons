@@ -3,7 +3,7 @@
 
 {
     "name": "Treasury Forecast",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.0.1",
     "category": "Accounting",
     "summary": "Manage and project future treasury movements",
     "author": "AvanzOSC",

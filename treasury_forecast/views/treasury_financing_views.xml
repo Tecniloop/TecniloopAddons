@@ -204,7 +204,7 @@ action = records.action_open_generate_lines_wizard()
 
         <separator />
 
-        <group expand="0" string="Group By">
+        <group name="groupby">
           <filter
             string="Partner"
             name="group_partner"

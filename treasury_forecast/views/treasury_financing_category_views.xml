@@ -50,7 +50,7 @@
         />
 
         <separator />
-        <group expand="0" string="Group By">
+        <group name="groupby">
           <filter
             string="Parent category"
             name="group_parent"

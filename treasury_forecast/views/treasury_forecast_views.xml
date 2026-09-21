@@ -195,7 +195,7 @@
 
         <separator />
 
-        <group expand="0" string="Group By">
+        <group name="groupby">
           <filter string="Date" name="group_date" context="{'group_by': 'date'}" />
           <filter
             string="Partner"
